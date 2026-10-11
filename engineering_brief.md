@@ -27,8 +27,17 @@ A lab is paying for three things:
 3. **Packaging it can run**: a standard format, reproducible, with documented
    quality numbers.
 
-Mayank is the finance expert. He decides what a correct answer is. You build
-everything that generates, runs, checks and packages tasks at scale.
+Both of us develop with frontier AI models, so writing code and drafting finance
+content are cheap. What stays scarce is deciding what is correct, proving it, and
+earning labs' trust. The work is split by accountability, not ability:
+
+- **Mayank decides and certifies what is correct.** He is the finance expert, and
+  his time is the critical path.
+- **You own the pipeline that produces tasks to that standard.** Most of that work
+  is specifying, directing AI agents, and verifying what they produce, more than
+  writing code by hand.
+
+Section 5 covers how this works day to day.
 
 ## 2. Vocabulary
 
@@ -49,6 +58,9 @@ Just enough to read the code and talk to Mayank.
 | Held-out set | Tasks kept out of training to test whether learning generalizes |
 | Leakage | Answer-key content reaching the model's input. Silently invalidates every result |
 | Agreement | How often two experts, or the grader and an expert, give the same verdict |
+| Judgment spec | Mayank's written standard for one workflow: what matters, what never counts. Steers AI drafts and grader prompts |
+| Blind-first label | An expert label made before seeing any AI draft; used to measure how much drafts sway experts |
+| Provenance | The record of which model and prompt produced an artifact, and who approved it |
 
 **Finance**
 
@@ -175,20 +187,90 @@ python rl/run.py --model claude-opus-5-5 --dry-run --skills off
 6. **Point-in-time data only.** When EDGAR work starts, a task dated D must never
    expose anything filed after D, whether in files, tool results or search indexes.
 7. **Grader models never get skills or tools.** Graders are measuring instruments.
+8. **AI drafts; people decide gold.** No model output becomes a gold label, rubric
+   item or task wording until Mayank signs off, and the sign-off is recorded in the
+   file's provenance.
+9. **No model grades its own work.** Draft and check with more than one model
+   family, and never let the model being evaluated draft or grade tasks it will be
+   scored on.
+10. **Record provenance for every generated artifact:** model, prompt fingerprint,
+    date, and who approved it. Labs will audit this, and it settles the
+    terms-of-service question in section 8.
+11. **Agent-written code passes the same tests.** The invariants above run in CI.
+    Nobody, human or agent, merges with them failing or switches them off.
 
-## 5. What comes next
+## 5. How we work with AI
 
-In priority order. Mayank owns every item marked *(Mayank)*. You need his input
-where an item says so, but you don't need finance knowledge to build any of these.
+**Your loop:** write the spec, have agents build it, verify it with tests and
+samples, then measure. Agents can write the ingest code, the exporter and the agent
+loop in days. Your leverage is in the specs, the tests that agent-written code
+cannot get around, and running agents at scale: cost, retries, logging,
+provenance.
 
-### 5.1 Smoke test and repo hygiene (first)
+**Mayank's loop:** write a judgment spec, then edit and adjudicate AI drafts.
+- **Judgment specs are the most valuable thing he writes.** One per workflow, in
+  the style of `rl/rubrics/research_design/TENETS.md`: what matters, which
+  objections never apply, which errors count. They steer every draft and every
+  grader prompt.
+- **He also writes exemplars and blind-first labels.** Drafts of worlds,
+  templates, rubric items and error types come from AI; he edits and approves
+  them.
+
+**Why AI drafts are not trusted as gold.** The case study found that models
+substitute generic methodology for finance knowledge and invent objections. Those
+are exactly the errors a model-drafted answer key would carry into the product.
+
+**Anchoring control.** Experts reviewing AI drafts drift toward them. For every
+workflow, Mayank and the other experts label about 15–20% of tasks **before**
+seeing any draft. The gap between those labels and the ones made after seeing
+drafts measures the drafts' pull on expert judgment. If the gap is large, review
+that workflow without drafts.
+
+**Mine for hard tasks.** Everyone, including the labs, has the same models, so a
+task a model can both write and solve is worth little. Run several frontier models
+on candidate tasks, keep the ones where they fail or disagree and the experts
+agree, and generate more around those failure patterns.
+
+**Pipeline metrics are part of the product.** Track these per workflow and report
+them to labs:
+- draft acceptance rate and average edit size
+- expert minutes per accepted task
+- agreement between labels made before and after seeing drafts
+- grader–expert agreement
+- frontier-model pass rates
+
+**Protect Mayank's calendar.** Anything that isn't a judgment call goes to you or to
+AI: labelling logistics, write-up drafting, formatting, scheduling.
+
+**Both of you can reach outside your lane.** You can ask a model to explain a finance
+concept so you can build, but never to decide what is correct. Mayank can
+prototype a world or tweak a prompt in the repo himself, but infrastructure quality
+stays yours.
+
+## 6. What comes next
+
+In priority order. Items marked *(Mayank)* are his; they run in parallel with
+yours. Code timelines are days, not weeks: the limits are Mayank's review hours,
+recruiting experts, and lab conversations.
+
+### 6.0 Mayank's first deliverables (in parallel, start now)
+
+- Confirm the take-home material can be reused outside Anthropic's process.
+- Write the **earnings-recap judgment spec** before any drafting starts.
+- Write **fund world #1 by hand** as the exemplar for AI-drafted worlds.
+- Pick 10–15 company-quarters with a clear story, such as a guidance cut.
+- Label the 4 context-flip items (a few hours; adds 12 graded tasks).
+- Recruit 2 experts for labelling.
+
+### 6.1 Smoke test, repo hygiene, invariants in CI (first)
 
 - Add `pyproject.toml` or `requirements.txt` and a README setup section.
 - Decide whether to upgrade the `anthropic` SDK. 0.89 predates the current Skills
   API: `manage.py` handles both shapes, but that path is untested. Check what
   changes for `case_study/scripts`.
-- Turn build + leak check + replay + `manage.py check` into a test suite that runs
-  in CI.
+- Make every invariant in section 4 a test that runs in CI: build, leak check,
+  replay, `manage.py check`, fingerprints, and a provenance check on generated
+  files.
 - **With Mayank's OK** (it writes to the workspace and spends API credit): run
   `manage.py sync`, then
   `run.py --model claude-opus-5-5 --tasks rd-funding-S1 rd-review-S1-A`, with
@@ -203,95 +285,124 @@ where an item says so, but you don't need finance knowledge to build any of thes
     `code_execution_20250825` with no beta). It is configurable in
     `rl/skills/config.yaml`.
 
-**Done when:** both conditions run end to end, rewards are recorded, and CI is
-green.
+**Done when:** both conditions run end to end, rewards are recorded, and CI
+enforces the invariants.
 
-### 5.2 Inspect exporter
+### 6.2 Provenance and the review queue
+
+Everything after this runs through it, so build it early.
+
+- Provenance on every generated file: model, prompt fingerprint, date, approval.
+- A review queue for Mayank and the experts:
+  - batches of drafts, highest-value first (where frontier models disagree with
+    each other or with an expert)
+  - cited evidence beside each claim
+  - one-key approve / edit / reject, with edits and rejections stored as
+    labelled examples
+  - support for the blind-first protocol: the drafts stay hidden until the
+    blind label is saved
+- The pipeline metrics from section 5, computed from the queue's records.
+
+**Done when:** Mayank can review a batch of 10 drafts in one sitting, and every
+decision is recorded.
+
+### 6.3 Inspect exporter
 
 Inspect (the UK AI Security Institute's eval framework) is what labs and safety
-institutes commonly use. Write an exporter from our task format to an Inspect task
+institutes commonly use. Write an exporter from our task format to an Inspect task,
 with custom scorers wrapping our graders. Don't change the task format to fit
 Inspect; the exporter adapts.
 
 **Done when:** a lab could run our graded tasks with Inspect and get the same
 rewards as `run.py`.
 
-### 5.3 Gaming test for the review grader
+### 6.4 Gaming test for the review grader
 
-Prove the reward can't be gamed. For a sample of review tasks, generate
-deliberately bad reviews of each type and confirm they score well below good
-reviews:
+Prove the reward can't be gamed. For a sample of review tasks, have models from at
+least two families generate deliberately bad reviews of each type, and confirm
+they score well below good reviews:
 
 - **Padding:** many generic objections
 - **Hedging:** everything marked "could be an issue"
 - **Rubric-parroting:** restating the plan's own caveats as objections
 - **Confident but wrong:** specific objections that do not apply
 
-*(Mayank)* confirms the attack list and spot-checks that the generated reviews
-really are bad.
+*(Mayank)* confirms the attack list and spot-checks a sample through the review
+queue.
 
-**Done when:** a report of the score gap per attack type, re-runnable as a check.
+**Done when:** a report of the score gap per attack type, re-runnable as a CI check.
 
-### 5.4 Multi-expert labelling and agreement
+### 6.5 Multi-expert labelling and agreement
 
 Today one expert labelled everything. Labs will ask how often experts agree with
 each other and with our grader.
 
-- Build a simple labelling form that collects labels in the existing `gold.json`
-  format, one copy per expert. It must not show other experts' labels.
+- Run labelling through the review queue in the existing `gold.json` format, one
+  copy per expert, never showing other experts' labels.
+- An AI pre-screen flags internal contradictions within an expert's labels for
+  Mayank to follow up. It never changes a label.
 - Compute agreement: expert vs expert, and grader vs each expert.
-- Fit the review grader's penalty weights (now 0.1 / 0.2, set by hand) against
+- Fit the review grader's penalty weights (now 0.1 / 0.2, set by hand) to the
   expert judgments.
-- *(Mayank)* recruits 2 experts, briefs them, and settles disagreements.
+- *(Mayank)* briefs the experts and settles disagreements.
 
-**Done when:** agreement numbers are reported for all 30 graded tasks.
+**Done when:** agreement numbers are reported for all graded tasks.
 
-### 5.5 First real environment: earnings recap (largest item)
+### 6.6 First real environment: earnings recap
 
 The case-study tasks are single prompt-and-response. Labs want **agentic** tasks:
 the model uses tools over many steps. The first one: *a fund analyst writes a
 recap of a company's quarterly earnings for their PM, focused on what matters for
 the fund's position.*
 
-| You build | *(Mayank)* provides |
-|---|---|
-| EDGAR ingest: 8-K Exhibit 99.1 press releases, 10-Qs, XBRL financial data, frozen as of each filing date | 10–15 company-quarters with a clear story (e.g. a guidance cut) |
-| Answer keys computed from XBRL by code (revenue, margins, guidance figures) | Which facts to extract and how they are defined |
-| Agent tools: document search over the snapshot, a filings API that refuses anything after the task date, Python | 2 full fund worlds: mandate, holdings, theses, past memos |
-| An agent loop with tool use, plus result logging | The recap template and 2–3 reader contexts (e.g. long holder vs short seller) |
-| Fill tasks automatically from template × company × reader context | The rubric format and review of every drafted rubric |
-| Rubric drafting: a model drafts pass/fail items, each citing a quote from the source; code verifies every quote exists; drafts go to Mayank in batches | Final sign-off on each task |
-| Review-mode variants: plant known errors in good recaps (a wrong number, a missed guidance change, a generic caveat) so the answer key is known by construction | The error types worth planting |
+| You and your agents build | AI drafts, *(Mayank)* edits and approves | *(Mayank)* writes by hand |
+|---|---|---|
+| EDGAR ingest: 8-K Exhibit 99.1 press releases, 10-Qs, XBRL, frozen as of each filing date | Fund worlds 2–5, drafted from world #1 and the spec | The judgment spec |
+| Answer keys computed from XBRL by code | The recap template and 2–3 reader contexts | Fund world #1 |
+| Agent tools: document search over the snapshot, a filings API that refuses anything after the task date, Python | Rubric items, each citing a quote from the source; code verifies every quote exists | Blind-first labels on 15–20% of tasks |
+| The agent loop, logging and provenance | The error types to plant in review-mode variants | Which facts to extract and how they are defined |
+| Task generation: template × company × reader context × world | | Final sign-off on each task |
+| Hard-task mining: run several frontier models, keep tasks where they fail and experts agree | | |
+| Review-mode variants: plant the approved errors in good recaps, so the answer key is known by construction | | |
 
-**Done when:** about 20–30 tasks in 1–2 worlds, run on several frontier models,
-with difficulty measured (target: models pass 10–70% of the time) and the leak and
-point-in-time checks passing.
+**Done when:** about 20–30 tasks across at least 2 worlds, run on several frontier
+models, with:
+- difficulty measured (target: models pass 10–70% of the time)
+- the leak and point-in-time checks passing
+- section 5's pipeline metrics reported, including the gap between labels made
+  before and after seeing drafts
 
-### 5.6 Later, not MVP
+### 6.7 Later, not MVP
 
 Holding out whole worlds for testing (needs about 5 or more full worlds), a
 training-lift demo on an open model, more workflows (backtesting needs licensed
 price data first), and rubrics for the 10 produce tasks.
 
-## 6. Working with Mayank
+## 7. Working with Mayank
 
-- **Agree formats before building.** The task format exists (`rl/FORMAT.md`). The
-  world format, rubric format and recap gold format need agreeing with him early,
-  so you can build without finance knowledge.
-- **Batch review requests.** His time is the bottleneck. Send 10 tasks, rubric
-  drafts or gaming samples at a time, not one by one.
-- **Feed rejections back.** Anything he rejects becomes a labelled example used
-  in generation prompts or checks, so the same mistake doesn't repeat.
+- **Agree formats before building.** The task format exists (`rl/FORMAT.md`).
+  Agree the world, rubric, recap gold and provenance formats with him early, so
+  you and your agents can build without finance knowledge.
+- **Batch review requests through the queue,** highest-value first, never one item
+  at a time. His review hours set the pace of the whole company.
+- **Feed rejections back.** Every edit or rejection becomes a labelled example for
+  generation prompts and checks, so the same mistake doesn't repeat.
+- **Take everything that isn't a judgment call off his plate:** logistics,
+  drafts of the write-up, formatting.
 - **When unsure whether something is "correct", ask.** Correctness is his call.
   Pipeline and infrastructure choices are yours.
 
-## 7. Open risks to keep in mind
+## 8. Open risks to keep in mind
 
+- **Anchoring and homogenization.** If AI drafts shape the gold, the product
+  inherits the drafting models' blind spots. The blind-first labels and
+  multi-family drafting in section 5 exist to detect and limit this.
 - **Data licensing.** EDGAR is free and public. Earnings call transcripts,
   consensus estimates and price history generally belong to vendors (S&P, FactSet,
   LSEG) whose licenses typically forbid model training. Don't pull from them until
   licensing is settled.
 - **Model terms of service.** Using one provider's model to generate content sold
-  to another lab may breach that provider's terms. Record which model produced
-  each artifact; this needs a legal answer before generated content ships.
+  to another lab may breach that provider's terms, and with AI drafting most
+  content this matters more. Provenance (invariant 10) makes it auditable; it
+  needs a legal answer before generated content ships.
 - **Case-study reuse rights** are not yet confirmed. Keep the repo private.

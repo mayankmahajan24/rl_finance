@@ -86,7 +86,14 @@ from 28.6 issues per review does not pay. Per-task records for every model are i
 
 ## Next
 
-1. A runner that executes any model on any task and grades it (plus an Inspect exporter).
-2. Label the 4 flip items: the cheapest gold to add, and it unlocks the context-sensitivity test.
-3. Earnings recap (fundamental_analyst, produce + review) built from EDGAR, as an agent with tools in a full fund world.
-4. Expert rubrics for the 10 produce tasks.
+The full plan, with who owns what and done criteria, is in
+`../engineering_brief.md` section 6. In order:
+
+1. Smoke test with skills on and off; invariants as CI tests.
+2. Provenance on generated files and a review queue for expert sign-off.
+3. Inspect exporter.
+4. Gaming test for the review grader.
+5. Labels from a 2nd and 3rd expert, with agreement numbers.
+6. Earnings recap built from EDGAR: an agent with tools, in AI-drafted, expert-approved fund worlds.
+
+Mayank meanwhile writes the earnings-recap judgment spec and fund world #1, and labels the 4 flip items.

@@ -1,0 +1,29 @@
+services:
+  # One-shot eval runner. Override the command to pick a suite/provider, e.g.
+  #   docker compose run --rm eval run --suite fixed_income --provider mock
+  #   docker compose run --rm eval run --suite earnings --provider anthropic
+  eval:
+    build: .
+    image: finrl-eval:local
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
+    volumes:
+      - ./runs:/app/runs
+    command: ["run", "--suite", "earnings", "--provider", "mock"]
+
+  # Full offline pipeline: unit tests + both suites against the mock provider.
+  pipeline:
+    build: .
+    image: finrl-eval:local
+    entrypoint: ["/bin/sh", "-c"]
+    volumes:
+      - ./runs:/app/runs
+    command:
+      - |
+        set -e
+        python -m pytest -q
+        finrl-eval run --suite earnings --provider mock --quiet
+        finrl-eval run --suite fixed_income --provider mock --quiet
+        ls -1 runs

@@ -1,0 +1,12 @@
+id: earnings_desk
+name: Equity earnings desk
+kind: fund
+status: brief_only
+brief: A long/short equity desk that writes same-day recaps of quarterly prints for the PM. Tasks here
+  are synthetic press-release recaps, not live EDGAR filings.
+to_become_a_full_world:
+- mandate and risk limits
+- current holdings with sizes
+- point-in-time data snapshot and tool access
+sources:
+- scripts/build_instrumentation_suites.py

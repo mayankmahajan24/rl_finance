@@ -1,0 +1,25 @@
+{
+  "expected": {
+    "revenue_musd": 1398.2,
+    "eps_gaap": 0.75,
+    "eps_non_gaap": 1.25,
+    "revenue_yoy_pct": 21.3,
+    "fy_revenue_guidance_low_musd": 6200,
+    "fy_revenue_guidance_high_musd": 6400
+  },
+  "task": "headline_extraction",
+  "tags": [
+    "units-billions",
+    "high-sbc",
+    "headline_extraction"
+  ],
+  "difficulty": "medium",
+  "provenance": {
+    "kind": "synthetic_pipeline",
+    "labeller": "synthetic (not human)",
+    "generator": "scripts/build_instrumentation_suites.py",
+    "suite": "earnings",
+    "sample_id": "earn-headline_extraction-slvp-q42025",
+    "suite_version": "0.1"
+  }
+}

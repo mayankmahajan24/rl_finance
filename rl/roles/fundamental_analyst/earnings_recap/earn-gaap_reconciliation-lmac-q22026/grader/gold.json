@@ -1,0 +1,28 @@
+{
+  "expected": {
+    "one_time_items": [],
+    "one_time_items_net_musd": 0,
+    "sbc_is_one_time_item": false,
+    "net_income_gaap_musd": -5.8,
+    "net_income_non_gaap_musd": 82.2,
+    "eps_gaap": -0.04,
+    "eps_non_gaap": 0.58,
+    "guidance_basis": "non-GAAP"
+  },
+  "task": "gaap_reconciliation",
+  "tags": [
+    "gaap-loss-non-gaap-profit",
+    "sbc-heavy",
+    "gaap_reconciliation",
+    "units-millions"
+  ],
+  "difficulty": "medium",
+  "provenance": {
+    "kind": "synthetic_pipeline",
+    "labeller": "synthetic (not human)",
+    "generator": "scripts/build_instrumentation_suites.py",
+    "suite": "earnings",
+    "sample_id": "earn-gaap_reconciliation-lmac-q22026",
+    "suite_version": "0.1"
+  }
+}

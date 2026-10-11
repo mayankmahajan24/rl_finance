@@ -1,0 +1,27 @@
+id: earn-gaap_reconciliation-hlcn-q32026
+role: fundamental_analyst
+workflow: earnings_recap
+mode: produce
+world: earnings_desk
+status: graded
+split: eval
+prompt:
+  template: finrl_eval/suites/earnings/templates/default.j2
+  fingerprint: 0756ead37449
+sources:
+- finrl_eval/suites/earnings/
+- scripts/build_instrumentation_suites.py
+output_schema: null
+grader:
+  type: rubric
+  module: graders/rubric.py
+meta:
+  suite: earnings
+  sample_id: earn-gaap_reconciliation-hlcn-q32026
+  task_type: gaap_reconciliation
+  tags:
+  - restructuring
+  - guidance-range
+  - gaap_reconciliation
+  - units-millions
+  difficulty: medium

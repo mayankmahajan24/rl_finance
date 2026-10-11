@@ -1,5 +1,12 @@
-.impeccable/
-__pycache__/
-*.pyc
+dist/
 .DS_Store
+*.egg-info/
+.impeccable/
+.mypy_cache/
+*.pyc
+__pycache__/
+.pytest_cache/
 rl/vendor/
+.ruff_cache/
+runs/
+.venv/

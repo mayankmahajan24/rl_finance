@@ -1,8 +1,9 @@
 """Build the rl/ task tree from the case study (case_study/part1, part2, seeds.json).
 
-Idempotent: wipes and regenerates rl/worlds/ and rl/roles/, then writes
-rl/catalog.json. Hand-written files (prompts, rubrics, graders, docs) are not
-touched.
+Idempotent: regenerates the six case-study worlds and the research_design /
+research_funding task trees, then rewrites rl/catalog.json from every task on
+disk. Other workflows under roles/ (earnings_recap, fixed_income, …) are left
+alone. Hand-written files (prompts, rubrics, graders, docs) are not touched.
 
 What gets built:
 
@@ -30,7 +31,18 @@ import shutil
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-from lib import CASE, RL, ROLES, WORLDS, fingerprint, load_prompt, write_json, write_yaml  # noqa: E402
+from lib import (  # noqa: E402
+    CASE,
+    CASE_STUDY_WORKFLOWS,
+    RL,
+    ROLES,
+    WORLDS,
+    fingerprint,
+    load_prompt,
+    write_catalog,
+    write_json,
+    write_yaml,
+)
 
 P1, P2 = CASE / "part1", CASE / "part2"
 PROMPTS = RL / "prompts" / "research_design"
@@ -328,11 +340,23 @@ def leak_check(catalog: list) -> list[str]:
     return problems
 
 
+def wipe_case_study_workflows() -> None:
+    """Remove only the workflows this script owns. Instrumentation FORMAT
+    mirrors (earnings_recap, fixed_income, …) stay on disk."""
+    if not ROLES.exists():
+        return
+    for role_dir in ROLES.iterdir():
+        if not role_dir.is_dir():
+            continue
+        for wf in CASE_STUDY_WORKFLOWS:
+            target = role_dir / wf
+            if target.exists():
+                shutil.rmtree(target)
+
+
 def main() -> None:
     d = load()
-    for p in (WORLDS, ROLES):
-        if p.exists():
-            shutil.rmtree(p)
+    wipe_case_study_workflows()
     write_schemas()
     build_worlds(d)
     catalog: list = []
@@ -344,14 +368,12 @@ def main() -> None:
     if problems:
         raise SystemExit("LEAK CHECK FAILED\n" + "\n".join(problems))
 
-    write_json(RL / "catalog.json", [
-        {k: t[k] for k in ("id", "role", "workflow", "mode", "world", "status", "split")}
-        for t in catalog
-    ])
+    full = write_catalog()
     from collections import Counter
-    print(f"{len(catalog)} tasks, {len(d['ctx']['firms'])} worlds, leak check passed")
+    print(f"{len(catalog)} case-study tasks rebuilt, {len(full)} tasks in catalog, "
+          f"{len(d['ctx']['firms'])} case-study worlds, leak check passed")
     for (role, wf, mode, st), n in sorted(Counter(
-            (t["role"], t["workflow"], t["mode"], t["status"]) for t in catalog).items()):
+            (t["role"], t["workflow"], t["mode"], t["status"]) for t in full).items()):
         print(f"  {role:<20}{wf:<18}{mode:<9}{st:<14}{n:>3}")
 
 

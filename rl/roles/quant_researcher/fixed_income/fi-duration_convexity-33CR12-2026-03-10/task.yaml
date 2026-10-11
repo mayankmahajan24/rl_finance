@@ -1,0 +1,27 @@
+id: fi-duration_convexity-33CR12-2026-03-10
+role: quant_researcher
+workflow: fixed_income
+mode: produce
+world: rates_desk
+status: graded
+split: eval
+prompt:
+  template: finrl_eval/suites/fixed_income/templates/default.j2
+  fingerprint: 64dd2e4a8f93
+sources:
+- finrl_eval/suites/fixed_income/
+- scripts/build_instrumentation_suites.py
+output_schema: null
+grader:
+  type: rubric
+  module: graders/rubric.py
+meta:
+  suite: fixed_income
+  sample_id: fi-duration_convexity-33CR12-2026-03-10
+  task_type: duration_convexity
+  tags:
+  - corporate
+  - 30/360
+  - long-dated
+  - duration_convexity
+  difficulty: hard

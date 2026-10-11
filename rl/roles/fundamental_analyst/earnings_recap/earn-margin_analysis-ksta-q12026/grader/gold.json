@@ -1,0 +1,24 @@
+{
+  "expected": {
+    "gross_margin_pct": 12.6,
+    "operating_margin_pct": 2.9,
+    "operating_margin_change_bps": -976
+  },
+  "task": "margin_analysis",
+  "tags": [
+    "cyclical",
+    "margin-compression",
+    "revenue-decline",
+    "margin_analysis",
+    "units-millions"
+  ],
+  "difficulty": "medium",
+  "provenance": {
+    "kind": "synthetic_pipeline",
+    "labeller": "synthetic (not human)",
+    "generator": "scripts/build_instrumentation_suites.py",
+    "suite": "earnings",
+    "sample_id": "earn-margin_analysis-ksta-q12026",
+    "suite_version": "0.1"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "expected": {
+    "one_time_items": [
+      "acquisition-related costs"
+    ],
+    "one_time_items_net_musd": 27.3,
+    "sbc_is_one_time_item": false,
+    "net_income_gaap_musd": 208.5,
+    "net_income_non_gaap_musd": 345.6,
+    "eps_gaap": 0.75,
+    "eps_non_gaap": 1.25,
+    "guidance_basis": "non-GAAP"
+  },
+  "task": "gaap_reconciliation",
+  "tags": [
+    "units-billions",
+    "high-sbc",
+    "gaap_reconciliation"
+  ],
+  "difficulty": "medium",
+  "provenance": {
+    "kind": "synthetic_pipeline",
+    "labeller": "synthetic (not human)",
+    "generator": "scripts/build_instrumentation_suites.py",
+    "suite": "earnings",
+    "sample_id": "earn-gaap_reconciliation-slvp-q42025",
+    "suite_version": "0.1"
+  }
+}

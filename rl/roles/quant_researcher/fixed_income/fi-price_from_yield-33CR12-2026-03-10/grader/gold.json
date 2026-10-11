@@ -1,0 +1,24 @@
+{
+  "expected": {
+    "clean_price": 86.335066,
+    "accrued_interest": 1.3475,
+    "dirty_price": 87.682566
+  },
+  "task": "price_from_yield",
+  "tags": [
+    "corporate",
+    "30/360",
+    "long-dated",
+    "discount",
+    "price_from_yield"
+  ],
+  "difficulty": "medium",
+  "provenance": {
+    "kind": "synthetic_pipeline",
+    "labeller": "synthetic (not human)",
+    "generator": "scripts/build_instrumentation_suites.py",
+    "suite": "fixed_income",
+    "sample_id": "fi-price_from_yield-33CR12-2026-03-10",
+    "suite_version": "0.1"
+  }
+}

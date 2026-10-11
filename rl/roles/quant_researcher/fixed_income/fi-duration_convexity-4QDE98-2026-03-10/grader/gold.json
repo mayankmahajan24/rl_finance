@@ -1,0 +1,24 @@
+{
+  "expected": {
+    "macaulay_duration": 5.169684,
+    "modified_duration": 4.942337,
+    "convexity": 31.083658,
+    "dv01": 0.045185
+  },
+  "task": "duration_convexity",
+  "tags": [
+    "em",
+    "high-yield",
+    "30/360",
+    "duration_convexity"
+  ],
+  "difficulty": "hard",
+  "provenance": {
+    "kind": "synthetic_pipeline",
+    "labeller": "synthetic (not human)",
+    "generator": "scripts/build_instrumentation_suites.py",
+    "suite": "fixed_income",
+    "sample_id": "fi-duration_convexity-4QDE98-2026-03-10",
+    "suite_version": "0.1"
+  }
+}

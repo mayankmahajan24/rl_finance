@@ -1,0 +1,23 @@
+{
+  "expected": {
+    "gross_margin_pct": 45.1,
+    "operating_margin_pct": 16.8,
+    "operating_margin_change_bps": 341
+  },
+  "task": "margin_analysis",
+  "tags": [
+    "no-one-time",
+    "low-growth",
+    "margin_analysis",
+    "units-millions"
+  ],
+  "difficulty": "easy",
+  "provenance": {
+    "kind": "synthetic_pipeline",
+    "labeller": "synthetic (not human)",
+    "generator": "scripts/build_instrumentation_suites.py",
+    "suite": "earnings",
+    "sample_id": "earn-margin_analysis-bwtr-q12026",
+    "suite_version": "0.1"
+  }
+}

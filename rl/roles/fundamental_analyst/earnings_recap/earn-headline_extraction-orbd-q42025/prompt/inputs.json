@@ -1,0 +1,15 @@
+{
+  "company": "Orbital Defense Systems",
+  "ticker": "ORBD",
+  "quarter": "Q4",
+  "fiscal_year": 2025,
+  "press_release": "ORBITAL DEFENSE SYSTEMS REPORTS Q4 FISCAL 2025 RESULTS\n\nOrbital Defense Systems (NASDAQ: ORBD) today announced financial results for the fourth quarter of fiscal 2025. Revenue was $3,312,000 thousand, up 7.6% year over year. GAAP net income was $250,100 thousand, or $0.46 per diluted share. Non-GAAP net income was $268,140 thousand, or $0.50 per diluted share. Non-GAAP measures exclude stock-based compensation of $22,000 thousand; there were no other adjusting items in the quarter. For fiscal 2025, the company now expects revenue of $13,800,000 thousand to $14,100,000 thousand on a GAAP basis.\n\nCondensed income statement (in thousands, unaudited)\n  Revenue                       $3,312,000 thousand\n  Cost of revenue               $2,651,000 thousand\n  Gross profit                  $661,000 thousand\n  Operating expenses            $356,000 thousand\n  Operating income (loss)       $305,000 thousand\n  Income tax expense            $54,900 thousand\n  Net income (loss)             $250,100 thousand\n  Diluted shares (millions)     540.0\n\nPrior-year quarter: revenue $3,077,000 thousand; operating income $288,000 thousand.",
+  "answer_fields": [
+    "revenue_musd",
+    "eps_gaap",
+    "eps_non_gaap",
+    "revenue_yoy_pct",
+    "fy_revenue_guidance_low_musd",
+    "fy_revenue_guidance_high_musd"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "feed": {
+    "ID_ISIN": "US06051GJX39",
+    "SECURITY_DES": "BAC 5.015 07/22/2033",
+    "ISSUER": "Bank of America Corp",
+    "CPN": 5.015,
+    "CPN_FREQ": 2,
+    "MATURITY": "2033-07-22",
+    "DAY_CNT_DES": "30/360",
+    "SETTLE_DT": "2026-03-10",
+    "PX_CLEAN": 101.125,
+    "CRNCY": "USD",
+    "PAR_AMT": 100
+  },
+  "given_field": "PX_CLEAN",
+  "answer_fields": [
+    "ytm_pct",
+    "accrued_interest"
+  ]
+}

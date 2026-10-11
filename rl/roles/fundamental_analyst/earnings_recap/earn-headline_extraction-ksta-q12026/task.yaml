@@ -1,0 +1,28 @@
+id: earn-headline_extraction-ksta-q12026
+role: fundamental_analyst
+workflow: earnings_recap
+mode: produce
+world: earnings_desk
+status: graded
+split: eval
+prompt:
+  template: finrl_eval/suites/earnings/templates/default.j2
+  fingerprint: fc94fd885cbb
+sources:
+- finrl_eval/suites/earnings/
+- scripts/build_instrumentation_suites.py
+output_schema: null
+grader:
+  type: rubric
+  module: graders/rubric.py
+meta:
+  suite: earnings
+  sample_id: earn-headline_extraction-ksta-q12026
+  task_type: headline_extraction
+  tags:
+  - cyclical
+  - margin-compression
+  - revenue-decline
+  - headline_extraction
+  - units-millions
+  difficulty: medium

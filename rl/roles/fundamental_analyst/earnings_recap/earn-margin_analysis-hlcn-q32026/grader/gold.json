@@ -1,0 +1,23 @@
+{
+  "expected": {
+    "gross_margin_pct": 61.9,
+    "operating_margin_pct": 16.9,
+    "operating_margin_change_bps": 66
+  },
+  "task": "margin_analysis",
+  "tags": [
+    "restructuring",
+    "guidance-range",
+    "margin_analysis",
+    "units-millions"
+  ],
+  "difficulty": "medium",
+  "provenance": {
+    "kind": "synthetic_pipeline",
+    "labeller": "synthetic (not human)",
+    "generator": "scripts/build_instrumentation_suites.py",
+    "suite": "earnings",
+    "sample_id": "earn-margin_analysis-hlcn-q32026",
+    "suite_version": "0.1"
+  }
+}

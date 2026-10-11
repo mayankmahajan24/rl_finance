@@ -44,7 +44,7 @@ The same grader serves every topic in a mode:
 |---|---|---|
 | review | `graders/review_issues.py` | blocking-issue recall − 0.1 × manufactured − 0.2 × contradicts-gold, clamped to [0, 1] |
 | compare | `graders/pairwise_pick.py` | 1 if the pick matches gold, averaged over both orderings |
-| produce | rubric grader (not built yet) | weighted pass/fail rubric items + code-checked facts |
+| produce | `graders/rubric.py` | weighted rubric items + code-checked facts (instrumentation suites). Case-study `research_design` produce tasks stay `needs_rubric` until an expert rubric exists. |
 
 ## Worlds
 

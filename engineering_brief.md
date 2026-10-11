@@ -264,7 +264,10 @@ recruiting experts, and lab conversations.
 
 ### 6.1 Smoke test, repo hygiene, invariants in CI (first)
 
-- Add `pyproject.toml` or `requirements.txt` and a README setup section.
+- **Done (packaging + CI):** `pyproject.toml`, `uv.lock`, `finrl-eval` CLI, pytest, ruff,
+  mypy, Dockerfile/compose, and `.github/workflows/ci.yml`. `make check` runs lint,
+  typecheck, unit tests, and `rl/replay_case_study.py`. Mock-provider suite runs for
+  `earnings` and `fixed_income` are in CI. See the root README.
 - Decide whether to upgrade the `anthropic` SDK. 0.89 predates the current Skills
   API: `manage.py` handles both shapes, but that path is untested. Check what
   changes for `case_study/scripts`.

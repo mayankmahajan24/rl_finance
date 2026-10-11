@@ -1,0 +1,28 @@
+id: fi-accrued_interest-2CFX71-2026-01-31
+role: quant_researcher
+workflow: fixed_income
+mode: produce
+world: rates_desk
+status: graded
+split: eval
+prompt:
+  template: finrl_eval/suites/fixed_income/templates/default.j2
+  fingerprint: 717d0fca0421
+sources:
+- finrl_eval/suites/fixed_income/
+- scripts/build_instrumentation_suites.py
+output_schema: null
+grader:
+  type: rubric
+  module: graders/rubric.py
+meta:
+  suite: fixed_income
+  sample_id: fi-accrued_interest-2CFX71-2026-01-31
+  task_type: accrued_interest
+  tags:
+  - treasury
+  - act/act
+  - month-end
+  - low-coupon
+  - accrued_interest
+  difficulty: hard

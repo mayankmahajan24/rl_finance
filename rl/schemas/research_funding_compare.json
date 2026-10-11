@@ -1,0 +1,98 @@
+{
+  "type": "object",
+  "properties": {
+    "winner": {
+      "type": "string",
+      "enum": [
+        "A",
+        "B"
+      ]
+    },
+    "confidence": {
+      "type": "integer",
+      "enum": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    "goal_type": {
+      "type": "string",
+      "enum": [
+        "single_name_kpi",
+        "broad_market_effect",
+        "mechanism_test",
+        "blind_fit_oos",
+        "capability_build"
+      ]
+    },
+    "error_asymmetry": {
+      "type": "string",
+      "enum": [
+        "type_i_dominant",
+        "type_ii_dominant",
+        "symmetric"
+      ],
+      "description": "Which error costs more in this setting. type_i_dominant = concentrated, explicit loss, asymmetric downside. type_ii_dominant = capped downside with unbounded upside, or symmetric payoff run with breadth."
+    },
+    "decisive_tenets": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "goal_mismatch",
+          "firm_fit",
+          "error_asymmetry",
+          "no_edge",
+          "unnecessary_complexity",
+          "proxy_substitution",
+          "measure_validity",
+          "horizon_mismatch",
+          "evidence_standard",
+          "evidence_hierarchy",
+          "breadth",
+          "sequencing",
+          "human_oversight",
+          "falsification",
+          "invented_economics",
+          "validity",
+          "other"
+        ]
+      },
+      "description": "Which tenets actually drove the choice, most important first. Usually one or two. Listing many means nothing decided it."
+    },
+    "key_differentiator": {
+      "type": "string",
+      "description": "The single consideration that decided it, in one sentence."
+    },
+    "rationale": {
+      "type": "string"
+    },
+    "issues_with_winner": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "issues_with_loser": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "winner",
+    "confidence",
+    "goal_type",
+    "error_asymmetry",
+    "decisive_tenets",
+    "key_differentiator",
+    "rationale",
+    "issues_with_winner",
+    "issues_with_loser"
+  ],
+  "additionalProperties": false
+}

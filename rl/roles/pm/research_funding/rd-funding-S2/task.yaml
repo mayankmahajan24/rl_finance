@@ -1,0 +1,24 @@
+id: rd-funding-S2
+role: pm
+workflow: research_funding
+mode: compare
+world: midsize_ls
+status: graded
+split: eval
+prompt:
+  template: prompts/research_design/funding_decision.md
+  fingerprint: 3a2276335156
+sources:
+- case_study/part2/items/S2.json
+- case_study/part2/gold/S2.json
+output_schema: schemas/research_funding_compare.json
+orderings:
+- AB
+- BA
+grader:
+  type: pairwise_pick
+  module: graders/pairwise_pick.py
+meta:
+  seed: S2
+  context_flip: false
+  seed_style: quant

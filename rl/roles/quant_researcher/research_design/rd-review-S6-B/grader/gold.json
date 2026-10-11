@@ -1,0 +1,37 @@
+{
+  "issues": [
+    {
+      "n": 1,
+      "text": "B should be able to solve the circularity properly rather than decompose around it: make the independent variable backward-looking (realized CAGR) and the dependent variable forward-looking. The EV identity decomposition is a workaround, not a fix.",
+      "label": "blocking",
+      "gist": "circularity should be fixed by making the independent variable backward-looking realized CAGR and dependent forward-looking; the EV identity decomposition is only a workaround"
+    },
+    {
+      "n": 2,
+      "text": "Log multiples do not make sense in this case.",
+      "label": "blocking",
+      "gist": "log multiples are inappropriate here"
+    },
+    {
+      "n": 3,
+      "text": "The negative-denominator problem is handled by screening to NTM and N2Y EBITDA > 0, which drops exactly the firm-quarters where re-rating is most violent. Switching to a revenue multiple handles those cases instead of excluding them.",
+      "label": "blocking",
+      "gist": "screening to positive NTM/N2Y EBITDA drops exactly the firm-quarters with the most violent re-rating; a revenue multiple would retain them"
+    },
+    {
+      "n": 4,
+      "text": "Neither plan addresses the metric shifting as a company matures - revenue for high-growth, EBITDA for mature. B has revenue CAGR as a second regressor and EV/Sales as an alternate dependent variable, but never models the transition.",
+      "label": "secondary",
+      "gist": "neither plan models the transition of the relevant metric from revenue to EBITDA as companies mature"
+    }
+  ],
+  "frame": {
+    "goal_type": "broad_market_effect",
+    "error_asymmetry": "symmetric"
+  },
+  "critique_prose": "B should be able to solve the circularity properly rather than decompose around it: make the independent variable backward-looking (realized CAGR) and the dependent variable forward-looking. The EV identity decomposition is a workaround, not a fix.\n\nLog multiples do not make sense in this case.\n\nThe negative-denominator problem is handled by screening to NTM and N2Y EBITDA > 0, which drops exactly the firm-quarters where re-rating is most violent. Switching to a revenue multiple handles those cases instead of excluding them.\n\nNeither plan addresses the metric shifting as a company matures - revenue for high-growth, EBITDA for mature. B has revenue CAGR as a second regressor and EV/Sales as an alternate dependent variable, but never models the transition.",
+  "provenance": {
+    "labeller": "human (case-study author), judged blind",
+    "issue_split": "case_study/scripts/split_gold.py classified the prose into blocking / secondary / anti_objection / praise"
+  }
+}

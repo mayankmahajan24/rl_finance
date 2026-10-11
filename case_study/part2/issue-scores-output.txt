@@ -1,0 +1,39 @@
+==============================================================================
+POINTWISE RECALL — blocking gold issues surfaced (denominator 45)
+==============================================================================
+model                         recall   issues raised   per review
+------------------------------------------------------------------------------
+claude-haiku-4-5         24/45 (53%)             572         28.6
+claude-sonnet-5          13/45 (29%)              66          3.3
+claude-opus-4-8          15/45 (33%)              72          3.6
+claude-opus-5            28/45 (62%)             133          6.7
+
+==============================================================================
+POINTWISE PRECISION — of everything raised, how much was real
+==============================================================================
+model                   precision band   matched  real-unl  manufact   CONTRA  uncert
+------------------------------------------------------------------------------
+claude-haiku-4-5             31% - 50%        50       236       279        7     108
+claude-sonnet-5              68% - 97%        17        47         2        0      19
+claude-opus-4-8              71% - 92%        20        46         3        3      15
+claude-opus-5                90% - 98%        33        97         1        2      10
+
+==============================================================================
+COMBINED — does anything order all four models?
+==============================================================================
+model                     recall         precision           F1 band  manufactured
+------------------------------------------------------------------------------
+claude-haiku-4-5            53%         31% - 50%       0.39 - 0.52           286
+claude-sonnet-5             29%         68% - 97%       0.41 - 0.45             2
+claude-opus-4-8             33%         71% - 92%       0.45 - 0.49             6
+claude-opus-5               62%         90% - 98%       0.74 - 0.76             3
+
+F1 is the standard way to combine these. Read whether it actually ranks the
+models, or whether raising far more issues buys enough recall to offset the
+precision it costs.
+
+precision = (matched + real_unlisted) / all raised.
+The scorer was told to choose real_unlisted when torn and flag `uncertain`, so the
+upper bound counts those as real and the LOWER bound counts them as manufactured.
+Report the band: the point estimate is an artifact of that tie-breaking rule.
+CONTRA = raised an objection the reviewer explicitly ruled out in writing.

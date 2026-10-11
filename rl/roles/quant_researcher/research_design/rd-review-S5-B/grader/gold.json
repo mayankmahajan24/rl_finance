@@ -1,0 +1,37 @@
+{
+  "issues": [
+    {
+      "n": 1,
+      "text": "Simple-first is the right instinct and it is B's best feature.",
+      "label": "praise",
+      "gist": "simple-first design is the right instinct and B's best feature"
+    },
+    {
+      "n": 2,
+      "text": "But B treats commoditization as close to dispositive: vendor availability implies crowding, therefore expect a null. That confuses decay with death. A published signal can still carry alpha for someone constructing it more carefully, and B never tests that possibility.",
+      "label": "blocking",
+      "gist": "treats commoditization as dispositive, conflating alpha decay with death and never testing whether a published signal still carries alpha"
+    },
+    {
+      "n": 3,
+      "text": "Where the residual alpha most likely lives is in niche cases not yet arbed away, and B cannot see them. One pooled specification with industry-by-quarter fixed effects estimates the average effect; killing the project at a t of 2.1 on that specification says little about whether pockets survive.",
+      "label": "blocking",
+      "gist": "single pooled specification estimates only the average effect and cannot detect surviving niche pockets, so killing on a t of 2.1 is uninformative"
+    },
+    {
+      "n": 4,
+      "text": "Constraint layering is thin - a flat 20bp round-trip, no borrow cost, no ADV cap, no capacity estimate. For a firm judged on whether a signal survives costs and has capacity, that is not a defensible net number.",
+      "label": "blocking",
+      "gist": "cost/constraint modeling too thin (flat 20bp, no borrow, no ADV cap, no capacity) to give a defensible net number"
+    }
+  ],
+  "frame": {
+    "goal_type": "blind_fit_oos",
+    "error_asymmetry": "symmetric"
+  },
+  "critique_prose": "Simple-first is the right instinct and it is B's best feature.\n\nBut B treats commoditization as close to dispositive: vendor availability implies crowding, therefore expect a null. That confuses decay with death. A published signal can still carry alpha for someone constructing it more carefully, and B never tests that possibility.\n\nWhere the residual alpha most likely lives is in niche cases not yet arbed away, and B cannot see them. One pooled specification with industry-by-quarter fixed effects estimates the average effect; killing the project at a t of 2.1 on that specification says little about whether pockets survive.\n\nConstraint layering is thin - a flat 20bp round-trip, no borrow cost, no ADV cap, no capacity estimate. For a firm judged on whether a signal survives costs and has capacity, that is not a defensible net number.",
+  "provenance": {
+    "labeller": "human (case-study author), judged blind",
+    "issue_split": "case_study/scripts/split_gold.py classified the prose into blocking / secondary / anti_objection / praise"
+  }
+}

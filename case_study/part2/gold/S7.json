@@ -1,0 +1,11 @@
+{
+  "goal_type": "single_name_kpi",
+  "error_asymmetry": "type_ii_dominant",
+  "preference": "A",
+  "preference_strength": "strong",
+  "decisive_tenets": "1, 7",
+  "preference_rationale": "A is much more in the spirit of the question, which pertains to ONE name that we are going to put size on. The more quantitative B version makes sense if this were a diversified strategy with multiple runs and the benefit of the law of large numbers; it is not. Having some bar is important - just knowing there are new logos is not enough to gain conviction in the bet - and A supplies one while supplementing it with other datasets and checks, which is good.\n\nOn the error asymmetry: we are not as worried about the downside of being in the name, since this is incrementally positive news. The exposure is Type II - missing the signal that they are going to announce bullish updates at earnings.",
+  "critique_A": "The thresholds are a bit arbitrary - the 0.5% full-year revision cutoff for priced, the 0.2% for dismissed, one estimation-window standard deviation on CAR, 1.2x the trailing straddle median. Four numbers carrying the entire stop-go decision, none of them derived.\n\nOtherwise the shape is right for this question: it establishes a bar, and supplements it with other datasets and checks rather than resting on the checks alone.",
+  "critique_B": "Solving for initial land value is totally irrelevant here.\n\nThe quantitative apparatus - bottom-up reconstruction of twelve quarters, ramp-curve fitting, Monte Carlo to p10/p50/p90 - makes sense for a diversified strategy with multiple runs and the benefit of the law of large numbers. With one name and one print there is no law of large numbers to lean on, and the distributional output implies a precision the setting cannot support.\n\nB might make more sense for a fast swing-trading pod, but the horizon here is a bit longer.\n\nIts thresholds are a bit arbitrary too.",
+  "why_loser_was_defensible": "The arithmetic is actually important - if it is just a few low-quality logos that do not meaningfully affect the top or bottom line, then none of this matters - and B makes that arithmetic the centerpiece rather than a compressed check inside a gate."
+}

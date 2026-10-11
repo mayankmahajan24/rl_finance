@@ -1,0 +1,9 @@
+Who this is for:
+
+A systematic trading firm. ~200 quantitative researchers, full tick-level market data, in-house execution, production ML infrastructure and a research platform that replicates any result before it trades. Horizon is days to weeks. Work is judged on whether a signal survives transaction costs, has capacity, and is not already crowded. Findings go to a research committee that will re-run them independently. Building a ten-year intraday dataset is a normal quarter's work here.
+
+Here is the research idea:
+
+Does sentiment expressed on earnings calls predict a company's outperformance versus its peers?
+
+Write the research plan.

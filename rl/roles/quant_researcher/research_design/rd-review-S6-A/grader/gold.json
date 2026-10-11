@@ -1,0 +1,37 @@
+{
+  "issues": [
+    {
+      "n": 1,
+      "text": "Killing the circularity is good, but the fix falters. EV/LTM EBITDA is not how assets are priced in public markets - pricing is mostly on forward earnings, not prior earnings - so A trades a mechanical problem for a measure that does not reflect the thing being studied.",
+      "label": "blocking",
+      "gist": "EV/LTM trailing EBITDA does not reflect how public markets price assets (forward earnings), so the fix substitutes an invalid measure"
+    },
+    {
+      "n": 2,
+      "text": "TAQ data makes absolutely zero sense for this project. The time horizon for a multiple re-rating is months to years, not milliseconds. (This desk also has no tick data, but the horizon mismatch is the real objection and would stand at any firm.)",
+      "label": "blocking",
+      "gist": "TAQ tick data is horizon-mismatched: multiple re-rating plays out over months to years, not milliseconds"
+    },
+    {
+      "n": 3,
+      "text": "A gates on the seed's question and then spends the project on two others - regime stability and re-rating efficiency. Those are legitimate questions, but the elasticity itself is the deliverable here and A never produces a usable one.",
+      "label": "blocking",
+      "gist": "plan never delivers the elasticity estimate that is the actual deliverable, substituting regime-stability and efficiency questions"
+    },
+    {
+      "n": 4,
+      "text": "Near-zero and negative EBITDA denominators are handled by screening them out (margin >= 2%). The natural fix is to switch to a revenue multiple rather than drop the observations.",
+      "label": "secondary",
+      "gist": "screening out low/negative EBITDA margins instead of switching to a revenue multiple discards observations"
+    }
+  ],
+  "frame": {
+    "goal_type": "broad_market_effect",
+    "error_asymmetry": "symmetric"
+  },
+  "critique_prose": "Killing the circularity is good, but the fix falters. EV/LTM EBITDA is not how assets are priced in public markets - pricing is mostly on forward earnings, not prior earnings - so A trades a mechanical problem for a measure that does not reflect the thing being studied.\n\nTAQ data makes absolutely zero sense for this project. The time horizon for a multiple re-rating is months to years, not milliseconds. (This desk also has no tick data, but the horizon mismatch is the real objection and would stand at any firm.)\n\nA gates on the seed's question and then spends the project on two others - regime stability and re-rating efficiency. Those are legitimate questions, but the elasticity itself is the deliverable here and A never produces a usable one.\n\nNear-zero and negative EBITDA denominators are handled by screening them out (margin >= 2%). The natural fix is to switch to a revenue multiple rather than drop the observations.",
+  "provenance": {
+    "labeller": "human (case-study author), judged blind",
+    "issue_split": "case_study/scripts/split_gold.py classified the prose into blocking / secondary / anti_objection / praise"
+  }
+}

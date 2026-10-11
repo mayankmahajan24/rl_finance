@@ -1,0 +1,19 @@
+{
+  "status": "draft — one human-written item; needs a full expert rubric",
+  "items": [
+    {
+      "id": "must_address_known_flaw",
+      "kind": "must_hit",
+      "text": "Near-tautological; simultaneity and definitional circularity in the forward multiple",
+      "source": "case_study/seeds.json `discriminator`, written by the case-study author before any plan was generated"
+    }
+  ],
+  "rubric_inputs": {
+    "human_verdict_on_claude_plan": "plan: overly complex and disorganized / critique: better simplification, but does not provision for negative -> positive earnings names or discuss fundamental valuation changes from revenue-based (growing, high gross margin) to EBITDA-based (mature, stable margin)",
+    "two_competent_approaches_with_human_preference": "rd-funding-S6",
+    "blocking_issues_on_those_approaches": [
+      "rd-review-S6-A",
+      "rd-review-S6-B"
+    ]
+  }
+}

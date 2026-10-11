@@ -1,0 +1,28 @@
+id: rd-produce-S2
+role: quant_researcher
+workflow: research_design
+mode: produce
+world: midsize_ls
+status: needs_rubric
+split: eval
+prompt:
+  template: prompts/research_design/produce.md
+  fingerprint: a193b3949f47
+sources:
+- case_study/seeds.json
+- case_study/part1/plans/S2.md
+- case_study/part1/critiques/S2.md
+- case_study/part1/findings-table.md
+output_schema: null
+grader:
+  type: rubric
+  module: null
+  note: no grader until an expert rubric exists; see grader/draft_rubric.json
+related_tasks:
+- rd-funding-S2
+- rd-review-S2-A
+- rd-review-S2-B
+meta:
+  seed: S2
+  seed_style: quant
+  seed_bucket: subtly flawed

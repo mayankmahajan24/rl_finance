@@ -1,0 +1,19 @@
+{
+  "issues": [
+    {
+      "n": 1,
+      "text": "A regression is not the right test for a switching/cannibalization framework. The magnitudes matter less than whether the effect exists and in which direction, and B spends its design budget defending a regressor that mechanically contains the outcome rather than avoiding that problem in the first place.",
+      "label": "blocking",
+      "gist": "regression is the wrong test for a switching/cannibalization question, and the regressor mechanically contains the outcome"
+    }
+  ],
+  "frame": {
+    "goal_type": "mechanism_test",
+    "error_asymmetry": "type_i_dominant"
+  },
+  "critique_prose": "A regression is not the right test for a switching/cannibalization framework. The magnitudes matter less than whether the effect exists and in which direction, and B spends its design budget defending a regressor that mechanically contains the outcome rather than avoiding that problem in the first place.",
+  "provenance": {
+    "labeller": "human (case-study author), judged blind",
+    "issue_split": "case_study/scripts/split_gold.py classified the prose into blocking / secondary / anti_objection / praise"
+  }
+}

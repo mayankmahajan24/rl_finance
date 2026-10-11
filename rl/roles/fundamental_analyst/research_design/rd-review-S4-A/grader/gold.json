@@ -1,0 +1,31 @@
+{
+  "issues": [
+    {
+      "n": 1,
+      "text": "Tries to generalize something that should not be generalized. Coding 40 to 60 comparable guarantor releases treats a set of highly idiosyncratic structures as draws from a common distribution, and the resulting base rate is not a frame this case can be meaningfully embedded in.",
+      "label": "blocking",
+      "gist": "coding 40-60 guarantor releases wrongly treats idiosyncratic structures as draws from a common distribution; base rate is not a valid reference frame for this case"
+    },
+    {
+      "n": 2,
+      "text": "The prior it rests on is asserted rather than derived - mechanical and refinancing causes dominate, accounting next, leverage-driven one to three in fifty - and the entire 25x likelihood-ratio bar is built on top of that guess. It reads as discipline but the denominator was invented.",
+      "label": "blocking",
+      "gist": "the prior on cause mix is asserted rather than derived, so the 25x likelihood-ratio bar rests on an invented denominator"
+    },
+    {
+      "n": 3,
+      "text": "It is also a dataset build, and this desk has no quantitative research staff and no capacity to build datasets.",
+      "label": "blocking",
+      "gist": "the plan requires a dataset build the desk has no quantitative staff or capacity to do"
+    }
+  ],
+  "frame": {
+    "goal_type": "mechanism_test",
+    "error_asymmetry": "type_i_dominant"
+  },
+  "critique_prose": "Tries to generalize something that should not be generalized. Coding 40 to 60 comparable guarantor releases treats a set of highly idiosyncratic structures as draws from a common distribution, and the resulting base rate is not a frame this case can be meaningfully embedded in.\n\nThe prior it rests on is asserted rather than derived - mechanical and refinancing causes dominate, accounting next, leverage-driven one to three in fifty - and the entire 25x likelihood-ratio bar is built on top of that guess. It reads as discipline but the denominator was invented.\n\nIt is also a dataset build, and this desk has no quantitative research staff and no capacity to build datasets.",
+  "provenance": {
+    "labeller": "human (case-study author), judged blind",
+    "issue_split": "case_study/scripts/split_gold.py classified the prose into blocking / secondary / anti_objection / praise"
+  }
+}

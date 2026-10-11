@@ -1,0 +1,105 @@
+{
+  "_comment": "Maps opaque generation tokens to (seed, slot). Generators receive ONLY their token \u2014 never a seed id, slot letter, or any hint that a paired plan exists. This map is written before generation and used after it to assemble the item files.",
+  "tokens": {
+    "febb35": {
+      "seed_id": "S1",
+      "slot": "A",
+      "methodology": "M1"
+    },
+    "ff3e5e": {
+      "seed_id": "S1",
+      "slot": "B",
+      "methodology": "M2"
+    },
+    "4148d8": {
+      "seed_id": "S2",
+      "slot": "A",
+      "methodology": "M2"
+    },
+    "a54be1": {
+      "seed_id": "S2",
+      "slot": "B",
+      "methodology": "M1"
+    },
+    "558c6a": {
+      "seed_id": "S3",
+      "slot": "A",
+      "methodology": "M2"
+    },
+    "4a3216": {
+      "seed_id": "S3",
+      "slot": "B",
+      "methodology": "M1"
+    },
+    "2c9cb3": {
+      "seed_id": "S4",
+      "slot": "A",
+      "methodology": "M1"
+    },
+    "7111ba": {
+      "seed_id": "S4",
+      "slot": "B",
+      "methodology": "M2"
+    },
+    "4215a5": {
+      "seed_id": "S5",
+      "slot": "A",
+      "methodology": "M2"
+    },
+    "21bf96": {
+      "seed_id": "S5",
+      "slot": "B",
+      "methodology": "M1"
+    },
+    "f15793": {
+      "seed_id": "S6",
+      "slot": "A",
+      "methodology": "M1"
+    },
+    "b58702": {
+      "seed_id": "S6",
+      "slot": "B",
+      "methodology": "M2"
+    },
+    "103ebf": {
+      "seed_id": "S7",
+      "slot": "A",
+      "methodology": "M1"
+    },
+    "c761e5": {
+      "seed_id": "S7",
+      "slot": "B",
+      "methodology": "M2"
+    },
+    "2c9b85": {
+      "seed_id": "S8",
+      "slot": "A",
+      "methodology": "M2"
+    },
+    "948243": {
+      "seed_id": "S8",
+      "slot": "B",
+      "methodology": "M1"
+    },
+    "e05d0b": {
+      "seed_id": "S9",
+      "slot": "A",
+      "methodology": "M2"
+    },
+    "0be96c": {
+      "seed_id": "S9",
+      "slot": "B",
+      "methodology": "M1"
+    },
+    "fc171e": {
+      "seed_id": "S10",
+      "slot": "A",
+      "methodology": "M1"
+    },
+    "61aec8": {
+      "seed_id": "S10",
+      "slot": "B",
+      "methodology": "M2"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+id: midsize_ls
+name: Mid-size fundamental long/short fund
+kind: fund
+status: brief_only
+brief: A mid-size fundamental long/short equity fund. ~30 investment staff, a three-person data team that
+  licenses and cleans alt-data panels, and one engineer. Horizon is six to eighteen months. They can run
+  a panel study or a cohort analysis and routinely buy transaction and web data, but they do not have
+  tick data or execution infrastructure and will not build production ML. Output is expected to change
+  position sizing on named companies, and to be defensible to a PM who will ask what would have to be
+  true for it to be wrong.
+case_study_items:
+- S1
+- S2
+- S6
+to_become_a_full_world:
+- mandate and risk limits
+- current holdings with sizes
+- investment theses per position
+- past research memos and IC notes
+- point-in-time data snapshot and tool access
+sources:
+- case_study/part2/contexts.json

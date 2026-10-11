@@ -1,0 +1,20 @@
+id: market_maker
+name: Electronic market maker internalizing retail flow
+kind: fund
+status: brief_only
+brief: An electronic market-making firm that internalizes and quotes against retail order flow. ~60 engineers
+  and quantitative researchers, colocated infrastructure, full order-book and tick data, and its own matching,
+  quoting and risk systems. Horizon is nanoseconds to seconds; inventory held overnight is a failure of
+  the hedging stack rather than a trade. Work is judged on realized spread capture net of adverse selection,
+  on inventory risk, and on whether a classification can run inside the quoting loop at production latency.
+  What kills them is systematically quoting into informed flow they had labelled uninformed.
+case_study_items:
+- S8
+to_become_a_full_world:
+- mandate and risk limits
+- current holdings with sizes
+- investment theses per position
+- past research memos and IC notes
+- point-in-time data snapshot and tool access
+sources:
+- case_study/part2/contexts.json

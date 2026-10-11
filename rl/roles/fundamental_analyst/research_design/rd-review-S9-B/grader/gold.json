@@ -1,0 +1,25 @@
+{
+  "issues": [
+    {
+      "n": 1,
+      "text": "The knock is all the datasets listed in the plan - TrendForce, Fastmarkets, UxC, Argus/ICIS, Drewry/Xeneta, Panjiva, PACER, the SEMI fab database. This firm would need to cobble together the data points individually using its analysts rather than subscribe to all those vendors to answer this one question. The plan should be built around that constraint instead of assuming the subscriptions.",
+      "label": "blocking",
+      "gist": "plan assumes access to a long list of expensive vendor data subscriptions the firm does not have; must be redesigned around analyst-assembled data points"
+    },
+    {
+      "n": 2,
+      "text": "The objection that twenty to thirty episodes across ten industries is too few or too heterogeneous does not apply, and a review raising it would be misapplying a standard concern. B ranks features by conditional base rate rather than regressing, and behavior within an industry is reasonably stable across cycles once cause and regime are accounted for.",
+      "label": "anti_objection",
+      "gist": "twenty to thirty episodes across ten industries is too small or too heterogeneous a sample"
+    }
+  ],
+  "frame": {
+    "goal_type": "mechanism_test",
+    "error_asymmetry": "type_i_dominant"
+  },
+  "critique_prose": "The knock is all the datasets listed in the plan - TrendForce, Fastmarkets, UxC, Argus/ICIS, Drewry/Xeneta, Panjiva, PACER, the SEMI fab database. This firm would need to cobble together the data points individually using its analysts rather than subscribe to all those vendors to answer this one question. The plan should be built around that constraint instead of assuming the subscriptions.\n\nThe objection that twenty to thirty episodes across ten industries is too few or too heterogeneous does not apply, and a review raising it would be misapplying a standard concern. B ranks features by conditional base rate rather than regressing, and behavior within an industry is reasonably stable across cycles once cause and regime are accounted for.",
+  "provenance": {
+    "labeller": "human (case-study author), judged blind",
+    "issue_split": "case_study/scripts/split_gold.py classified the prose into blocking / secondary / anti_objection / praise"
+  }
+}

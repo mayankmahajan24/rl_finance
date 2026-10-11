@@ -1,0 +1,11 @@
+{
+  "goal_type": "mechanism_test",
+  "error_asymmetry": "type_i_dominant",
+  "preference": "A",
+  "preference_strength": "strong",
+  "decisive_tenets": "1, 11",
+  "preference_rationale": "Optimizing against Type I error is the right objective here, and A gets there through experimental design - clean matched controls and a placebo battery - rather than by leaning on niche statistical tests to rescue a contaminated regressor. For a mechanism question the causal story is the object, so a credible counterfactual beats a more sophisticated estimate of a magnitude.",
+  "critique_A": "Does not account for hidden Kalshi users trading through Robinhood. Broker-routed Kalshi activity produces no Kalshi descriptor, so those users sit in the control group while actually treated, attenuating the estimate toward zero. Robinhood appears in the merchant dictionary as a descriptor to capture, but the treatment-misclassification consequence is never addressed.\n\nDoes not resolve the timing of Kalshi adoption, which is concentrated in specific events and cohorts. Kalshi only ramped its sports contracts around the 2025 football season, so a panel starting Jan 2022 pools politics- and election-driven adopters with sports-driven ones as if they were one population. Cohort-by-calendar-month effects and a robustness spec dropping the Nov 2024 and Jan 2025 cohorts treat this as a nuisance to control for rather than as distinct regimes that should be estimated separately.\n\nPromotional credit is unhandled. Kalshi ran free promos during the sports ramp, so a user can trade without any qualifying bank debit. The treatment definition - first Kalshi debit of $5 or more - will misdate or entirely miss those adopters, mixing treated users back into controls.",
+  "critique_B": "A regression is not the right test for a switching/cannibalization framework. The magnitudes matter less than whether the effect exists and in which direction, and B spends its design budget defending a regressor that mechanically contains the outcome rather than avoiding that problem in the first place.",
+  "why_loser_was_defensible": "B is arguably the more statistically rigorous plan - it confronts the denominator circularity directly with a permutation null the estimate must clear, an instrument, and an independent event-study cross-check required to agree within 2x."
+}

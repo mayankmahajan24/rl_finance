@@ -1,0 +1,27 @@
+id: rd-review-S2-A
+role: quant_researcher
+workflow: research_design
+mode: review
+world: midsize_ls
+status: graded
+split: eval
+prompt:
+  template: prompts/research_design/review.md
+  fingerprint: ee6dd1a4f99e
+sources:
+- case_study/part2/items/S2.json
+- case_study/part2/gold/S2.json
+- case_study/part2/gold/_issues.json
+output_schema: schemas/research_design_review.json
+grader:
+  type: review_issues
+  module: graders/review_issues.py
+  params:
+    penalty_manufactured: 0.1
+    penalty_contradicts_gold: 0.2
+meta:
+  seed: S2
+  plan_slot: A
+  plan_token: 4148d8
+  context_flip: false
+  seed_style: quant

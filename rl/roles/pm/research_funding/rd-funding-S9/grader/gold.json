@@ -1,0 +1,12 @@
+{
+  "preference": "B",
+  "preference_strength": "weak",
+  "decisive_tenets": "8, 5",
+  "preference_rationale": "Although focusing on the specific company is the most direct measure, I picked B because of my prior around how shortage cycles work. Prices move during shortages in some general way, and there must be indicators of whether a given episode is durable or a cycle peak that would be a mistake to invest in. B is built to find those indicators; A is built to price one company's paperwork.\n\nOn the heterogeneity worry: semis likely do not behave very differently across cycles once you account for the cause and the prevailing market regime, so pooling episodes within an industry is reasonable and the usual objection that twenty to thirty cross-industry cases are too few or too dissimilar does not apply here. B is ranking features by conditional base rate, not estimating a coefficient.\n\nWeak because A is the more direct measurement and someone still has to do that work before a position goes on.",
+  "why_loser_was_defensible": "Focusing on the specific company is the most direct measure of the question actually asked, and A is the only plan that produces a priced answer for the name in front of you rather than a framework to apply to it.",
+  "goal_type": "mechanism_test",
+  "error_asymmetry": "type_i_dominant",
+  "provenance": {
+    "labeller": "human (case-study author), judged blind"
+  }
+}

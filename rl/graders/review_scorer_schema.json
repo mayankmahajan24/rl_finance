@@ -1,0 +1,73 @@
+{
+  "type": "object",
+  "properties": {
+    "gold_recall": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "gold_ref": {
+            "type": "string"
+          },
+          "surfaced": {
+            "type": "boolean"
+          },
+          "by_issue": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "gold_ref",
+          "surfaced",
+          "by_issue",
+          "note"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "issue_buckets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "idx": {
+            "type": "integer"
+          },
+          "bucket": {
+            "type": "string",
+            "enum": [
+              "matched",
+              "real_unlisted",
+              "manufactured",
+              "contradicts_gold"
+            ]
+          },
+          "uncertain": {
+            "type": "boolean"
+          },
+          "why": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "idx",
+          "bucket",
+          "uncertain",
+          "why"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "gold_recall",
+    "issue_buckets"
+  ],
+  "additionalProperties": false
+}

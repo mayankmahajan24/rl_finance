@@ -1,0 +1,12 @@
+{
+  "preference": "B",
+  "preference_strength": "strong",
+  "decisive_tenets": "4, 5",
+  "preference_rationale": "In-line results are less interesting; the payoff is in capturing sizable deviations from consensus, high or low. B is built for that. It winnows to the names where this information would actually be captured in the first place, and applies per-company inclusion screens and per-company shrunk coefficients rather than resting on a single pooled elasticity. It is also careful to decompose ARR into its two pieces and to speak plainly about what the data can track (seats) and what it cannot (pricing growth). The negative control A carries is not really relevant here: the point is out-of-sample performance per name, backtested and evaluated statistically.",
+  "why_loser_was_defensible": "A would have been the better plan if the question were whether MAU growth is in general indicative of ARR growth - that is a cross-sectional claim and a panel is the right instrument for it. But we are trading individual names, so per-company analysis is what the output has to support.",
+  "goal_type": "blind_fit_oos",
+  "error_asymmetry": "symmetric",
+  "provenance": {
+    "labeller": "human (case-study author), judged blind"
+  }
+}

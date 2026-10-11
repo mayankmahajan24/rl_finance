@@ -1,0 +1,31 @@
+{
+  "issues": [
+    {
+      "n": 1,
+      "text": "The experiment as set up is infeasible for a nontechnical team. A 40,000 firm-quarter panel with embedding-based topic tagging, a pinned LLM, 1,000 hand-labels, elastic-net weighting and block bootstrap cannot be run by five people with no engineers and nobody maintaining a database, and the investment committee is skeptical of models it cannot inspect. Nor would this firm be interested in that kind of analysis even if it is stronger statistically.",
+      "label": "blocking",
+      "gist": "the design is infeasible for a five-person nontechnical team and produces a black box the investment committee won't trust or want"
+    },
+    {
+      "n": 2,
+      "text": "Under this error asymmetry the cost is sharper than inconvenience: spending the only analyst on a research programme while the renegotiation resolves is how the fund gets blindsided on the thing it was worried about.",
+      "label": "blocking",
+      "gist": "given the error asymmetry, tying up the only analyst on this research while the renegotiation resolves risks being blindsided on the key risk"
+    },
+    {
+      "n": 3,
+      "text": "The idea is right. Separating whether this call is genuinely elevated from whether elevation predicts anything is the correct decomposition, and B is honest that the modal outcome is a null. What it needs is a version scaled to this desk - the same two questions asked of this company's own transcript history rather than a market-wide panel.",
+      "label": "praise",
+      "gist": "the decomposition into 'is elevation real' vs 'does elevation predict' is correct and the plan is honest about a likely null; just needs scaling to the single company's transcript history"
+    }
+  ],
+  "frame": {
+    "goal_type": "mechanism_test",
+    "error_asymmetry": "type_ii_dominant"
+  },
+  "critique_prose": "The experiment as set up is infeasible for a nontechnical team. A 40,000 firm-quarter panel with embedding-based topic tagging, a pinned LLM, 1,000 hand-labels, elastic-net weighting and block bootstrap cannot be run by five people with no engineers and nobody maintaining a database, and the investment committee is skeptical of models it cannot inspect. Nor would this firm be interested in that kind of analysis even if it is stronger statistically.\n\nUnder this error asymmetry the cost is sharper than inconvenience: spending the only analyst on a research programme while the renegotiation resolves is how the fund gets blindsided on the thing it was worried about.\n\nThe idea is right. Separating whether this call is genuinely elevated from whether elevation predicts anything is the correct decomposition, and B is honest that the modal outcome is a null. What it needs is a version scaled to this desk - the same two questions asked of this company's own transcript history rather than a market-wide panel.",
+  "provenance": {
+    "labeller": "human (case-study author), judged blind",
+    "issue_split": "case_study/scripts/split_gold.py classified the prose into blocking / secondary / anti_objection / praise"
+  }
+}

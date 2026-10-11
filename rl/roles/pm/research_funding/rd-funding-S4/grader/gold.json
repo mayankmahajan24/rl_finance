@@ -1,0 +1,12 @@
+{
+  "preference": "B",
+  "preference_strength": "strong",
+  "decisive_tenets": "2, 7",
+  "preference_rationale": "More of a judgement call. These events do not happen often and carry many idiosyncrasies, so it is hard to build a probabilistic base rate and then embed this case into that framework. What this needs instead is a breadth-and-depth search on this particular company: its history with its suppliers, the current industry and competitive context, and the supporting or refuting data points around this specific structure. The mechanism matters, but we are looking at one name for now, so generalization is not what the work has to deliver.",
+  "why_loser_was_defensible": "A writes its prior down before looking and pre-registers falsifiers, several of which are individually decisive. An analyst most worried about anchoring on the seed's embedded conclusion would want exactly that structure, and A supplies it where B relies on judgement.",
+  "goal_type": "mechanism_test",
+  "error_asymmetry": "type_i_dominant",
+  "provenance": {
+    "labeller": "human (case-study author), judged blind"
+  }
+}

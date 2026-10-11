@@ -1,0 +1,72 @@
+# Financial-services Agent Skills for Anthropic models.
+#
+# Source: Anthropic's Claude for Financial Services repo, pinned to one commit so a
+# run is reproducible. `python rl/skills/manage.py fetch` checks it out into
+# rl/vendor/financial-services (gitignored); `sync` uploads the selected skills to
+# the API workspace and pins each uploaded version in rl/skills/lock.json.
+#
+# Skills apply to OUTPUT GENERATION only. Graders and the review scorer never get
+# skills, so a skills-on run and a skills-off run are graded by the same instrument.
+
+source:
+  repo: https://github.com/anthropics/financial-services
+  commit: 574ed3624aebd0418c7e96cd101262f30210ab26
+  license: Apache-2.0
+
+# Anthropic models (model id starting "claude-") get this profile unless a run says
+# --skills off. Other providers never get skills.
+default_for_anthropic: buy_side_core
+
+# The Messages API accepts at most 20 skills per request, and the repo has 63
+# distinct skills, so a profile is a curated subset. Skills are taken from
+# plugins/vertical-plugins (the source copies); the agent-plugins hold synced copies.
+profiles:
+  none: []
+
+  buy_side_core:
+    # equity-research: public-equity analyst workflows
+    - equity-research/earnings-analysis
+    - equity-research/earnings-preview
+    - equity-research/model-update
+    - equity-research/morning-note
+    - equity-research/idea-generation
+    - equity-research/initiating-coverage
+    - equity-research/sector-overview
+    - equity-research/thesis-tracker
+    - equity-research/catalyst-calendar
+    # financial-analysis: modeling and spreadsheet work
+    - financial-analysis/3-statement-model
+    - financial-analysis/dcf-model
+    - financial-analysis/comps-analysis
+    - financial-analysis/competitive-analysis
+    - financial-analysis/audit-xls
+    - financial-analysis/clean-data-xls
+    - financial-analysis/xlsx-author
+    # private-equity: the two that carry over to public-market research
+    - private-equity/unit-economics
+    - private-equity/ic-memo
+
+# Why the other 45 are out of buy_side_core. Move any of them into a profile to opt in.
+excluded:
+  decks_and_formatting: [pptx-author, deck-refresh, ib-check-deck, ppt-template-creator, pitch-deck]
+  sell_side_banking: [buyer-list, cim-builder, datapack-builder, deal-tracker, merger-model,
+                      process-letter, strip-profile, teaser]
+  private_equity_deal_process: [ai-readiness, dd-checklist, dd-meeting-prep, deal-screening,
+                                deal-sourcing, lbo-model, portfolio-monitoring, returns-analysis,
+                                value-creation-plan]
+  fund_admin_and_operations: [accrual-schedule, break-trace, gl-recon, nav-tieout, roll-forward,
+                              variance-commentary, kyc-doc-parse, kyc-rules]
+  wealth_management: [client-report, client-review, investment-proposal]
+  # Partner skills expect LSEG / S&P Capital IQ data connectors; the skills
+  # container has no network access, so they cannot reach their data here.
+  partner_data_required: [bond-futures-basis, bond-relative-value, equity-research,
+                          fixed-income-portfolio, fx-carry-trade, macro-rates-monitor,
+                          option-vol-analysis, swap-curve-strategy, earnings-preview-beta,
+                          funding-digest, tear-sheet]
+  tooling: [skill-creator]
+
+# Request shape when skills are on. Skills run inside the code-execution container.
+request:
+  tool: {type: code_execution_20260521, name: code_execution}
+  betas: [code-execution-2025-08-25]
+  max_pause_turn_continuations: 10

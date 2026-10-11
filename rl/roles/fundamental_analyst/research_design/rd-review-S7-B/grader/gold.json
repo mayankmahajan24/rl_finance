@@ -1,0 +1,37 @@
+{
+  "issues": [
+    {
+      "n": 1,
+      "text": "Solving for initial land value is totally irrelevant here.",
+      "label": "blocking",
+      "gist": "solving for initial land value is irrelevant to the question"
+    },
+    {
+      "n": 2,
+      "text": "The quantitative apparatus - bottom-up reconstruction of twelve quarters, ramp-curve fitting, Monte Carlo to p10/p50/p90 - makes sense for a diversified strategy with multiple runs and the benefit of the law of large numbers. With one name and one print there is no law of large numbers to lean on, and the distributional output implies a precision the setting cannot support.",
+      "label": "blocking",
+      "gist": "Monte Carlo/distributional apparatus implies false precision with a single name and single print, no law of large numbers"
+    },
+    {
+      "n": 3,
+      "text": "B might make more sense for a fast swing-trading pod, but the horizon here is a bit longer.",
+      "label": "blocking",
+      "gist": "the plan's horizon is wrong — suited to fast swing trading, not the longer horizon here"
+    },
+    {
+      "n": 4,
+      "text": "Its thresholds are a bit arbitrary too.",
+      "label": "secondary",
+      "gist": "thresholds are somewhat arbitrary"
+    }
+  ],
+  "frame": {
+    "goal_type": "single_name_kpi",
+    "error_asymmetry": "type_ii_dominant"
+  },
+  "critique_prose": "Solving for initial land value is totally irrelevant here.\n\nThe quantitative apparatus - bottom-up reconstruction of twelve quarters, ramp-curve fitting, Monte Carlo to p10/p50/p90 - makes sense for a diversified strategy with multiple runs and the benefit of the law of large numbers. With one name and one print there is no law of large numbers to lean on, and the distributional output implies a precision the setting cannot support.\n\nB might make more sense for a fast swing-trading pod, but the horizon here is a bit longer.\n\nIts thresholds are a bit arbitrary too.",
+  "provenance": {
+    "labeller": "human (case-study author), judged blind",
+    "issue_split": "case_study/scripts/split_gold.py classified the prose into blocking / secondary / anti_objection / praise"
+  }
+}

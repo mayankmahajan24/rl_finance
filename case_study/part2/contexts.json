@@ -1,0 +1,42 @@
+{
+  "_comment": "Firm/person context per item. Tenet 1 says a plan is good or bad FOR SOMEONE, so every item now states who is asking. Contexts are written as a desk would brief an analyst \u2014 capability, horizon, what they can build, what kills the work \u2014 never as a hint about which plan to prefer. The `flip` items reuse an existing pair under a different firm to test whether the discriminator is context-sensitive at all.",
+  "firms": {
+    "systematic": "A systematic trading firm. ~200 quantitative researchers, full tick-level market data, in-house execution, production ML infrastructure and a research platform that replicates any result before it trades. Horizon is days to weeks. Work is judged on whether a signal survives transaction costs, has capacity, and is not already crowded. Findings go to a research committee that will re-run them independently. Building a ten-year intraday dataset is a normal quarter's work here.",
+    "small_lo": "A five-person old-school long-only manager, ~$400M AUM, 25-30 concentrated positions held three to five years. Two PMs, two analysts, one operations person. Tooling is Bloomberg, Excel, and filings; there are no engineers and no data scientists, and nobody here maintains a database. They buy research and datasets occasionally but cannot operate infrastructure. What kills them is being wrong about a business, not transaction costs. Anything proposed must be executable by one analyst and defensible to an investment committee that is skeptical of models it cannot inspect.",
+    "midsize_ls": "A mid-size fundamental long/short equity fund. ~30 investment staff, a three-person data team that licenses and cleans alt-data panels, and one engineer. Horizon is six to eighteen months. They can run a panel study or a cohort analysis and routinely buy transaction and web data, but they do not have tick data or execution infrastructure and will not build production ML. Output is expected to change position sizing on named companies, and to be defensible to a PM who will ask what would have to be true for it to be wrong.",
+    "event_desk": "A single-name event-driven desk inside a multi-manager platform. One PM, two analysts. Horizon is weeks to a few months around a catalyst. Deep primary-source and legal-document work, expert networks, and a risk manager who cuts positions fast. No quantitative research staff and no capacity to build datasets; they consume sell-side, filings, and expert calls. The question is always whether this specific situation is mispriced right now, not whether an effect holds on average.",
+    "market_maker": "An electronic market-making firm that internalizes and quotes against retail order flow. ~60 engineers and quantitative researchers, colocated infrastructure, full order-book and tick data, and its own matching, quoting and risk systems. Horizon is nanoseconds to seconds; inventory held overnight is a failure of the hedging stack rather than a trade. Work is judged on realized spread capture net of adverse selection, on inventory risk, and on whether a classification can run inside the quoting loop at production latency. What kills them is systematically quoting into informed flow they had labelled uninformed.",
+    "ls_altdata": "A mid-size long/short equity fund that has just licensed a European retail transaction panel. ~30 investment staff, a three-person data team that cleans alt-data panels, and one engineer. Horizon is six to eighteen months. They want to take positions in specific listed European banks and to use the panel to underwrite them \u2014 deposit flows, salary capture, customer acquisition, attrition. The obstacle is that the panel's institution IDs are anonymized: until an ID is matched to a bank, none of the behavioral data can be attached to a ticker. What kills the work is a confident wrong match, because the desk would then be sizing a position on another bank's customers. Must be defensible to a PM who will ask what would have to be true for it to be wrong."
+  },
+  "assignment": {
+    "S1": "midsize_ls",
+    "S2": "midsize_ls",
+    "S3": "ls_altdata",
+    "S4": "event_desk",
+    "S5": "systematic",
+    "S6": "midsize_ls",
+    "S7": "event_desk",
+    "S8": "market_maker",
+    "S9": "small_lo",
+    "S10": "small_lo"
+  },
+  "flips": {
+    "_comment": "Context flips: the same seed and the same two plans under a DIFFERENT firm, to test whether a discriminator applies tenet 2 or scores plans in the abstract. Restored 2026-08-09 to run the context-sensitivity check. Gold for a flip must be filled independently of its base \u2014 the interesting cases are where the preference moves.",
+    "S5F": {
+      "base": "S5",
+      "firm": "small_lo"
+    },
+    "S8F": {
+      "base": "S8",
+      "firm": "small_lo"
+    },
+    "S2F": {
+      "base": "S2",
+      "firm": "small_lo"
+    },
+    "S9F": {
+      "base": "S9",
+      "firm": "systematic"
+    }
+  }
+}

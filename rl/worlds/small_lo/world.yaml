@@ -1,0 +1,24 @@
+id: small_lo
+name: Small concentrated long-only manager
+kind: fund
+status: brief_only
+brief: A five-person old-school long-only manager, ~$400M AUM, 25-30 concentrated positions held three
+  to five years. Two PMs, two analysts, one operations person. Tooling is Bloomberg, Excel, and filings;
+  there are no engineers and no data scientists, and nobody here maintains a database. They buy research
+  and datasets occasionally but cannot operate infrastructure. What kills them is being wrong about a
+  business, not transaction costs. Anything proposed must be executable by one analyst and defensible
+  to an investment committee that is skeptical of models it cannot inspect.
+case_study_items:
+- S9
+- S10
+- S2F
+- S5F
+- S8F
+to_become_a_full_world:
+- mandate and risk limits
+- current holdings with sizes
+- investment theses per position
+- past research memos and IC notes
+- point-in-time data snapshot and tool access
+sources:
+- case_study/part2/contexts.json

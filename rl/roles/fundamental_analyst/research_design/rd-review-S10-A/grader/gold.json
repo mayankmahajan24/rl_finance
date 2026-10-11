@@ -1,0 +1,37 @@
+{
+  "issues": [
+    {
+      "n": 1,
+      "text": "My chief complaint is that it circumvents the main question - whether the language is actually informative - and just sizes the potential impact instead. It asserts that a CFO sounds the same either way rather than establishing it.",
+      "label": "blocking",
+      "gist": "plan sidesteps the core question of whether the CFO's language is informative, merely sizing impact and asserting tone is uninformative rather than establishing it"
+    },
+    {
+      "n": 2,
+      "text": "I would also assume the team has already established that this company is sensitive to its vendors' pricing, which is precisely the work A describes. Much of the plan therefore delivers back what the analyst already holds, rather than addressing the new question the call raised.",
+      "label": "blocking",
+      "gist": "much of the plan re-derives what the analyst already knows (vendor pricing sensitivity) instead of addressing the new question raised by the call"
+    },
+    {
+      "n": 3,
+      "text": "A treats the vendor's uplift distribution as observable across five to ten comparable customers renewed in the last 24 months. Those deals are private. Gartner, Forrester and SAM benchmarks give directional ranges, not per-customer realized uplift, so the distribution the likelihood weighting rests on is largely unobtainable.",
+      "label": "blocking",
+      "gist": "the per-customer realized uplift distribution underpinning the likelihood weighting is private/unobtainable; benchmarks give only directional ranges"
+    },
+    {
+      "n": 4,
+      "text": "The materiality cuts - under 25bp makes tone moot, over 75bp forces a call - are asserted rather than derived.",
+      "label": "secondary",
+      "gist": "materiality thresholds (25bp/75bp) are asserted rather than derived"
+    }
+  ],
+  "frame": {
+    "goal_type": "mechanism_test",
+    "error_asymmetry": "type_ii_dominant"
+  },
+  "critique_prose": "My chief complaint is that it circumvents the main question - whether the language is actually informative - and just sizes the potential impact instead. It asserts that a CFO sounds the same either way rather than establishing it.\n\nI would also assume the team has already established that this company is sensitive to its vendors' pricing, which is precisely the work A describes. Much of the plan therefore delivers back what the analyst already holds, rather than addressing the new question the call raised.\n\nA treats the vendor's uplift distribution as observable across five to ten comparable customers renewed in the last 24 months. Those deals are private. Gartner, Forrester and SAM benchmarks give directional ranges, not per-customer realized uplift, so the distribution the likelihood weighting rests on is largely unobtainable.\n\nThe materiality cuts - under 25bp makes tone moot, over 75bp forces a call - are asserted rather than derived.",
+  "provenance": {
+    "labeller": "human (case-study author), judged blind",
+    "issue_split": "case_study/scripts/split_gold.py classified the prose into blocking / secondary / anti_objection / praise"
+  }
+}

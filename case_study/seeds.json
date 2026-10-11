@@ -1,0 +1,75 @@
+{
+  "_comment": "The Part 1 seed set. `text` is the ONLY field sent to the model \u2014 style/bucket/discriminator are our labels and must never enter a prompt.",
+  "seeds": [
+    {
+      "id": "S1",
+      "style": "fundamental",
+      "bucket": "good",
+      "discriminator": "Staggered adoption + selection into treatment; deposits are not revenue",
+      "text": "Do customers who start trading on Kalshi subsequently reduce their spend and activity on DraftKings? We have a credit-card and bank-deposit transaction panel covering both."
+    },
+    {
+      "id": "S2",
+      "style": "quant",
+      "bucket": "subtly flawed",
+      "discriminator": "Seats contracted != seats used; ARR is seats x price and MAU is blind to price/mix",
+      "text": "Do monthly active users on a company's client-facing portal predict ARR for SaaS companies on seat-based pricing?"
+    },
+    {
+      "id": "S3",
+      "style": "quant",
+      "bucket": "good",
+      "discriminator": "Leaky validation; needs external ground truth and an abstain class",
+      "text": "Can we reliably identify European financial institutions from transaction data, using only anonymized institution IDs plus the demographics and spend behavior of a panel of customers?"
+    },
+    {
+      "id": "S4",
+      "style": "fundamental",
+      "bucket": "good",
+      "discriminator": "SPV guarantee removal is a VIE consolidation fact before it is a strategy signal",
+      "text": "A hyperscaler was removed as a guarantor on a new SPV with its longstanding chip manufacturer. Is this a sign they are qualifying a second source and pushing risk back onto their primary provider?"
+    },
+    {
+      "id": "S5",
+      "style": "quant",
+      "bucket": "obviously flawed",
+      "discriminator": "Crowded and mined; sentiment is collinear with the earnings surprise",
+      "text": "Does sentiment expressed on earnings calls predict a company's outperformance versus its peers?"
+    },
+    {
+      "id": "S6",
+      "style": "quant",
+      "bucket": "obviously flawed",
+      "discriminator": "Near-tautological; simultaneity and definitional circularity in the forward multiple",
+      "text": "Do changes in next-two-year revenue and EBITDA CAGR drive earnings-multiple re-ratings among peers within an industry?"
+    },
+    {
+      "id": "S7",
+      "style": "fundamental",
+      "bucket": "obviously flawed",
+      "discriminator": "Published sell-side work is consensus by construction; guidance is a policy choice",
+      "text": "Sell-side channel checks are incrementally positive on new logo wins. Should we expect a meaningful boost to full-year guidance at the upcoming print, and is this a long?"
+    },
+    {
+      "id": "S8",
+      "style": "quant",
+      "bucket": "subtly flawed",
+      "discriminator": "Proxy polarity is backwards; retail is identified off sub-penny off-exchange prints, not lot size",
+      "text": "Do round-lot orders identify retail flow that is profitable to trade against?"
+    },
+    {
+      "id": "S9",
+      "style": "fundamental",
+      "bucket": "subtly flawed",
+      "discriminator": "Narrative anchoring; shortages are a cycle-peak tell and backlog is inflated by double-ordering",
+      "text": "A company just guided to product shortages lasting through next year. Does that portend more customer long-term agreements and more durable revenue?"
+    },
+    {
+      "id": "S10",
+      "style": "fundamental",
+      "bucket": "subtly flawed",
+      "discriminator": "Signal confounded at source: guardedness is the baseline during any live negotiation",
+      "text": "A company went notably defensive around its annual vendor licence renegotiation. Is this a stronger near-term risk to margins than management has communicated, or is it not a sign of weakening fundamentals?"
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+Scored on 10 items with gold: S1, S2, S3, S4, S5, S6, S7, S8, S9, S10
+NOT scored (gold empty): S2F, S5F, S8F, S9F
+
+Gold preference: A x6, B x4  -> always-answer-A baseline = 60%
+Strength: strong x6, weak x4
+
+============================================================================
+PAIRWISE ACCURACY vs gold preference  (each item judged twice: A/B and B/A)
+============================================================================
+model                    all calls        strong         weak    both-ways
+----------------------------------------------------------------------------
+claude-haiku-4-5       11/20 (55%)    7/12 (58%)    4/8 (50%)   4/10 (40%)
+claude-opus-4-8        10/20 (50%)    8/12 (67%)    2/8 (25%)   4/10 (40%)
+claude-opus-5          13/20 (65%)    9/12 (75%)    4/8 (50%)   6/10 (60%)
+claude-sonnet-5        11/20 (55%)    8/12 (67%)    3/8 (38%)   5/10 (50%)
+--- always-A/B ---            60%          50%         75%
+
+Each split carries its OWN majority baseline, and they differ sharply:
+  strong items are 50% balanced, weak items 75% —
+  so a weak-split score below that number is worse than answering blind.
+
+'both-ways' = agreed with gold under BOTH orderings. This is the strict
+read: an evaluator that only matches gold in one ordering matched by luck.
+
+============================================================================
+PER-ITEM  (gold pick, then each model's pick under A/B and B/A)
+============================================================================
+item   gold     str   haiku-4-5         opus-4-8          opus-5            sonnet-5          
+----------------------------------------------------------------------------
+S1        A  strong   Ab xx             AA OK             AA OK             AA OK             
+S2        B  strong   BB OK             Ba xx             aB xx             aa xx             
+S3        A    weak   bb xx             bb xx             bb xx             bb xx             
+S4        B  strong   BB OK             BB OK             BB OK             BB OK             
+S5        A  strong   bb xx             bb xx             bb xx             bb xx             
+S6        B  strong   aB xx             aB xx             BB OK             BB OK             
+S7        A  strong   Ab xx             AA OK             AA OK             AA OK             
+S8        A    weak   bb xx             bb xx             AA OK             bA xx             
+S9        B    weak   BB OK             aa xx             aa xx             aa xx             
+S10       A    weak   AA OK             AA OK             AA OK             AA OK             
+
+Uppercase = matched gold, lowercase = did not. 'OK' only when both agree with gold.
+
+============================================================================
+FRAME ACCURACY  (goal_type and error_asymmetry vs gold)
+============================================================================
+model                  goal pairwise   goal pointwise   asym pairwise  asym pointwise
+----------------------------------------------------------------------------
+claude-haiku-4-5          3/20 (15%)       5/20 (25%)      8/20 (40%)      8/20 (40%)
+claude-opus-4-8           5/20 (25%)       9/20 (45%)      9/20 (45%)      8/20 (40%)
+claude-opus-5             4/20 (20%)       8/20 (40%)      9/20 (45%)      8/20 (40%)
+claude-sonnet-5           6/20 (30%)       6/20 (30%)     10/20 (50%)      8/20 (40%)
+--- baseline ---                40%                             50%
+
+============================================================================
+ERROR ASYMMETRY, split by the item's TRUE value
+(SCORING.md: the pattern is the finding. A model that assumes one posture
+ everywhere is right on the common class and wrong on the rest.)
+============================================================================
+model                    symmetric (n=3)        type_i (n=5)       type_ii (n=2)
+----------------------------------------------------------------------------
+claude-haiku-4-5                0/6 (0%)          8/10 (80%)            0/4 (0%)
+claude-opus-4-8                 0/6 (0%)          8/10 (80%)            0/4 (0%)
+claude-opus-5                   0/6 (0%)          8/10 (80%)            0/4 (0%)
+claude-sonnet-5                 0/6 (0%)          8/10 (80%)            0/4 (0%)
+
+============================================================================
+DECISIVE TENETS — did the model decide for gold's stated reason?
+============================================================================
+Gold names tenet numbers; the model returns issue categories. Compared via
+the SCORING.md map. Tenets 1 and 13 have no category and are not checkable,
+so this is a lower bound, and the uncheckable share is reported.
+
+model                   hit >=1 gold tenet   mean cats
+----------------------------------------------------------------------------
+claude-haiku-4-5               12/20 (60%)         3.6
+claude-opus-4-8                11/20 (55%)         2.8
+claude-opus-5                  13/20 (65%)         3.6
+claude-sonnet-5                10/20 (50%)         3.0
+
+10/10 items have at least one checkable gold tenet.

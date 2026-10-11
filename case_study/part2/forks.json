@@ -1,0 +1,155 @@
+{
+  "_comment": "Methodology forks for Part 2. Each seed gets TWO DISTINCT, DEFENSIBLE STRATEGIES, built independently by agents that see only their own methodology and are told to build the strongest version of it. Neither plan carries a deliberate defect: the item works as long as the two approaches are genuinely different, and the gold preference is the human's judgment about which one they would staff. `slot` records which methodology landed in plan_A, mixed 5/5 so an evaluator cannot learn position bias. My own read of which is stronger is quarantined in gold/design-intent.json and never reaches a generator or evaluator.",
+  "forks": {
+    "S1": {
+      "seed": "Do customers who start trading on Kalshi subsequently reduce their spend and activity on DraftKings? We have a credit-card and bank-deposit transaction panel covering both.",
+      "M1": {
+        "label": "Cohort-stacked DiD on matched never-adopters",
+        "brief": "Treat each user's first Kalshi transaction as the treatment date. Because adoption timing is staggered, build stacked event-time cohorts (one clean 2x2 per adoption month) rather than a pooled two-way fixed-effects panel. Match each adopter to never-adopter DraftKings users on pre-period DraftKings intensity, tenure and demographics. Outcomes: DraftKings retention, deposit dollars, transaction frequency, in event time from -6 to +6 months."
+      },
+      "M2": {
+        "label": "Within-user share-of-wallet regression",
+        "brief": "For each user-month compute Kalshi's share of that user's total speculative spend (Kalshi / (Kalshi + DraftKings + FanDuel)). Regress the change in DraftKings deposit dollars on the change in Kalshi share, with user and month fixed effects. Interpret the coefficient as the substitution elasticity. Cut by user tenure and spend decile."
+      },
+      "slot": {
+        "A": "M1",
+        "B": "M2"
+      }
+    },
+    "S2": {
+      "seed": "Do monthly active users on a company's client-facing portal predict ARR for SaaS companies on seat-based pricing?",
+      "M1": {
+        "label": "Validate the MAU-to-billable-seat link first, then nowcast in growth space",
+        "brief": "Gate the whole project on one prior question: does panel MAU track BILLABLE SEATS? Test it on the subset of companies that disclose seat counts. Only if that link holds, build the nowcast \u2014 and build it in year-over-year growth space, not levels, with an explicit decomposition of ARR into seats and price/mix so it is clear which half MAU can speak to. Compare against a naive persistence baseline before claiming any skill."
+      },
+      "M2": {
+        "label": "Panel nowcast in log-levels with fixed effects",
+        "brief": "Build a quarterly panel of log MAU and log ARR. Estimate log(ARR) on lagged log(MAU) with company fixed effects to absorb persistent coverage and price-level differences, and quarter fixed effects for macro. Test lags of 0, 1 and 2 quarters and carry the best. Hold out a random 20% of company-quarters and target out-of-sample MAPE under 3%. Trade predicted surprise versus consensus into the print."
+      },
+      "slot": {
+        "A": "M2",
+        "B": "M1"
+      }
+    },
+    "S3": {
+      "seed": "Can we reliably identify European financial institutions from transaction data, using only anonymized institution IDs plus the demographics and spend behavior of a panel of customers?",
+      "M1": {
+        "label": "External-anchor identification with institution-level holdout and abstain",
+        "brief": "Generate candidate identifications from behavioral and demographic features, then confirm them against EXTERNAL ground truth that shares no inputs with the model: published national deposit market shares, branch and ATM footprints, payroll and state-benefit payment patterns. Hold out by institution, never by transaction. Report per-institution precision and recall with an explicit no-match abstain class, modelled per country."
+      },
+      "M2": {
+        "label": "Unsupervised behavioral fingerprinting with internal-consistency validation",
+        "brief": "Cluster anonymized institution IDs on their customer behavioral signature \u2014 salary-credit timing, card-network mix, ATM usage, average balance, demographic skew. Assign cluster identities using the strongest distinguishing features. Validate by internal consistency: silhouette scores, cluster stability under bootstrap resampling, and agreement across time windows. Spot-check the largest clusters by hand."
+      },
+      "slot": {
+        "A": "M2",
+        "B": "M1"
+      }
+    },
+    "S4": {
+      "seed": "A hyperscaler was removed as a guarantor on a new SPV with its longstanding chip manufacturer. Is this a sign they are qualifying a second source and pushing risk back onto their primary provider?",
+      "M1": {
+        "label": "Base-rate first: establish the accounting null before reading intent",
+        "brief": "Before any strategic reading, assemble comparable cases \u2014 sponsor guarantees released on similar financing SPVs \u2014 and establish the base rate for why they get released: VIE deconsolidation, structure seasoning to standalone credit, ratings or covenant treatment at refinancing. Only against that counterfactual, test the second-sourcing hypothesis on independent evidence (foundry qualification disclosures, tape-outs, capex and prepayment terms, supply-agreement amendments, hiring). State what would falsify it."
+      },
+      "M2": {
+        "label": "Single-name deep dive on the transaction documents",
+        "brief": "Work the primary sources on this specific transaction: the SPV's formation and financing documents, the guarantee release terms, the supply agreement and its amendments, the hyperscaler's and chip maker's filings and calls around the change. Map the risk transfer before and after, size the exposure shifted, and build the second-source thesis from the documentary record plus channel work with industry contacts."
+      },
+      "slot": {
+        "A": "M1",
+        "B": "M2"
+      }
+    },
+    "S5": {
+      "seed": "Does sentiment expressed on earnings calls predict a company's outperformance versus its peers?",
+      "M1": {
+        "label": "Two-week feasibility triage with a kill gate",
+        "brief": "Treat this as a triage, not a project. Days 1-3: establish what is already known \u2014 the published literature, decay since publication, and what commercial NLP vendors already sell. Days 4-10: one pre-registered specification on recent data, with earnings-surprise (SUE) and guidance controls in from the start so the test measures tone and not post-earnings drift. Pre-commit the kill criterion. Escalate to a full build only if the incremental t-statistic over the surprise controls clears it."
+      },
+      "M2": {
+        "label": "Full build with a domain-tuned language model",
+        "brief": "Build the pipeline properly: ten years of transcripts, a finance-domain sentiment model fine-tuned on the corpus rather than an off-the-shelf lexicon, separating prepared remarks from Q&A and speaker-tagging management versus analysts. Construct peer-relative sentiment scores, sort into quintile portfolios, rebalance on call dates, and evaluate against Fama-French factors with a realistic cost model. Roughly eight weeks."
+      },
+      "slot": {
+        "A": "M2",
+        "B": "M1"
+      }
+    },
+    "S6": {
+      "seed": "Do changes in next-two-year revenue and EBITDA CAGR drive earnings-multiple re-ratings among peers within an industry?",
+      "M1": {
+        "label": "Reframe to an answerable question about the market's reaction",
+        "brief": "The naive version answers itself, so reframe. Ask instead whether the market's sensitivity to CAGR revisions is STABLE across regimes, and whether it over- or under-reacts. Use event ordering around revision dates to break the simultaneity between price moves and analyst revisions, and choose a multiple whose denominator is not the estimate being revised so the relationship is not partly arithmetic. Pre-commit a gate on whether out-year consensus moves enough to study at all."
+      },
+      "M2": {
+        "label": "Cross-sectional panel regression within industry",
+        "brief": "Build a panel of forward multiples and consensus next-two-year revenue and EBITDA CAGR by company-quarter. Regress the change in forward EV/EBITDA on the change in CAGR, with industry-by-quarter fixed effects so identification is off relative moves among peers. Control for size, leverage and margin level. Report elasticities by industry and test whether the relationship strengthens in high-dispersion periods."
+      },
+      "slot": {
+        "A": "M1",
+        "B": "M2"
+      }
+    },
+    "S7": {
+      "seed": "Sell-side channel checks are incrementally positive on new logo wins. Should we expect a meaningful boost to full-year guidance at the upcoming print, and is this a long?",
+      "M1": {
+        "label": "Price-in test first, then guidance-policy analysis",
+        "brief": "Lead with the only question that determines whether there is a trade: is this already in the price? The checks were published, so measure consensus estimate revisions and cumulative abnormal return since the notes went out. Only if the information appears unpriced, move to whether guidance actually moves \u2014 and treat guidance as a management POLICY choice by studying this company's own history: do they raise in Q1, do they sandbag, what is the beat-and-raise cadence."
+      },
+      "M2": {
+        "label": "Bottom-up bookings-to-guidance model",
+        "brief": "Translate the channel work into numbers. Build a bottom-up model from logo count to average contract value to ramped revenue, using historical cohort ramp curves for this company's new customers. Compare implied full-year revenue against current guidance and consensus to size the potential raise. Sanity-check against partner and reseller commentary, then size a position into the print with a defined stop."
+      },
+      "slot": {
+        "A": "M1",
+        "B": "M2"
+      }
+    },
+    "S8": {
+      "seed": "Do round-lot orders identify retail flow that is profitable to trade against?",
+      "M1": {
+        "label": "Validate the retail proxy before building anything on it",
+        "brief": "Gate the project on the proxy. Before constructing any signal, test whether round-lot prints actually identify retail flow, by benchmarking round-lot classification against established retail identification \u2014 sub-penny price improvement on off-exchange prints, and exchange retail-liquidity-program flags. Partition by venue first, since lit and off-exchange round lots are different populations. If the proxy fails, report that and stop; the study is dead at step one."
+      },
+      "M2": {
+        "label": "Build the order-flow-imbalance signal and test it directly",
+        "brief": "Construct a round-lot order-flow imbalance measure from signed trades, aggregate to daily stock level, and test forward returns at one, five and twenty days with Fama-MacBeth cross-sectional regressions controlling for prior returns, turnover and size. Layer in a realistic cost model with spread and impact, then evaluate the long-short portfolio against standard factors including short-term reversal."
+      },
+      "slot": {
+        "A": "M2",
+        "B": "M1"
+      }
+    },
+    "S9": {
+      "seed": "A company just guided to product shortages lasting through next year. Does that portend more customer long-term agreements and more durable revenue?",
+      "M1": {
+        "label": "Historical base rate across prior shortage cycles",
+        "brief": "Test the durability claim rather than assuming it. Assemble prior shortage cycles in this and adjacent industries, and track what actually happened to long-term agreements after supply normalized: were they honored, renegotiated, walked, or quietly restructured. Read the contract terms that determine which \u2014 take-or-pay versus non-binding capacity reservation, fixed versus indexed pricing, cancellation penalties, duration. Model the competitor capacity response and when it lands relative to LTA maturities."
+      },
+      "M2": {
+        "label": "Forward revenue-durability model from backlog and LTA coverage",
+        "brief": "Build the forward view. Track announced long-term agreements and total backlog, compute backlog coverage as a share of forward revenue, and project the revenue durability that implies through the guided shortage window and beyond. Segment by customer concentration and product line, and stress the projection against a range of shortage-resolution dates. Compare the resulting multi-year revenue visibility to how the market is currently valuing it."
+      },
+      "slot": {
+        "A": "M2",
+        "B": "M1"
+      }
+    },
+    "S10": {
+      "seed": "A company went notably defensive around its annual vendor licence renegotiation. Is this a stronger near-term risk to margins than management has communicated, or is it not a sign of weakening fundamentals?",
+      "M1": {
+        "label": "Size the exposure and treat tone as uninformative",
+        "brief": "Set the tone observation aside and size what actually matters. Establish the licence as a share of COGS and of operating expense, the contract's renewal mechanics and duration, switching costs and the vendor's market power, and what this vendor has done on price to comparable customers recently. Produce a sensitivity table of margin impact per increment of price increase, which is decision-useful whichever way the tone reads. Anchor on prior renegotiation outcomes for this pair."
+      },
+      "M2": {
+        "label": "Systematic tone analysis with a defensiveness index",
+        "brief": "Make the tone observation measurable. Build a defensiveness index over transcripts \u2014 hedging density, question-deflection rate, answer length and specificity when the vendor relationship comes up, relative to that management's own baseline on other topics. Score the current call against history, then test whether elevated defensiveness around procurement topics has historically preceded negative margin surprises across a broad sample of companies."
+      },
+      "slot": {
+        "A": "M1",
+        "B": "M2"
+      }
+    }
+  }
+}

@@ -1,0 +1,228 @@
+{
+  "type": "object",
+  "properties": {
+    "goal_type": {
+      "type": "string",
+      "enum": [
+        "single_name_kpi",
+        "broad_market_effect",
+        "mechanism_test",
+        "blind_fit_oos",
+        "capability_build"
+      ]
+    },
+    "plan_implied_asker": {
+      "type": "string",
+      "description": "What kind of firm this plan appears WRITTEN for — assumed horizon, infrastructure, and what it treats as the risk that matters. One short phrase."
+    },
+    "fits_firm": {
+      "type": "string",
+      "enum": [
+        "yes",
+        "partly",
+        "no"
+      ]
+    },
+    "error_asymmetry": {
+      "type": "string",
+      "enum": [
+        "type_i_dominant",
+        "type_ii_dominant",
+        "symmetric"
+      ],
+      "description": "Which error costs more here, from the payoff structure. type_i_dominant = concentrated with explicit loss; a false positive cannot be diversified away. type_ii_dominant = capped downside with unbounded upside, or symmetric payoff with breadth; a missed real effect is the expensive error."
+    },
+    "edge_basis": {
+      "type": "string",
+      "enum": [
+        "variant_view",
+        "speed",
+        "better_measurement",
+        "none_established",
+        "not_applicable"
+      ],
+      "description": "What the edge would be if this worked. none_established = never says what is incremental, so it confirms what is already priced (blocking). not_applicable = a capability build."
+    },
+    "error_posture_fit": {
+      "type": "string",
+      "enum": [
+        "appropriate",
+        "too_permissive",
+        "too_conservative"
+      ],
+      "description": "Does the burden of proof match the asymmetry above? Judge against the setting, never against a fixed standard of rigor."
+    },
+    "method_sophistication_fit": {
+      "type": "string",
+      "enum": [
+        "appropriate",
+        "too_sophisticated_for_audience",
+        "too_naive_for_audience",
+        "sophisticated_but_corroborated"
+      ],
+      "description": "Can the audience evaluate and defend the method? sophisticated_but_corroborated = complex method plus a simple check they can verify themselves, which resolves the tension."
+    },
+    "target_vs_proxy": {
+      "type": "string",
+      "enum": [
+        "measures_target",
+        "validated_proxy",
+        "unvalidated_proxy",
+        "wrong_target"
+      ],
+      "description": "wrong_target = predicts an easier adjacent quantity than the one asked about."
+    },
+    "horizon_fit": {
+      "type": "string",
+      "enum": [
+        "appropriate",
+        "too_long",
+        "too_short",
+        "not_stated"
+      ]
+    },
+    "evidence_standard": {
+      "type": "string",
+      "enum": [
+        "appropriate",
+        "over_demanding",
+        "under_specified"
+      ],
+      "description": "over_demanding = requires significance the setting cannot produce, or pools units to manufacture N. under_specified = low N with no stated way to judge success."
+    },
+    "front_loads_kill": {
+      "type": "string",
+      "enum": [
+        "yes",
+        "no",
+        "not_applicable"
+      ],
+      "description": "Could the plan be stopped after its early steps and still have taught you something? no = the first usable output arrives only at the end."
+    },
+    "adaptive_flow": {
+      "type": "string",
+      "enum": [
+        "yes",
+        "partly",
+        "no"
+      ],
+      "description": "Does it say what changes depending on intermediate results? no = a fixed pipeline scheduled in advance."
+    },
+    "effort_proportionate": {
+      "type": "string",
+      "enum": [
+        "yes",
+        "over_scoped",
+        "under_scoped"
+      ]
+    },
+    "explainability_fit": {
+      "type": "string",
+      "enum": [
+        "appropriate",
+        "over_demanded",
+        "under_delivered"
+      ]
+    },
+    "what_would_falsify": {
+      "type": "string",
+      "description": "The specific result the plan commits to as grounds for abandoning the hypothesis. 'NONE STATED' if it names none — a blocking gap."
+    },
+    "other_side_considered": {
+      "type": "string",
+      "enum": [
+        "yes",
+        "superficial",
+        "no",
+        "not_applicable"
+      ]
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "string",
+            "description": "The defect in one sentence."
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "blocking",
+              "secondary"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "goal_mismatch",
+              "firm_fit",
+              "error_asymmetry",
+              "no_edge",
+              "unnecessary_complexity",
+              "proxy_substitution",
+              "measure_validity",
+              "horizon_mismatch",
+              "evidence_standard",
+              "evidence_hierarchy",
+              "breadth",
+              "sequencing",
+              "human_oversight",
+              "falsification",
+              "invented_economics",
+              "validity",
+              "other"
+            ]
+          },
+          "why_it_applies_here": {
+            "type": "string",
+            "description": "Why this bites THIS design — this data, this construction, this claim. A justification that would read identically against any plan in the asset class has not been earned; drop the issue instead."
+          },
+          "what_breaks": {
+            "type": "string",
+            "description": "Which step, and what goes wrong downstream of it."
+          },
+          "fix": {
+            "type": "string",
+            "description": "What it would take to fix or kill it."
+          }
+        },
+        "required": [
+          "summary",
+          "severity",
+          "category",
+          "why_it_applies_here",
+          "what_breaks",
+          "fix"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "overall": {
+      "type": "string",
+      "description": "Two or three sentences. The verdict."
+    }
+  },
+  "required": [
+    "goal_type",
+    "plan_implied_asker",
+    "fits_firm",
+    "error_asymmetry",
+    "edge_basis",
+    "error_posture_fit",
+    "method_sophistication_fit",
+    "target_vs_proxy",
+    "horizon_fit",
+    "evidence_standard",
+    "front_loads_kill",
+    "adaptive_flow",
+    "effort_proportionate",
+    "explainability_fit",
+    "what_would_falsify",
+    "other_side_considered",
+    "issues",
+    "overall"
+  ],
+  "additionalProperties": false
+}

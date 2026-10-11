@@ -1,0 +1,425 @@
+{
+  "model": "claude-opus-5",
+  "items": {
+    "S1": {
+      "A": [
+        {
+          "n": 1,
+          "text": "Does not account for hidden Kalshi users trading through Robinhood. Broker-routed Kalshi activity produces no Kalshi descriptor, so those users sit in the control group while actually treated, attenuating the estimate toward zero. Robinhood appears in the merchant dictionary as a descriptor to capture, but the treatment-misclassification consequence is never addressed.",
+          "label": "blocking",
+          "gist": "Kalshi users trading via Robinhood produce no Kalshi descriptor, so treated users sit in the control group, attenuating estimates; misclassification never addressed"
+        },
+        {
+          "n": 2,
+          "text": "Does not resolve the timing of Kalshi adoption, which is concentrated in specific events and cohorts. Kalshi only ramped its sports contracts around the 2025 football season, so a panel starting Jan 2022 pools politics- and election-driven adopters with sports-driven ones as if they were one population. Cohort-by-calendar-month effects and a robustness spec dropping the Nov 2024 and Jan 2025 cohorts treat this as a nuisance to control for rather than as distinct regimes that should be estimated separately.",
+          "label": "blocking",
+          "gist": "Panel from Jan 2022 pools politics/election adopters with post-2025 sports adopters as one population instead of estimating distinct regimes separately"
+        },
+        {
+          "n": 3,
+          "text": "Promotional credit is unhandled. Kalshi ran free promos during the sports ramp, so a user can trade without any qualifying bank debit. The treatment definition - first Kalshi debit of $5 or more - will misdate or entirely miss those adopters, mixing treated users back into controls.",
+          "label": "blocking",
+          "gist": "Promotional free credit means adopters trade without a qualifying $5 bank debit, so treatment definition misdates or misses them and contaminates controls"
+        }
+      ],
+      "B": [
+        {
+          "n": 1,
+          "text": "A regression is not the right test for a switching/cannibalization framework. The magnitudes matter less than whether the effect exists and in which direction, and B spends its design budget defending a regressor that mechanically contains the outcome rather than avoiding that problem in the first place.",
+          "label": "blocking",
+          "gist": "regression is the wrong test for a switching/cannibalization question, and the regressor mechanically contains the outcome"
+        }
+      ]
+    },
+    "S2": {
+      "A": [
+        {
+          "n": 1,
+          "text": "Leads with a validation that leaks. The headline is a random 20% company-quarter holdout, and the plan states in the same breath that random splits leak, then relegates rolling-origin to a gate. For a panel with company fixed effects and serially correlated ARR, a random company-quarter split trains on quarters that postdate the ones it predicts for the same company, so the headline number is not a clean out-of-sample result. The honest validation exists in the plan but is not what gets reported.",
+          "label": "blocking",
+          "gist": "headline validation uses a random company-quarter holdout that leaks future quarters for the same company, so the reported out-of-sample number is not clean; the honest rolling-origin test is demoted to a gate"
+        }
+      ],
+      "B": [
+        {
+          "n": 1,
+          "text": "The gate is too strict in one specific way. Requiring beta in [0.5, 1.5] and separately testing beta = 1 constrains a magnitude that should not be constrained for this use. The right form is a positive, significant MAU correlation estimated independently for each company, with no regard to the magnitude of beta. A gate that kills a real per-name signal because a pooled elasticity falls outside a pre-set band has failed at the thing it was built to protect.",
+          "label": "blocking",
+          "gist": "the gate wrongly constrains beta magnitude (band [0.5,1.5] plus beta=1 test) instead of just requiring a positive significant per-company MAU correlation, so it can kill real per-name signal"
+        },
+        {
+          "n": 2,
+          "text": "The thinness of the seat-disclosing gate sample is not an objection here. Because the output is per-name, an analysis that works on even one or two relevant companies is fine provided it is defensible on those names.",
+          "label": "anti_objection",
+          "gist": "the seat-disclosing gate sample is too thin / too few companies to support the analysis"
+        }
+      ]
+    },
+    "S3": {
+      "A": [
+        {
+          "n": 1,
+          "text": "The naming step is not the evidence-based identification this task needs. A ranks IDs by panel customer count against institutions ranked by market share and runs a Hungarian assignment on rank distance, accepting on rank agreement and a preset margin. That is size-ordering, and it inherits panel skew directly - A's own pitfalls note the panel over-represents young, urban, digital and multi-banked customers, which makes rank-by-panel-count a biased proxy for market rank. The plan should instead match observed geographic and demographic properties against researched real-world properties of prominent institutions, which needs no survey.",
+          "label": "blocking",
+          "gist": "identification by size-ranking panel customer counts against market share is not evidence-based and inherits panel skew; should match geographic/demographic properties to researched institution properties"
+        },
+        {
+          "n": 2,
+          "text": "A has no external ground truth, so its gates measure whether clusters are stable rather than whether the names are right. It flags this itself but never resolves it.",
+          "label": "blocking",
+          "gist": "no external ground truth, so validation gates only measure cluster stability, not naming correctness"
+        },
+        {
+          "n": 3,
+          "text": "A stable cluster that cannot be identified is not a Type I failure - that is a Type II miss, and A's tiering handles it correctly by leaving those at country and archetype rather than forcing a name.",
+          "label": "anti_objection",
+          "gist": "a stable cluster that cannot be named is a Type I / false-identification failure of the plan"
+        }
+      ],
+      "B": [
+        {
+          "n": 1,
+          "text": "The one good thing B does is narrow down to an individual ticker, and that is really the only good thing it does. Everything else is disproportionate to the setting. It requires ground truth labels that do not exist here and manufactures them through a consented survey of 500 respondents per country plus provider-revealed seeds - work this desk cannot commission and should not need. The anchor stack behind it (five national regulators, OSM branch tags, published tariff schedules, benefit calendars keyed to national numbering systems) is a standing maintenance burden for a three-person data team, and putting GDPR clearance as gate zero means the project can die before producing anything.",
+          "label": "blocking",
+          "gist": "Plan B is disproportionate to the setting: it needs nonexistent ground-truth labels manufactured via an uncommissionable 500-per-country survey, an unmaintainable anchor stack for a three-person team, and a GDPR gate that can kill the project before output"
+        }
+      ]
+    },
+    "S4": {
+      "A": [
+        {
+          "n": 1,
+          "text": "Tries to generalize something that should not be generalized. Coding 40 to 60 comparable guarantor releases treats a set of highly idiosyncratic structures as draws from a common distribution, and the resulting base rate is not a frame this case can be meaningfully embedded in.",
+          "label": "blocking",
+          "gist": "coding 40-60 guarantor releases wrongly treats idiosyncratic structures as draws from a common distribution; base rate is not a valid reference frame for this case"
+        },
+        {
+          "n": 2,
+          "text": "The prior it rests on is asserted rather than derived - mechanical and refinancing causes dominate, accounting next, leverage-driven one to three in fifty - and the entire 25x likelihood-ratio bar is built on top of that guess. It reads as discipline but the denominator was invented.",
+          "label": "blocking",
+          "gist": "the prior on cause mix is asserted rather than derived, so the 25x likelihood-ratio bar rests on an invented denominator"
+        },
+        {
+          "n": 3,
+          "text": "It is also a dataset build, and this desk has no quantitative research staff and no capacity to build datasets.",
+          "label": "blocking",
+          "gist": "the plan requires a dataset build the desk has no quantitative staff or capacity to do"
+        }
+      ],
+      "B": [
+        {
+          "n": 1,
+          "text": "Focuses on the impact to the numbers and never raises the impact on the prevailing narrative in the market. It sizes notional, expected loss and release spread carefully, but on an event desk the trade often works through how the story reprices rather than through the fundamentals alone, and B has no view on that.",
+          "label": "blocking",
+          "gist": "plan only sizes the numbers (notional, expected loss, spread) and has no view on how the market narrative reprices, which is how event-desk trades actually work"
+        },
+        {
+          "n": 2,
+          "text": "The amount of reading B requires is not a negative - under tenet 10 an AI reader handles the volume - so its pitfall about every clause looking intentional after 300 pages is aimed at the wrong thing. The improvement would have been to say how to separate the data points that genuinely stand out in the reading from the precedent boilerplate that generates false positives: a discrimination rule over what is read, rather than a caution about having read too much.",
+          "label": "anti_objection",
+          "gist": "the volume of reading the plan requires is too large / over-reading 300 pages makes every clause look intentional"
+        }
+      ]
+    },
+    "S5": {
+      "A": [
+        {
+          "n": 1,
+          "text": "Kitchen-sink approach, which I would avoid. It is better to start with strong priors and the subsets of the data and the market where you think the signal will work, and test those, than to fit everything and orthogonalize afterward.",
+          "label": "blocking",
+          "gist": "kitchen-sink fit-everything-then-orthogonalize approach instead of starting from strong priors on targeted subsets"
+        },
+        {
+          "n": 2,
+          "text": "The custom-trained transformer might not be needed. FinBERT, or even a time-series z-score fed to a standard scoring model, may get most of the way. A names FinBERT as a baseline to beat but still leads with the domain-adaptation build rather than establishing first what the cheap measure delivers.",
+          "label": "blocking",
+          "gist": "leads with custom-trained transformer domain adaptation without first establishing what cheap baselines (FinBERT, z-score) deliver"
+        },
+        {
+          "n": 3,
+          "text": "The real knock: A does not use a vendor-provided score as the threshold a custom signal has to clear. If a licensed score already captures most of the effect, the custom build is only worth its cost if it beats that score, and A never sets the hurdle.",
+          "label": "blocking",
+          "gist": "no vendor-provided score set as the hurdle the custom signal must beat"
+        },
+        {
+          "n": 4,
+          "text": "The constraint layering - spread, impact, ADV caps, borrow, break-even cost, capacity where net alpha halves - is right, and is what makes a signal defensible to this committee.",
+          "label": "praise",
+          "gist": "constraint layering (spread, impact, ADV caps, borrow, break-even cost, capacity) is right and makes the signal defensible"
+        }
+      ],
+      "B": [
+        {
+          "n": 1,
+          "text": "Simple-first is the right instinct and it is B's best feature.",
+          "label": "praise",
+          "gist": "simple-first design is the right instinct and B's best feature"
+        },
+        {
+          "n": 2,
+          "text": "But B treats commoditization as close to dispositive: vendor availability implies crowding, therefore expect a null. That confuses decay with death. A published signal can still carry alpha for someone constructing it more carefully, and B never tests that possibility.",
+          "label": "blocking",
+          "gist": "treats commoditization as dispositive, conflating alpha decay with death and never testing whether a published signal still carries alpha"
+        },
+        {
+          "n": 3,
+          "text": "Where the residual alpha most likely lives is in niche cases not yet arbed away, and B cannot see them. One pooled specification with industry-by-quarter fixed effects estimates the average effect; killing the project at a t of 2.1 on that specification says little about whether pockets survive.",
+          "label": "blocking",
+          "gist": "single pooled specification estimates only the average effect and cannot detect surviving niche pockets, so killing on a t of 2.1 is uninformative"
+        },
+        {
+          "n": 4,
+          "text": "Constraint layering is thin - a flat 20bp round-trip, no borrow cost, no ADV cap, no capacity estimate. For a firm judged on whether a signal survives costs and has capacity, that is not a defensible net number.",
+          "label": "blocking",
+          "gist": "cost/constraint modeling too thin (flat 20bp, no borrow, no ADV cap, no capacity) to give a defensible net number"
+        }
+      ]
+    },
+    "S6": {
+      "A": [
+        {
+          "n": 1,
+          "text": "Killing the circularity is good, but the fix falters. EV/LTM EBITDA is not how assets are priced in public markets - pricing is mostly on forward earnings, not prior earnings - so A trades a mechanical problem for a measure that does not reflect the thing being studied.",
+          "label": "blocking",
+          "gist": "EV/LTM trailing EBITDA does not reflect how public markets price assets (forward earnings), so the fix substitutes an invalid measure"
+        },
+        {
+          "n": 2,
+          "text": "TAQ data makes absolutely zero sense for this project. The time horizon for a multiple re-rating is months to years, not milliseconds. (This desk also has no tick data, but the horizon mismatch is the real objection and would stand at any firm.)",
+          "label": "blocking",
+          "gist": "TAQ tick data is horizon-mismatched: multiple re-rating plays out over months to years, not milliseconds"
+        },
+        {
+          "n": 3,
+          "text": "A gates on the seed's question and then spends the project on two others - regime stability and re-rating efficiency. Those are legitimate questions, but the elasticity itself is the deliverable here and A never produces a usable one.",
+          "label": "blocking",
+          "gist": "plan never delivers the elasticity estimate that is the actual deliverable, substituting regime-stability and efficiency questions"
+        },
+        {
+          "n": 4,
+          "text": "Near-zero and negative EBITDA denominators are handled by screening them out (margin >= 2%). The natural fix is to switch to a revenue multiple rather than drop the observations.",
+          "label": "secondary",
+          "gist": "screening out low/negative EBITDA margins instead of switching to a revenue multiple discards observations"
+        }
+      ],
+      "B": [
+        {
+          "n": 1,
+          "text": "B should be able to solve the circularity properly rather than decompose around it: make the independent variable backward-looking (realized CAGR) and the dependent variable forward-looking. The EV identity decomposition is a workaround, not a fix.",
+          "label": "blocking",
+          "gist": "circularity should be fixed by making the independent variable backward-looking realized CAGR and dependent forward-looking; the EV identity decomposition is only a workaround"
+        },
+        {
+          "n": 2,
+          "text": "Log multiples do not make sense in this case.",
+          "label": "blocking",
+          "gist": "log multiples are inappropriate here"
+        },
+        {
+          "n": 3,
+          "text": "The negative-denominator problem is handled by screening to NTM and N2Y EBITDA > 0, which drops exactly the firm-quarters where re-rating is most violent. Switching to a revenue multiple handles those cases instead of excluding them.",
+          "label": "blocking",
+          "gist": "screening to positive NTM/N2Y EBITDA drops exactly the firm-quarters with the most violent re-rating; a revenue multiple would retain them"
+        },
+        {
+          "n": 4,
+          "text": "Neither plan addresses the metric shifting as a company matures - revenue for high-growth, EBITDA for mature. B has revenue CAGR as a second regressor and EV/Sales as an alternate dependent variable, but never models the transition.",
+          "label": "secondary",
+          "gist": "neither plan models the transition of the relevant metric from revenue to EBITDA as companies mature"
+        }
+      ]
+    },
+    "S7": {
+      "A": [
+        {
+          "n": 1,
+          "text": "The thresholds are a bit arbitrary - the 0.5% full-year revision cutoff for priced, the 0.2% for dismissed, one estimation-window standard deviation on CAR, 1.2x the trailing straddle median. Four numbers carrying the entire stop-go decision, none of them derived.",
+          "label": "blocking",
+          "gist": "the four decision thresholds (0.5% revision, 0.2%, one estimation-window SD on CAR, 1.2x straddle median) are arbitrary and undermined by not being derived, yet carry the whole stop-go decision"
+        },
+        {
+          "n": 2,
+          "text": "Otherwise the shape is right for this question: it establishes a bar, and supplements it with other datasets and checks rather than resting on the checks alone.",
+          "label": "praise",
+          "gist": "the design's shape is right: it sets a bar and supplements it with other datasets and checks rather than relying on checks alone"
+        }
+      ],
+      "B": [
+        {
+          "n": 1,
+          "text": "Solving for initial land value is totally irrelevant here.",
+          "label": "blocking",
+          "gist": "solving for initial land value is irrelevant to the question"
+        },
+        {
+          "n": 2,
+          "text": "The quantitative apparatus - bottom-up reconstruction of twelve quarters, ramp-curve fitting, Monte Carlo to p10/p50/p90 - makes sense for a diversified strategy with multiple runs and the benefit of the law of large numbers. With one name and one print there is no law of large numbers to lean on, and the distributional output implies a precision the setting cannot support.",
+          "label": "blocking",
+          "gist": "Monte Carlo/distributional apparatus implies false precision with a single name and single print, no law of large numbers"
+        },
+        {
+          "n": 3,
+          "text": "B might make more sense for a fast swing-trading pod, but the horizon here is a bit longer.",
+          "label": "blocking",
+          "gist": "the plan's horizon is wrong \u2014 suited to fast swing trading, not the longer horizon here"
+        },
+        {
+          "n": 4,
+          "text": "Its thresholds are a bit arbitrary too.",
+          "label": "secondary",
+          "gist": "thresholds are somewhat arbitrary"
+        }
+      ]
+    },
+    "S8": {
+      "A": [
+        {
+          "n": 1,
+          "text": "The horizon is wrong for the question and for this firm. Trading against retail flow is liquidity provision at nanoseconds to seconds; A builds a daily signal with t+1 entry and a five-day hold, which is a different business. A half-notices this in its pitfalls, observing that a one-day sign would be liquidity provision, but the design never follows the observation.",
+          "label": "blocking",
+          "gist": "horizon mismatch: daily signal with t+1 entry and five-day hold instead of nanosecond-to-second liquidity provision"
+        },
+        {
+          "n": 2,
+          "text": "Its practical constraints are the wrong practical constraints. Effective half-spread, square-root impact, borrow fees, participation caps and capacity from $50M to $5B AUM are the binding costs for a daily long-short book, not for a quoting business where the binding constraint is realized spread capture net of adverse selection and whether the classification runs inside the quoting loop.",
+          "label": "blocking",
+          "gist": "cost and capacity constraints modeled are wrong for a quoting business; should be realized spread net of adverse selection and in-loop classification"
+        },
+        {
+          "n": 3,
+          "text": "The round-lot definition is too narrow. 100 shares can be a lot, and the analysis should also consider 1, 5, 10 and 20 shares as round. A explicitly holds the 100-share threshold fixed despite the SEC's tiered redefinition, where B at least computes both fixed-100 and the tiered version.",
+          "label": "secondary",
+          "gist": "round-lot definition fixed at 100 shares, ignoring smaller round sizes and SEC tiering"
+        },
+        {
+          "n": 4,
+          "text": "Structural breaks are part of the experiment and should be accounted for. A handles the December 2013 odd-lot reporting change and the later round-lot tiering, but never addresses the half-penny tick regime, which degrades the sub-penny retail classification that RETOIB is built from - the very control the round-lot filter is residualized against.",
+          "label": "blocking",
+          "gist": "fails to address half-penny tick regime break that degrades sub-penny retail classification underlying RETOIB"
+        },
+        {
+          "n": 5,
+          "text": "Like B, it never reaches for the firm's own internalized flow, which is the one place real retail labels exist.",
+          "label": "secondary",
+          "gist": "does not use the firm's own internalized flow where true retail labels exist"
+        }
+      ],
+      "B": [
+        {
+          "n": 1,
+          "text": "It makes the secondary question the gate, and the gate rests on labels that cannot be established cleanly. There is no strict order-level retail-versus-institutional disclosure to a market maker, so five conjunctive kill tests against imperfect labels mean a label-quality failure reads as a signal failure and the project dies on the wrong evidence.",
+          "label": "blocking",
+          "gist": "gating the project on retail-vs-institutional labels that cannot be established cleanly means label failure is mistaken for signal failure"
+        },
+        {
+          "n": 2,
+          "text": "Worse, the labels B works so hard to triangulate - Rule 605 reports, RLP flags, sub-penny classification, VandaTrack - are the toolkit of a researcher with only public data. This firm internalizes retail flow and therefore has proprietary ground truth on its own book. B could settle G1 through G4 directly off that flow with real labels instead of latent-class estimation, and never considers it. The evidence standard is calibrated to a poorer setting than the one it is in.",
+          "label": "blocking",
+          "gist": "plan uses public-data proxies for retail labels when the firm has proprietary ground truth on its own internalized flow"
+        },
+        {
+          "n": 3,
+          "text": "B handles the half-penny break by truncating the sample to the months before the compliance date rather than accounting for it. Structural breaks are part of the experiment and should be modelled, not avoided by shortening the window.",
+          "label": "blocking",
+          "gist": "truncating the sample before the half-penny compliance date instead of modelling the structural break"
+        },
+        {
+          "n": 4,
+          "text": "It carries the same horizon error as A: Phase 2 is decile sorts and Fama-MacBeth at daily frequency, when the question is a market-making one operating at nanoseconds to seconds.",
+          "label": "blocking",
+          "gist": "horizon mismatch: daily decile sorts and Fama-MacBeth for a nanosecond-to-second market-making question"
+        },
+        {
+          "n": 5,
+          "text": "All of the economics is deferred to a Phase 2 that only happens if all five gates pass.",
+          "label": "blocking",
+          "gist": "all economic content deferred to a Phase 2 conditional on passing all five gates"
+        }
+      ]
+    },
+    "S9": {
+      "A": [
+        {
+          "n": 1,
+          "text": "It tiers agreements on contract attributes - minimum quantities, take-or-pay damages, cancellability, RPO inclusion - when these indicators need to be industry and market-regime specific. Contract language is not what separates the agreements that hold from the ones that reprice; switching cost and requalification lag are, which is why aerospace forgings and container slots behave differently at identical contract strength. A sorts on the wrong axis.",
+          "label": "blocking",
+          "gist": "tiers agreements on contract-language attributes rather than switching cost and requalification lag, so it sorts on the wrong axis"
+        },
+        {
+          "n": 2,
+          "text": "The explicit numeric thresholds seem arbitrary. The 90-95 / 70 / 25-35 percent tier haircuts, and the six constructive conditions (60% NTM coverage, 40% year-two, cash support 15%, top-three customer share under 45%, mirror reconciliation 50%, modeled horizon two years beyond market-implied), are all asserted rather than derived.",
+          "label": "secondary",
+          "gist": "numeric thresholds and haircut tiers are asserted rather than derived"
+        },
+        {
+          "n": 3,
+          "text": "The haircuts are calibrated off a single prior episode, 2021-23 semiconductors. That is the one-observation base rate this plan is implicitly arguing is sufficient, and it is an episode where agreements broke on price - potentially the wrong prior to carry into a different industry.",
+          "label": "blocking",
+          "gist": "haircuts calibrated off a single episode (2021-23 semis) that may be the wrong prior for a different industry"
+        }
+      ],
+      "B": [
+        {
+          "n": 1,
+          "text": "The knock is all the datasets listed in the plan - TrendForce, Fastmarkets, UxC, Argus/ICIS, Drewry/Xeneta, Panjiva, PACER, the SEMI fab database. This firm would need to cobble together the data points individually using its analysts rather than subscribe to all those vendors to answer this one question. The plan should be built around that constraint instead of assuming the subscriptions.",
+          "label": "blocking",
+          "gist": "plan assumes access to a long list of expensive vendor data subscriptions the firm does not have; must be redesigned around analyst-assembled data points"
+        },
+        {
+          "n": 2,
+          "text": "The objection that twenty to thirty episodes across ten industries is too few or too heterogeneous does not apply, and a review raising it would be misapplying a standard concern. B ranks features by conditional base rate rather than regressing, and behavior within an industry is reasonably stable across cycles once cause and regime are accounted for.",
+          "label": "anti_objection",
+          "gist": "twenty to thirty episodes across ten industries is too small or too heterogeneous a sample"
+        }
+      ]
+    },
+    "S10": {
+      "A": [
+        {
+          "n": 1,
+          "text": "My chief complaint is that it circumvents the main question - whether the language is actually informative - and just sizes the potential impact instead. It asserts that a CFO sounds the same either way rather than establishing it.",
+          "label": "blocking",
+          "gist": "plan sidesteps the core question of whether the CFO's language is informative, merely sizing impact and asserting tone is uninformative rather than establishing it"
+        },
+        {
+          "n": 2,
+          "text": "I would also assume the team has already established that this company is sensitive to its vendors' pricing, which is precisely the work A describes. Much of the plan therefore delivers back what the analyst already holds, rather than addressing the new question the call raised.",
+          "label": "blocking",
+          "gist": "much of the plan re-derives what the analyst already knows (vendor pricing sensitivity) instead of addressing the new question raised by the call"
+        },
+        {
+          "n": 3,
+          "text": "A treats the vendor's uplift distribution as observable across five to ten comparable customers renewed in the last 24 months. Those deals are private. Gartner, Forrester and SAM benchmarks give directional ranges, not per-customer realized uplift, so the distribution the likelihood weighting rests on is largely unobtainable.",
+          "label": "blocking",
+          "gist": "the per-customer realized uplift distribution underpinning the likelihood weighting is private/unobtainable; benchmarks give only directional ranges"
+        },
+        {
+          "n": 4,
+          "text": "The materiality cuts - under 25bp makes tone moot, over 75bp forces a call - are asserted rather than derived.",
+          "label": "secondary",
+          "gist": "materiality thresholds (25bp/75bp) are asserted rather than derived"
+        }
+      ],
+      "B": [
+        {
+          "n": 1,
+          "text": "The experiment as set up is infeasible for a nontechnical team. A 40,000 firm-quarter panel with embedding-based topic tagging, a pinned LLM, 1,000 hand-labels, elastic-net weighting and block bootstrap cannot be run by five people with no engineers and nobody maintaining a database, and the investment committee is skeptical of models it cannot inspect. Nor would this firm be interested in that kind of analysis even if it is stronger statistically.",
+          "label": "blocking",
+          "gist": "the design is infeasible for a five-person nontechnical team and produces a black box the investment committee won't trust or want"
+        },
+        {
+          "n": 2,
+          "text": "Under this error asymmetry the cost is sharper than inconvenience: spending the only analyst on a research programme while the renegotiation resolves is how the fund gets blindsided on the thing it was worried about.",
+          "label": "blocking",
+          "gist": "given the error asymmetry, tying up the only analyst on this research while the renegotiation resolves risks being blindsided on the key risk"
+        },
+        {
+          "n": 3,
+          "text": "The idea is right. Separating whether this call is genuinely elevated from whether elevation predicts anything is the correct decomposition, and B is honest that the modal outcome is a null. What it needs is a version scaled to this desk - the same two questions asked of this company's own transcript history rather than a market-wide panel.",
+          "label": "praise",
+          "gist": "the decomposition into 'is elevation real' vs 'does elevation predict' is correct and the plan is honest about a likely null; just needs scaling to the single company's transcript history"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "expected": {
+    "revenue_musd": 4218.0,
+    "eps_gaap": 0.5,
+    "eps_non_gaap": 1.0,
+    "revenue_yoy_pct": 34.3,
+    "fy_revenue_guidance_low_musd": 18900,
+    "fy_revenue_guidance_high_musd": 19500
+  },
+  "task": "headline_extraction",
+  "tags": [
+    "units-thousands",
+    "multi-one-time",
+    "headline_extraction"
+  ],
+  "difficulty": "hard",
+  "provenance": {
+    "kind": "synthetic_pipeline",
+    "labeller": "synthetic (not human)",
+    "generator": "scripts/build_instrumentation_suites.py",
+    "suite": "earnings",
+    "sample_id": "earn-headline_extraction-cbhs-q42025",
+    "suite_version": "0.1"
+  }
+}

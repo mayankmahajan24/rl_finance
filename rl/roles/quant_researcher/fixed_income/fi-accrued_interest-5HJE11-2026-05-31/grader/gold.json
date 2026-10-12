@@ -1,0 +1,24 @@
+{
+  "expected": {
+    "days_accrued": 180,
+    "accrued_interest": 2.475,
+    "day_count_convention": "30/360"
+  },
+  "task": "accrued_interest",
+  "tags": [
+    "financial",
+    "30/360",
+    "month-end",
+    "day-before-coupon",
+    "accrued_interest"
+  ],
+  "difficulty": "hard",
+  "provenance": {
+    "kind": "synthetic_pipeline",
+    "labeller": "synthetic (not human)",
+    "generator": "scripts/build_instrumentation_suites.py",
+    "suite": "fixed_income",
+    "sample_id": "fi-accrued_interest-5HJE11-2026-05-31",
+    "suite_version": "0.1"
+  }
+}

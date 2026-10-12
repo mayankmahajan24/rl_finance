@@ -1,0 +1,30 @@
+{
+  "expected": {
+    "one_time_items": [
+      "restructuring charges"
+    ],
+    "one_time_items_net_musd": 48.0,
+    "sbc_is_one_time_item": false,
+    "net_income_gaap_musd": 246.3,
+    "net_income_non_gaap_musd": 360.1,
+    "eps_gaap": 0.6,
+    "eps_non_gaap": 0.87,
+    "guidance_basis": "non-GAAP"
+  },
+  "task": "gaap_reconciliation",
+  "tags": [
+    "restructuring",
+    "guidance-range",
+    "gaap_reconciliation",
+    "units-millions"
+  ],
+  "difficulty": "medium",
+  "provenance": {
+    "kind": "synthetic_pipeline",
+    "labeller": "synthetic (not human)",
+    "generator": "scripts/build_instrumentation_suites.py",
+    "suite": "earnings",
+    "sample_id": "earn-gaap_reconciliation-hlcn-q32026",
+    "suite_version": "0.1"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "expected": {
+    "one_time_items": [
+      "legal reserve release"
+    ],
+    "one_time_items_net_musd": -18.0,
+    "sbc_is_one_time_item": false,
+    "net_income_gaap_musd": 55.0,
+    "net_income_non_gaap_musd": 46.6,
+    "eps_gaap": 0.46,
+    "eps_non_gaap": 0.39,
+    "guidance_basis": "non-GAAP"
+  },
+  "task": "gaap_reconciliation",
+  "tags": [
+    "reserve-release",
+    "below-the-line",
+    "gaap_reconciliation",
+    "units-millions"
+  ],
+  "difficulty": "medium",
+  "provenance": {
+    "kind": "synthetic_pipeline",
+    "labeller": "synthetic (not human)",
+    "generator": "scripts/build_instrumentation_suites.py",
+    "suite": "earnings",
+    "sample_id": "earn-gaap_reconciliation-vrda-q12026",
+    "suite_version": "0.1"
+  }
+}

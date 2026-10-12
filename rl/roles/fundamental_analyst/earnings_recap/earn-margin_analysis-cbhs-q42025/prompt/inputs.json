@@ -1,0 +1,12 @@
+{
+  "company": "Cobalt Harbor Semiconductor",
+  "ticker": "CBHS",
+  "quarter": "Q4",
+  "fiscal_year": 2025,
+  "press_release": "COBALT HARBOR SEMICONDUCTOR REPORTS Q4 FISCAL 2025 RESULTS\n\nCobalt Harbor Semiconductor (NASDAQ: CBHS) today announced financial results for the fourth quarter of fiscal 2025. Revenue was $4,218,000 thousand, up 34.3% year over year. GAAP net income was $600,100 thousand, or $0.50 per diluted share. Non-GAAP net income was $1,207,850 thousand, or $1.00 per diluted share. Results include a $215,000 thousand inventory write-down (charge), a $90,000 thousand litigation settlement (charge), which are excluded from non-GAAP measures along with stock-based compensation of $410,000 thousand. For fiscal 2025, the company now expects revenue of $18,900,000 thousand to $19,500,000 thousand and a non-GAAP operating margin of approximately 33.0%.\n\nCondensed income statement (in thousands, unaudited)\n  Revenue                       $4,218,000 thousand\n  Cost of revenue               $1,897,000 thousand\n  Gross profit                  $2,321,000 thousand\n  Operating expenses            $1,615,000 thousand (incl. $305,000 thousand of items noted above)\n  Operating income (loss)       $706,000 thousand\n  Income tax expense            $105,900 thousand\n  Net income (loss)             $600,100 thousand\n  Diluted shares (millions)     1,205.0\n\nPrior-year quarter: revenue $3,140,000 thousand; operating income $540,000 thousand.",
+  "answer_fields": [
+    "gross_margin_pct",
+    "operating_margin_pct",
+    "operating_margin_change_bps"
+  ]
+}

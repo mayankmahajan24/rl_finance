@@ -1,0 +1,15 @@
+{
+  "company": "Brightwater Utilities",
+  "ticker": "BWTR",
+  "quarter": "Q1",
+  "fiscal_year": 2026,
+  "press_release": "BRIGHTWATER UTILITIES REPORTS Q1 FISCAL 2026 RESULTS\n\nBrightwater Utilities (NASDAQ: BWTR) today announced financial results for the first quarter of fiscal 2026. Revenue was $712.4 million, up 3.4% year over year. GAAP net income was $93.1 million, or $0.60 per diluted share. Non-GAAP net income was $96.6 million, or $0.62 per diluted share. Non-GAAP measures exclude stock-based compensation of $4.5 million; there were no other adjusting items in the quarter. For fiscal 2026, the company expects revenue of $2,900.0 million to $2,960.0 million on a GAAP basis.\n\nCondensed income statement (in millions, unaudited)\n  Revenue                       $712.4 million\n  Cost of revenue               $391.3 million\n  Gross profit                  $321.1 million\n  Operating expenses            $201.7 million\n  Operating income (loss)       $119.4 million\n  Income tax expense            $26.3 million\n  Net income (loss)             $93.1 million\n  Diluted shares (millions)     156.0\n\nPrior-year quarter: revenue $688.9 million; operating income $92.0 million.",
+  "answer_fields": [
+    "revenue_musd",
+    "eps_gaap",
+    "eps_non_gaap",
+    "revenue_yoy_pct",
+    "fy_revenue_guidance_low_musd",
+    "fy_revenue_guidance_high_musd"
+  ]
+}

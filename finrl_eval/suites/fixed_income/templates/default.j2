@@ -1,0 +1,32 @@
+Terminal feed row (fixed-coupon bullet bond):
+
+{% for key, value in feed.items() %}
+  {{ "%-14s"|format(key) }} {{ value }}
+{% endfor %}
+
+{% if sample.task == "price_from_yield" %}
+Task: Using the quoted yield to maturity (YLD_YTM_MID, in percent) and the stated day-count
+convention, compute for settlement on SETTLE_DT:
+  - clean_price: clean (flat) price per 100 face
+  - accrued_interest: accrued interest per 100 face
+  - dirty_price: full (invoice) price per 100 face
+{% elif sample.task == "ytm_from_price" %}
+Task: Using the quoted clean price (PX_CLEAN, per 100 face) and the stated day-count
+convention, compute for settlement on SETTLE_DT:
+  - ytm_pct: street-convention yield to maturity, in percent (e.g. 4.37 for 4.37%)
+  - accrued_interest: accrued interest per 100 face
+{% elif sample.task == "duration_convexity" %}
+Task: At the quoted yield (YLD_YTM_MID, in percent) compute for settlement on SETTLE_DT:
+  - macaulay_duration: in years
+  - modified_duration: in years
+  - convexity: in years^2, using the standard (1+y/f)^-2 scaling
+  - dv01: price change per 100 face for a 1 basis-point move in yield (positive number)
+{% elif sample.task == "accrued_interest" %}
+Task: For settlement on SETTLE_DT, determine:
+  - days_accrued: number of accrued days from the previous coupon date under DAY_CNT_DES
+  - accrued_interest: accrued interest per 100 face
+  - day_count_convention: the convention you applied, exactly as written in the feed
+{% endif %}
+
+Respond with your reasoning in at most a few sentences, then a ```json block with exactly
+these keys: {{ answer_fields | join(", ") }}.

@@ -1,0 +1,24 @@
+id: fi-accrued_interest-3XZG61-2026-03-10
+role: quant_researcher
+workflow: fixed_income
+mode: produce
+world: rates_desk
+status: needs_rubric
+split: eval
+prompt:
+  template: finrl_eval/suites/fixed_income/templates/default.j2
+  fingerprint: a4f3e1709980
+sources:
+- finrl_eval/suites/fixed_income/
+- scripts/build_instrumentation_suites.py
+output_schema: null
+meta:
+  suite: fixed_income
+  sample_id: fi-accrued_interest-3XZG61-2026-03-10
+  task_type: accrued_interest
+  tags:
+  - financial
+  - quarterly
+  - act/360
+  - accrued_interest
+  difficulty: medium

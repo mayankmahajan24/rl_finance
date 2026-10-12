@@ -1,0 +1,23 @@
+id: earn-margin_analysis-cbhs-q42025
+role: fundamental_analyst
+workflow: earnings_recap
+mode: produce
+world: earnings_desk
+status: needs_rubric
+split: eval
+prompt:
+  template: finrl_eval/suites/earnings/templates/default.j2
+  fingerprint: f7ad515c0e44
+sources:
+- finrl_eval/suites/earnings/
+- scripts/build_instrumentation_suites.py
+output_schema: null
+meta:
+  suite: earnings
+  sample_id: earn-margin_analysis-cbhs-q42025
+  task_type: margin_analysis
+  tags:
+  - units-thousands
+  - multi-one-time
+  - margin_analysis
+  difficulty: hard

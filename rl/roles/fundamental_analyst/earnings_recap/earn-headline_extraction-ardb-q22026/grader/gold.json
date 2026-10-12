@@ -1,0 +1,27 @@
+{
+  "expected": {
+    "revenue_musd": 318.6,
+    "eps_gaap": -3.27,
+    "eps_non_gaap": -1.36,
+    "revenue_yoy_pct": 56.1,
+    "fy_revenue_guidance_low_musd": 1250,
+    "fy_revenue_guidance_high_musd": 1350
+  },
+  "task": "headline_extraction",
+  "tags": [
+    "loss-making",
+    "ipr&d",
+    "negative-eps",
+    "headline_extraction",
+    "units-millions"
+  ],
+  "difficulty": "hard",
+  "provenance": {
+    "kind": "synthetic_pipeline",
+    "labeller": "synthetic (not human)",
+    "generator": "scripts/build_instrumentation_suites.py",
+    "suite": "earnings",
+    "sample_id": "earn-headline_extraction-ardb-q22026",
+    "suite_version": "0.1"
+  }
+}

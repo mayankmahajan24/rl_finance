@@ -1,0 +1,23 @@
+id: earn-headline_extraction-orbd-q42025
+role: fundamental_analyst
+workflow: earnings_recap
+mode: produce
+world: earnings_desk
+status: needs_rubric
+split: eval
+prompt:
+  template: finrl_eval/suites/earnings/templates/default.j2
+  fingerprint: 22bc1593b9de
+sources:
+- finrl_eval/suites/earnings/
+- scripts/build_instrumentation_suites.py
+output_schema: null
+meta:
+  suite: earnings
+  sample_id: earn-headline_extraction-orbd-q42025
+  task_type: headline_extraction
+  tags:
+  - units-thousands
+  - no-one-time
+  - headline_extraction
+  difficulty: medium

@@ -1,0 +1,26 @@
+{
+  "expected": {
+    "revenue_musd": 2765.0,
+    "eps_gaap": 0.56,
+    "eps_non_gaap": 0.82,
+    "revenue_yoy_pct": 2.5,
+    "fy_revenue_guidance_low_musd": 11100,
+    "fy_revenue_guidance_high_musd": 11300
+  },
+  "task": "headline_extraction",
+  "tags": [
+    "non-gaap-first",
+    "offsetting-items",
+    "headline_extraction",
+    "units-millions"
+  ],
+  "difficulty": "hard",
+  "provenance": {
+    "kind": "synthetic_pipeline",
+    "labeller": "synthetic (not human)",
+    "generator": "scripts/build_instrumentation_suites.py",
+    "suite": "earnings",
+    "sample_id": "earn-headline_extraction-ngcb-q32026",
+    "suite_version": "0.1"
+  }
+}

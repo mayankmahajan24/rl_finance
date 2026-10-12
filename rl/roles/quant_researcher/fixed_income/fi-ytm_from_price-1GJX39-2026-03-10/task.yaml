@@ -1,0 +1,27 @@
+id: fi-ytm_from_price-1GJX39-2026-03-10
+role: quant_researcher
+workflow: fixed_income
+mode: produce
+world: rates_desk
+status: graded
+split: eval
+prompt:
+  template: finrl_eval/suites/fixed_income/templates/default.j2
+  fingerprint: 7b21cbe8bc35
+sources:
+- finrl_eval/suites/fixed_income/
+- scripts/build_instrumentation_suites.py
+output_schema: null
+grader:
+  type: rubric
+  module: graders/rubric.py
+meta:
+  suite: fixed_income
+  sample_id: fi-ytm_from_price-1GJX39-2026-03-10
+  task_type: ytm_from_price
+  tags:
+  - financial
+  - 30/360
+  - premium
+  - ytm_from_price
+  difficulty: medium

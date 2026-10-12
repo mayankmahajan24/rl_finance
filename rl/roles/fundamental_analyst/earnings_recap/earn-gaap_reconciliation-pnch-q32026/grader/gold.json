@@ -1,0 +1,31 @@
+{
+  "expected": {
+    "one_time_items": [
+      "hurricane-related losses",
+      "insurance recoveries"
+    ],
+    "one_time_items_net_musd": 23.0,
+    "sbc_is_one_time_item": false,
+    "net_income_gaap_musd": 119.9,
+    "net_income_non_gaap_musd": 143.6,
+    "eps_gaap": 0.58,
+    "eps_non_gaap": 0.69,
+    "guidance_basis": "non-GAAP"
+  },
+  "task": "gaap_reconciliation",
+  "tags": [
+    "offsetting-items",
+    "insurance",
+    "gaap_reconciliation",
+    "units-millions"
+  ],
+  "difficulty": "hard",
+  "provenance": {
+    "kind": "synthetic_pipeline",
+    "labeller": "synthetic (not human)",
+    "generator": "scripts/build_instrumentation_suites.py",
+    "suite": "earnings",
+    "sample_id": "earn-gaap_reconciliation-pnch-q32026",
+    "suite_version": "0.1"
+  }
+}

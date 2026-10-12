@@ -28,7 +28,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from lib import RL, fingerprint, iter_tasks, write_json  # noqa: E402
-from graders import pairwise_pick, review_issues  # noqa: E402
+from graders import pairwise_pick, review_issues, rubric  # noqa: E402
 from skills import manage as skills  # noqa: E402
 
 SKILL_PATH = re.compile(r"/skills/([a-z0-9-]+)")
@@ -147,6 +147,9 @@ def run_task(client, args, cond: dict, d: pathlib.Path, t: dict) -> dict:
     rec["status"] = "ok" if all(c["status"] == "ok" for c in rec["calls"].values()) else "error"
     if rec["status"] != "ok" or t["status"] != "graded":
         rec["reward"] = None
+        return rec
+    if t["mode"] == "produce":
+        rec.update(rubric.grade(d, t, parsed["single"]))
         return rec
     gold = json.loads((d / "grader" / "gold.json").read_text())
     if t["mode"] == "compare":

@@ -4,9 +4,13 @@ The case study (`case_study/part1/`, `case_study/part2/`) converted into environ
 fund role, run inside fund worlds, graded by mode. Format spec: `FORMAT.md`.
 
 ```sh
-python rl/build_from_case_study.py   # regenerate worlds/, roles/, catalog.json from the case study
+python rl/build_from_case_study.py   # regenerate case-study worlds + research_design/research_funding
+python scripts/build_instrumentation_suites.py  # FORMAT mirrors of earnings + fixed-income suites
 python rl/replay_case_study.py       # grade the case-study model runs with the rl/ graders
 ```
+
+`build_from_case_study.py` only rebuilds `research_design` and `research_funding`. It does not
+wipe `earnings_recap` or `fixed_income`. The catalog is rewritten from every task on disk.
 
 ## Running models, with or without financial-services skills
 
@@ -30,7 +34,7 @@ The case-study baselines below are all skills-off.
 
 ## What is here
 
-52 tasks in 6 worlds.
+100 tasks in 8 worlds (52 case-study + 48 instrumentation FORMAT mirrors).
 
 | Role | Workflow | Mode | Graded | Not yet graded |
 |---|---|---|---|---|
@@ -39,17 +43,25 @@ The case-study baselines below are all skills-off.
 | pm | research_funding | compare | 10 | 4 (context flips, no gold) |
 | quant_researcher | research_design | produce | — | 5 (need a rubric) |
 | fundamental_analyst | research_design | produce | — | 5 (need a rubric) |
+| fundamental_analyst | earnings_recap | produce | 28 | none, synthetic gold |
+| quant_researcher | fixed_income | produce | 20 | none, synthetic gold |
 
-**30 graded tasks.** Review tasks: a model reviews one research plan for a named
-firm; gold is the human critique split into 45 blocking issues, plus secondary
-issues, praise, and 4 objections the expert ruled out. Compare tasks: a PM picks
-which of two plans to fund; gold is the human preference and its strength.
+**30 graded case-study tasks** (review + compare). Review tasks: a model reviews one
+research plan for a named firm; gold is the human critique split into 45 blocking
+issues, plus secondary issues, praise, and 4 objections the expert ruled out.
+Compare tasks: a PM picks which of two plans to fund; gold is the human preference
+and its strength. **Plus 48 graded instrumentation produce tasks** with synthetic gold.
 
-**22 tasks waiting on labels.** The 4 context-flip items reuse a pair under a
+**22 case-study tasks waiting on labels.** The 4 context-flip items reuse a pair under a
 different firm and were never labelled. The 10 produce tasks (seed + firm → plan)
 have one human-written must-hit item each (the flaw written before generation),
 the human verdict on Claude's Part 1 plan, and Claude's Part 1 plan and critique
 as reference outputs.
+
+**48 instrumentation tasks** (`earnings_recap`, `fixed_income`) are FORMAT mirrors of
+the `finrl_eval` suites. Gold is synthetic (`provenance.kind: synthetic_pipeline`) and
+the produce-mode grader `graders/rubric.py` reuses the suite rubric. It does not
+re-derive scores. Rebuild them with `python scripts/build_instrumentation_suites.py`.
 
 ## Verified against the case study
 

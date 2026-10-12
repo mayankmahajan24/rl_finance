@@ -1,0 +1,15 @@
+{
+  "company": "Ardent Biologics",
+  "ticker": "ARDB",
+  "quarter": "Q2",
+  "fiscal_year": 2026,
+  "press_release": "ARDENT BIOLOGICS REPORTS Q2 FISCAL 2026 RESULTS\n\nArdent Biologics (NASDAQ: ARDB) today announced financial results for the second quarter of fiscal 2026. Revenue was $318.6 million, compared with $204.1 million in the prior-year quarter. GAAP net loss was $210.5 million, or $3.27 per diluted share (loss). Non-GAAP net loss was $87.5 million, or $1.36 per diluted share (loss). Results include a $85.0 million acquired in-process R&D (charge), which is excluded from non-GAAP measures along with stock-based compensation of $38.0 million. For fiscal 2026, the company now expects revenue of $1,250.0 million to $1,350.0 million and a non-GAAP operating margin of approximately -30.0%.\n\nCondensed income statement (in millions, unaudited)\n  Revenue                       $318.6 million\n  Cost of revenue               $41.2 million\n  Gross profit                  $277.4 million\n  Operating expenses            $487.9 million (incl. $85.0 million of items noted above)\n  Operating income (loss)       $-210.5 million\n  Income tax expense            $0.0 million\n  Net income (loss)             $-210.5 million\n  Diluted shares (millions)     64.3\n\nPrior-year quarter: revenue $204.1 million; operating income $-148.0 million.",
+  "answer_fields": [
+    "revenue_musd",
+    "eps_gaap",
+    "eps_non_gaap",
+    "revenue_yoy_pct",
+    "fy_revenue_guidance_low_musd",
+    "fy_revenue_guidance_high_musd"
+  ]
+}

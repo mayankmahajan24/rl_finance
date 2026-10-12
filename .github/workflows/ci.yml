@@ -1,0 +1,71 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: lint, typecheck, unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy finrl_eval tests scripts
+      - run: uv run pytest
+      - run: uv run python rl/replay_case_study.py
+
+  eval-in-container:
+    name: build image and run mock eval end to end
+    runs-on: ubuntu-latest
+    needs: checks
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: finrl-eval:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Run tests inside the container
+        run: docker run --rm --entrypoint python finrl-eval:ci -m pytest -q
+      - name: Run live suites (mock provider)
+        run: |
+          set -euo pipefail
+          mkdir -p runs && chmod 777 runs
+          mapfile -t suites < <(docker run --rm --entrypoint finrl-eval finrl-eval:ci runnable)
+          for suite in "${suites[@]}"; do
+            docker run --rm -v "$PWD/runs:/app/runs" finrl-eval:ci run --suite "$suite" --provider mock
+          done
+      - name: Summarise results
+        run: |
+          for d in runs/*/; do
+            echo "## $d" >> "$GITHUB_STEP_SUMMARY"
+            python3 - "$d" >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          import json, sys
+          s = json.load(open(sys.argv[1] + "summary.json"))
+          print(f"- suite `{s['suite']}` model `{s['model']}`: mean {s['mean_score']:.3f}, pass rate {s['pass_rate']:.1%} over {s['n_samples']} samples")
+          for d, a in s["by_dimension"].items():
+              print(f"  - {d}: {a['mean']:.3f}")
+          EOF
+          done
+      - name: Upload eval results
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results-${{ github.sha }}
+          path: runs/
+          if-no-files-found: error
+          retention-days: 30

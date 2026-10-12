@@ -1,0 +1,30 @@
+{
+  "expected": {
+    "one_time_items": [
+      "gain on sale of terminal assets"
+    ],
+    "one_time_items_net_musd": -62.5,
+    "sbc_is_one_time_item": false,
+    "net_income_gaap_musd": 89.0,
+    "net_income_non_gaap_musd": 50.6,
+    "eps_gaap": 1.01,
+    "eps_non_gaap": 0.57,
+    "guidance_basis": "GAAP"
+  },
+  "task": "gaap_reconciliation",
+  "tags": [
+    "one-time-gain",
+    "revenue-decline",
+    "gaap_reconciliation",
+    "units-millions"
+  ],
+  "difficulty": "hard",
+  "provenance": {
+    "kind": "synthetic_pipeline",
+    "labeller": "synthetic (not human)",
+    "generator": "scripts/build_instrumentation_suites.py",
+    "suite": "earnings",
+    "sample_id": "earn-gaap_reconciliation-mfrt-q22026",
+    "suite_version": "0.1"
+  }
+}

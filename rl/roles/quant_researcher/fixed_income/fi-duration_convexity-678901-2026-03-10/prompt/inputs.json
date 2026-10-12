@@ -1,0 +1,22 @@
+{
+  "feed": {
+    "ID_ISIN": "XS2345678901",
+    "SECURITY_DES": "DBR 2 1/2 08/15/2046",
+    "ISSUER": "Bundesrepublik Deutschland",
+    "CPN": 2.5,
+    "CPN_FREQ": 1,
+    "MATURITY": "2046-08-15",
+    "DAY_CNT_DES": "ACT/ACT",
+    "SETTLE_DT": "2026-03-10",
+    "YLD_YTM_MID": 2.85,
+    "CRNCY": "EUR",
+    "PAR_AMT": 100
+  },
+  "given_field": "YLD_YTM_MID",
+  "answer_fields": [
+    "macaulay_duration",
+    "modified_duration",
+    "convexity",
+    "dv01"
+  ]
+}

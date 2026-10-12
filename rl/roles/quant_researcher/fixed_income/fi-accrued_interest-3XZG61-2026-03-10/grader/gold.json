@@ -1,0 +1,23 @@
+{
+  "expected": {
+    "days_accrued": 52,
+    "accrued_interest": 0.563333,
+    "day_count_convention": "ACT/360"
+  },
+  "task": "accrued_interest",
+  "tags": [
+    "financial",
+    "quarterly",
+    "act/360",
+    "accrued_interest"
+  ],
+  "difficulty": "medium",
+  "provenance": {
+    "kind": "synthetic_pipeline",
+    "labeller": "synthetic (not human)",
+    "generator": "scripts/build_instrumentation_suites.py",
+    "suite": "fixed_income",
+    "sample_id": "fi-accrued_interest-3XZG61-2026-03-10",
+    "suite_version": "0.1"
+  }
+}

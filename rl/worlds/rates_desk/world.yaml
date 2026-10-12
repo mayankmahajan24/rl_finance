@@ -1,0 +1,12 @@
+id: rates_desk
+name: Rates and credit desk
+kind: fund
+status: brief_only
+brief: A rates/credit desk that prices and risks fixed-coupon bonds from a terminal feed. Feed rows and
+  issuers are fictional.
+to_become_a_full_world:
+- mandate and risk limits
+- current holdings with sizes
+- point-in-time data snapshot and tool access
+sources:
+- scripts/build_instrumentation_suites.py

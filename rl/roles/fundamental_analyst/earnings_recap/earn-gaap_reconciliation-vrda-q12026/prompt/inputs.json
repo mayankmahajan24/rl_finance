@@ -1,0 +1,17 @@
+{
+  "company": "Verdant Agri Holdings",
+  "ticker": "VRDA",
+  "quarter": "Q1",
+  "fiscal_year": 2026,
+  "press_release": "VERDANT AGRI HOLDINGS REPORTS Q1 FISCAL 2026 RESULTS\n\nVerdant Agri Holdings (NASDAQ: VRDA) today announced financial results for the first quarter of fiscal 2026. Revenue was $845.5 million, up 7.0% year over year. GAAP net income was $55.0 million, or $0.46 per diluted share. Non-GAAP net income was $46.6 million, or $0.39 per diluted share. Results include a $18.0 million legal reserve release (gain), which is excluded from non-GAAP measures along with stock-based compensation of $7.5 million. For fiscal 2026, the company expects revenue of $3,500.0 million to $3,650.0 million and a non-GAAP operating margin of approximately 8.5%.\n\nCondensed income statement (in millions, unaudited)\n  Revenue                       $845.5 million\n  Cost of revenue               $611.4 million\n  Gross profit                  $234.1 million\n  Operating expenses            $153.3 million (incl. $-18.0 million of items noted above)\n  Operating income (loss)       $80.8 million\n  Other income (expense), net   $-12.0 million\n  Income tax expense            $13.8 million\n  Net income (loss)             $55.0 million\n  Diluted shares (millions)     118.5\n\nPrior-year quarter: revenue $790.2 million; operating income $56.0 million.",
+  "answer_fields": [
+    "one_time_items",
+    "one_time_items_net_musd",
+    "sbc_is_one_time_item",
+    "net_income_gaap_musd",
+    "net_income_non_gaap_musd",
+    "eps_gaap",
+    "eps_non_gaap",
+    "guidance_basis"
+  ]
+}

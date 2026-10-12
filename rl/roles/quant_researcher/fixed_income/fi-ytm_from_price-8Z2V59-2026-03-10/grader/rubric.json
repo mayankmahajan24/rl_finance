@@ -1,0 +1,218 @@
+[
+  {
+    "name": "valid_json",
+    "dimension": "constraint",
+    "scorer": "ValidJson",
+    "weight": 0.5,
+    "hard": true,
+    "tasks": "all",
+    "description": "Answer ends with a parseable JSON object."
+  },
+  {
+    "name": "fields_price_from_yield",
+    "dimension": "constraint",
+    "scorer": "RequiredFields",
+    "weight": 0.5,
+    "hard": false,
+    "tasks": [
+      "price_from_yield"
+    ],
+    "description": "All requested fields present for price_from_yield."
+  },
+  {
+    "name": "fields_ytm_from_price",
+    "dimension": "constraint",
+    "scorer": "RequiredFields",
+    "weight": 0.5,
+    "hard": false,
+    "tasks": [
+      "ytm_from_price"
+    ],
+    "description": "All requested fields present for ytm_from_price."
+  },
+  {
+    "name": "fields_duration_convexity",
+    "dimension": "constraint",
+    "scorer": "RequiredFields",
+    "weight": 0.5,
+    "hard": false,
+    "tasks": [
+      "duration_convexity"
+    ],
+    "description": "All requested fields present for duration_convexity."
+  },
+  {
+    "name": "fields_accrued_interest",
+    "dimension": "constraint",
+    "scorer": "RequiredFields",
+    "weight": 0.5,
+    "hard": false,
+    "tasks": [
+      "accrued_interest"
+    ],
+    "description": "All requested fields present for accrued_interest."
+  },
+  {
+    "name": "no_hedging",
+    "dimension": "constraint",
+    "scorer": "ForbiddenTerms",
+    "weight": 0.25,
+    "hard": false,
+    "tasks": "all",
+    "description": "Does not refuse or hedge on a fully specified calculation."
+  },
+  {
+    "name": "concise",
+    "dimension": "constraint",
+    "scorer": "MaxWords",
+    "weight": 0.25,
+    "hard": false,
+    "tasks": "all",
+    "description": "Prose outside the JSON stays under 250 words."
+  },
+  {
+    "name": "clean_price",
+    "dimension": "math",
+    "scorer": "NumericTolerance",
+    "weight": 2.0,
+    "hard": false,
+    "tasks": [
+      "price_from_yield"
+    ],
+    "description": "Clean price within 1 cent per 100 face."
+  },
+  {
+    "name": "dirty_price",
+    "dimension": "math",
+    "scorer": "NumericTolerance",
+    "weight": 1.0,
+    "hard": false,
+    "tasks": [
+      "price_from_yield"
+    ],
+    "description": ""
+  },
+  {
+    "name": "price_sane",
+    "dimension": "constraint",
+    "scorer": "ValueInRange",
+    "weight": 0.5,
+    "hard": false,
+    "tasks": [
+      "price_from_yield"
+    ],
+    "description": "Domain sanity: price per 100 in a plausible band."
+  },
+  {
+    "name": "ytm",
+    "dimension": "math",
+    "scorer": "NumericTolerance",
+    "weight": 2.5,
+    "hard": false,
+    "tasks": [
+      "ytm_from_price"
+    ],
+    "description": "Yield within half a basis point."
+  },
+  {
+    "name": "ytm_sane",
+    "dimension": "constraint",
+    "scorer": "ValueInRange",
+    "weight": 0.5,
+    "hard": false,
+    "tasks": [
+      "ytm_from_price"
+    ],
+    "description": "Yield expressed in percent, not decimal."
+  },
+  {
+    "name": "macaulay_duration",
+    "dimension": "math",
+    "scorer": "NumericTolerance",
+    "weight": 1.0,
+    "hard": false,
+    "tasks": [
+      "duration_convexity"
+    ],
+    "description": ""
+  },
+  {
+    "name": "modified_duration",
+    "dimension": "math",
+    "scorer": "NumericTolerance",
+    "weight": 1.5,
+    "hard": false,
+    "tasks": [
+      "duration_convexity"
+    ],
+    "description": ""
+  },
+  {
+    "name": "convexity",
+    "dimension": "math",
+    "scorer": "NumericTolerance",
+    "weight": 1.0,
+    "hard": false,
+    "tasks": [
+      "duration_convexity"
+    ],
+    "description": ""
+  },
+  {
+    "name": "dv01",
+    "dimension": "math",
+    "scorer": "NumericTolerance",
+    "weight": 1.0,
+    "hard": false,
+    "tasks": [
+      "duration_convexity"
+    ],
+    "description": ""
+  },
+  {
+    "name": "duration_ordering",
+    "dimension": "context",
+    "scorer": "_DurationOrdering",
+    "weight": 0.5,
+    "hard": false,
+    "tasks": [
+      "duration_convexity"
+    ],
+    "description": "Modified duration < Macaulay duration (positive yield)."
+  },
+  {
+    "name": "accrued_interest",
+    "dimension": "math",
+    "scorer": "NumericTolerance",
+    "weight": 1.5,
+    "hard": false,
+    "tasks": [
+      "accrued_interest",
+      "price_from_yield",
+      "ytm_from_price"
+    ],
+    "description": "Accrued interest within 0.05 cents per 100 face."
+  },
+  {
+    "name": "days_accrued",
+    "dimension": "context",
+    "scorer": "NumericTolerance",
+    "weight": 1.0,
+    "hard": false,
+    "tasks": [
+      "accrued_interest"
+    ],
+    "description": "Day count under the stated convention is exact."
+  },
+  {
+    "name": "day_count_convention",
+    "dimension": "context",
+    "scorer": "ExactMatch",
+    "weight": 0.5,
+    "hard": false,
+    "tasks": [
+      "accrued_interest"
+    ],
+    "description": "Echoes the convention actually applied."
+  }
+]

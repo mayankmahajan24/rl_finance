@@ -1,0 +1,240 @@
+[
+  {
+    "name": "valid_json",
+    "dimension": "constraint",
+    "scorer": "ValidJson",
+    "weight": 0.5,
+    "hard": true,
+    "tasks": "all",
+    "description": "Answer ends with a parseable JSON object."
+  },
+  {
+    "name": "fields_headline_extraction",
+    "dimension": "constraint",
+    "scorer": "RequiredFields",
+    "weight": 0.5,
+    "hard": false,
+    "tasks": [
+      "headline_extraction"
+    ],
+    "description": "All requested fields present for headline_extraction."
+  },
+  {
+    "name": "fields_margin_analysis",
+    "dimension": "constraint",
+    "scorer": "RequiredFields",
+    "weight": 0.5,
+    "hard": false,
+    "tasks": [
+      "margin_analysis"
+    ],
+    "description": "All requested fields present for margin_analysis."
+  },
+  {
+    "name": "fields_gaap_reconciliation",
+    "dimension": "constraint",
+    "scorer": "RequiredFields",
+    "weight": 0.5,
+    "hard": false,
+    "tasks": [
+      "gaap_reconciliation"
+    ],
+    "description": "All requested fields present for gaap_reconciliation."
+  },
+  {
+    "name": "no_hedging",
+    "dimension": "constraint",
+    "scorer": "ForbiddenTerms",
+    "weight": 0.25,
+    "hard": false,
+    "tasks": "all",
+    "description": "Does not claim data is missing when it is in the release."
+  },
+  {
+    "name": "concise",
+    "dimension": "constraint",
+    "scorer": "MaxWords",
+    "weight": 0.25,
+    "hard": false,
+    "tasks": "all",
+    "description": ""
+  },
+  {
+    "name": "revenue",
+    "dimension": "extraction",
+    "scorer": "NumericTolerance",
+    "weight": 2.0,
+    "hard": false,
+    "tasks": [
+      "headline_extraction"
+    ],
+    "description": "Quarterly revenue in $M (unit conversion required for releases stated in thousands/billions)."
+  },
+  {
+    "name": "eps_gaap",
+    "dimension": "extraction",
+    "scorer": "NumericTolerance",
+    "weight": 1.5,
+    "hard": false,
+    "tasks": [
+      "gaap_reconciliation",
+      "headline_extraction"
+    ],
+    "description": "GAAP diluted EPS; sign matters for losses."
+  },
+  {
+    "name": "eps_non_gaap",
+    "dimension": "context",
+    "scorer": "NumericTolerance",
+    "weight": 1.5,
+    "hard": false,
+    "tasks": [
+      "gaap_reconciliation",
+      "headline_extraction"
+    ],
+    "description": "Non-GAAP EPS, not confused with GAAP."
+  },
+  {
+    "name": "revenue_yoy",
+    "dimension": "math",
+    "scorer": "NumericTolerance",
+    "weight": 1.5,
+    "hard": false,
+    "tasks": [
+      "headline_extraction"
+    ],
+    "description": "YoY growth in percent, computed when not stated."
+  },
+  {
+    "name": "guidance_low",
+    "dimension": "extraction",
+    "scorer": "NumericTolerance",
+    "weight": 1.0,
+    "hard": false,
+    "tasks": [
+      "headline_extraction"
+    ],
+    "description": ""
+  },
+  {
+    "name": "guidance_high",
+    "dimension": "extraction",
+    "scorer": "NumericTolerance",
+    "weight": 1.0,
+    "hard": false,
+    "tasks": [
+      "headline_extraction"
+    ],
+    "description": ""
+  },
+  {
+    "name": "gross_margin",
+    "dimension": "math",
+    "scorer": "NumericTolerance",
+    "weight": 1.5,
+    "hard": false,
+    "tasks": [
+      "margin_analysis"
+    ],
+    "description": ""
+  },
+  {
+    "name": "operating_margin",
+    "dimension": "math",
+    "scorer": "NumericTolerance",
+    "weight": 1.5,
+    "hard": false,
+    "tasks": [
+      "margin_analysis"
+    ],
+    "description": "GAAP operating margin including one-time items."
+  },
+  {
+    "name": "operating_margin_change",
+    "dimension": "math",
+    "scorer": "NumericTolerance",
+    "weight": 1.5,
+    "hard": false,
+    "tasks": [
+      "margin_analysis"
+    ],
+    "description": "Change vs prior-year quarter in basis points."
+  },
+  {
+    "name": "one_time_items",
+    "dimension": "context",
+    "scorer": "FuzzyMatch",
+    "weight": 2.0,
+    "hard": false,
+    "tasks": [
+      "gaap_reconciliation"
+    ],
+    "description": "Identifies each one-time item (and nothing else)."
+  },
+  {
+    "name": "one_time_items_net",
+    "dimension": "math",
+    "scorer": "NumericTolerance",
+    "weight": 1.5,
+    "hard": false,
+    "tasks": [
+      "gaap_reconciliation"
+    ],
+    "description": "Net of charges and gains in $M."
+  },
+  {
+    "name": "sbc_not_one_time",
+    "dimension": "context",
+    "scorer": "ExactMatch",
+    "weight": 1.0,
+    "hard": false,
+    "tasks": [
+      "gaap_reconciliation"
+    ],
+    "description": "Recognises recurring SBC is not a one-time item."
+  },
+  {
+    "name": "net_income_gaap",
+    "dimension": "extraction",
+    "scorer": "NumericTolerance",
+    "weight": 1.0,
+    "hard": false,
+    "tasks": [
+      "gaap_reconciliation"
+    ],
+    "description": ""
+  },
+  {
+    "name": "net_income_non_gaap",
+    "dimension": "context",
+    "scorer": "NumericTolerance",
+    "weight": 1.0,
+    "hard": false,
+    "tasks": [
+      "gaap_reconciliation"
+    ],
+    "description": ""
+  },
+  {
+    "name": "guidance_basis",
+    "dimension": "context",
+    "scorer": "ExactMatch",
+    "weight": 1.0,
+    "hard": false,
+    "tasks": [
+      "gaap_reconciliation"
+    ],
+    "description": "Whether guidance is on a GAAP or non-GAAP basis."
+  },
+  {
+    "name": "recap_quality",
+    "dimension": "judgment",
+    "scorer": "LLMJudge",
+    "weight": 1.0,
+    "hard": false,
+    "tasks": [
+      "headline_extraction"
+    ],
+    "description": "LLM-as-judge: qualitative accuracy of the recap prose."
+  }
+]

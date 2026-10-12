@@ -3,7 +3,7 @@ role: quant_researcher
 workflow: fixed_income
 mode: produce
 world: rates_desk
-status: needs_rubric
+status: graded
 split: eval
 prompt:
   template: finrl_eval/suites/fixed_income/templates/default.j2
@@ -12,6 +12,9 @@ sources:
 - finrl_eval/suites/fixed_income/
 - scripts/build_instrumentation_suites.py
 output_schema: null
+grader:
+  type: rubric
+  module: graders/rubric.py
 meta:
   suite: fixed_income
   sample_id: fi-accrued_interest-8Z2V59-2026-03-10

@@ -1,0 +1,25 @@
+id: earn-headline_extraction-ardb-q22026
+role: fundamental_analyst
+workflow: earnings_recap
+mode: produce
+world: earnings_desk
+status: needs_rubric
+split: eval
+prompt:
+  template: finrl_eval/suites/earnings/templates/default.j2
+  fingerprint: acb22273e3e7
+sources:
+- finrl_eval/suites/earnings/
+- scripts/build_instrumentation_suites.py
+output_schema: null
+meta:
+  suite: earnings
+  sample_id: earn-headline_extraction-ardb-q22026
+  task_type: headline_extraction
+  tags:
+  - loss-making
+  - ipr&d
+  - negative-eps
+  - headline_extraction
+  - units-millions
+  difficulty: hard

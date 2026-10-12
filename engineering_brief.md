@@ -264,7 +264,7 @@ recruiting experts, and lab conversations.
 
 ### 6.1 Smoke test, repo hygiene, invariants in CI (first)
 
-- Add `pyproject.toml` or `requirements.txt` and a README setup section.
+- Packaging is in place for the suite registry: `pyproject.toml`, `uv.lock`, pytest, ruff, and mypy. CI runs those checks and `rl/replay_case_study.py`. Scoring and a mock model are not in this change.
 - Decide whether to upgrade the `anthropic` SDK. 0.89 predates the current Skills
   API: `manage.py` handles both shapes, but that path is untested. Check what
   changes for `case_study/scripts`.

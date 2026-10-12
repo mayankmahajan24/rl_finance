@@ -1,0 +1,17 @@
+{
+  "company": "Silverline Payments",
+  "ticker": "SLVP",
+  "quarter": "Q4",
+  "fiscal_year": 2025,
+  "press_release": "SILVERLINE PAYMENTS REPORTS Q4 FISCAL 2025 RESULTS\n\nSilverline Payments (NASDAQ: SLVP) today announced financial results for the fourth quarter of fiscal 2025. Revenue was $1.398 billion, up 21.3% year over year. GAAP net income was $0.208 billion, or $0.75 per diluted share. Non-GAAP net income was $0.346 billion, or $1.25 per diluted share. Results include a $0.027 billion acquisition-related costs (charge), which is excluded from non-GAAP measures along with stock-based compensation of $0.142 billion. For fiscal 2025, the company now expects revenue of $6.200 billion to $6.400 billion and a non-GAAP operating margin of approximately 24.0%.\n\nCondensed income statement (in billions, unaudited)\n  Revenue                       $1.398 billion\n  Cost of revenue               $0.412 billion\n  Gross profit                  $0.986 billion\n  Operating expenses            $0.729 billion (incl. $0.027 billion of items noted above)\n  Operating income (loss)       $0.257 billion\n  Income tax expense            $0.049 billion\n  Net income (loss)             $0.208 billion\n  Diluted shares (millions)     276.4\n\nPrior-year quarter: revenue $1.153 billion; operating income $0.190 billion.",
+  "answer_fields": [
+    "one_time_items",
+    "one_time_items_net_musd",
+    "sbc_is_one_time_item",
+    "net_income_gaap_musd",
+    "net_income_non_gaap_musd",
+    "eps_gaap",
+    "eps_non_gaap",
+    "guidance_basis"
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "expected": {
+    "revenue_musd": 2130.0,
+    "eps_gaap": 0.48,
+    "eps_non_gaap": 1.06,
+    "revenue_yoy_pct": -13.2,
+    "fy_revenue_guidance_low_musd": 8200,
+    "fy_revenue_guidance_high_musd": 8600
+  },
+  "task": "headline_extraction",
+  "tags": [
+    "cyclical",
+    "margin-compression",
+    "revenue-decline",
+    "headline_extraction",
+    "units-millions"
+  ],
+  "difficulty": "medium",
+  "provenance": {
+    "kind": "synthetic_pipeline",
+    "labeller": "synthetic (not human)",
+    "generator": "scripts/build_instrumentation_suites.py",
+    "suite": "earnings",
+    "sample_id": "earn-headline_extraction-ksta-q12026",
+    "suite_version": "0.1"
+  }
+}

@@ -1,0 +1,25 @@
+id: fi-price_from_yield-33CR12-2026-03-10
+role: quant_researcher
+workflow: fixed_income
+mode: produce
+world: rates_desk
+status: needs_rubric
+split: eval
+prompt:
+  template: finrl_eval/suites/fixed_income/templates/default.j2
+  fingerprint: fe98ca7956ff
+sources:
+- finrl_eval/suites/fixed_income/
+- scripts/build_instrumentation_suites.py
+output_schema: null
+meta:
+  suite: fixed_income
+  sample_id: fi-price_from_yield-33CR12-2026-03-10
+  task_type: price_from_yield
+  tags:
+  - corporate
+  - 30/360
+  - long-dated
+  - discount
+  - price_from_yield
+  difficulty: medium

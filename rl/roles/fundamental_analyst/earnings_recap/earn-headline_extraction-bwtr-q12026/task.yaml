@@ -1,0 +1,24 @@
+id: earn-headline_extraction-bwtr-q12026
+role: fundamental_analyst
+workflow: earnings_recap
+mode: produce
+world: earnings_desk
+status: needs_rubric
+split: eval
+prompt:
+  template: finrl_eval/suites/earnings/templates/default.j2
+  fingerprint: f1fcf9a3bcd0
+sources:
+- finrl_eval/suites/earnings/
+- scripts/build_instrumentation_suites.py
+output_schema: null
+meta:
+  suite: earnings
+  sample_id: earn-headline_extraction-bwtr-q12026
+  task_type: headline_extraction
+  tags:
+  - no-one-time
+  - low-growth
+  - headline_extraction
+  - units-millions
+  difficulty: easy

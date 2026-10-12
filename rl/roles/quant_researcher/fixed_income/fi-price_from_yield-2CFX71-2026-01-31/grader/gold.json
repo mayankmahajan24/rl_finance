@@ -1,0 +1,23 @@
+{
+  "expected": {
+    "clean_price": 95.26816,
+    "accrued_interest": 0.127747,
+    "dirty_price": 95.395907
+  },
+  "task": "price_from_yield",
+  "tags": [
+    "treasury",
+    "act/act",
+    "deep-discount",
+    "price_from_yield"
+  ],
+  "difficulty": "medium",
+  "provenance": {
+    "kind": "synthetic_pipeline",
+    "labeller": "synthetic (not human)",
+    "generator": "scripts/build_instrumentation_suites.py",
+    "suite": "fixed_income",
+    "sample_id": "fi-price_from_yield-2CFX71-2026-01-31",
+    "suite_version": "0.1"
+  }
+}

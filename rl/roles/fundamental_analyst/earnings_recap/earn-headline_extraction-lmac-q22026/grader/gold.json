@@ -1,0 +1,26 @@
+{
+  "expected": {
+    "revenue_musd": 486.9,
+    "eps_gaap": -0.04,
+    "eps_non_gaap": 0.58,
+    "revenue_yoy_pct": 38.2,
+    "fy_revenue_guidance_low_musd": 2010,
+    "fy_revenue_guidance_high_musd": 2030
+  },
+  "task": "headline_extraction",
+  "tags": [
+    "gaap-loss-non-gaap-profit",
+    "sbc-heavy",
+    "headline_extraction",
+    "units-millions"
+  ],
+  "difficulty": "medium",
+  "provenance": {
+    "kind": "synthetic_pipeline",
+    "labeller": "synthetic (not human)",
+    "generator": "scripts/build_instrumentation_suites.py",
+    "suite": "earnings",
+    "sample_id": "earn-headline_extraction-lmac-q22026",
+    "suite_version": "0.1"
+  }
+}

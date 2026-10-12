@@ -1,0 +1,17 @@
+{
+  "company": "Meridian Freight Systems",
+  "ticker": "MFRT",
+  "quarter": "Q2",
+  "fiscal_year": 2026,
+  "press_release": "MERIDIAN FREIGHT SYSTEMS REPORTS Q2 FISCAL 2026 RESULTS\n\nMeridian Freight Systems (NASDAQ: MFRT) today announced financial results for the second quarter of fiscal 2026. Revenue was $963.8 million, down 5.6% year over year. GAAP net income was $89.0 million, or $1.01 per diluted share. Non-GAAP net income was $50.6 million, or $0.57 per diluted share. Results include a $62.5 million gain on sale of terminal assets (gain), which is excluded from non-GAAP measures along with stock-based compensation of $12.0 million. For fiscal 2026, the company now expects revenue of $3,850.0 million to $3,950.0 million on a GAAP basis.\n\nCondensed income statement (in millions, unaudited)\n  Revenue                       $963.8 million\n  Cost of revenue               $711.0 million\n  Gross profit                  $252.8 million\n  Operating expenses            $135.7 million (incl. $-62.5 million of items noted above)\n  Operating income (loss)       $117.1 million\n  Income tax expense            $28.1 million\n  Net income (loss)             $89.0 million\n  Diluted shares (millions)     88.2\n\nPrior-year quarter: revenue $1,021.4 million; operating income $118.0 million.",
+  "answer_fields": [
+    "one_time_items",
+    "one_time_items_net_musd",
+    "sbc_is_one_time_item",
+    "net_income_gaap_musd",
+    "net_income_non_gaap_musd",
+    "eps_gaap",
+    "eps_non_gaap",
+    "guidance_basis"
+  ]
+}

@@ -1,0 +1,24 @@
+id: earn-gaap_reconciliation-pnch-q32026
+role: fundamental_analyst
+workflow: earnings_recap
+mode: produce
+world: earnings_desk
+status: needs_rubric
+split: eval
+prompt:
+  template: finrl_eval/suites/earnings/templates/default.j2
+  fingerprint: 88f9f10649b5
+sources:
+- finrl_eval/suites/earnings/
+- scripts/build_instrumentation_suites.py
+output_schema: null
+meta:
+  suite: earnings
+  sample_id: earn-gaap_reconciliation-pnch-q32026
+  task_type: gaap_reconciliation
+  tags:
+  - offsetting-items
+  - insurance
+  - gaap_reconciliation
+  - units-millions
+  difficulty: hard

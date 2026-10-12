@@ -1,0 +1,20 @@
+{
+  "feed": {
+    "ID_ISIN": "US71654QDE98",
+    "SECURITY_DES": "PEMEX 6 7/8 10/16/2032",
+    "ISSUER": "Petroleos Mexicanos",
+    "CPN": 6.875,
+    "CPN_FREQ": 2,
+    "MATURITY": "2032-10-16",
+    "DAY_CNT_DES": "30/360",
+    "SETTLE_DT": "2026-03-10",
+    "PX_CLEAN": 88.5,
+    "CRNCY": "USD",
+    "PAR_AMT": 100
+  },
+  "given_field": "PX_CLEAN",
+  "answer_fields": [
+    "ytm_pct",
+    "accrued_interest"
+  ]
+}

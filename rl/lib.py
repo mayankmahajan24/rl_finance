@@ -24,6 +24,11 @@ CASE = ROOT / "case_study"   # the original take-home: part0-3, scripts, seeds
 ROLES = RL / "roles"
 WORLDS = RL / "worlds"
 
+# Workflows regenerated from case_study/. Everything else under roles/ is left alone
+# by build_from_case_study.py so instrumentation FORMAT mirrors survive a rebuild.
+CASE_STUDY_WORKFLOWS = ("research_design", "research_funding")
+CATALOG_FIELDS = ("id", "role", "workflow", "mode", "world", "status", "split")
+
 
 def fingerprint(*parts: str) -> str:
     """Same hash as case_study/scripts/run_eval.py, so a task rendered here can be proven to
@@ -67,3 +72,14 @@ def load_task(task_id: str) -> tuple[pathlib.Path, dict]:
         if t["id"] == task_id:
             return d, t
     raise KeyError(task_id)
+
+
+def catalog_row(task: dict) -> dict:
+    return {k: task[k] for k in CATALOG_FIELDS}
+
+
+def write_catalog() -> list[dict]:
+    """Rewrite rl/catalog.json from every task folder currently on disk."""
+    catalog = [catalog_row(t) for _, t in iter_tasks()]
+    write_json(RL / "catalog.json", catalog)
+    return catalog

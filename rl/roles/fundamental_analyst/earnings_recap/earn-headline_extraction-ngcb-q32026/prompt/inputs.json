@@ -1,0 +1,15 @@
+{
+  "company": "Northgate Consumer Brands",
+  "ticker": "NGCB",
+  "quarter": "Q3",
+  "fiscal_year": 2026,
+  "press_release": "NORTHGATE CONSUMER BRANDS REPORTS Q3 FISCAL 2026 RESULTS\n\nNorthgate Consumer Brands (NASDAQ: NGCB) today announced financial results for the third quarter of fiscal 2026. Revenue was $2,765.0 million, up 2.5% year over year. Non-GAAP net income was $247.5 million, or $0.82 per diluted share. GAAP net income was $168.0 million, or $0.56 per diluted share. Results include a $120.0 million brand impairment (charge), a $45.0 million gain on divestiture (gain), which are excluded from non-GAAP measures along with stock-based compensation of $31.0 million. For fiscal 2026, the company now expects revenue of $11,100.0 million to $11,300.0 million and a non-GAAP operating margin of approximately 9.0%.\n\nCondensed income statement (in millions, unaudited)\n  Revenue                       $2,765.0 million\n  Cost of revenue               $1,587.0 million\n  Gross profit                  $1,178.0 million\n  Operating expenses            $954.0 million (incl. $75.0 million of items noted above)\n  Operating income (loss)       $224.0 million\n  Income tax expense            $56.0 million\n  Net income (loss)             $168.0 million\n  Diluted shares (millions)     301.0\n\nPrior-year quarter: revenue $2,698.0 million; operating income $236.0 million.",
+  "answer_fields": [
+    "revenue_musd",
+    "eps_gaap",
+    "eps_non_gaap",
+    "revenue_yoy_pct",
+    "fy_revenue_guidance_low_musd",
+    "fy_revenue_guidance_high_musd"
+  ]
+}

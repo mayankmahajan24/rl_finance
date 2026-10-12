@@ -1,0 +1,24 @@
+id: fi-duration_convexity-4QDE98-2026-03-10
+role: quant_researcher
+workflow: fixed_income
+mode: produce
+world: rates_desk
+status: needs_rubric
+split: eval
+prompt:
+  template: finrl_eval/suites/fixed_income/templates/default.j2
+  fingerprint: 2a16c12ea886
+sources:
+- finrl_eval/suites/fixed_income/
+- scripts/build_instrumentation_suites.py
+output_schema: null
+meta:
+  suite: fixed_income
+  sample_id: fi-duration_convexity-4QDE98-2026-03-10
+  task_type: duration_convexity
+  tags:
+  - em
+  - high-yield
+  - 30/360
+  - duration_convexity
+  difficulty: hard

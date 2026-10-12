@@ -1,0 +1,24 @@
+id: earn-headline_extraction-mfrt-q22026
+role: fundamental_analyst
+workflow: earnings_recap
+mode: produce
+world: earnings_desk
+status: needs_rubric
+split: eval
+prompt:
+  template: finrl_eval/suites/earnings/templates/default.j2
+  fingerprint: 127ef6cd0e21
+sources:
+- finrl_eval/suites/earnings/
+- scripts/build_instrumentation_suites.py
+output_schema: null
+meta:
+  suite: earnings
+  sample_id: earn-headline_extraction-mfrt-q22026
+  task_type: headline_extraction
+  tags:
+  - one-time-gain
+  - revenue-decline
+  - headline_extraction
+  - units-millions
+  difficulty: hard

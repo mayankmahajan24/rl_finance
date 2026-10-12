@@ -1,0 +1,26 @@
+{
+  "expected": {
+    "revenue_musd": 712.4,
+    "eps_gaap": 0.6,
+    "eps_non_gaap": 0.62,
+    "revenue_yoy_pct": 3.4,
+    "fy_revenue_guidance_low_musd": 2900,
+    "fy_revenue_guidance_high_musd": 2960
+  },
+  "task": "headline_extraction",
+  "tags": [
+    "no-one-time",
+    "low-growth",
+    "headline_extraction",
+    "units-millions"
+  ],
+  "difficulty": "easy",
+  "provenance": {
+    "kind": "synthetic_pipeline",
+    "labeller": "synthetic (not human)",
+    "generator": "scripts/build_instrumentation_suites.py",
+    "suite": "earnings",
+    "sample_id": "earn-headline_extraction-bwtr-q12026",
+    "suite_version": "0.1"
+  }
+}

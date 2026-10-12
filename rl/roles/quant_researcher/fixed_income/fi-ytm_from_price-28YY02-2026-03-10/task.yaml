@@ -1,0 +1,25 @@
+id: fi-ytm_from_price-28YY02-2026-03-10
+role: quant_researcher
+workflow: fixed_income
+mode: produce
+world: rates_desk
+status: needs_rubric
+split: eval
+prompt:
+  template: finrl_eval/suites/fixed_income/templates/default.j2
+  fingerprint: a6df0ed9c174
+sources:
+- finrl_eval/suites/fixed_income/
+- scripts/build_instrumentation_suites.py
+output_schema: null
+meta:
+  suite: fixed_income
+  sample_id: fi-ytm_from_price-28YY02-2026-03-10
+  task_type: ytm_from_price
+  tags:
+  - treasury
+  - act/act
+  - discount
+  - month-end
+  - ytm_from_price
+  difficulty: medium

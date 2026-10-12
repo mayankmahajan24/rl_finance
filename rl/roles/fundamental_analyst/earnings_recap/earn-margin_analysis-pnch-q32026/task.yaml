@@ -1,0 +1,24 @@
+id: earn-margin_analysis-pnch-q32026
+role: fundamental_analyst
+workflow: earnings_recap
+mode: produce
+world: earnings_desk
+status: needs_rubric
+split: eval
+prompt:
+  template: finrl_eval/suites/earnings/templates/default.j2
+  fingerprint: 174b29edca9f
+sources:
+- finrl_eval/suites/earnings/
+- scripts/build_instrumentation_suites.py
+output_schema: null
+meta:
+  suite: earnings
+  sample_id: earn-margin_analysis-pnch-q32026
+  task_type: margin_analysis
+  tags:
+  - offsetting-items
+  - insurance
+  - margin_analysis
+  - units-millions
+  difficulty: hard

@@ -1,0 +1,23 @@
+id: fi-accrued_interest-8Z2V59-2026-03-10
+role: quant_researcher
+workflow: fixed_income
+mode: produce
+world: rates_desk
+status: needs_rubric
+split: eval
+prompt:
+  template: finrl_eval/suites/fixed_income/templates/default.j2
+  fingerprint: e30fc0761b15
+sources:
+- finrl_eval/suites/fixed_income/
+- scripts/build_instrumentation_suites.py
+output_schema: null
+meta:
+  suite: fixed_income
+  sample_id: fi-accrued_interest-8Z2V59-2026-03-10
+  task_type: accrued_interest
+  tags:
+  - gilt
+  - act/365
+  - accrued_interest
+  difficulty: medium

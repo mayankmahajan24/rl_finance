@@ -11,7 +11,7 @@ import typer
 from finrl_eval import __version__
 from finrl_eval.providers import PROVIDERS
 from finrl_eval.schema import RunConfig, SampleResult
-from finrl_eval.suites import PLANNED_SUITES, SUITES
+from finrl_eval.suites import live_suites, planned
 
 app = typer.Typer(
     help="Finance RL: evaluate frontier models on high-stakes financial tasks.",
@@ -31,26 +31,33 @@ def list_cmd(
 ) -> None:
     """List available suites, their tasks, and providers."""
     suites: list[dict[str, Any]] = []
-    for name, cls in SUITES.items():
+    mirror_counts: dict[str, int] = {}
+    mirror_lines: list[str] = []
+    for name, cls in live_suites().items():
         suite = cls()
+        n_samples = len(suite.load_samples())
+        mirror = cls.mirror
+        mirror_counts[mirror.workflow] = n_samples
+        mirror_lines.append(
+            f"  {mirror.workflow:<16}{n_samples:>2} tasks  ({mirror.role} / {mirror.world})"
+        )
         suites.append(
             {
                 "name": name,
                 "title": cls.spec.title,
                 "version": cls.spec.version,
                 "tasks": cls.spec.tasks,
-                "n_samples": len(suite.load_samples()),
+                "n_samples": n_samples,
                 "n_criteria": len(suite.rubric().criteria),
                 "description": cls.spec.description,
             }
         )
     payload = {
         "suites": suites,
-        "planned": PLANNED_SUITES,
+        "planned": planned(),
         "providers": sorted(PROVIDERS),
         "format_mirrors": {
-            "earnings_recap": 28,
-            "fixed_income": 20,
+            **mirror_counts,
             "note": (
                 "FORMAT task folders under rl/roles/; "
                 "rebuilt by scripts/build_instrumentation_suites.py"
@@ -69,13 +76,20 @@ def list_cmd(
         )
         typer.echo(f"  {'':<14} tasks: {', '.join(s['tasks'])}")
     typer.echo("\nPlanned (extension points, not runnable):")
-    for name, desc in PLANNED_SUITES.items():
+    for name, desc in planned().items():
         typer.echo(f"  {name:<14} {desc}")
     typer.echo("\nFORMAT mirrors (rl/roles/, produce + rubric grader):")
-    typer.echo("  earnings_recap  28 tasks  (fundamental_analyst / earnings_desk)")
-    typer.echo("  fixed_income    20 tasks  (quant_researcher / rates_desk)")
+    for line in mirror_lines:
+        typer.echo(line)
     typer.echo(f"\nProviders: {', '.join(sorted(PROVIDERS))}")
     typer.echo("  mock models: mock-noisy (default), mock-oracle, mock-broken")
+
+
+@app.command("runnable")
+def runnable_cmd() -> None:
+    """Print live suite names, one per line, in registry order."""
+    for name in live_suites():
+        typer.echo(name)
 
 
 @app.command("run")
@@ -93,9 +107,10 @@ def run_cmd(
     """Run a suite against a provider and write results to runs/<timestamp>/."""
     from finrl_eval.runner import run
 
-    if suite not in SUITES:
-        hint = " (planned, not yet implemented)" if suite in PLANNED_SUITES else ""
-        typer.secho(f"Unknown suite {suite!r}{hint}. Available: {', '.join(SUITES)}", fg="red")
+    runnable = live_suites()
+    if suite not in runnable:
+        hint = " (planned, not yet implemented)" if suite in planned() else ""
+        typer.secho(f"Unknown suite {suite!r}{hint}. Available: {', '.join(runnable)}", fg="red")
         raise typer.Exit(2)
     config = RunConfig(
         suite=suite,

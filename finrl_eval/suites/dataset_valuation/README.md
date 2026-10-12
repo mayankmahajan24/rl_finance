@@ -13,5 +13,7 @@ Planned tasks
 - `valuation_memo`: recommend buy / trial / pass with a price band; scored by `ExactMatch` on
   the decision, `ValueInRange` on the band, and an `LLMJudge` criterion on the rationale.
 
-To implement: add `suite.py` with a `DatasetValuationSuite(TaskSuite)`, fixtures under
-`fixtures/`, `templates/default.j2`, and register it in `finrl_eval/suites/__init__.py`.
+To implement: add `suite.py` with a `TaskSuite` subclass (`read_samples`, `domain_criteria`,
+`spec`, `mirror`), fixtures under `fixtures/`, and `templates/default.j2`. Replace the
+`Planned("dataset_valuation", ...)` line in `finrl_eval/suites/__init__.py` with `Live` of
+that class. Answer constraints and FORMAT placement are read from the class.

@@ -14,12 +14,12 @@ from finrl_eval.report import load_run
 from finrl_eval.rewards import shaped_reward
 from finrl_eval.runner import run
 from finrl_eval.schema import RewardRecord, RunConfig
-from finrl_eval.suites import SUITES, get_suite
+from finrl_eval.suites import get_suite, live_suites, planned
 
 REPO = Path(__file__).resolve().parents[1]
 
 
-@pytest.mark.parametrize("suite_name", sorted(SUITES))
+@pytest.mark.parametrize("suite_name", sorted(live_suites()))
 def test_suite_samples_prompts_and_rubric_are_consistent(suite_name: str) -> None:
     suite = get_suite(suite_name)
     samples = suite.load_samples()
@@ -38,7 +38,7 @@ def test_suite_samples_prompts_and_rubric_are_consistent(suite_name: str) -> Non
             assert key in scored_fields, f"{suite_name}/{s.task}: {key} not scored"
 
 
-@pytest.mark.parametrize("suite_name", sorted(SUITES))
+@pytest.mark.parametrize("suite_name", sorted(live_suites()))
 def test_oracle_scores_perfect_and_broken_scores_floor(suite_name: str, tmp_path: Path) -> None:
     _, oracle = run(RunConfig(suite=suite_name, provider="mock", model="mock-oracle"), tmp_path)
     assert oracle.mean_score == 1.0 and oracle.pass_rate == 1.0
@@ -134,8 +134,16 @@ def test_cli_list_run_report(tmp_path: Path) -> None:
     listed = runner.invoke(app, ["list", "--json"])
     assert listed.exit_code == 0, listed.output
     payload = json.loads(listed.output)
-    assert {s["name"] for s in payload["suites"]} == {"earnings", "fixed_income"}
-    assert "quant_signal" in payload["planned"]
+    assert {s["name"] for s in payload["suites"]} == set(live_suites())
+    assert payload["planned"] == planned()
+    assert set(payload["planned"]) == {"quant_signal", "dataset_valuation"}
+    mirrors = payload["format_mirrors"]
+    for cls in live_suites().values():
+        assert mirrors[cls.mirror.workflow] == len(cls().load_samples())
+
+    names = runner.invoke(app, ["runnable"])
+    assert names.exit_code == 0, names.output
+    assert names.output.splitlines() == list(live_suites())
 
     ran = runner.invoke(
         app,

@@ -3,16 +3,18 @@ and must stay green when the case-study rebuild and instrumentation build run.""
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any, cast
 
+import pytest
 import yaml
 
 from finrl_eval.prompts import parse_json_answer
-from finrl_eval.suites import SUITES, get_suite
+from finrl_eval.suites import get_suite, live_suites
 
 REPO = Path(__file__).resolve().parents[1]
 RL = REPO / "rl"
@@ -22,9 +24,13 @@ from graders import rubric  # noqa: E402
 from lib import CASE_STUDY_WORKFLOWS, catalog_row, iter_tasks  # noqa: E402
 
 CASE_STUDY_N = 52
-EARNINGS_N = 28
-FIXED_INCOME_N = 20
-CATALOG_N = CASE_STUDY_N + EARNINGS_N + FIXED_INCOME_N
+
+
+def _mirror_counts() -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for cls in live_suites().values():
+        counts[cls.mirror.workflow] = len(cls().load_samples())
+    return counts
 
 
 def _catalog() -> list[dict[str, Any]]:
@@ -35,14 +41,15 @@ def test_catalog_matches_task_tree_and_counts() -> None:
     on_disk = [catalog_row(t) for _, t in iter_tasks()]
     catalog = _catalog()
     assert catalog == on_disk
-    assert len(catalog) == CATALOG_N
+    mirrors = _mirror_counts()
+    assert len(catalog) == CASE_STUDY_N + sum(mirrors.values())
     by_wf = {
         wf: sum(1 for t in catalog if t["workflow"] == wf)
         for wf in {t["workflow"] for t in catalog}
     }
     assert by_wf["research_design"] + by_wf["research_funding"] == CASE_STUDY_N
-    assert by_wf["earnings_recap"] == EARNINGS_N
-    assert by_wf["fixed_income"] == FIXED_INCOME_N
+    for workflow, n in mirrors.items():
+        assert by_wf[workflow] == n
 
 
 def test_case_study_tasks_are_untouched() -> None:
@@ -66,12 +73,28 @@ def test_instrumentation_tasks_are_synthetic_produce() -> None:
         assert t["grader"]["module"] == "graders/rubric.py"
         gold = json.loads((d / "grader" / "gold.json").read_text())
         assert gold["provenance"]["kind"] == "synthetic_pipeline"
-        assert gold["provenance"]["suite"] in SUITES
+        assert gold["provenance"]["suite"] in live_suites()
         assert (d / "prompt" / "system.md").read_text().strip()
         assert (d / "prompt" / "user.md").read_text().strip()
         # Gold expected must not be copied into the model-visible prompt JSON.
         inputs = json.loads((d / "prompt" / "inputs.json").read_text())
         assert "expected" not in inputs
+
+
+def test_format_builder_reads_mirrors_from_the_registry() -> None:
+    src = (REPO / "scripts" / "build_instrumentation_suites.py").read_text()
+    assert "SUITE_LAYOUT" not in src
+    assert "WORLDS_SPEC" not in src
+    registry = (REPO / "finrl_eval" / "suites" / "__init__.py").read_text()
+    assert "_ENTRIES" in registry
+    spec = importlib.util.spec_from_file_location(
+        "build_instrumentation_suites", REPO / "scripts" / "build_instrumentation_suites.py"
+    )
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    with pytest.raises(SystemExit, match="case-study"):
+        module.materialize(protected=frozenset({"earnings_recap"}))
 
 
 def test_build_from_case_study_does_not_wipe_other_workflows() -> None:

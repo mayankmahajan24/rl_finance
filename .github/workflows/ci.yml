@@ -42,12 +42,14 @@ jobs:
           cache-to: type=gha,mode=max
       - name: Run tests inside the container
         run: docker run --rm --entrypoint python finrl-eval:ci -m pytest -q
-      - name: Run earnings suite (mock provider)
+      - name: Run live suites (mock provider)
         run: |
+          set -euo pipefail
           mkdir -p runs && chmod 777 runs
-          docker run --rm -v "$PWD/runs:/app/runs" finrl-eval:ci run --suite earnings --provider mock
-      - name: Run fixed income suite (mock provider)
-        run: docker run --rm -v "$PWD/runs:/app/runs" finrl-eval:ci run --suite fixed_income --provider mock
+          mapfile -t suites < <(docker run --rm --entrypoint finrl-eval finrl-eval:ci runnable)
+          for suite in "${suites[@]}"; do
+            docker run --rm -v "$PWD/runs:/app/runs" finrl-eval:ci run --suite "$suite" --provider mock
+          done
       - name: Summarise results
         run: |
           for d in runs/*/; do

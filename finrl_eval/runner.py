@@ -1,4 +1,7 @@
-"""Run orchestrator. Load samples, render prompts, call a provider, score with the rubric, and write a run directory."""
+"""Run orchestrator.
+
+Load samples, render prompts, call a provider, score with the rubric, and write a run directory.
+"""
 
 from __future__ import annotations
 

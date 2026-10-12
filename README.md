@@ -26,10 +26,10 @@ rebuild no longer wipes other workflows under `rl/roles/`.
 - Providers: deterministic `mock` (oracle / noisy / broken), Anthropic, OpenAI.
 - Rubric produce grader in `rl/graders/rubric.py`, called by `rl/run.py` for graded
   produce tasks. It calls the suite rubric. Scores are not re-derived.
-- FORMAT mirrors: 28 `earnings_recap` + 20 `fixed_income` produce tasks, gold
-  marked `provenance.kind: synthetic_pipeline`.
+- FORMAT mirrors: one produce task per sample of each live suite
+  (`earnings_recap`, `fixed_income`), gold marked `provenance.kind: synthetic_pipeline`.
 - Packaging (`pyproject.toml` / `uv.lock`), Dockerfile / compose, GitHub Actions CI.
-- CLI: `finrl-eval list | run | report`.
+- CLI: `finrl-eval list | runnable | run | report`.
 
 Quant Signal Research and Dataset Valuation remain extension-point stubs.
 
@@ -41,6 +41,7 @@ Requires Python 3.11+ and [`uv`](https://docs.astral.sh/uv/).
 uv sync
 uv run python rl/replay_case_study.py          # offline case-study regression
 uv run finrl-eval list                         # suites, FORMAT mirrors, providers
+uv run finrl-eval runnable                     # live suite names, one per line
 uv run finrl-eval run --suite earnings --provider mock
 uv run finrl-eval run --suite fixed_income --provider mock
 uv run finrl-eval report runs/<run_id>

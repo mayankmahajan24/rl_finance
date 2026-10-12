@@ -14,5 +14,7 @@ Planned tasks
 - `bias_detection`: identify look-ahead / survivorship issues in a described backtest;
   scored with `ExactMatch` on a categorical label plus an `LLMJudge` criterion.
 
-To implement: add `suite.py` with a `QuantSignalSuite(TaskSuite)`, `fixtures/panel.json`,
-`templates/default.j2`, and register it in `finrl_eval/suites/__init__.py`.
+To implement: add `suite.py` with a `TaskSuite` subclass (`read_samples`, `domain_criteria`,
+`spec`, `mirror`), `fixtures/panel.json`, and `templates/default.j2`. Replace the
+`Planned("quant_signal", ...)` line in `finrl_eval/suites/__init__.py` with `Live` of that
+class. Answer constraints and FORMAT placement are read from the class.

@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 JsonValue = str | int | float | bool | None | list[Any] | dict[str, Any]
 
@@ -39,14 +39,84 @@ class Sample(BaseModel):
     notes: str = ""
 
 
-class SuiteSpec(BaseModel):
-    """Static description of a task suite as shown by `finrl-eval list`."""
+class TaskFields(BaseModel):
+    """Ordered answer fields for one task. This tuple is the only field list."""
 
-    name: str
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    name: str = Field(min_length=1)
+    fields: tuple[str, ...]
+
+    @model_validator(mode="after")
+    def _fields_ok(self) -> TaskFields:
+        if not self.fields or any(not field for field in self.fields):
+            raise ValueError(f"{self.name}: answer fields must be non-empty")
+        if len(set(self.fields)) != len(self.fields):
+            raise ValueError(f"{self.name}: duplicate answer field")
+        return self
+
+
+class FormatMirror(BaseModel):
+    """Where a live suite is written under rl/roles and rl/worlds.
+
+    task.yaml wire fields (mode, status, provenance, grader module) are not
+    on this type. The FORMAT builder owns those.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    role: str = Field(min_length=1)
+    workflow: str = Field(min_length=1)
+    world: str = Field(min_length=1)
+    abbrev: str = Field(min_length=1)
+    id_prefix: str = Field(min_length=1)
+    world_name: str = Field(min_length=1)
+    world_brief: str = Field(min_length=1)
+
+
+class SuiteSpec(BaseModel):
+    """Static description of a live suite.
+
+    `tasks` is derived from `task_fields`. Constraint weights are not fields.
+    FORMAT placement is `TaskSuite.mirror`, so dumping a spec cannot leak it.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    name: str = Field(min_length=1)
     title: str
     description: str
-    tasks: list[str]
+    task_fields: tuple[TaskFields, ...]
+    forbidden: tuple[str, ...]
+    max_words: int
+    hedging_note: str
+    concise_note: str = ""
     version: str = "0.1"
+    tasks: list[str] = Field(default_factory=list)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _derive_tasks(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if "tasks" in data:
+                raise ValueError("tasks is derived from task_fields")
+            names: list[str] = []
+            for item in data.get("task_fields", ()):
+                names.append(item["name"] if isinstance(item, dict) else item.name)
+            data["tasks"] = names
+        return data
+
+    @model_validator(mode="after")
+    def _spec_ok(self) -> SuiteSpec:
+        if not self.task_fields:
+            raise ValueError(f"{self.name}: task_fields is empty")
+        if len(self.tasks) != len(set(self.tasks)):
+            raise ValueError(f"{self.name}: duplicate task name")
+        if self.max_words < 1:
+            raise ValueError(f"{self.name}: max_words must be positive")
+        if not self.forbidden:
+            raise ValueError(f"{self.name}: forbidden phrases are empty")
+        return self
 
 
 class ModelRequest(BaseModel):
@@ -149,3 +219,8 @@ class RewardRecord(BaseModel):
     dimension_rewards: dict[str, float]
     failed_criteria: list[str]
     hard_constraint_violation: bool
+
+
+TaskFields.model_rebuild()
+FormatMirror.model_rebuild()
+SuiteSpec.model_rebuild()

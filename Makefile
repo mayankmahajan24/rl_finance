@@ -24,6 +24,8 @@ format-tasks:
 
 check: lint typecheck test replay
 
+# Shortcuts for one suite. `make eval` loops `finrl-eval runnable`, so a new
+# live suite is included without another target.
 eval-earnings:
 	$(UV) run finrl-eval run --suite earnings --provider $(PROVIDER)
 
@@ -31,7 +33,11 @@ eval-fixed-income:
 	$(UV) run finrl-eval run --suite fixed_income --provider $(PROVIDER)
 
 PROVIDER ?= mock
-eval: eval-earnings eval-fixed-income
+eval:
+	@set -eu; \
+	for suite in $$($(UV) run finrl-eval runnable); do \
+		$(UV) run finrl-eval run --suite "$$suite" --provider $(PROVIDER); \
+	done
 
 fixtures:
 	$(UV) run python scripts/generate_earnings_fixtures.py
@@ -40,8 +46,10 @@ docker-build:
 	docker build -t $(IMAGE) .
 
 docker-eval: docker-build
-	docker compose run --rm eval run --suite earnings --provider $(PROVIDER)
-	docker compose run --rm eval run --suite fixed_income --provider $(PROVIDER)
+	@set -eu; \
+	for suite in $$(docker compose run --rm -T eval runnable); do \
+		docker compose run --rm eval run --suite "$$suite" --provider $(PROVIDER); \
+	done
 
 docker-pipeline: docker-build
 	docker compose run --rm pipeline

@@ -1,9 +1,9 @@
-"""Reward export for post-training.
+"""Reward export.
 
-`rewards.jsonl` has one record per sample with the scalar `reward` (the rubric aggregate in
-[0, 1]) plus per-dimension rewards so a trainer can re-weight (e.g. up-weight CONTEXT errors
-such as GAAP/non-GAAP confusion) without re-running the eval. `hard_constraint_violation`
-lets a pipeline apply a floor penalty for unparseable or rule-breaking outputs.
+`rewards.jsonl` has one record per sample. `reward` is the rubric aggregate from
+0 to 1. Per-dimension rewards let a trainer re-weight a miss, such as a GAAP
+and non-GAAP mix-up, without running the eval again. `hard_constraint_violation`
+lets a later step apply a floor penalty for unparseable or rule-breaking output.
 """
 
 from __future__ import annotations

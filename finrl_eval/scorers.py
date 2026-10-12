@@ -1,4 +1,4 @@
-"""Composable scorers. Each scorer maps (sample, response) -> score in [0, 1].
+"""Composable scorers. Each scorer maps a sample and a response to a score from 0 to 1.
 
 Scorers are small, pure objects so a rubric reads like a spec:
 

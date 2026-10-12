@@ -7,7 +7,7 @@ The repo has two layers that share one catalog and one scoring path:
 | Folder | What it is |
 |---|---|
 | [`rl/`](rl/) | FORMAT task tree: 100 tasks by role and workflow, fund worlds, graders by mode, Anthropic runner with financial-services skills. Start at [`rl/README.md`](rl/README.md). |
-| [`finrl_eval/`](finrl_eval/) | Multi-provider harness (`mock` / `anthropic` / `openai`), rubric/scorers, and the `finrl-eval` CLI. Earnings and fixed-income suites live here; FORMAT mirrors of those suites are generated under `rl/roles/`. |
+| [`finrl_eval/`](finrl_eval/) | Multi-provider package for mock, Anthropic, and OpenAI, plus rubric scorers and the `finrl-eval` CLI. Earnings and fixed-income suites live here. FORMAT copies of those suites are generated under `rl/roles/`. |
 | [`engineering_brief.md`](engineering_brief.md) | Start here if you are an engineer joining: goal, vocabulary, what exists, invariants, next work. |
 | [`case_study/`](case_study/) | The Finance Domain Research Lead take-home the first environment is built from. `rl/build_from_case_study.py` reads it. Do not duplicate its graders or gold. |
 
@@ -24,8 +24,8 @@ rebuild no longer wipes other workflows under `rl/roles/`.
 ## What `finrl_eval` adds
 
 - Providers: deterministic `mock` (oracle / noisy / broken), Anthropic, OpenAI.
-- Rubric produce grader (`rl/graders/rubric.py`) reused by `rl/run.py` for graded
-  produce tasks. It calls the suite rubric — scores are not re-derived.
+- Rubric produce grader in `rl/graders/rubric.py`, called by `rl/run.py` for graded
+  produce tasks. It calls the suite rubric. Scores are not re-derived.
 - FORMAT mirrors: 28 `earnings_recap` + 20 `fixed_income` produce tasks, gold
   marked `provenance.kind: synthetic_pipeline`.
 - Packaging (`pyproject.toml` / `uv.lock`), Dockerfile / compose, GitHub Actions CI.
@@ -73,7 +73,7 @@ python rl/run.py --model claude-opus-5-5 --dry-run
 
 Each run writes `runs/<timestamp>-<suite>-<provider>/` with `config.json`,
 `rubric.json`, `samples.jsonl`, `summary.json`, `report.md`, `failure_modes.md`,
-and `rewards.jsonl` (the post-training hand-off). Live Anthropic sweeps from
+and `rewards.jsonl`, one reward record per sample. Live Anthropic sweeps from
 `rl/run.py` still write `rl/runs/<tag>/`.
 
 ## Docker

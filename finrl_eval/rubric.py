@@ -71,7 +71,7 @@ class Rubric:
         total_w = sum(r.weight for r in results)
         score = sum(r.score * r.weight for r in results) / total_w if total_w else 0.0
         if hard_violation:
-            # A hard constraint violation caps the aggregate: unparseable or rule-breaking
+            # A hard constraint violation caps the aggregate. Unparseable or rule-breaking
             # output is not a usable answer regardless of partial numeric accuracy.
             score = min(score, 0.25)
         dims = {

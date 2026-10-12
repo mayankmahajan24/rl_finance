@@ -1,16 +1,16 @@
 """Deterministic offline provider.
 
-The mock simulates a model with *known* failure modes so the whole pipeline (scoring,
-aggregation, failure-mode reporting, reward export) can be exercised with no credentials.
-Behaviour is a pure function of (seed, sample_id, mode), so runs are reproducible.
+The mock simulates a model with known failure modes so scoring, aggregation,
+failure-mode reporting, and reward export can run with no credentials.
+Behaviour is a pure function of seed, sample id, and mode, so runs are reproducible.
 
 Modes
 -----
-- ``oracle``: always returns the ground truth. Useful to validate that a rubric awards 1.0
-  to a perfect answer (a rubric sanity check).
-- ``noisy`` (default): mostly correct, with a fixed mix of realistic errors — numeric slips,
-  GAAP/non-GAAP confusion, unit errors, dropped fields and format violations.
-- ``broken``: always returns an unparseable prose answer. Validates the floor of the rubric.
+- ``oracle``: always returns the ground truth. A rubric sanity check expects 1.0
+  for a perfect answer.
+- ``noisy``, the default: mostly correct, with numeric slips, GAAP and non-GAAP
+  confusion, unit errors, dropped fields, and format violations.
+- ``broken``: always returns an unparseable prose answer. Tests use it to check the rubric floor.
 """
 
 from __future__ import annotations

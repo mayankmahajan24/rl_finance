@@ -43,8 +43,8 @@ The case-study baselines below are all skills-off.
 | pm | research_funding | compare | 10 | 4 (context flips, no gold) |
 | quant_researcher | research_design | produce | — | 5 (need a rubric) |
 | fundamental_analyst | research_design | produce | — | 5 (need a rubric) |
-| fundamental_analyst | earnings_recap | produce | 28 | — (synthetic gold) |
-| quant_researcher | fixed_income | produce | 20 | — (synthetic gold) |
+| fundamental_analyst | earnings_recap | produce | 28 | none, synthetic gold |
+| quant_researcher | fixed_income | produce | 20 | none, synthetic gold |
 
 **30 graded case-study tasks** (review + compare). Review tasks: a model reviews one
 research plan for a named firm; gold is the human critique split into 45 blocking
@@ -60,7 +60,7 @@ as reference outputs.
 
 **48 instrumentation tasks** (`earnings_recap`, `fixed_income`) are FORMAT mirrors of
 the `finrl_eval` suites. Gold is synthetic (`provenance.kind: synthetic_pipeline`) and
-the produce-mode grader (`graders/rubric.py`) reuses the suite rubric — it does not
+the produce-mode grader `graders/rubric.py` reuses the suite rubric. It does not
 re-derive scores. Rebuild them with `python scripts/build_instrumentation_suites.py`.
 
 ## Verified against the case study

@@ -137,7 +137,7 @@ class RunConfig(BaseModel):
 
 
 class RewardRecord(BaseModel):
-    """One line of rewards.jsonl: the shape a post-training pipeline consumes."""
+    """One line of rewards.jsonl."""
 
     sample_id: str
     suite: str

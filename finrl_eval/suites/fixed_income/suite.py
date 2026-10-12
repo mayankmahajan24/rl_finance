@@ -10,7 +10,17 @@ import json
 from datetime import date
 from typing import Any
 
-from finrl_eval.schema import FormatMirror, Sample, SuiteSpec, TaskFields
+from finrl_eval.rubric import Criterion
+from finrl_eval.schema import Dimension, FormatMirror, Sample, SuiteSpec, TaskFields
+from finrl_eval.scorers import (
+    ExactMatch,
+    NumericTolerance,
+    ScoreContext,
+    ScoreOutcome,
+    Scorer,
+    ValueInRange,
+    coerce_number,
+)
 from finrl_eval.suites.base import TaskSuite
 from finrl_eval.suites.fixed_income.reference import Bond
 
@@ -128,3 +138,125 @@ class FixedIncomeSuite(TaskSuite):
                 )
             )
         return samples
+
+    def domain_criteria(self) -> list[Criterion]:
+        return [
+            # price_from_yield
+            Criterion(
+                "clean_price",
+                Dimension.MATH,
+                NumericTolerance("clean_price", abs_tol=0.01),
+                weight=2.0,
+                tasks={"price_from_yield"},
+                description="Clean price within 1 cent per 100 face.",
+            ),
+            Criterion(
+                "dirty_price",
+                Dimension.MATH,
+                NumericTolerance("dirty_price", abs_tol=0.01),
+                weight=1.0,
+                tasks={"price_from_yield"},
+            ),
+            Criterion(
+                "price_sane",
+                Dimension.CONSTRAINT,
+                ValueInRange("clean_price", 20, 250),
+                weight=0.5,
+                tasks={"price_from_yield"},
+                description="Domain sanity: price per 100 in a plausible band.",
+            ),
+            # ytm_from_price
+            Criterion(
+                "ytm",
+                Dimension.MATH,
+                NumericTolerance("ytm_pct", abs_tol=0.005),
+                weight=2.5,
+                tasks={"ytm_from_price"},
+                description="Yield within half a basis point.",
+            ),
+            Criterion(
+                "ytm_sane",
+                Dimension.CONSTRAINT,
+                ValueInRange("ytm_pct", -1, 40),
+                weight=0.5,
+                tasks={"ytm_from_price"},
+                description="Yield expressed in percent, not decimal.",
+            ),
+            # duration / convexity
+            Criterion(
+                "macaulay_duration",
+                Dimension.MATH,
+                NumericTolerance("macaulay_duration", rel_tol=0.005),
+                weight=1.0,
+                tasks={"duration_convexity"},
+            ),
+            Criterion(
+                "modified_duration",
+                Dimension.MATH,
+                NumericTolerance("modified_duration", rel_tol=0.005),
+                weight=1.5,
+                tasks={"duration_convexity"},
+            ),
+            Criterion(
+                "convexity",
+                Dimension.MATH,
+                NumericTolerance("convexity", rel_tol=0.01),
+                weight=1.0,
+                tasks={"duration_convexity"},
+            ),
+            Criterion(
+                "dv01",
+                Dimension.MATH,
+                NumericTolerance("dv01", rel_tol=0.01),
+                weight=1.0,
+                tasks={"duration_convexity"},
+            ),
+            Criterion(
+                "duration_ordering",
+                Dimension.CONTEXT,
+                _DurationOrdering(),
+                weight=0.5,
+                tasks={"duration_convexity"},
+                description="Modified duration < Macaulay duration (positive yield).",
+            ),
+            # accrued interest (shared across tasks where requested)
+            Criterion(
+                "accrued_interest",
+                Dimension.MATH,
+                NumericTolerance("accrued_interest", abs_tol=0.0005),
+                weight=1.5,
+                tasks={"price_from_yield", "ytm_from_price", "accrued_interest"},
+                description="Accrued interest within 0.05 cents per 100 face.",
+            ),
+            Criterion(
+                "days_accrued",
+                Dimension.CONTEXT,
+                NumericTolerance("days_accrued", abs_tol=0),
+                weight=1.0,
+                tasks={"accrued_interest"},
+                description="Day count under the stated convention is exact.",
+            ),
+            Criterion(
+                "day_count_convention",
+                Dimension.CONTEXT,
+                ExactMatch("day_count_convention"),
+                weight=0.5,
+                tasks={"accrued_interest"},
+                description="Echoes the convention actually applied.",
+            ),
+        ]
+
+
+class _DurationOrdering(Scorer):
+    """Suite-specific scorer: modified duration must sit strictly below Macaulay for
+    positive yields. Illustrates how a suite adds a domain-constraint check."""
+
+    def score(self, ctx: ScoreContext) -> ScoreOutcome:
+        if ctx.parsed is None:
+            return ScoreOutcome(0.0, "mod < mac", None, "no JSON")
+        mod = coerce_number(ctx.parsed.get("modified_duration"))
+        mac = coerce_number(ctx.parsed.get("macaulay_duration"))
+        if mod is None or mac is None:
+            return ScoreOutcome(0.0, "mod < mac", [mod, mac], "missing")
+        ok = 0 < mod < mac
+        return ScoreOutcome(1.0 if ok else 0.0, "0 < mod < mac", [mod, mac])

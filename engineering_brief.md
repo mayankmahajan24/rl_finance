@@ -264,7 +264,7 @@ recruiting experts, and lab conversations.
 
 ### 6.1 Smoke test, repo hygiene, invariants in CI (first)
 
-- Packaging is in place for the suite registry: `pyproject.toml`, `uv.lock`, pytest, ruff, and mypy. CI runs those checks and `rl/replay_case_study.py`. Scoring and a mock model are not in this change.
+- Packaging and CI are in place. The repo has `pyproject.toml`, `uv.lock`, the `finrl-eval` CLI, pytest, ruff, mypy, Dockerfile and compose, and `.github/workflows/ci.yml`. `make check` runs lint, typecheck, unit tests, and `rl/replay_case_study.py`. CI runs the mock-provider suites by looping `finrl-eval runnable`. FORMAT tasks stay `needs_rubric`. `rl/run.py` does not grade them.
 - Decide whether to upgrade the `anthropic` SDK. 0.89 predates the current Skills
   API: `manage.py` handles both shapes, but that path is untested. Check what
   changes for `case_study/scripts`.

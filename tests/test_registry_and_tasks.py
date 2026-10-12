@@ -105,20 +105,19 @@ def test_case_study_produce_stays_needs_rubric() -> None:
     assert len(graded) == 30
 
 
-def test_instrumentation_tasks_are_ungraded_synthetic_produce() -> None:
+def test_instrumentation_tasks_are_graded_synthetic_produce() -> None:
     seen = 0
     for task_dir, task in iter_tasks():
         if task["workflow"] in CASE_STUDY_WORKFLOWS:
             continue
         seen += 1
         assert task["mode"] == "produce"
-        assert task["status"] == "needs_rubric"
-        assert task["status"] != "graded"
-        assert "grader" not in task
+        assert task["status"] == "graded"
+        assert task["grader"]["module"] == "graders/rubric.py"
         gold = json.loads((task_dir / "grader" / "gold.json").read_text())
         assert gold["provenance"]["kind"] == "synthetic_pipeline"
         assert gold["provenance"]["suite"] in live_suites()
-        assert not (task_dir / "grader" / "rubric.json").exists()
+        assert (task_dir / "grader" / "rubric.json").exists()
         inputs = json.loads((task_dir / "prompt" / "inputs.json").read_text())
         assert "expected" not in inputs
         assert (task_dir / "prompt" / "user.md").read_text().strip()
@@ -129,7 +128,7 @@ def test_format_builder_reads_mirrors_from_the_registry() -> None:
     src = (REPO / "scripts" / "build_instrumentation_suites.py").read_text()
     assert "SUITE_LAYOUT" not in src
     assert "WORLDS_SPEC" not in src
-    assert "graders/rubric.py" not in src
+    assert "graders/rubric.py" in src
     registry = (REPO / "finrl_eval" / "suites" / "__init__.py").read_text()
     assert "_ENTRIES" in registry
     spec = importlib.util.spec_from_file_location(
@@ -160,11 +159,8 @@ def test_replay_case_study_still_matches_graded_md() -> None:
     assert proc.returncode == 0, proc.stdout + proc.stderr
 
 
-def test_format_tasks_stay_ungraded_while_the_runner_exists() -> None:
-    assert not (RL / "graders" / "rubric.py").exists()
+def test_produce_hook_uses_the_suite_grader() -> None:
+    assert (RL / "graders" / "rubric.py").exists()
+    run_py = (RL / "run.py").read_text()
+    assert "rubric.grade" in run_py
     assert "rl/run.py" not in (REPO / "finrl_eval" / "runner.py").read_text()
-    for _, task in iter_tasks():
-        if task["workflow"] in CASE_STUDY_WORKFLOWS:
-            continue
-        assert task["status"] == "needs_rubric"
-        assert "grader" not in task

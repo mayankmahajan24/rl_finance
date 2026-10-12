@@ -3,7 +3,6 @@
 Does not touch research_design / research_funding (those stay owned by
 rl/build_from_case_study.py). Gold is synthetic: provenance.kind is
 `synthetic_pipeline` so it is never confused with human case-study labels.
-Written tasks stay `needs_rubric` and do not name a grader module.
 
 Placement is each live suite's FormatMirror. Usage:
 
@@ -66,6 +65,7 @@ def _write_tasks(suite: TaskSuite, samples: list[Any]) -> set[str]:
     mirror = suite.mirror
     name = suite.spec.name
     engine = suite.prompt_engine()
+    rubric = suite.rubric().describe()
     written: set[str] = set()
     for sample in samples:
         tid = _task_id(mirror, sample.id)
@@ -93,6 +93,7 @@ def _write_tasks(suite: TaskSuite, samples: list[Any]) -> set[str]:
                 },
             },
         )
+        write_json(out / "grader" / "rubric.json", rubric)
         template = (
             f"finrl_eval/suites/{name}/templates/default.j2"
             if (suite.template_dir / "default.j2").exists()
@@ -104,7 +105,7 @@ def _write_tasks(suite: TaskSuite, samples: list[Any]) -> set[str]:
             "workflow": mirror.workflow,
             "mode": "produce",
             "world": mirror.world,
-            "status": "needs_rubric",
+            "status": "graded",
             "split": "eval",
             "prompt": {
                 "template": template,
@@ -115,6 +116,10 @@ def _write_tasks(suite: TaskSuite, samples: list[Any]) -> set[str]:
                 "scripts/build_instrumentation_suites.py",
             ],
             "output_schema": None,
+            "grader": {
+                "type": "rubric",
+                "module": "graders/rubric.py",
+            },
             "meta": {
                 "suite": name,
                 "sample_id": sample.id,

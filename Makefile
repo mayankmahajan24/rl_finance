@@ -1,6 +1,7 @@
-.PHONY: install test lint typecheck check replay fixtures format-tasks eval eval-earnings eval-fixed-income docker-build docker-eval docker-pipeline clean
+.PHONY: install test lint typecheck check replay eval eval-earnings eval-fixed-income fixtures format-tasks docker-build docker-eval docker-pipeline clean
 
 UV ?= uv
+IMAGE ?= finrl-eval:local
 
 install:
 	$(UV) sync
@@ -23,7 +24,8 @@ format-tasks:
 
 check: lint typecheck test replay
 
-# Shortcuts for one suite. `make eval` loops `finrl-eval runnable`.
+# Shortcuts for one suite. `make eval` loops `finrl-eval runnable`, so a new
+# live suite is included without another target.
 eval-earnings:
 	$(UV) run finrl-eval run --suite earnings --provider $(PROVIDER)
 
@@ -37,7 +39,9 @@ eval:
 		$(UV) run finrl-eval run --suite "$$suite" --provider $(PROVIDER); \
 	done
 
-IMAGE ?= finrl-eval:local
+fixtures:
+	$(UV) run python scripts/generate_earnings_fixtures.py
+
 docker-build:
 	docker build -t $(IMAGE) .
 
@@ -49,9 +53,6 @@ docker-eval: docker-build
 
 docker-pipeline: docker-build
 	docker compose run --rm pipeline
-
-fixtures:
-	$(UV) run python scripts/generate_earnings_fixtures.py
 
 clean:
 	rm -rf runs .pytest_cache .mypy_cache .ruff_cache

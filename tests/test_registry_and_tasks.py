@@ -65,8 +65,6 @@ def test_cli_lists_suites_and_runnable_names() -> None:
     names = runner.invoke(app, ["runnable"])
     assert names.exit_code == 0, names.output
     assert names.output.splitlines() == list(live_suites())
-    missing = runner.invoke(app, ["run", "--help"])
-    assert missing.exit_code != 0
 
 
 def test_earnings_fixture_is_not_stale() -> None:
@@ -162,10 +160,11 @@ def test_replay_case_study_still_matches_graded_md() -> None:
     assert proc.returncode == 0, proc.stdout + proc.stderr
 
 
-def test_scoring_modules_are_absent() -> None:
-    root = REPO / "finrl_eval"
-    assert not (root / "rubric.py").exists()
-    assert not (root / "scorers.py").exists()
-    assert not (root / "runner.py").exists()
-    assert not (root / "providers" / "mock.py").exists()
+def test_format_tasks_stay_ungraded_while_the_runner_exists() -> None:
     assert not (RL / "graders" / "rubric.py").exists()
+    assert "rl/run.py" not in (REPO / "finrl_eval" / "runner.py").read_text()
+    for _, task in iter_tasks():
+        if task["workflow"] in CASE_STUDY_WORKFLOWS:
+            continue
+        assert task["status"] == "needs_rubric"
+        assert "grader" not in task

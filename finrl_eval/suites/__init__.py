@@ -14,6 +14,8 @@ from finrl_eval.suites.base import TaskSuite
 from finrl_eval.suites.earnings.suite import EarningsSuite
 from finrl_eval.suites.fixed_income.suite import FixedIncomeSuite
 
+_RESERVED = frozenset({"valid_json", "no_hedging", "concise"})
+
 
 @dataclass(frozen=True, slots=True)
 class Live:
@@ -58,6 +60,15 @@ def _validate(entries: tuple[Entry, ...]) -> tuple[Entry, ...]:
         if previous is not None and previous != brief:
             raise ValueError(f"{spec.name}: world {mirror.world} brief disagrees")
         worlds[mirror.world] = brief
+        reserved = _RESERVED | {f"fields_{task}" for task in spec.tasks}
+        allowed = set(spec.tasks)
+        for criterion in entry.suite().domain_criteria():
+            if criterion.name in reserved or criterion.name.startswith("fields_"):
+                raise ValueError(
+                    f"{spec.name}: {criterion.name} is reserved for answer constraints"
+                )
+            if criterion.tasks is not None and not set(criterion.tasks) <= allowed:
+                raise ValueError(f"{spec.name}: {criterion.name} names an unknown task")
     if len(live_names) != len(set(live_names)):
         raise ValueError(f"duplicate live suite name in {live_names}")
     if len(planned_names) != len(set(planned_names)):

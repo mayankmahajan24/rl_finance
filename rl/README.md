@@ -1,12 +1,33 @@
 # rl/ — buy-side RL environments, MVP
 
-The case study (source data in `data/research_design/`) converted into environment tasks: organized by
-fund role, run inside fund worlds, graded by mode. Format spec: `FORMAT.md`.
+Tasks are built from **sources** (a dataset plus the assignment it came with) by **families** (one
+kind of task each), and assigned to **splits** (train, bench, heldout) by company.
+
+| Folder | What it holds |
+|---|---|
+| [`sources/`](sources/) | `txn_panel` (card-transaction panel + anomaly-detection brief) and `research_design_case` (the take-home) |
+| [`families/`](families/) | `kpi_nowcast`, `data_audit`, `anomaly_scoring`, `growth_thesis`; research_design still lives in `build_research_design.py`, `graders/`, `prompts/` until step 4 |
+| [`splits/`](splits/) | company and seed assignment per split, manifests of built tasks, `check.py` |
+| `roles/` | built tasks in the repo format (research_design, kpi_nowcast, earnings_recap) |
+| `tasks/` | built Harbor tasks, `tasks/<split>/<task_id>/`. Gitignored; rebuilt from `splits/manifests/` |
+| `harness/` | `run_solutions.py` (reference vs naive, no Docker), `calibrate.py` (pass@k, pass^k) |
+| `worlds/`, `rubrics/`, `skills/`, `runs/` | fund briefs, rubric tenets, financial-services skills, run outputs |
+
+Format spec for repo-format tasks: `FORMAT.md`. Harbor tasks follow Harbor's layout (`families/README.md`).
 
 ```sh
-python rl/build_research_design.py   # regenerate worlds/ and the rd-* tasks from data/research_design/
-python rl/replay_research_design.py  # grade the case-study baseline runs with the rl/ graders
+python rl/build_research_design.py                     # research_design + research_funding tasks, worlds, catalog
+python rl/replay_research_design.py                    # case-study baselines must reproduce
+python rl/families/kpi_nowcast/build.py                # 102 kpi_nowcast tasks
+python rl/build_panel_tasks.py --split bench           # data_audit, anomaly_scoring, growth_thesis
+python rl/harness/run_solutions.py --split bench       # reference should beat naive on every family
+python rl/splits/check.py                              # no company or seed in two splits
 ```
+
+Dependencies: `pip install pandas numpy scipy openpyxl pyyaml anthropic harbor` (versions pinned in
+`../requirements.txt`).
+
+The rest of this file describes the research_design environment.
 
 ## Running models, with or without financial-services skills
 
@@ -55,7 +76,7 @@ as reference outputs.
 
 `replay_research_design.py` re-grades all four models' saved runs with the new graders.
 Prompt fingerprints match the runs, and every headline number in
-`data/research_design/baseline_runs/GRADED.md` reproduces:
+`sources/research_design_case/baseline_runs/GRADED.md` reproduces:
 
 | | Haiku 4.5 | Sonnet 5 | Opus 4.8 | Opus 5 |
 |---|---|---|---|---|
@@ -72,12 +93,12 @@ from 28.6 issues per review does not pay. Per-task records for every model are i
 
 | | Why |
 |---|---|
-| `part2/gold/design-intent.json` | The author's construction intent, not a gold label (`data/research_design/ISOLATION.md`) |
+| `part2/gold/design-intent.json` | The author's construction intent, not a gold label (`sources/research_design_case/ISOLATION.md`) |
 | `part2/forks.json` | Generator-tier methodology briefs |
 | `part1/scores/` | Scored by a model; gold must be human |
 
 Paths are in the case study at commit `a75441c`. The full list is in
-`data/research_design/README.md`.
+`sources/research_design_case/README.md`.
 
 ## Known limits
 

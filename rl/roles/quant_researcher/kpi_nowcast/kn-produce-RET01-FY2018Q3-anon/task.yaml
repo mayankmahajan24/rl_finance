@@ -1,0 +1,41 @@
+id: kn-produce-RET01-FY2018Q3-anon
+role: quant_researcher
+workflow: kpi_nowcast
+mode: produce
+world: ls_altdata
+status: graded
+split: train
+prompt:
+  template: families/kpi_nowcast/prompts/{system,user}.md
+  fingerprint: 92f1c5e3b201
+  files:
+  - actuals.csv
+  - data_brief.md
+  - sensor_panel.csv
+environment:
+  tools:
+  - code_execution
+  internet: false
+output_schema: families/kpi_nowcast/schema.json
+grader:
+  type: kpi_nowcast
+  module: families/kpi_nowcast/grader.py
+  accuracy: programmatic (forecast JSON vs gold.actual)
+  writeup: LLM judge rubric C1-C12 (families/kpi_nowcast/judge.md)
+sources:
+- rl/sources/txn_panel/raw/sensor_panel.csv.gz
+- rl/sources/txn_panel/grader_only/kpi_facts.csv
+- https://www.sec.gov/Archives/edgar/data/109198/000162828018014818/tjx-20181103.xml
+tags:
+- fiscal_jan
+- anon
+- low_signal
+meta:
+  series: TJX_MARMAXX
+  company: TJX
+  variant: anon
+  as_of: '2018-11-03'
+  target_period: FY2018 Q3
+  sensors:
+  - TJX_TJMAXX
+  low_signal: sensor covers TJ Maxx only; KPI is TJ Maxx + Marshalls (2015-17 YoY fit 0.02)

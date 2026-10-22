@@ -1,0 +1,41 @@
+id: kn-produce-DAL-2017Q4
+role: quant_researcher
+workflow: kpi_nowcast
+mode: produce
+world: ls_altdata
+status: graded
+split: bench
+prompt:
+  template: families/kpi_nowcast/prompts/{system,user}.md
+  fingerprint: a0a51092ad09
+  files:
+  - actuals.csv
+  - data_brief.md
+  - sensor_panel.csv
+environment:
+  tools:
+  - code_execution
+  internet: false
+output_schema: families/kpi_nowcast/schema.json
+grader:
+  type: kpi_nowcast
+  module: families/kpi_nowcast/grader.py
+  accuracy: programmatic (forecast JSON vs gold.actual)
+  writeup: LLM judge rubric C1-C12 (families/kpi_nowcast/judge.md)
+sources:
+- rl/sources/txn_panel/raw/sensor_panel.csv.gz
+- rl/sources/txn_panel/grader_only/kpi_facts.csv
+- https://www.sec.gov/Archives/edgar/data/27904/000002790418000006/dal1231201710k_htm.xml
+tags:
+- calendar
+- named
+- DAL
+meta:
+  series: DAL
+  company: DAL
+  variant: named
+  as_of: '2017-12-31'
+  target_period: 2017Q4
+  sensors:
+  - DAL
+  low_signal: null

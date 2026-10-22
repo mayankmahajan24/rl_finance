@@ -5,7 +5,7 @@
       "id": "must_address_known_flaw",
       "kind": "must_hit",
       "text": "Crowded and mined; sentiment is collinear with the earnings surprise",
-      "source": "data/research_design/seeds.json `discriminator`, written by the case-study author before any plan was generated"
+      "source": "sources/research_design_case/seeds.json `discriminator`, written by the case-study author before any plan was generated"
     }
   ],
   "rubric_inputs": {

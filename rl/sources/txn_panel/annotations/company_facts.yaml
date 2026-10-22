@@ -1,0 +1,65 @@
+# Reporting-basis, structural and coverage facts per KPI series: what a careful analyst should
+# notice. GRADER-ONLY. kpi_nowcast's write-up judge uses them for C5 (reporting basis) and C12
+# (structural breaks); data-quality facts (C4) are computed per case from the panel.
+#
+# public_from is the first date the fact was public and relevant; null means true for the whole
+# sample (e.g. a KPI definition or a sensor/KPI coverage mismatch). A case only gets facts public
+# on or before its as-of date, and no fact states an outcome after it. Restatements (e.g. ASC 606)
+# are not listed: kpi_nowcast derives them from each case's own actuals feed.
+#
+# The fiscal calendar is public in advance, but the 53-week shift only affects comparisons once
+# fiscal 2018 starts. Order within a series matters: facts reach the judge in this order.
+
+fy17_53_weeks: &fy17
+  text: >-
+    Fiscal 2017 has 53 weeks (its Q4 is 14 weeks), so fiscal 2018 quarters are shifted one week
+    later than the fiscal 2017 quarters they are compared with
+  public_from: '2018-02-04'
+
+facts:
+  ALK:
+  - text: 'Virgin America acquired Dec 14, 2016: YoY growth from 2017Q1 through 2017Q4 is mostly inorganic'
+    public_from: '2016-12-14'
+  SAVE:
+  - text: KPI is fares + non-ticket revenue; before 2018 these were reported as two separate lines
+    public_from: null
+  ALGT:
+  - text: >-
+      KPI is scheduled service revenue; from 2018 the line labelled passenger revenue also includes
+      air-related ancillaries
+    public_from: '2018-04-01'
+  - text: Sensor panel is thin and gappy on all four sources
+    public_from: null
+  KSS:
+  - *fy17
+  M:
+  - text: "KPI covers Macy's and Bloomingdale's: two sensor tickers (M_M, M_BL) must be combined"
+    public_from: null
+  - *fy17
+  JWN_FP:
+  - *fy17
+  JWN_OP:
+  - text: Off-price = Rack stores + Nordstromrack.com/HauteLook
+    public_from: null
+  - *fy17
+  ROST:
+  - text: "KPI covers Ross and dd's DISCOUNTS: two sensor tickers; the dd's sensor is very thin"
+    public_from: null
+  - *fy17
+  TJX_MARMAXX:
+  - text: 'Coverage mismatch: the sensor covers TJ Maxx only, while the Marmaxx segment is TJ Maxx + Marshalls'
+    public_from: null
+  - *fy17
+  DDS:
+  - text: KPI is the retail operations segment (excludes the CDI construction business)
+    public_from: null
+  - *fy17
+  JCP:
+  - text: Closing ~140 stores, announced Feb 24, 2017
+    public_from: '2017-02-24'
+  - *fy17
+
+# Series whose sensor cannot track the KPI well (measured fit near zero). Kept as cases that test
+# whether the agent notices weak signal; reported separately from the main score.
+low_signal:
+  TJX_MARMAXX: 'sensor covers TJ Maxx only; KPI is TJ Maxx + Marshalls (2015-17 YoY fit 0.02)'

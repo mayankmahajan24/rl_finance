@@ -1,0 +1,37 @@
+{
+  "target_period": "FY2017 Q3",
+  "target_period_end": "2017-10-28",
+  "unit": "USD millions",
+  "actual": 3328.894,
+  "actual_first_filed": "2017-12-06",
+  "actual_source": "https://www.sec.gov/Archives/edgar/data/745732/000074573217000034/rost-20171028.xml",
+  "actual_q4_derived": false,
+  "naive_forecast": 3329.947,
+  "consensus": null,
+  "consensus_note": "not compiled for v1",
+  "scale_factor": 1.0,
+  "series": "ROST",
+  "kpi": "Total sales",
+  "facts": {
+    "reporting_basis_and_structural": [
+      "KPI covers Ross and dd's DISCOUNTS: two sensor tickers; the dd's sensor is very thin"
+    ],
+    "sensor_data_quality_auto": [
+      "ROST_DD source 1: 858 of 1397 days missing",
+      "ROST_DD source 1: 69 days more than 4x above or below the trailing 4-week median",
+      "ROST_DD source 2: 28 days more than 4x above or below the trailing 4-week median",
+      "ROST_DD source 4: 23 days more than 4x above or below the trailing 4-week median",
+      "ROST_ROST source 2: 8 days more than 4x above or below the trailing 4-week median",
+      "ROST_ROST source 3: 9 days more than 4x above or below the trailing 4-week median",
+      "ROST_ROST source 4: 8 days more than 4x above or below the trailing 4-week median",
+      "ROST_ROST source 1: spend changed +59% 2015->2016 vs +4% on the other sources (level shift / panel change)",
+      "ROST_ROST source 1: spend changed +32% 2016->2017 vs -21% on the other sources (level shift / panel change)",
+      "ROST_DD source 2: spend changed +46% 2014->2015 vs +13% on the other sources (level shift / panel change)",
+      "ROST_DD source 1: spend changed +86% 2015->2016 vs +24% on the other sources (level shift / panel change)",
+      "ROST_DD source 2: spend changed +75% 2015->2016 vs +24% on the other sources (level shift / panel change)",
+      "ROST_DD source 3: spend changed +24% 2015->2016 vs +75% on the other sources (level shift / panel change)",
+      "ROST_DD source 4: spend changed +9% 2015->2016 vs +75% on the other sources (level shift / panel change)",
+      "ROST_DD source 1: spend changed +18% 2016->2017 vs -16% on the other sources (level shift / panel change)"
+    ]
+  }
+}

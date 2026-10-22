@@ -21,4 +21,4 @@ to_become_a_full_world:
 - past research memos and IC notes
 - point-in-time data snapshot and tool access
 sources:
-- data/research_design/contexts.json
+- sources/research_design_case/contexts.json

@@ -1,0 +1,42 @@
+period_start,period_end,value_usd_m,reported_on,report,q4_derived_from_annual
+2013-01-01,2013-03-31,1186.000,2014-05-02,first report,False
+2013-04-01,2013-06-30,1222.000,2014-08-01,first report,False
+2013-07-01,2013-09-30,1321.000,2014-10-31,first report,False
+2013-09-30,2013-12-31,1242.000,2015-02-12,first report,True
+2013-09-30,2013-12-31,1242.000,2016-02-17,"later filing (comparative, may be restated)",True
+2014-01-01,2014-03-31,1230.000,2014-05-02,first report,False
+2014-01-01,2014-03-31,1230.000,2015-04-30,"later filing (comparative, may be restated)",False
+2014-04-01,2014-06-30,1372.000,2014-08-01,first report,False
+2014-04-01,2014-06-30,1372.000,2015-07-31,"later filing (comparative, may be restated)",False
+2014-07-01,2014-09-30,1414.000,2014-10-31,first report,False
+2014-07-01,2014-09-30,1414.000,2015-10-30,"later filing (comparative, may be restated)",False
+2014-09-30,2014-12-31,1327.000,2015-02-12,first report,True
+2014-09-30,2014-12-31,1327.000,2016-02-17,"later filing (comparative, may be restated)",True
+2014-09-30,2014-12-31,1327.000,2017-02-17,"later filing (comparative, may be restated)",True
+2015-01-01,2015-03-31,1408.000,2015-04-30,first report,False
+2015-01-01,2015-03-31,1408.000,2016-05-03,"later filing (comparative, may be restated)",False
+2015-04-01,2015-06-30,1496.000,2015-07-31,first report,False
+2015-04-01,2015-06-30,1496.000,2016-07-29,"later filing (comparative, may be restated)",False
+2015-07-01,2015-09-30,1551.000,2015-10-30,first report,False
+2015-07-01,2015-09-30,1551.000,2016-10-28,"later filing (comparative, may be restated)",False
+2015-09-30,2015-12-31,1438.000,2016-02-17,first report,True
+2015-09-30,2015-12-31,1438.000,2017-02-17,"later filing (comparative, may be restated)",True
+2015-09-30,2015-12-31,1438.000,2018-02-16,"later filing (comparative, may be restated)",True
+2016-01-01,2016-03-31,1478.000,2016-05-03,first report,False
+2016-01-01,2016-03-31,1478.000,2017-04-28,"later filing (comparative, may be restated)",False
+2016-04-01,2016-06-30,1487.000,2016-07-29,first report,False
+2016-04-01,2016-06-30,1487.000,2017-07-28,"later filing (comparative, may be restated)",False
+2016-07-01,2016-09-30,1571.000,2016-10-28,first report,False
+2016-07-01,2016-09-30,1571.000,2017-10-27,"later filing (comparative, may be restated)",False
+2016-09-30,2016-12-31,1477.000,2017-02-17,first report,True
+2016-09-30,2016-12-31,1477.000,2018-02-16,"later filing (comparative, may be restated)",True
+2017-01-01,2017-03-31,1451.000,2017-04-28,first report,False
+2017-01-01,2017-03-31,1556.000,2018-04-27,"later filing (comparative, may be restated)",False
+2017-04-01,2017-06-30,1650.000,2017-07-28,first report,False
+2017-04-01,2017-06-30,1766.000,2018-07-26,"later filing (comparative, may be restated)",False
+2017-07-01,2017-09-30,1623.000,2017-10-27,first report,False
+2017-07-01,2017-09-30,1753.000,2018-10-26,"later filing (comparative, may be restated)",False
+2017-09-30,2017-12-31,1564.000,2018-02-16,first report,True
+2018-01-01,2018-03-31,1692.000,2018-04-27,first report,False
+2018-04-01,2018-06-30,1858.000,2018-07-26,first report,False
+2018-07-01,2018-09-30,1941.000,2018-10-26,first report,False

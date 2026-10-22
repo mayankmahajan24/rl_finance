@@ -3,3 +3,8 @@ __pycache__/
 *.pyc
 .DS_Store
 rl/vendor/
+
+# built tasks are regenerated, not committed; secrets never leave this machine
+rl/tasks/
+rl/splits/secrets/
+.venv/

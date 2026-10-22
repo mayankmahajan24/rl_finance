@@ -1,0 +1,147 @@
+--- a/rl/run_kpi_nowcast.py
++++ b/rl/run_kpi_nowcast.py
+@@ -31,6 +31,7 @@
+ import sys
+ import threading
+ import time
++from datetime import datetime, timezone
+ from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutTimeout
+ 
+ import yaml
+@@ -43,6 +44,9 @@
+ STATE = RUNS / "_state.json"
+ TOOL = {"type": "code_execution_20260521", "name": "code_execution"}
+ MAX_CONTINUATIONS = 40
++# Per-request HTTP timeouts. `read` is the longest gap allowed between streamed bytes; the server sends
++# keepalive pings while code runs, so a gap this long means a stalled connection, not a slow task.
++HTTP_TIMEOUT = {"connect": 30.0, "read": 300.0, "write": 120.0, "pool": 30.0}
+ HARNESS = ["run_kpi_nowcast.py", "graders/kpi_nowcast.py", "graders/kpi_nowcast_judge.md",
+            "prompts/kpi_nowcast/system.md", "prompts/kpi_nowcast/user.md", "build_kpi_nowcast.py",
+            "schemas/kpi_nowcast_forecast.json"]
+@@ -85,18 +89,34 @@
+     return files
+ 
+ 
+-def stream_with_backoff(client, req: dict, tries: int = 6):
++class DeadlineExceeded(RuntimeError):
++    pass
++
++
++def now() -> str:
++    return datetime.now(timezone.utc).isoformat(timespec="seconds")
++
++
++def stream_with_backoff(client, req: dict, deadline: float, label: str = "", tries: int = 6):
++    """One streamed request with jittered backoff on transient errors. Never starts an attempt or sleeps
++    past the case's deadline, so retries can't run a case beyond its wall-clock ceiling."""
+     import anthropic
+     retries = 0
+     while True:
++        if time.time() >= deadline:
++            raise DeadlineExceeded(f"case deadline reached before attempt {retries + 1}")
+         try:
+             with client.beta.messages.stream(**req) as s:
+                 return s.get_final_message(), retries
+         except (anthropic.RateLimitError, anthropic.InternalServerError, anthropic.APIConnectionError) as e:
+             retries += 1
++            print(f"    {now()} {label} attempt {retries} failed: {type(e).__name__}: {e}", flush=True)
+             if retries >= tries:
+                 raise
+-            time.sleep(min(60, 2 ** retries) * (0.5 + random.random()))
++            pause = min(60, 2 ** retries) * (0.5 + random.random())
++            if time.time() + pause >= deadline:
++                raise DeadlineExceeded(f"case deadline reached after {retries} failed attempts; last: {type(e).__name__}: {e}")
++            time.sleep(pause)
+ 
+ 
+ def block_to_turns(b) -> list[dict]:
+@@ -119,6 +139,7 @@
+ 
+ 
+ def run_once(client, args, d: pathlib.Path, t: dict, rep: int) -> dict:
++    started_at, deadline = now(), time.time() + (args.timeout_s or 10 ** 9)
+     system = (d / "prompt" / "system.md").read_text().strip()
+     user = (d / "prompt" / "user.md").read_text().strip()
+     files = materialize(d)
+@@ -133,7 +154,7 @@
+     turns = [{"role": "system", "content": system}, {"role": "user", "content": user + "\n\n[attached: " + ", ".join(files) + "]"}]
+     t0, retries, conts, tool_calls = time.time(), 0, 0, 0
+     while True:
+-        msg, r = stream_with_backoff(client, req)
++        msg, r = stream_with_backoff(client, req, deadline, t["id"])
+         retries += r
+         if not msg.model.startswith(args.model):
+             raise RuntimeError(f"served model {msg.model} != requested {args.model}")
+@@ -156,7 +177,7 @@
+             pass
+     latency = round(time.time() - t0, 1)
+     final_text = "\n".join(b.text for b in msg.content if b.type == "text")
+-    row = {"prompt_id": t["id"], "rep": rep, "prompt": user, "tags": t.get("tags", []), "model": msg.model,
++    row = {"prompt_id": t["id"], "rep": rep, "started_at": started_at, "prompt": user, "tags": t.get("tags", []), "model": msg.model,
+            "usage": usage, "latency_s": latency, "tool_calls": tool_calls, "continuations": conts,
+            "retries": retries, "stop_reason": msg.stop_reason, "meta": t["meta"]}
+     if msg.stop_reason == "refusal":
+@@ -171,7 +192,7 @@
+     row["parse_error"] = perr
+     row["forecast"] = fc
+     jreq = G.judge_request(args.judge, user, t["meta"]["as_of"], writeup, fc, gold)
+-    jmsg, jr = stream_with_backoff(client, jreq)
++    jmsg, jr = stream_with_backoff(client, jreq, deadline, t["id"] + " judge")
+     verdicts = json.loads(next(b.text for b in jmsg.content if b.type == "text"))
+     grade.update({k: v for k, v in G.grade_writeup(verdicts).items() if v is not None})
+     row.update(status="ok", grade=grade, judge_model=jmsg.model,
+@@ -186,22 +207,27 @@
+ 
+ 
+ def run_case(client, args, vdir, d, t, rep):
++    started_at, t0 = now(), time.time()
++    stamp = lambda: {"started_at": started_at, "ended_at": now(), "elapsed_s": round(time.time() - t0, 1)}  # noqa: E731
++    print(f"  {started_at} {t['id']} rep{rep}: start", flush=True)
+     pool = ThreadPoolExecutor(max_workers=1)
+     fut = pool.submit(run_once, client, args, d, t, rep)
+     try:
+-        row, turns = fut.result(timeout=args.timeout_s or None)
+-    except FutTimeout:
++        # small grace over the case deadline so the cooperative DeadlineExceeded path reports first
++        row, turns = fut.result(timeout=(args.timeout_s + 60) if args.timeout_s else None)
++    except (FutTimeout, DeadlineExceeded) as e:
+         write_row(vdir, "errors.jsonl", {"prompt_id": t["id"], "rep": rep, "failure_class": "timeout",
+-                                         "error": f"wall-clock ceiling {args.timeout_s}s"})
+-        print(f"  {t['id']} rep{rep}: timeout")
++                                         "error": f"wall-clock ceiling {args.timeout_s}s: {e}", **stamp()})
++        print(f"  {now()} {t['id']} rep{rep}: timeout", flush=True)
+         pool.shutdown(wait=False)
+         return
+     except Exception as e:
+         cls = "served_model_mismatch" if "served model" in str(e) else "harness_or_serving_error"
+         write_row(vdir, "errors.jsonl", {"prompt_id": t["id"], "rep": rep, "failure_class": cls,
+-                                         "error": f"{type(e).__name__}: {e}"})
+-        print(f"  {t['id']} rep{rep}: {cls}: {e}")
++                                         "error": f"{type(e).__name__}: {e}", **stamp()})
++        print(f"  {now()} {t['id']} rep{rep}: {cls}: {e}", flush=True)
+         return
++    row["ended_at"] = now()
+     (vdir / "traces").mkdir(parents=True, exist_ok=True)
+     (vdir / "traces" / f"{t['id']}_rep{rep}.json").write_text(json.dumps(turns, indent=1, default=str))
+     write_row(vdir, "results.jsonl", row)
+@@ -245,7 +271,8 @@
+         done = {(r["prompt_id"], r["rep"]) for r in map(json.loads, (vdir / "results.jsonl").read_text().splitlines())}
+     todo = [(d, t, k) for d, t in tasks for k in range(args.reps) if (t["id"], k) not in done]
+     import anthropic
+-    client = anthropic.Anthropic(max_retries=0)
++    import httpx
++    client = anthropic.Anthropic(max_retries=0, timeout=httpx.Timeout(**HTTP_TIMEOUT))
+     print(f"{args.model} effort={args.effort} judge={args.judge} · {len(todo)} runs ({len(done)} already done)")
+     t0 = time.time()
+     with ThreadPoolExecutor(max_workers=args.concurrency) as pool:
+--- a/rl/build_kpi_nowcast.py
++++ b/rl/build_kpi_nowcast.py
+@@ -348,7 +348,7 @@
+                                "writeup": "LLM judge rubric C1-C12 (graders/kpi_nowcast_judge.md)"},
+                     "sources": ["rl/data/kpi_nowcast/sensor_panel.csv.gz", "rl/data/kpi_nowcast/grader_only/kpi_facts.csv",
+                                 q["first_source"]],
+-                    "tags": [s["calendar"], variant, s["id"] if not anon else "anon"]
++                    "tags": [s["calendar"], variant] + ([] if anon else [s["id"]])
+                             + (["low_signal"] if s["id"] in LOW_SIGNAL else []),
+                     "meta": {"series": s["id"], "variant": variant, "as_of": as_of, "target_period": label,
+                              "sensors": s["sensors"], "low_signal": LOW_SIGNAL.get(s["id"])},

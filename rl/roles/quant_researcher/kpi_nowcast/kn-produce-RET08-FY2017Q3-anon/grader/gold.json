@@ -1,0 +1,26 @@
+{
+  "target_period": "FY2017 Q3",
+  "target_period_end": "2017-10-28",
+  "unit": "USD millions",
+  "actual": 1940.94,
+  "actual_first_filed": "2017-11-28",
+  "actual_source": "https://www.sec.gov/Archives/edgar/data/72333/000007233317000197/jwn-20171028.xml",
+  "actual_q4_derived": false,
+  "naive_forecast": 2015.737,
+  "consensus": null,
+  "consensus_note": "not compiled for v1",
+  "scale_factor": 0.959911,
+  "series": "JWN_FP",
+  "kpi": "Full-price net sales",
+  "facts": {
+    "reporting_basis_and_structural": [],
+    "sensor_data_quality_auto": [
+      "JWN_JWN source 1: 12 days more than 4x above or below the trailing 4-week median",
+      "JWN_JWN source 2: 7 days more than 4x above or below the trailing 4-week median",
+      "JWN_JWN source 3: 5 days more than 4x above or below the trailing 4-week median",
+      "JWN_JWN source 4: 5 days more than 4x above or below the trailing 4-week median",
+      "JWN_JWN source 1: spend changed +46% 2015->2016 vs -6% on the other sources (level shift / panel change)",
+      "JWN_JWN source 1: spend changed +18% 2016->2017 vs -27% on the other sources (level shift / panel change)"
+    ]
+  }
+}

@@ -1,0 +1,42 @@
+period_start,period_end,value_usd_m,reported_on,report,q4_derived_from_annual
+2013-01-01,2013-03-31,9249.469,2014-05-01,first report,False
+2013-04-01,2013-06-30,10555.673,2014-07-30,first report,False
+2013-07-01,2013-09-30,10377.335,2014-10-29,first report,False
+2013-09-30,2013-12-31,10114.648,2015-02-06,first report,True
+2013-09-30,2013-12-31,10114.648,2016-02-03,"later filing (comparative, may be restated)",True
+2014-01-01,2014-03-31,9478.416,2014-05-01,first report,False
+2014-01-01,2014-03-31,9478.416,2015-04-30,"later filing (comparative, may be restated)",False
+2014-04-01,2014-06-30,11452.182,2014-07-30,first report,False
+2014-04-01,2014-06-30,11452.182,2015-07-31,"later filing (comparative, may be restated)",False
+2014-07-01,2014-09-30,10999.108,2014-10-29,first report,False
+2014-07-01,2014-09-30,10999.108,2015-10-29,"later filing (comparative, may be restated)",False
+2014-09-30,2014-12-31,10625.562,2015-02-06,first report,True
+2014-09-30,2014-12-31,10625.562,2016-02-03,"later filing (comparative, may be restated)",True
+2014-09-30,2014-12-31,10625.562,2017-02-07,"later filing (comparative, may be restated)",True
+2015-01-01,2015-03-31,10068.859,2015-04-30,first report,False
+2015-01-01,2015-03-31,10068.859,2016-04-29,"later filing (comparative, may be restated)",False
+2015-04-01,2015-06-30,11693.179,2015-07-31,first report,False
+2015-04-01,2015-06-30,11693.179,2016-07-28,"later filing (comparative, may be restated)",False
+2015-07-01,2015-09-30,11365.423,2015-10-29,first report,False
+2015-07-01,2015-09-30,11365.423,2016-10-31,"later filing (comparative, may be restated)",False
+2015-09-30,2015-12-31,10972.598,2016-02-03,first report,True
+2015-09-30,2015-12-31,10972.598,2017-02-07,"later filing (comparative, may be restated)",True
+2015-09-30,2015-12-31,10972.598,2018-02-07,"later filing (comparative, may be restated)",True
+2016-01-01,2016-03-31,10599.052,2016-04-29,first report,False
+2016-01-01,2016-03-31,10599.052,2017-05-03,"later filing (comparative, may be restated)",False
+2016-04-01,2016-06-30,11820.908,2016-07-28,first report,False
+2016-04-01,2016-06-30,11820.908,2017-08-01,"later filing (comparative, may be restated)",False
+2016-07-01,2016-09-30,11252.155,2016-10-31,first report,False
+2016-07-01,2016-09-30,11252.155,2017-11-01,"later filing (comparative, may be restated)",False
+2016-09-30,2016-12-31,11141.296,2017-02-07,first report,True
+2016-09-30,2016-12-31,11141.296,2018-02-07,"later filing (comparative, may be restated)",True
+2017-01-01,2017-03-31,10661.712,2017-05-03,first report,False
+2017-01-01,2017-03-31,10955.728,2018-05-01,"later filing (comparative, may be restated)",False
+2017-04-01,2017-06-30,12611.378,2017-08-01,first report,False
+2017-04-01,2017-06-30,12963.234,2018-08-01,"later filing (comparative, may be restated)",False
+2017-07-01,2017-09-30,11435.312,2017-11-01,first report,False
+2017-07-01,2017-09-30,11914.897,2018-10-30,"later filing (comparative, may be restated)",False
+2017-09-30,2017-12-31,11418.443,2018-02-07,first report,True
+2018-01-01,2018-03-31,11049.717,2018-05-01,first report,False
+2018-04-01,2018-06-30,12912.625,2018-08-01,first report,False
+2018-07-01,2018-09-30,12517.389,2018-10-30,first report,False

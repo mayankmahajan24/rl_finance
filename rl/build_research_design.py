@@ -1,4 +1,4 @@
-"""Build the research_design and research_funding tasks from rl/data/research_design/.
+"""Build the research_design and research_funding tasks from rl/sources/research_design_case/.
 
 Idempotent: wipes and regenerates the 6 worlds and the rd-* task folders, then
 rewrites rl/catalog.json over every task in the tree. Other workflows' tasks
@@ -13,7 +13,7 @@ What gets built:
   roles/*/research_design/rd-produce-*  10 produce tasks (seed + firm -> plan)
 
 The source data, and what was deliberately left out of it, is described in
-rl/data/research_design/README.md.
+rl/sources/research_design_case/README.md.
 
 Usage:
     python rl/build_research_design.py
@@ -30,10 +30,10 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from lib import RL, ROLES, WORLDS, fingerprint, iter_tasks, load_prompt, write_json, write_yaml  # noqa: E402
 
-DATA = RL / "data" / "research_design"
+DATA = RL / "sources" / "research_design_case"
 GOLD = DATA / "grader_only" / "gold"
 SEED_ONLY = DATA / "grader_only" / "seed_only_runs"
-SRC = "data/research_design"   # prefix for `sources` paths, relative to rl/
+SRC = "sources/research_design_case"   # prefix for `sources` paths, relative to rl/
 PROMPTS = RL / "prompts" / "research_design"
 
 WORLD_NAMES = {

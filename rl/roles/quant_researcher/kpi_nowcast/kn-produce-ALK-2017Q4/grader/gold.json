@@ -1,0 +1,27 @@
+{
+  "target_period": "2017Q4",
+  "target_period_end": "2017-12-31",
+  "unit": "USD millions",
+  "actual": 1703.0,
+  "actual_first_filed": "2018-02-15",
+  "actual_source": "https://www.sec.gov/Archives/edgar/data/766421/000076642118000015/alk-20171231.xml",
+  "actual_q4_derived": true,
+  "naive_forecast": 1777.089,
+  "consensus": null,
+  "consensus_note": "not compiled for v1",
+  "scale_factor": 1.0,
+  "series": "ALK",
+  "kpi": "Passenger revenue",
+  "facts": {
+    "reporting_basis_and_structural": [
+      "Virgin America acquired Dec 14, 2016: YoY growth from 2017Q1 through 2017Q4 is mostly inorganic"
+    ],
+    "sensor_data_quality_auto": [
+      "ALK source 1: 157 of 1461 days missing",
+      "ALK source 1: 364 days more than 4x above or below the trailing 4-week median",
+      "ALK source 1: spend changed +93% 2015->2016 vs -1% on the other sources (level shift / panel change)",
+      "ALK source 1: spend changed +156% 2016->2017 vs +28% on the other sources (level shift / panel change)",
+      "ALK source 4: spend changed +4% 2016->2017 vs +46% on the other sources (level shift / panel change)"
+    ]
+  }
+}

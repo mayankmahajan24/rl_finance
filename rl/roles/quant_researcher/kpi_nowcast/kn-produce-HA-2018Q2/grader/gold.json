@@ -1,0 +1,28 @@
+{
+  "target_period": "2018Q2",
+  "target_period_end": "2018-06-30",
+  "unit": "USD millions",
+  "actual": 655.162,
+  "actual_first_filed": "2018-07-25",
+  "actual_source": "https://www.sec.gov/Archives/edgar/data/1172222/000117222218000048/ha-20180630.xml",
+  "actual_q4_derived": false,
+  "naive_forecast": 674.877,
+  "consensus": null,
+  "consensus_note": "not compiled for v1",
+  "scale_factor": 1.0,
+  "series": "HA",
+  "kpi": "Passenger revenue",
+  "facts": {
+    "reporting_basis_and_structural": [
+      "Reporting basis changed: 1 earlier quarter(s) were re-reported in filings from 2018-04-25 on, by +4.9% to +4.9% (e.g. a new accounting standard or a segment redefinition). The target quarter will be reported on the new basis; its same-quarter-last-year comparable is NOT yet available on the new basis (only its original figure is in the feed)."
+    ],
+    "sensor_data_quality_auto": [
+      "HA source 1: 616 of 1642 days missing",
+      "HA source 1: 393 days more than 4x above or below the trailing 4-week median",
+      "HA source 4: 34 days more than 4x above or below the trailing 4-week median",
+      "HA source 1: spend changed +54% 2014->2015 vs +9% on the other sources (level shift / panel change)",
+      "HA source 1: spend changed +62% 2015->2016 vs +5% on the other sources (level shift / panel change)",
+      "HA source 1: spend changed +56% 2016->2017 vs +8% on the other sources (level shift / panel change)"
+    ]
+  }
+}

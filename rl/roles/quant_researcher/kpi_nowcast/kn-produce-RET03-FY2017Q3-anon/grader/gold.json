@@ -1,0 +1,28 @@
+{
+  "target_period": "FY2017 Q3",
+  "target_period_end": "2017-10-28",
+  "unit": "USD millions",
+  "actual": 3607.596,
+  "actual_first_filed": "2017-11-29",
+  "actual_source": "https://www.sec.gov/Archives/edgar/data/1166126/000116612617000066/jcp-20171028.xml",
+  "actual_q4_derived": false,
+  "naive_forecast": 3727.224,
+  "consensus": null,
+  "consensus_note": "not compiled for v1",
+  "scale_factor": 1.285214,
+  "series": "JCP",
+  "kpi": "Total net sales",
+  "facts": {
+    "reporting_basis_and_structural": [
+      "Closing ~140 stores, announced Feb 24, 2017"
+    ],
+    "sensor_data_quality_auto": [
+      "JCP source 1: 14 days more than 4x above or below the trailing 4-week median",
+      "JCP source 2: 10 days more than 4x above or below the trailing 4-week median",
+      "JCP source 3: 12 days more than 4x above or below the trailing 4-week median",
+      "JCP source 4: 11 days more than 4x above or below the trailing 4-week median",
+      "JCP source 1: spend changed +35% 2015->2016 vs -10% on the other sources (level shift / panel change)",
+      "JCP source 1: spend changed +1% 2016->2017 vs -27% on the other sources (level shift / panel change)"
+    ]
+  }
+}

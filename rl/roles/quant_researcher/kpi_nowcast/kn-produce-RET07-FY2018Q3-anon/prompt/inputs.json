@@ -1,0 +1,12 @@
+{
+  "company": "Retailer RET07",
+  "kpi": "total sales",
+  "industry": "US department store / off-price retailer",
+  "tickers": "RET07, RET09",
+  "target": "FY2018 Q3",
+  "target_end": "2018-11-03",
+  "as_of": "2018-11-03",
+  "first_quarter": "FY2012 Q1",
+  "prior": "FY2018 Q2",
+  "fiscal_note": "fiscal quarters (fiscal year ends late January / early February)"
+}

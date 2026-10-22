@@ -1,0 +1,41 @@
+id: kn-produce-SAVE-2018Q2
+role: quant_researcher
+workflow: kpi_nowcast
+mode: produce
+world: ls_altdata
+status: graded
+split: bench
+prompt:
+  template: families/kpi_nowcast/prompts/{system,user}.md
+  fingerprint: 30812abdfe9c
+  files:
+  - actuals.csv
+  - data_brief.md
+  - sensor_panel.csv
+environment:
+  tools:
+  - code_execution
+  internet: false
+output_schema: families/kpi_nowcast/schema.json
+grader:
+  type: kpi_nowcast
+  module: families/kpi_nowcast/grader.py
+  accuracy: programmatic (forecast JSON vs gold.actual)
+  writeup: LLM judge rubric C1-C12 (families/kpi_nowcast/judge.md)
+sources:
+- rl/sources/txn_panel/raw/sensor_panel.csv.gz
+- rl/sources/txn_panel/grader_only/kpi_facts.csv
+- https://www.sec.gov/Archives/edgar/data/1498710/000149871018000138/save-20180630.xml
+tags:
+- calendar
+- named
+- SAVE
+meta:
+  series: SAVE
+  company: SAVE
+  variant: named
+  as_of: '2018-06-30'
+  target_period: 2018Q2
+  sensors:
+  - SAVE
+  low_signal: null

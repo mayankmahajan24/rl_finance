@@ -9,9 +9,9 @@ prompt:
   template: prompts/research_design/review.md
   fingerprint: ee6dd1a4f99e
 sources:
-- data/research_design/items/S7.json
-- data/research_design/grader_only/gold/S7.json
-- data/research_design/grader_only/gold/_issues.json
+- sources/research_design_case/items/S7.json
+- sources/research_design_case/grader_only/gold/S7.json
+- sources/research_design_case/grader_only/gold/_issues.json
 output_schema: schemas/research_design_review.json
 grader:
   type: review_issues

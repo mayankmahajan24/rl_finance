@@ -1,0 +1,24 @@
+# Who is in the panel. A company is the unit splits are assigned by: every sensor ticker and KPI
+# series of one company always lands in the same split, so no task in one split can carry another
+# split's company (even disguised: rescaling and date shifts don't hide a series' shape).
+#
+# sensors  tickers as they appear in raw/sensor_panel.csv.gz
+# series   KPI series ids in grader_only/kpi_*.csv and build/sec_xbrl/series.py
+
+companies:
+  AAL:  {name: American Airlines, industry: airlines, sensors: [AAL], series: [AAL]}
+  ALGT: {name: Allegiant Travel, industry: airlines, sensors: [ALGT], series: [ALGT]}
+  ALK:  {name: Alaska Air Group, industry: airlines, sensors: [ALK], series: [ALK]}
+  DAL:  {name: Delta Air Lines, industry: airlines, sensors: [DAL], series: [DAL]}
+  HA:   {name: Hawaiian Holdings, industry: airlines, sensors: [HA], series: [HA]}
+  JBLU: {name: JetBlue Airways, industry: airlines, sensors: [JBLU], series: [JBLU]}
+  LUV:  {name: Southwest Airlines, industry: airlines, sensors: [LUV], series: [LUV]}
+  SAVE: {name: Spirit Airlines, industry: airlines, sensors: [SAVE], series: [SAVE]}
+  UAL:  {name: United Airlines, industry: airlines, sensors: [UAL], series: [UAL]}
+  DDS:  {name: "Dillard's", industry: department stores, sensors: [DDS], series: [DDS]}
+  JCP:  {name: J. C. Penney, industry: department stores, sensors: [JCP], series: [JCP]}
+  JWN:  {name: Nordstrom, industry: department stores, sensors: [JWN_JWN, JWN_RACK], series: [JWN_FP, JWN_OP]}
+  KSS:  {name: "Kohl's", industry: department stores, sensors: [KSS], series: [KSS]}
+  M:    {name: "Macy's", industry: department stores, sensors: [M_M, M_BL], series: [M]}
+  ROST: {name: Ross Stores, industry: department stores, sensors: [ROST_ROST, ROST_DD], series: [ROST]}
+  TJX:  {name: TJX Companies, industry: department stores, sensors: [TJX_TJMAXX], series: [TJX_MARMAXX]}

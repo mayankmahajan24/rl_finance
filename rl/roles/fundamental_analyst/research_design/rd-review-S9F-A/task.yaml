@@ -9,9 +9,9 @@ prompt:
   template: prompts/research_design/review.md
   fingerprint: ee6dd1a4f99e
 sources:
-- data/research_design/items/S9F.json
-- data/research_design/grader_only/gold/S9F.json
-- data/research_design/grader_only/gold/_issues.json
+- sources/research_design_case/items/S9F.json
+- sources/research_design_case/grader_only/gold/S9F.json
+- sources/research_design_case/grader_only/gold/_issues.json
 output_schema: schemas/research_design_review.json
 grader:
   type: review_issues
@@ -25,4 +25,4 @@ meta:
   plan_token: e05d0b
   context_flip: true
   seed_style: fundamental
-status_note: 'gold empty: context-flip item, labels never filled (data/research_design/grader_only/gold/HOW-TO-FILL.md)'
+status_note: 'gold empty: context-flip item, labels never filled (sources/research_design_case/grader_only/gold/HOW-TO-FILL.md)'

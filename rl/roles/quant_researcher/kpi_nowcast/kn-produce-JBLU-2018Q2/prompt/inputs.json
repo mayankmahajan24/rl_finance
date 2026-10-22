@@ -1,0 +1,12 @@
+{
+  "company": "JBLU",
+  "kpi": "passenger revenue",
+  "industry": "US airline",
+  "tickers": "JBLU",
+  "target": "2018Q2",
+  "target_end": "2018-06-30",
+  "as_of": "2018-06-30",
+  "first_quarter": "2013Q1",
+  "prior": "2018Q1",
+  "fiscal_note": "calendar quarters"
+}

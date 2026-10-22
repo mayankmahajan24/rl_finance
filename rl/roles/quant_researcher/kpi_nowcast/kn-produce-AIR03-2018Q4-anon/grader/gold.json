@@ -1,0 +1,24 @@
+{
+  "target_period": "2018Q4",
+  "target_period_end": "2018-12-31",
+  "unit": "USD millions",
+  "actual": 21625.648,
+  "actual_first_filed": "2019-02-28",
+  "actual_source": "https://www.sec.gov/Archives/edgar/data/100517/000010051719000009/ual-20181231.xml",
+  "actual_q4_derived": true,
+  "naive_forecast": 21698.898,
+  "consensus": null,
+  "consensus_note": "not compiled for v1",
+  "scale_factor": 2.263044,
+  "series": "UAL",
+  "kpi": "Passenger revenue",
+  "facts": {
+    "reporting_basis_and_structural": [
+      "Reporting basis changed: 3 earlier quarter(s) were re-reported in filings from 2018-04-18 on, by +6.1% to +6.7% (e.g. a new accounting standard or a segment redefinition). The target quarter will be reported on the new basis; its same-quarter-last-year comparable is NOT yet available on the new basis (only its original figure is in the feed)."
+    ],
+    "sensor_data_quality_auto": [
+      "UAL source 1: spend changed +77% 2015->2016 vs -4% on the other sources (level shift / panel change)",
+      "UAL source 1: spend changed +111% 2016->2017 vs +2% on the other sources (level shift / panel change)"
+    ]
+  }
+}

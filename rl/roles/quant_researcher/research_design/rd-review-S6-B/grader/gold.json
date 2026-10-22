@@ -32,6 +32,6 @@
   "critique_prose": "B should be able to solve the circularity properly rather than decompose around it: make the independent variable backward-looking (realized CAGR) and the dependent variable forward-looking. The EV identity decomposition is a workaround, not a fix.\n\nLog multiples do not make sense in this case.\n\nThe negative-denominator problem is handled by screening to NTM and N2Y EBITDA > 0, which drops exactly the firm-quarters where re-rating is most violent. Switching to a revenue multiple handles those cases instead of excluding them.\n\nNeither plan addresses the metric shifting as a company matures - revenue for high-growth, EBITDA for mature. B has revenue CAGR as a second regressor and EV/Sales as an alternate dependent variable, but never models the transition.",
   "provenance": {
     "labeller": "human (case-study author), judged blind",
-    "issue_split": "case_study/scripts/split_gold.py classified the prose into blocking / secondary / anti_objection / praise"
+    "issue_split": "the case study's scripts/split_gold.py (commit a75441c) classified the prose into blocking / secondary / anti_objection / praise"
   }
 }

@@ -10,7 +10,7 @@ brief: 'A mid-size long/short equity fund that has just licensed a European reta
   data can be attached to a ticker. What kills the work is a confident wrong match, because the desk would
   then be sizing a position on another bank''s customers. Must be defensible to a PM who will ask what
   would have to be true for it to be wrong.'
-case_study_items:
+source_items:
 - S3
 to_become_a_full_world:
 - mandate and risk limits
@@ -19,4 +19,4 @@ to_become_a_full_world:
 - past research memos and IC notes
 - point-in-time data snapshot and tool access
 sources:
-- case_study/part2/contexts.json
+- data/research_design/contexts.json

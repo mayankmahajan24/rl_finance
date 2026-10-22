@@ -1,6 +1,6 @@
 # Review scorer prompt
 
-Copied from `case_study/scripts/score_issues.py` by the build. The scorer buckets each issue a model raised against the task's gold issues.
+Copied verbatim from the case study's `scripts/score_issues.py` (commit a75441c). The scorer buckets each issue a model raised against the task's gold issues.
 
 ---
 

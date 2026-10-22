@@ -16,7 +16,7 @@ halves that must never mix: what the model sees, and what only the grader sees.
     reference/       reference outputs with their human verdicts
 ```
 
-`build_from_case_study.py` refuses to write the tree if any gold text appears
+Each build script (`build_research_design.py`, `build_kpi_nowcast.py`) refuses to write the tree if any gold text appears
 anywhere under `prompt/` (the leak check).
 
 ## task.yaml

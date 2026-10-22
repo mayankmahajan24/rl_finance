@@ -20,14 +20,13 @@ import yaml
 
 RL = pathlib.Path(__file__).resolve().parent
 ROOT = RL.parent
-CASE = ROOT / "case_study"   # the original take-home: part0-3, scripts, seeds
 ROLES = RL / "roles"
 WORLDS = RL / "worlds"
 
 
 def fingerprint(*parts: str) -> str:
-    """Same hash as case_study/scripts/run_eval.py, so a task rendered here can be proven to
-    use the identical instrument the case-study runs used."""
+    """Same hash the case study's scripts/run_eval.py used, so a task rendered here can be
+    proven to use the identical instrument as the baseline runs in data/research_design/."""
     h = hashlib.sha256()
     for p in parts:
         h.update(p.encode())

@@ -32,6 +32,6 @@
   "critique_prose": "Killing the circularity is good, but the fix falters. EV/LTM EBITDA is not how assets are priced in public markets - pricing is mostly on forward earnings, not prior earnings - so A trades a mechanical problem for a measure that does not reflect the thing being studied.\n\nTAQ data makes absolutely zero sense for this project. The time horizon for a multiple re-rating is months to years, not milliseconds. (This desk also has no tick data, but the horizon mismatch is the real objection and would stand at any firm.)\n\nA gates on the seed's question and then spends the project on two others - regime stability and re-rating efficiency. Those are legitimate questions, but the elasticity itself is the deliverable here and A never produces a usable one.\n\nNear-zero and negative EBITDA denominators are handled by screening them out (margin >= 2%). The natural fix is to switch to a revenue multiple rather than drop the observations.",
   "provenance": {
     "labeller": "human (case-study author), judged blind",
-    "issue_split": "case_study/scripts/split_gold.py classified the prose into blocking / secondary / anti_objection / praise"
+    "issue_split": "the case study's scripts/split_gold.py (commit a75441c) classified the prose into blocking / secondary / anti_objection / praise"
   }
 }

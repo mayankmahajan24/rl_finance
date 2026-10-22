@@ -32,6 +32,6 @@
   "critique_prose": "Simple-first is the right instinct and it is B's best feature.\n\nBut B treats commoditization as close to dispositive: vendor availability implies crowding, therefore expect a null. That confuses decay with death. A published signal can still carry alpha for someone constructing it more carefully, and B never tests that possibility.\n\nWhere the residual alpha most likely lives is in niche cases not yet arbed away, and B cannot see them. One pooled specification with industry-by-quarter fixed effects estimates the average effect; killing the project at a t of 2.1 on that specification says little about whether pockets survive.\n\nConstraint layering is thin - a flat 20bp round-trip, no borrow cost, no ADV cap, no capacity estimate. For a firm judged on whether a signal survives costs and has capacity, that is not a defensible net number.",
   "provenance": {
     "labeller": "human (case-study author), judged blind",
-    "issue_split": "case_study/scripts/split_gold.py classified the prose into blocking / secondary / anti_objection / praise"
+    "issue_split": "the case study's scripts/split_gold.py (commit a75441c) classified the prose into blocking / secondary / anti_objection / praise"
   }
 }

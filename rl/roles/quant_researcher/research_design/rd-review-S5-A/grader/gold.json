@@ -32,6 +32,6 @@
   "critique_prose": "Kitchen-sink approach, which I would avoid. It is better to start with strong priors and the subsets of the data and the market where you think the signal will work, and test those, than to fit everything and orthogonalize afterward.\n\nThe custom-trained transformer might not be needed. FinBERT, or even a time-series z-score fed to a standard scoring model, may get most of the way. A names FinBERT as a baseline to beat but still leads with the domain-adaptation build rather than establishing first what the cheap measure delivers.\n\nThe real knock: A does not use a vendor-provided score as the threshold a custom signal has to clear. If a licensed score already captures most of the effect, the custom build is only worth its cost if it beats that score, and A never sets the hurdle.\n\nThe constraint layering - spread, impact, ADV caps, borrow, break-even cost, capacity where net alpha halves - is right, and is what makes a signal defensible to this committee.",
   "provenance": {
     "labeller": "human (case-study author), judged blind",
-    "issue_split": "case_study/scripts/split_gold.py classified the prose into blocking / secondary / anti_objection / praise"
+    "issue_split": "the case study's scripts/split_gold.py (commit a75441c) classified the prose into blocking / secondary / anti_objection / praise"
   }
 }

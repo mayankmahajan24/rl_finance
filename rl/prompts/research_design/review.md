@@ -1,8 +1,8 @@
 # Research-design review prompt (review mode)
 
-Copied verbatim from `case_study/part2/evaluator/pointwise.md`; only this header changed.
+Copied verbatim from the case study's `part2/evaluator/pointwise.md` (commit a75441c); only this header changed.
 The text below the `## SYSTEM` and `## USER` markers is the instrument, and its
-fingerprint must match the case-study runs (`rl/replay_case_study.py` checks).
+fingerprint must match the case-study runs (`rl/replay_research_design.py` checks).
 Placeholders: `{context}`, `{seed}`, `{plan}`. Judging basis:
 `rl/rubrics/research_design/TENETS.md`.
 

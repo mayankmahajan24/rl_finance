@@ -26,6 +26,6 @@
   "critique_prose": "The experiment as set up is infeasible for a nontechnical team. A 40,000 firm-quarter panel with embedding-based topic tagging, a pinned LLM, 1,000 hand-labels, elastic-net weighting and block bootstrap cannot be run by five people with no engineers and nobody maintaining a database, and the investment committee is skeptical of models it cannot inspect. Nor would this firm be interested in that kind of analysis even if it is stronger statistically.\n\nUnder this error asymmetry the cost is sharper than inconvenience: spending the only analyst on a research programme while the renegotiation resolves is how the fund gets blindsided on the thing it was worried about.\n\nThe idea is right. Separating whether this call is genuinely elevated from whether elevation predicts anything is the correct decomposition, and B is honest that the modal outcome is a null. What it needs is a version scaled to this desk - the same two questions asked of this company's own transcript history rather than a market-wide panel.",
   "provenance": {
     "labeller": "human (case-study author), judged blind",
-    "issue_split": "case_study/scripts/split_gold.py classified the prose into blocking / secondary / anti_objection / praise"
+    "issue_split": "the case study's scripts/split_gold.py (commit a75441c) classified the prose into blocking / secondary / anti_objection / praise"
   }
 }

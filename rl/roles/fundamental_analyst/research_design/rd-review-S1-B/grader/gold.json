@@ -14,6 +14,6 @@
   "critique_prose": "A regression is not the right test for a switching/cannibalization framework. The magnitudes matter less than whether the effect exists and in which direction, and B spends its design budget defending a regressor that mechanically contains the outcome rather than avoiding that problem in the first place.",
   "provenance": {
     "labeller": "human (case-study author), judged blind",
-    "issue_split": "case_study/scripts/split_gold.py classified the prose into blocking / secondary / anti_objection / praise"
+    "issue_split": "the case study's scripts/split_gold.py (commit a75441c) classified the prose into blocking / secondary / anti_objection / praise"
   }
 }

@@ -8,7 +8,7 @@ brief: A five-person old-school long-only manager, ~$400M AUM, 25-30 concentrate
   and datasets occasionally but cannot operate infrastructure. What kills them is being wrong about a
   business, not transaction costs. Anything proposed must be executable by one analyst and defensible
   to an investment committee that is skeptical of models it cannot inspect.
-case_study_items:
+source_items:
 - S9
 - S10
 - S2F
@@ -21,4 +21,4 @@ to_become_a_full_world:
 - past research memos and IC notes
 - point-in-time data snapshot and tool access
 sources:
-- case_study/part2/contexts.json
+- data/research_design/contexts.json

@@ -8,7 +8,7 @@ brief: An electronic market-making firm that internalizes and quotes against ret
   the hedging stack rather than a trade. Work is judged on realized spread capture net of adverse selection,
   on inventory risk, and on whether a classification can run inside the quoting loop at production latency.
   What kills them is systematically quoting into informed flow they had labelled uninformed.
-case_study_items:
+source_items:
 - S8
 to_become_a_full_world:
 - mandate and risk limits
@@ -17,4 +17,4 @@ to_become_a_full_world:
 - past research memos and IC notes
 - point-in-time data snapshot and tool access
 sources:
-- case_study/part2/contexts.json
+- data/research_design/contexts.json

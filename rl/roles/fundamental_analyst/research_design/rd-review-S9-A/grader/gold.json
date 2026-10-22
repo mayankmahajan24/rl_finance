@@ -26,6 +26,6 @@
   "critique_prose": "It tiers agreements on contract attributes - minimum quantities, take-or-pay damages, cancellability, RPO inclusion - when these indicators need to be industry and market-regime specific. Contract language is not what separates the agreements that hold from the ones that reprice; switching cost and requalification lag are, which is why aerospace forgings and container slots behave differently at identical contract strength. A sorts on the wrong axis.\n\nThe explicit numeric thresholds seem arbitrary. The 90-95 / 70 / 25-35 percent tier haircuts, and the six constructive conditions (60% NTM coverage, 40% year-two, cash support 15%, top-three customer share under 45%, mirror reconciliation 50%, modeled horizon two years beyond market-implied), are all asserted rather than derived.\n\nThe haircuts are calibrated off a single prior episode, 2021-23 semiconductors. That is the one-observation base rate this plan is implicitly arguing is sufficient, and it is an episode where agreements broke on price - potentially the wrong prior to carry into a different industry.",
   "provenance": {
     "labeller": "human (case-study author), judged blind",
-    "issue_split": "case_study/scripts/split_gold.py classified the prose into blocking / secondary / anti_objection / praise"
+    "issue_split": "the case study's scripts/split_gold.py (commit a75441c) classified the prose into blocking / secondary / anti_objection / praise"
   }
 }

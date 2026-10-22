@@ -1,6 +1,6 @@
 # Research-design produce prompt (produce mode)
 
-The system text is `PLAN_SYSTEM` from `case_study/scripts/generate.py`, unchanged. The user
+The system text is `PLAN_SYSTEM` from the case study's `scripts/generate.py` (commit a75441c), unchanged. The user
 message differs from Part 1 in one way: it now carries the firm context, because
 tenet 1 says a plan is good or bad *for someone*. Part 1 plans were generated
 without it, so they are reference outputs for this task, not runs of it.

@@ -26,6 +26,6 @@
   "critique_prose": "Does not account for hidden Kalshi users trading through Robinhood. Broker-routed Kalshi activity produces no Kalshi descriptor, so those users sit in the control group while actually treated, attenuating the estimate toward zero. Robinhood appears in the merchant dictionary as a descriptor to capture, but the treatment-misclassification consequence is never addressed.\n\nDoes not resolve the timing of Kalshi adoption, which is concentrated in specific events and cohorts. Kalshi only ramped its sports contracts around the 2025 football season, so a panel starting Jan 2022 pools politics- and election-driven adopters with sports-driven ones as if they were one population. Cohort-by-calendar-month effects and a robustness spec dropping the Nov 2024 and Jan 2025 cohorts treat this as a nuisance to control for rather than as distinct regimes that should be estimated separately.\n\nPromotional credit is unhandled. Kalshi ran free promos during the sports ramp, so a user can trade without any qualifying bank debit. The treatment definition - first Kalshi debit of $5 or more - will misdate or entirely miss those adopters, mixing treated users back into controls.",
   "provenance": {
     "labeller": "human (case-study author), judged blind",
-    "issue_split": "case_study/scripts/split_gold.py classified the prose into blocking / secondary / anti_objection / praise"
+    "issue_split": "the case study's scripts/split_gold.py (commit a75441c) classified the prose into blocking / secondary / anti_objection / praise"
   }
 }

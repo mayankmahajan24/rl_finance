@@ -82,7 +82,7 @@ Just enough to read the code and talk to Mayank.
 
 ## 3. Where things stand
 
-### The origin: the case study (`case_study/`)
+### The origin: the case study
 
 Mayank wrote this in August 2026 as a take-home assignment for a finance research
 role at Anthropic. It asked whether Claude can turn a rough investment idea into a
@@ -96,14 +96,16 @@ from it drive this company:
   catching issues without penalizing invented ones would teach this behaviour. Our
   review grader is built to prevent it.
 
-You won't need to change `case_study/`. Treat it as read-only source data: its
-scripts and raw model outputs are what `rl/` is built from and checked against.
+The data `rl/` needs from it (items, gold labels, seeds, firm briefs and four
+models' saved runs) lives in `rl/data/research_design/`. Treat it as read-only
+source data: `rl/` is built from it and checked against it. The full take-home is
+in git history at commit `a75441c`, under `case_study/`.
 
 ### What `rl/` contains today
 
 **52 tasks in 6 "worlds"**, all converted from the case study by
-`rl/build_from_case_study.py`. The script is idempotent and regenerates
-`rl/worlds/`, `rl/roles/` and `rl/catalog.json`.
+`rl/build_research_design.py`. The script is idempotent: it regenerates
+`rl/worlds/` and its own `rd-*` tasks, and rewrites `rl/catalog.json`.
 
 Tasks are organized **role → workflow → task**:
 
@@ -126,7 +128,7 @@ A **world** is a simulated fund. Today each is a one-paragraph description
 (`rl/worlds/<id>/world.yaml`). Making them full worlds (holdings, theses, past
 memos, data) is upcoming work.
 
-**Verified.** `rl/replay_case_study.py` re-grades four models' saved outputs with
+**Verified.** `rl/replay_research_design.py` re-grades four models' saved outputs with
 the new graders and reproduces every headline number from the case study, with no
 API calls. The build refuses to write the task tree if any gold text appears in a
 model-visible prompt; that leak check has been tested by planting a leak.
@@ -161,8 +163,8 @@ Dependencies: Python 3, `anthropic` (installed: 0.89), `pyyaml`. An
 `ANTHROPIC_API_KEY` is needed only for `sync` and real runs.
 
 ```sh
-python rl/build_from_case_study.py         # regenerate tasks; runs the leak check
-python rl/replay_case_study.py             # must print "All fingerprints and GRADED.md numbers reproduced."
+python rl/build_research_design.py         # regenerate tasks; runs the leak check
+python rl/replay_research_design.py        # must print "All fingerprints and GRADED.md numbers reproduced."
 python rl/skills/manage.py fetch           # check out the pinned skills repo
 python rl/skills/manage.py check
 python rl/run.py --model claude-opus-5-5 --dry-run               # print a request, no API call
@@ -267,7 +269,7 @@ recruiting experts, and lab conversations.
 - Add `pyproject.toml` or `requirements.txt` and a README setup section.
 - Decide whether to upgrade the `anthropic` SDK. 0.89 predates the current Skills
   API: `manage.py` handles both shapes, but that path is untested. Check what
-  changes for `case_study/scripts`.
+  changes.
 - Make every invariant in section 4 a test that runs in CI: build, leak check,
   replay, `manage.py check`, fingerprints, and a provenance check on generated
   files.

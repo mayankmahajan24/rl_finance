@@ -26,7 +26,7 @@ Note: these grades used the **old** grader facts. ALK's C5 failure is a known gr
 - **Forecast:** 20,839 (range 19,796–21,883 at 90%)
 - **Accuracy:** miss -3.6%, in range: yes, skill vs naive -0.83, interval score 0.097
 - **Write-up score:** 0.90
-- **Transcript:** [`traces/kn-produce-AIR03-2018Q4-anon_rep0.json`](baseline/traces/kn-produce-AIR03-2018Q4-anon_rep0.json)
+- **Transcript:** [`traces/kn-produce-AIR03-2018Q4-anon_rep0.json`](../baseline/traces/kn-produce-AIR03-2018Q4-anon_rep0.json)
 
 | Item | Judge | Judge's reason | You'd score it… |
 |---|---|---|---|
@@ -49,7 +49,7 @@ Note: these grades used the **old** grader facts. ALK's C5 failure is a known gr
 - **Forecast:** 9,232 (range 8,800–9,670 at 90%)
 - **Accuracy:** miss -3.4%, in range: yes, skill vs naive -0.82, interval score 0.091
 - **Write-up score:** 0.91
-- **Transcript:** [`traces/kn-produce-UAL-2018Q4_rep0.json`](baseline/traces/kn-produce-UAL-2018Q4_rep0.json)
+- **Transcript:** [`traces/kn-produce-UAL-2018Q4_rep0.json`](../baseline/traces/kn-produce-UAL-2018Q4_rep0.json)
 
 | Item | Judge | Judge's reason | You'd score it… |
 |---|---|---|---|
@@ -72,7 +72,7 @@ Note: these grades used the **old** grader facts. ALK's C5 failure is a known gr
 - **Forecast:** 2,082 (range 1,959–2,213 at 90%)
 - **Accuracy:** miss -12.0%, in range: no, skill vs naive +0.09, interval score 1.409
 - **Write-up score:** 1.00
-- **Transcript:** [`traces/kn-produce-JWN_FP-FY2018Q3_rep0.json`](baseline/traces/kn-produce-JWN_FP-FY2018Q3_rep0.json)
+- **Transcript:** [`traces/kn-produce-JWN_FP-FY2018Q3_rep0.json`](../baseline/traces/kn-produce-JWN_FP-FY2018Q3_rep0.json)
 
 | Item | Judge | Judge's reason | You'd score it… |
 |---|---|---|---|
@@ -95,7 +95,7 @@ Note: these grades used the **old** grader facts. ALK's C5 failure is a known gr
 - **Forecast:** 1,675 (range 1,555–1,805 at 90%)
 - **Accuracy:** miss -1.6%, in range: yes, skill vs naive +0.45, interval score 0.147
 - **Write-up score:** 0.82
-- **Transcript:** [`traces/kn-produce-ALK-2017Q4_rep0.json`](baseline/traces/kn-produce-ALK-2017Q4_rep0.json)
+- **Transcript:** [`traces/kn-produce-ALK-2017Q4_rep0.json`](../baseline/traces/kn-produce-ALK-2017Q4_rep0.json)
 
 | Item | Judge | Judge's reason | You'd score it… |
 |---|---|---|---|

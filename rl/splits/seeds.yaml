@@ -1,16 +1,14 @@
 # Seed ranges for generated families. A (family, seed, control) triple names one task exactly, so
 # ranges must never overlap across splits; splits/check.py enforces it.
 #
-#   pilot    the 18 tasks from ~/altdata_evals (built on ALL companies, so in no split). Kept to
-#            prove the port reproduces them; never used for training or eval.
+#   below retired_below: never use. Seeds 1-5 and 1000 built the ~/altdata_evals pilot on every
+#            company, held-out ones included, and are public in git history.
 #   train    open-ended: start + count chosen at build time
 #   bench    fixed
 #   heldout  NOT here. Drawn at random on first build into splits/secrets/heldout_seeds.yaml
 #            (gitignored). Back that file up outside the repo; losing it loses the held-out set.
 
-pilot:
-  seeds: [1, 2, 3, 4, 5]
-  controls: [1000]
+retired_below: 100000
 
 train:
   seed_start: 100000

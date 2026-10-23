@@ -5,11 +5,7 @@ that split's seeds (splits/seeds.yaml; held-out seeds are secret). Output goes t
 rl/tasks/<split>/<task_id>/ (gitignored: tasks are rebuilt, not committed) and a manifest of what
 was built, with hashes, to splits/manifests/ (held-out: splits/secrets/manifests/).
 
-The `pilot` split rebuilds the 18 tasks of ~/altdata_evals on every company, to prove the port
-reproduces them. It belongs to no split and is never used for training or eval.
-
 Usage:
-    python rl/build_panel_tasks.py --split pilot
     python rl/build_panel_tasks.py --split bench                       # all three families
     python rl/build_panel_tasks.py --split train --family data_audit --n 200 --controls 20
 """
@@ -43,8 +39,6 @@ def render(template: str, **kw) -> str:
 
 
 def task_id(prefix: str, split: str, seed: int, control: bool, index: int) -> str:
-    if split == "pilot":
-        return f"{prefix}-s{seed}" + ("-control" if control else "")
     # never the seed itself: held-out seeds are secret, and ids are not
     return f"{prefix}-{split}-" + (f"control-{index:02d}" if control else f"{index:03d}")
 
@@ -61,12 +55,9 @@ def build_family(fam_id: str, split: str, n: int | None, controls: int | None, f
     instruction_t = (fam_dir / "instruction.md").read_text()
     artifacts = panel.data_artifacts()
 
-    if split == "pilot":
-        comps = sorted(panel.companies())
-    else:
-        comps = splits.companies(fam["source"], split)
+    comps = splits.companies(fam["source"], split)
     sensors = panel.sensors_of(comps)
-    raw = full[full.ticker.isin(sensors)].reset_index(drop=True) if split != "pilot" else full
+    raw = full[full.ticker.isin(sensors)].reset_index(drop=True)
 
     built, i_task, i_ctrl = {}, 0, 0
     for seed, control in splits.seeds(fam_id, split, n, controls):
@@ -104,7 +95,7 @@ def build_family(fam_id: str, split: str, n: int | None, controls: int | None, f
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--split", required=True, choices=["pilot", *splits.SPLITS])
+    ap.add_argument("--split", required=True, choices=splits.SPLITS)
     ap.add_argument("--family", choices=FAMILIES, action="append", help="default: all three")
     ap.add_argument("--n", type=int, help="seeds per family (train needs it; bench/heldout use seeds.yaml)")
     ap.add_argument("--controls", type=int)

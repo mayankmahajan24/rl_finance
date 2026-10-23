@@ -2,7 +2,7 @@
 
   1. every company of a source is in exactly one split
   2. seed ranges never overlap across splits, and every built task's seed is in its split's range
-  3. every built task's companies are all in its split (pilot tasks are exempt: they use every company)
+  3. every built task's companies are all in its split
   4. kpi_nowcast tasks carry their company's split, or "retired" for retired cases
   5. no task id appears in two splits; nothing grader-side sits in a Harbor task's environment/
 
@@ -49,11 +49,13 @@ def check() -> list[str]:
 
     # 2. seed ranges (configured order keeps them apart; built seeds must sit inside their range)
     cfg = yaml.safe_load((splits.HERE / "seeds.yaml").read_text())
-    bounds = [max(cfg["pilot"]["seeds"] + cfg["pilot"]["controls"]), cfg["train"]["seed_start"],
-              cfg["train"]["control_start"], cfg["bench"]["seed_start"], cfg["bench"]["control_start"], 10**8]
+    bounds = [cfg["train"]["seed_start"], cfg["train"]["control_start"], cfg["bench"]["seed_start"],
+              cfg["bench"]["control_start"], 10**8]
     if bounds != sorted(bounds) or len(set(bounds)) != len(bounds):
         problems.append(f"seeds.yaml ranges are not in increasing order: {bounds}")
-    ranges = {"pilot": (0, bounds[1]), "train": (bounds[1], bounds[3]), "bench": (bounds[3], 10**8),
+    if bounds[0] < cfg["retired_below"]:
+        problems.append(f"train seeds start below retired_below ({cfg['retired_below']})")
+    ranges = {"train": (bounds[0], bounds[2]), "bench": (bounds[2], 10**8),
               "heldout": (10**8, 10**9)}
     held = {s for f in splits.heldout_seeds().values() for v in f.values() for s in v}
 
@@ -68,11 +70,13 @@ def check() -> list[str]:
         if tid in owner:
             problems.append(f"{tid}: built in both {owner[tid]} and {split_dir}")
         owner[tid] = split_dir
-        if split_dir != "pilot":
-            allowed = set(splits.companies(m["source"], split_dir))
-            extra = set(m.get("companies", [])) - allowed
-            if extra:
-                problems.append(f"{tid}: uses {sorted(extra)}, not in {split_dir}")
+        if split_dir not in splits.SPLITS:
+            problems.append(f"{tid}: built under tasks/{split_dir}, which is not a split")
+            continue
+        allowed = set(splits.companies(m["source"], split_dir))
+        extra = set(m.get("companies", [])) - allowed
+        if extra:
+            problems.append(f"{tid}: uses {sorted(extra)}, not in {split_dir}")
         seed = m.get("seed")
         if split_dir == "heldout":
             if seed is not None:

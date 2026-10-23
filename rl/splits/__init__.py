@@ -22,8 +22,6 @@ def assignment(source: str) -> dict:
 
 
 def companies(source: str, split: str) -> list[str]:
-    if split == "pilot":
-        raise ValueError("the pilot split uses every company; ask the source for its company list")
     return list(assignment(source)["companies"][split])
 
 
@@ -73,8 +71,6 @@ def seeds(family: str, split: str, n: int | None = None, controls: int | None = 
     """[(seed, is_control)] for one family in one split. `n`/`controls` override the configured
     counts (train has none configured; it takes whatever the caller asks for)."""
     cfg = _seed_config()
-    if split == "pilot":
-        return [(s, False) for s in cfg["pilot"]["seeds"]] + [(s, True) for s in cfg["pilot"]["controls"]]
     if split == "heldout":
         h = _draw_heldout(family)
         ss, cc = h["seeds"], h["controls"]

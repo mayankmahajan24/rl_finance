@@ -4,9 +4,9 @@ emulating the container layout with temp directories. Ported from ~/altdata_eval
 The reference solver should score well and the naive one badly; if they don't, the verifier is
 not separating quality. Results go to rl/runs/solutions/<split>.csv.
 
-    python rl/harness/run_solutions.py --split pilot             # both solvers, every task in the split
+    python rl/harness/run_solutions.py --split bench             # both solvers, every task in the split
     python rl/harness/run_solutions.py --split bench --family data_audit --solvers naive
-    JUDGE=keyword python rl/harness/run_solutions.py --split pilot   # thesis memo by keyword fallback (no API calls)
+    JUDGE=keyword python rl/harness/run_solutions.py --split bench   # thesis memo by keyword fallback (no API calls)
 """
 import argparse
 import os

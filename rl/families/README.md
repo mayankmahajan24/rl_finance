@@ -12,10 +12,10 @@ the agent does; the tasks they build carry the fund role and workflow in their m
 | [`growth_thesis`](growth_thesis/) | txn_panel | Which airline grew fastest? Answer + memo, on semi-synthetic data with traps | 0.35 answer + 0.25 growth + 0.15 unreliable list + 0.25 memo rubric | Harbor | same, `--family growth_thesis` |
 | research_design / research_funding | research_design_case | Review, compare or write research plans | Issue recall − penalties; pairwise pick | repo format (Harbor in step 4) | `python rl/build_research_design.py` |
 
-The three Harbor families came from `~/altdata_evals` (2026-10-21). Built on every company with the
-pilot's seeds, they reproduce its 18 tasks byte for byte, and the reference and naive solutions
-score exactly as they did there (`python rl/build_panel_tasks.py --split pilot`, then
-`python rl/harness/run_solutions.py --split pilot`).
+The three Harbor families came from `~/altdata_evals` (2026-10-21). Built on every company with
+its seeds, they reproduced its 18 pilot tasks byte for byte, and the reference and naive solutions
+scored exactly as they did there (verified at commit `0411bc4`). That pilot used held-out
+companies, so it was then removed; its seeds are retired (`splits/seeds.yaml`).
 
 ## Layout of a family
 
@@ -49,6 +49,6 @@ _shared/               code used by several families: panel disguise and injecti
 2. Write `generate.py` against the source loader, taking the split-restricted data as input.
 3. Write the instruction, verifier, and both solutions.
 4. Add it to `FAMILIES` in `rl/build_panel_tasks.py` (or give it its own build script if it isn't a
-   generated panel family), build the `pilot` or a small `train` split, and run
+   generated panel family), build a small `train` split, and run
    `python rl/harness/run_solutions.py`.
 5. `python rl/splits/check.py` must pass.

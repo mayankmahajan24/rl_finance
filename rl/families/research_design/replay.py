@@ -12,7 +12,7 @@ Checks, and exits non-zero if any fail:
   - review recall and manufactured-per-review match GRADED.md
 
 Usage:
-    python rl/replay_research_design.py
+    python rl/families/research_design/replay.py
 """
 
 from __future__ import annotations
@@ -21,9 +21,9 @@ import json
 import pathlib
 import sys
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 from lib import RL, iter_tasks, write_json  # noqa: E402
-from graders import pairwise_pick, review_issues  # noqa: E402
+from families.research_design.graders import pairwise_pick, review_issues  # noqa: E402
 
 RUNS = RL / "sources" / "research_design_case" / "baseline_runs"
 OUT = RL / "runs" / "research_design" / "baseline"

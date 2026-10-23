@@ -6,7 +6,7 @@ world: ls_altdata
 status: needs_rubric
 split: eval
 prompt:
-  template: prompts/research_design/produce.md
+  template: families/research_design/prompts/produce.md
   fingerprint: a193b3949f47
 sources:
 - sources/research_design_case/seeds.json

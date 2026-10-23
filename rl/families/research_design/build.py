@@ -16,7 +16,7 @@ The source data, and what was deliberately left out of it, is described in
 rl/sources/research_design_case/README.md.
 
 Usage:
-    python rl/build_research_design.py
+    python rl/families/research_design/build.py
 """
 
 from __future__ import annotations
@@ -27,14 +27,15 @@ import re
 import shutil
 import sys
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 from lib import RL, ROLES, WORLDS, fingerprint, iter_tasks, load_prompt, write_json, write_yaml  # noqa: E402
 
 DATA = RL / "sources" / "research_design_case"
 GOLD = DATA / "grader_only" / "gold"
 SEED_ONLY = DATA / "grader_only" / "seed_only_runs"
 SRC = "sources/research_design_case"   # prefix for `sources` paths, relative to rl/
-PROMPTS = RL / "prompts" / "research_design"
+HERE = RL / "families" / "research_design"
+PROMPTS = HERE / "prompts"
 
 WORLD_NAMES = {
     "systematic": "Systematic trading firm",
@@ -152,10 +153,10 @@ def build_review(d: dict, catalog: list) -> None:
                  f"{SRC}/grader_only/gold/_issues.json"],
                 prompt,
                 {
-                    "output_schema": "schemas/research_design_review.json",
+                    "output_schema": "families/research_design/schemas/review.json",
                     "grader": {
                         "type": "review_issues",
-                        "module": "graders/review_issues.py",
+                        "module": "families/research_design/graders/review_issues.py",
                         "params": {"penalty_manufactured": 0.1, "penalty_contradicts_gold": 0.2},
                     },
                     "meta": {
@@ -207,9 +208,9 @@ def build_funding(d: dict, catalog: list) -> None:
             [f"{SRC}/items/{sid}.json", f"{SRC}/grader_only/gold/{sid}.json"],
             prompt,
             {
-                "output_schema": "schemas/research_funding_compare.json",
+                "output_schema": "families/research_design/schemas/compare.json",
                 "orderings": ["AB", "BA"],
-                "grader": {"type": "pairwise_pick", "module": "graders/pairwise_pick.py"},
+                "grader": {"type": "pairwise_pick", "module": "families/research_design/graders/pairwise_pick.py"},
                 "meta": {"seed": base, "context_flip": sid != base,
                          "seed_style": d["seeds"][base]["style"]},
             },

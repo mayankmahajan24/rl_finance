@@ -10,7 +10,7 @@ the agent does; the tasks they build carry the fund role and workflow in their m
 | [`data_audit`](data_audit/) | txn_panel | Find planted data-quality problems in a disguised panel | F1 against planted + natural problems | Harbor | `python rl/build_panel_tasks.py --split <s> --family data_audit` |
 | [`anomaly_scoring`](anomaly_scoring/) | txn_panel | Write an online anomaly scorer with no foresight | F1 × coverage, zeroed by a foresight check | Harbor | same, `--family anomaly_scoring` |
 | [`growth_thesis`](growth_thesis/) | txn_panel | Which airline grew fastest? Answer + memo, on semi-synthetic data with traps | 0.35 answer + 0.25 growth + 0.15 unreliable list + 0.25 memo rubric | Harbor | same, `--family growth_thesis` |
-| research_design / research_funding | research_design_case | Review, compare or write research plans | Issue recall − penalties; pairwise pick | repo format (Harbor in step 4) | `python rl/build_research_design.py` |
+| [`research_design`](research_design/) (workflows research_design, research_funding) | research_design_case | Review, compare or write research plans | Issue recall − penalties; pairwise pick | repo format (Harbor in step 4) | `python rl/families/research_design/build.py` |
 
 The three Harbor families came from `~/altdata_evals` (2026-10-21). Built on every company with
 its seeds, they reproduced its 18 pilot tasks byte for byte, and the reference and naive solutions

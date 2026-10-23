@@ -104,7 +104,7 @@ in git history at commit `a75441c`, under `case_study/`.
 ### What `rl/` contains today
 
 **52 tasks in 6 "worlds"**, all converted from the case study by
-`rl/build_research_design.py`. The script is idempotent: it regenerates
+`rl/families/research_design/build.py`. The script is idempotent: it regenerates
 `rl/worlds/` and its own `rd-*` tasks, and rewrites `rl/catalog.json`.
 
 Tasks are organized **role → workflow → task**:
@@ -120,20 +120,20 @@ Each task has a **mode**, and graders are written per mode, not per topic:
 
 | Mode | The model's job | Grader | Tasks |
 |---|---|---|---|
-| review | Find the problems in a research plan | `rl/graders/review_issues.py`: share of expert-flagged blocking issues found, minus 0.1 per invented objection and 0.2 per objection the expert explicitly ruled out | 20 graded, 8 waiting on labels |
-| compare | Pick which of two plans to fund | `rl/graders/pairwise_pick.py`: 1 if it matches the expert's pick. Each pair is shown in both orders to cancel position bias | 10 graded, 4 waiting on labels |
+| review | Find the problems in a research plan | `rl/families/research_design/graders/review_issues.py`: share of expert-flagged blocking issues found, minus 0.1 per invented objection and 0.2 per objection the expert explicitly ruled out | 20 graded, 8 waiting on labels |
+| compare | Pick which of two plans to fund | `rl/families/research_design/graders/pairwise_pick.py`: 1 if it matches the expert's pick. Each pair is shown in both orders to cancel position bias | 10 graded, 4 waiting on labels |
 | produce | Write a research plan | None yet: needs an expert rubric | 10 |
 
 A **world** is a simulated fund. Today each is a one-paragraph description
 (`rl/worlds/<id>/world.yaml`). Making them full worlds (holdings, theses, past
 memos, data) is upcoming work.
 
-**Verified.** `rl/replay_research_design.py` re-grades four models' saved outputs with
+**Verified.** `rl/families/research_design/replay.py` re-grades four models' saved outputs with
 the new graders and reproduces every headline number from the case study, with no
 API calls. The build refuses to write the task tree if any gold text appears in a
 model-visible prompt; that leak check has been tested by planting a leak.
 
-**Model runner.** `rl/run.py` runs any Claude model on any task and grades the
+**Model runner.** `rl/families/research_design/run.py` runs any Claude model on the research_design tasks and grades the
 result. It has **not yet been run against the live API**; only `--dry-run` has
 been exercised.
 
@@ -163,12 +163,12 @@ Dependencies: Python 3, `anthropic` (installed: 0.89), `pyyaml`. An
 `ANTHROPIC_API_KEY` is needed only for `sync` and real runs.
 
 ```sh
-python rl/build_research_design.py         # regenerate tasks; runs the leak check
-python rl/replay_research_design.py        # must print "All fingerprints and GRADED.md numbers reproduced."
+python rl/families/research_design/build.py         # regenerate tasks; runs the leak check
+python rl/families/research_design/replay.py        # must print "All fingerprints and GRADED.md numbers reproduced."
 python rl/skills/manage.py fetch           # check out the pinned skills repo
 python rl/skills/manage.py check
-python rl/run.py --model claude-opus-5-5 --dry-run               # print a request, no API call
-python rl/run.py --model claude-opus-5-5 --dry-run --skills off
+python rl/families/research_design/run.py --model claude-opus-5-5 --dry-run               # print a request, no API call
+python rl/families/research_design/run.py --model claude-opus-5-5 --dry-run --skills off
 ```
 
 ## 4. Invariants: do not break these
@@ -211,7 +211,7 @@ provenance.
 
 **Mayank's loop:** write a judgment spec, then edit and adjudicate AI drafts.
 - **Judgment specs are the most valuable thing he writes.** One per workflow, in
-  the style of `rl/rubrics/research_design/TENETS.md`: what matters, which
+  the style of `rl/families/research_design/TENETS.md`: what matters, which
   objections never apply, which errors count. They steer every draft and every
   grader prompt.
 - **He also writes exemplars and blind-first labels.** Drafts of worlds,

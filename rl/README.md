@@ -6,18 +6,18 @@ kind of task each), and assigned to **splits** (train, bench, heldout) by compan
 | Folder | What it holds |
 |---|---|
 | [`sources/`](sources/) | `txn_panel` (card-transaction panel + anomaly-detection brief) and `research_design_case` (the take-home) |
-| [`families/`](families/) | `kpi_nowcast`, `data_audit`, `anomaly_scoring`, `growth_thesis`; research_design still lives in `build_research_design.py`, `graders/`, `prompts/` until step 4 |
+| [`families/`](families/) | `research_design`, `kpi_nowcast`, `data_audit`, `anomaly_scoring`, `growth_thesis` |
 | [`splits/`](splits/) | company and seed assignment per split, manifests of built tasks, `check.py` |
 | `roles/` | built tasks in the repo format (research_design, kpi_nowcast, earnings_recap) |
 | `tasks/` | built Harbor tasks, `tasks/<split>/<task_id>/`. Gitignored; rebuilt from `splits/manifests/` |
 | `harness/` | `run_solutions.py` (reference vs naive, no Docker), `calibrate.py` (pass@k, pass^k) |
-| `worlds/`, `rubrics/`, `skills/`, `runs/` | fund briefs, rubric tenets, financial-services skills, run outputs |
+| `worlds/`, `skills/`, `runs/` | fund briefs, financial-services skills, run records |
 
 Format spec for repo-format tasks: `FORMAT.md`. Harbor tasks follow Harbor's layout (`families/README.md`).
 
 ```sh
-python rl/build_research_design.py                     # research_design + research_funding tasks, worlds, catalog
-python rl/replay_research_design.py                    # case-study baselines must reproduce
+python rl/families/research_design/build.py                     # research_design + research_funding tasks, worlds, catalog
+python rl/families/research_design/replay.py                    # case-study baselines must reproduce
 python rl/families/kpi_nowcast/build.py                # 102 kpi_nowcast tasks
 python rl/build_panel_tasks.py --split bench           # data_audit, anomaly_scoring, growth_thesis
 python rl/harness/run_solutions.py --split bench       # reference should beat naive on every family
@@ -34,8 +34,8 @@ The rest of this file describes the research_design environment.
 ```sh
 python rl/skills/manage.py fetch    # pinned checkout of anthropics/financial-services
 python rl/skills/manage.py sync     # upload the profile's skills to your API workspace (once)
-python rl/run.py --model claude-opus-5-5                  # skills on (default for claude-*)
-python rl/run.py --model claude-opus-5-5 --skills off     # same tasks, no skills
+python rl/families/research_design/run.py --model claude-opus-5-5                  # skills on (default for claude-*)
+python rl/families/research_design/run.py --model claude-opus-5-5 --skills off     # same tasks, no skills
 ```
 
 Anthropic models get the `buy_side_core` profile from `skills/config.yaml` by
@@ -74,7 +74,7 @@ as reference outputs.
 
 ## Verified against the case study
 
-`replay_research_design.py` re-grades all four models' saved runs with the new graders.
+`families/research_design/replay.py` re-grades all four models' saved runs with the new graders.
 Prompt fingerprints match the runs, and every headline number in
 `sources/research_design_case/baseline_runs/GRADED.md` reproduces:
 

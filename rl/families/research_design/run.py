@@ -1,4 +1,4 @@
-"""Run a model on rl/ tasks and grade it.
+"""Run a model on research_design and research_funding tasks and grade it.
 
 Anthropic models get the financial-services skills profile from
 rl/skills/config.yaml by default (`default_for_anthropic`). `--skills off` runs the
@@ -10,10 +10,10 @@ Skills apply to output generation only: the review scorer always runs without
 skills, so both conditions are graded by the same instrument.
 
 Usage:
-    python rl/run.py --model claude-opus-5-5                      # graded tasks, skills on
-    python rl/run.py --model claude-opus-5-5 --skills off
-    python rl/run.py --model claude-opus-5-5 --mode compare --tasks rd-funding-S1
-    python rl/run.py --model claude-opus-5-5 --dry-run            # print one request, no API call
+    python rl/families/research_design/run.py --model claude-opus-5-5                      # graded tasks, skills on
+    python rl/families/research_design/run.py --model claude-opus-5-5 --skills off
+    python rl/families/research_design/run.py --model claude-opus-5-5 --mode compare --tasks rd-funding-S1
+    python rl/families/research_design/run.py --model claude-opus-5-5 --dry-run            # print one request, no API call
 """
 
 from __future__ import annotations
@@ -26,17 +26,20 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 from lib import RL, fingerprint, iter_tasks, write_json  # noqa: E402
-from graders import pairwise_pick, review_issues  # noqa: E402
+from families.research_design.graders import pairwise_pick, review_issues  # noqa: E402
 from skills import manage as skills  # noqa: E402
 
+WORKFLOWS = ("research_design", "research_funding")
 SKILL_PATH = re.compile(r"/skills/([a-z0-9-]+)")
 
 
 def select(args) -> list[tuple[pathlib.Path, dict]]:
     out = []
     for d, t in iter_tasks():
+        if t["workflow"] not in WORKFLOWS:   # other families have their own runners
+            continue
         if args.tasks and t["id"] not in args.tasks:
             continue
         if not args.tasks and t["status"] not in args.status:
@@ -200,7 +203,7 @@ def main() -> None:
     for r in records:
         print(f"  {r['task']:<22} {r['status']:<6} reward={r.get('reward')}")
 
-    out = RL / "runs" / args.tag / f"{args.model}__{label}.jsonl"
+    out = RL / "runs" / "research_design" / args.tag / f"{args.model}__{label}.jsonl"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("".join(json.dumps(r, ensure_ascii=False, default=str) + "\n" for r in records))
     graded = [r["reward"] for r in records if r.get("reward") is not None]

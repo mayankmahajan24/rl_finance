@@ -20,7 +20,7 @@ halves that must never mix: what the model sees, and what only the grader sees.
     reference/       reference outputs with their human verdicts
 ```
 
-Each build script (`build_research_design.py`, `families/kpi_nowcast/build.py`) refuses to write the tree if any gold text appears
+Each build script (`families/research_design/build.py`, `families/kpi_nowcast/build.py`) refuses to write the tree if any gold text appears
 anywhere under `prompt/` (the leak check).
 
 ## task.yaml
@@ -46,8 +46,8 @@ The same grader serves every topic in a mode:
 
 | Mode | Grader | Reward |
 |---|---|---|
-| review | `graders/review_issues.py` | blocking-issue recall − 0.1 × manufactured − 0.2 × contradicts-gold, clamped to [0, 1] |
-| compare | `graders/pairwise_pick.py` | 1 if the pick matches gold, averaged over both orderings |
+| review | `families/research_design/graders/review_issues.py` | blocking-issue recall − 0.1 × manufactured − 0.2 × contradicts-gold, clamped to [0, 1] |
+| compare | `families/research_design/graders/pairwise_pick.py` | 1 if the pick matches gold, averaged over both orderings |
 | produce | rubric grader (not built yet) | weighted pass/fail rubric items + code-checked facts |
 
 ## Worlds

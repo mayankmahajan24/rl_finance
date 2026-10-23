@@ -6,16 +6,16 @@ world: systematic
 status: graded
 split: eval
 prompt:
-  template: prompts/research_design/review.md
+  template: families/research_design/prompts/review.md
   fingerprint: ee6dd1a4f99e
 sources:
 - sources/research_design_case/items/S5.json
 - sources/research_design_case/grader_only/gold/S5.json
 - sources/research_design_case/grader_only/gold/_issues.json
-output_schema: schemas/research_design_review.json
+output_schema: families/research_design/schemas/review.json
 grader:
   type: review_issues
-  module: graders/review_issues.py
+  module: families/research_design/graders/review_issues.py
   params:
     penalty_manufactured: 0.1
     penalty_contradicts_gold: 0.2

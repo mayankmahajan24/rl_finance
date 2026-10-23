@@ -6,18 +6,18 @@ world: systematic
 status: graded
 split: eval
 prompt:
-  template: prompts/research_design/funding_decision.md
+  template: families/research_design/prompts/funding_decision.md
   fingerprint: 3a2276335156
 sources:
 - sources/research_design_case/items/S5.json
 - sources/research_design_case/grader_only/gold/S5.json
-output_schema: schemas/research_funding_compare.json
+output_schema: families/research_design/schemas/compare.json
 orderings:
 - AB
 - BA
 grader:
   type: pairwise_pick
-  module: graders/pairwise_pick.py
+  module: families/research_design/graders/pairwise_pick.py
 meta:
   seed: S5
   context_flip: false

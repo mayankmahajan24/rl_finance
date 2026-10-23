@@ -2,9 +2,9 @@
 
 Copied verbatim from the case study's `part2/evaluator/pairwise.md` (commit a75441c); only this header changed.
 The text below the `## SYSTEM` and `## USER` markers is the instrument, and its
-fingerprint must match the case-study runs (`rl/replay_research_design.py` checks).
+fingerprint must match the case-study runs (`rl/families/research_design/replay.py` checks).
 Placeholders: `{context}`, `{seed}`, `{plan_A}`, `{plan_B}`. Judging basis:
-`rl/rubrics/research_design/TENETS.md`.
+`rl/families/research_design/TENETS.md`.
 
 ---
 

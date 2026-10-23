@@ -3,7 +3,7 @@
   1. every company of a source is in exactly one split
   2. seed ranges never overlap across splits, and every built task's seed is in its split's range
   3. every built task's companies are all in its split (pilot tasks are exempt: they use every company)
-  4. kpi_nowcast tasks carry their company's split
+  4. kpi_nowcast tasks carry their company's split, or "retired" for retired cases
   5. no task id appears in two splits; nothing grader-side sits in a Harbor task's environment/
 
 Usage:
@@ -93,11 +93,14 @@ def check() -> list[str]:
             if v["seed"] not in held:
                 problems.append(f"{tid}: held-out manifest seed not in secrets/heldout_seeds.yaml")
 
-    # 4. kpi_nowcast (repo task format)
+    # 4. kpi_nowcast (repo task format); retired cases carry split "retired"
+    retired_kpi = splits.retired("txn_panel", "kpi_nowcast")
     for d, t in iter_tasks():
         if t.get("workflow") != "kpi_nowcast":
             continue
         want = splits.split_of("txn_panel", panel.company_of_series(t["meta"]["series"]))
+        if f"{t['meta']['series']}-{t['meta']['target_period'].replace(' ', '')}" in retired_kpi:
+            want = "retired"
         if t.get("split") != want:
             problems.append(f"{t['id']}: split {t.get('split')}, company split is {want}")
     return problems

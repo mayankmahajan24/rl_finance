@@ -234,6 +234,7 @@ def main() -> None:
     system_t = (PROMPTS / "system.md").read_text().strip()
     user_t = (PROMPTS / "user.md").read_text().strip()
     codes, factor = anon_codes()
+    retired = splits.retired("txn_panel", "kpi_nowcast")
 
     for old in (OUT, PANELS):
         if old.exists():
@@ -270,6 +271,7 @@ def main() -> None:
             dq = sensor_facts(rows_all, s["sensors"], as_of)
             basis = restatement_facts(feed, target_end)
 
+            case_split = "retired" if key in retired else split
             for variant in ("named", "anon"):
                 anon = variant == "anon"
                 f = factor[s["id"]] if anon else 1.0
@@ -317,8 +319,7 @@ def main() -> None:
                         shared = PANELS / f"sensor_panel_{as_of}_{variant}.csv.gz"
                         if not shared.exists():
                             PANELS.mkdir(parents=True, exist_ok=True)
-                            with gzip.open(shared, "wt", newline="") as fh:
-                                fh.write(text)
+                            shared.write_bytes(gzip.compress(text.encode(), mtime=0))   # same bytes every build
                         manifest[name] = {"path": str(shared.relative_to(RL)), "gzip": True, "sha256": sha}
                     else:
                         (tdir / "prompt" / "files").mkdir(parents=True, exist_ok=True)
@@ -342,7 +343,7 @@ def main() -> None:
                 fp = fingerprint(system, user, *[files[k] for k in sorted(files)])
                 write_yaml(tdir / "task.yaml", {
                     "id": task_id, "role": "quant_researcher", "workflow": "kpi_nowcast", "mode": "produce",
-                    "world": "ls_altdata", "status": "graded", "split": split,
+                    "world": "ls_altdata", "status": "graded", "split": case_split,
                     "prompt": {"template": "families/kpi_nowcast/prompts/{system,user}.md", "fingerprint": fp,
                                "files": sorted(files)},
                     "environment": {"tools": ["code_execution"], "internet": False},

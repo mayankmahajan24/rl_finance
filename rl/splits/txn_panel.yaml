@@ -30,3 +30,12 @@ why:
   train: >-
     The rest, including both other natural breaks (AAL re-map, ALGT outage), the low-signal TJX
     series, and the multi-sensor ROST and two-series JWN, so training sees every kind of trap.
+
+# Cases taken out of every split. A case seen during harness or grader development can't measure
+# anything, and its company's split rules out moving it to train. Keyed by family, then case
+# (series-period; named and anon variants retire together). Built with split: retired.
+retired:
+  kpi_nowcast:
+    ALK-2017Q4: >-
+      Held-out company, but run in the 2026-10-18 kpi_nowcast pilot; its transcript shaped grader
+      question Q1 (runs/kpi_nowcast/feedback_log.md) and a facts fix.

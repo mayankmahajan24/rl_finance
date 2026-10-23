@@ -501,7 +501,7 @@
     "mode": "produce",
     "world": "ls_altdata",
     "status": "graded",
-    "split": "heldout"
+    "split": "retired"
   },
   {
     "id": "kn-produce-AIR08-2018Q2-anon",
@@ -582,7 +582,7 @@
     "mode": "produce",
     "world": "ls_altdata",
     "status": "graded",
-    "split": "heldout"
+    "split": "retired"
   },
   {
     "id": "kn-produce-ALK-2018Q2",

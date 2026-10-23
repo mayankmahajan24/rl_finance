@@ -4,7 +4,7 @@ workflow: kpi_nowcast
 mode: produce
 world: ls_altdata
 status: graded
-split: heldout
+split: retired
 prompt:
   template: families/kpi_nowcast/prompts/{system,user}.md
   fingerprint: 27e19d8297ca

@@ -13,6 +13,11 @@ whose data it contains is in that split. Disguise doesn't change this: rescaling
 shifts don't hide a series' shape from a model that trained on it. Named and anonymised versions of
 a case always go together.
 
+**Retired cases leave every split.** A case used while building a harness or grader (run, read,
+debugged against) no longer measures anything. If its company is in bench or held-out it can't
+move to train either, so it is listed under `retired:` in `<source>.yaml` with the reason and built
+with `split: retired`. Nothing trains or evaluates on it.
+
 **Generated families also split by seed.** With the generator in the repo, anyone with a seed can
 rebuild a task, so held-out seeds live in `secrets/heldout_seeds.yaml` (gitignored, drawn on the
 first held-out build). Back that file up outside the repo. Held-out task ids are numbered, never

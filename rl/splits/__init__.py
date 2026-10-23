@@ -34,6 +34,11 @@ def split_of(source: str, company: str) -> str:
     raise KeyError(f"{company} has no split in splits/{source}.yaml")
 
 
+def retired(source: str, family: str) -> dict[str, str]:
+    """{case: reason} for cases removed from every split (built with split "retired")."""
+    return dict(assignment(source).get("retired", {}).get(family, {}))
+
+
 def _seed_config() -> dict:
     return yaml.safe_load((HERE / "seeds.yaml").read_text())
 

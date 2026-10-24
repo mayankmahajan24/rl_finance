@@ -60,6 +60,10 @@ def _draw_heldout(family: str) -> dict[str, list[int]]:
     path = HERE / cfg["file"]
     allv = heldout_seeds()
     if family not in allv:
+        if any(v["split"] == "heldout" for v in manifest(family).values()):
+            raise SystemExit(f"{family}: the manifest lists held-out tasks but {path.relative_to(HERE.parent)} has no "
+                             "seeds for it. Restore that file from your backup; drawing new seeds would replace "
+                             "the held-out set.")
         rng = random.SystemRandom()
         used = {s for f in allv.values() for v in f.values() for s in v}
         draw = set()

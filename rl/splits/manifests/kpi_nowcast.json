@@ -1,0 +1,1328 @@
+{
+ "kn-produce-AAL-2017Q4": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "AAL"
+  ],
+  "fingerprint": "baec8e413d63",
+  "gold_fingerprint": "f3f851ee584f"
+ },
+ "kn-produce-AAL-2018Q2": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "AAL"
+  ],
+  "fingerprint": "bbfbf53fcc6a",
+  "gold_fingerprint": "7611cdbd2a84"
+ },
+ "kn-produce-AAL-2018Q4": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "AAL"
+  ],
+  "fingerprint": "2e2c13c01e3f",
+  "gold_fingerprint": "bd8187956720"
+ },
+ "kn-produce-AIR01-2017Q4-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "HA"
+  ],
+  "fingerprint": "a92a4dc1e852",
+  "gold_fingerprint": "0d87ea0df9b6"
+ },
+ "kn-produce-AIR01-2018Q2-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "HA"
+  ],
+  "fingerprint": "e819b6cb13f0",
+  "gold_fingerprint": "173201f8d757"
+ },
+ "kn-produce-AIR01-2018Q4-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "HA"
+  ],
+  "fingerprint": "a70e89dc4265",
+  "gold_fingerprint": "a33cb43ebf8f"
+ },
+ "kn-produce-AIR02-2017Q4-anon": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "SAVE"
+  ],
+  "fingerprint": "eb057d40facc",
+  "gold_fingerprint": "9789ba6f66dc"
+ },
+ "kn-produce-AIR02-2018Q2-anon": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "SAVE"
+  ],
+  "fingerprint": "056d96775102",
+  "gold_fingerprint": "1317bec6561e"
+ },
+ "kn-produce-AIR02-2018Q4-anon": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "SAVE"
+  ],
+  "fingerprint": "c6c05e6bf32c",
+  "gold_fingerprint": "226d3a7092fb"
+ },
+ "kn-produce-AIR03-2017Q4-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "UAL"
+  ],
+  "fingerprint": "6aa16cc0b4cf",
+  "gold_fingerprint": "98841d9a4e49"
+ },
+ "kn-produce-AIR03-2018Q2-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "UAL"
+  ],
+  "fingerprint": "e86e4fed4779",
+  "gold_fingerprint": "0a0054c2b6e7"
+ },
+ "kn-produce-AIR03-2018Q4-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "UAL"
+  ],
+  "fingerprint": "c63e68b23985",
+  "gold_fingerprint": "a0d8da48f577"
+ },
+ "kn-produce-AIR04-2017Q4-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "LUV"
+  ],
+  "fingerprint": "f6cc2cabf5d8",
+  "gold_fingerprint": "dc14cb10c986"
+ },
+ "kn-produce-AIR04-2018Q2-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "LUV"
+  ],
+  "fingerprint": "51b0a1a2844e",
+  "gold_fingerprint": "7ce578bed6bc"
+ },
+ "kn-produce-AIR04-2018Q4-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "LUV"
+  ],
+  "fingerprint": "d8c6f38912b1",
+  "gold_fingerprint": "e0d2f02ad482"
+ },
+ "kn-produce-AIR05-2017Q4-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "AAL"
+  ],
+  "fingerprint": "f44dd9636db2",
+  "gold_fingerprint": "0ac3b4c2d396"
+ },
+ "kn-produce-AIR05-2018Q2-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "AAL"
+  ],
+  "fingerprint": "06bd699dde47",
+  "gold_fingerprint": "e27c81b4c1bc"
+ },
+ "kn-produce-AIR05-2018Q4-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "AAL"
+  ],
+  "fingerprint": "f7e9d9def3c2",
+  "gold_fingerprint": "c821e64f7071"
+ },
+ "kn-produce-AIR06-2017Q4-anon": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "DAL"
+  ],
+  "fingerprint": "e865861e64fe",
+  "gold_fingerprint": "6bed269bbebe"
+ },
+ "kn-produce-AIR06-2018Q2-anon": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "DAL"
+  ],
+  "fingerprint": "a9bc52427ca8",
+  "gold_fingerprint": "f98d24d9b2e6"
+ },
+ "kn-produce-AIR06-2018Q4-anon": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "DAL"
+  ],
+  "fingerprint": "f3867ebc349b",
+  "gold_fingerprint": "6e5d11fe1cdb"
+ },
+ "kn-produce-AIR07-2017Q4-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "ALGT"
+  ],
+  "fingerprint": "c301cf56e118",
+  "gold_fingerprint": "a1a345fb815e"
+ },
+ "kn-produce-AIR07-2018Q2-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "ALGT"
+  ],
+  "fingerprint": "a3f2ab6d6ae1",
+  "gold_fingerprint": "c81e33fcab4c"
+ },
+ "kn-produce-AIR07-2018Q4-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "ALGT"
+  ],
+  "fingerprint": "63db3eaaab2c",
+  "gold_fingerprint": "81dc74324cce"
+ },
+ "kn-produce-AIR08-2017Q4-anon": {
+  "split": "retired",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "ALK"
+  ],
+  "fingerprint": "27e19d8297ca",
+  "gold_fingerprint": "1cba5626423d"
+ },
+ "kn-produce-AIR08-2018Q2-anon": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "ALK"
+  ],
+  "fingerprint": "58d9dfc17fa7",
+  "gold_fingerprint": "cdff1bfd1abd"
+ },
+ "kn-produce-AIR08-2018Q4-anon": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "ALK"
+  ],
+  "fingerprint": "eed3e528826e",
+  "gold_fingerprint": "3e4b72444b95"
+ },
+ "kn-produce-AIR09-2017Q4-anon": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JBLU"
+  ],
+  "fingerprint": "ca0f1e70f6cf",
+  "gold_fingerprint": "477487dc5729"
+ },
+ "kn-produce-AIR09-2018Q2-anon": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JBLU"
+  ],
+  "fingerprint": "bdecbf42e200",
+  "gold_fingerprint": "e254dd33a4c9"
+ },
+ "kn-produce-AIR09-2018Q4-anon": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JBLU"
+  ],
+  "fingerprint": "f8f320f5f752",
+  "gold_fingerprint": "79543fb5286b"
+ },
+ "kn-produce-ALGT-2017Q4": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "ALGT"
+  ],
+  "fingerprint": "b27c03e40c4f",
+  "gold_fingerprint": "0976d0a3d771"
+ },
+ "kn-produce-ALGT-2018Q2": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "ALGT"
+  ],
+  "fingerprint": "5ae79a0de46e",
+  "gold_fingerprint": "df5dec8e75dd"
+ },
+ "kn-produce-ALGT-2018Q4": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "ALGT"
+  ],
+  "fingerprint": "582f8883ae99",
+  "gold_fingerprint": "1ec7e78440b4"
+ },
+ "kn-produce-ALK-2017Q4": {
+  "split": "retired",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "ALK"
+  ],
+  "fingerprint": "09e454990491",
+  "gold_fingerprint": "db997eb306be"
+ },
+ "kn-produce-ALK-2018Q2": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "ALK"
+  ],
+  "fingerprint": "ba19c8d66ebb",
+  "gold_fingerprint": "d35fa343dd69"
+ },
+ "kn-produce-ALK-2018Q4": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "ALK"
+  ],
+  "fingerprint": "7029e88f72d7",
+  "gold_fingerprint": "a999c9cd1c75"
+ },
+ "kn-produce-DAL-2017Q4": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "DAL"
+  ],
+  "fingerprint": "a0a51092ad09",
+  "gold_fingerprint": "ccf476ee9c9a"
+ },
+ "kn-produce-DAL-2018Q2": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "DAL"
+  ],
+  "fingerprint": "9d3bcaa7a363",
+  "gold_fingerprint": "f6eb37a4782b"
+ },
+ "kn-produce-DAL-2018Q4": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "DAL"
+  ],
+  "fingerprint": "8041cd9c627a",
+  "gold_fingerprint": "c85514758d85"
+ },
+ "kn-produce-DDS-FY2017Q3": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "DDS"
+  ],
+  "fingerprint": "501671fa4a4f",
+  "gold_fingerprint": "5b8ad606f6e4"
+ },
+ "kn-produce-DDS-FY2018Q1": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "DDS"
+  ],
+  "fingerprint": "55e6f3bdf6b3",
+  "gold_fingerprint": "d55188949a48"
+ },
+ "kn-produce-DDS-FY2018Q3": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "DDS"
+  ],
+  "fingerprint": "18ebda0072e3",
+  "gold_fingerprint": "3a073a00535e"
+ },
+ "kn-produce-HA-2017Q4": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "HA"
+  ],
+  "fingerprint": "c3c3ac94ce6b",
+  "gold_fingerprint": "d4dc24feae68"
+ },
+ "kn-produce-HA-2018Q2": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "HA"
+  ],
+  "fingerprint": "35611959af2c",
+  "gold_fingerprint": "6453a7ebb850"
+ },
+ "kn-produce-HA-2018Q4": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "HA"
+  ],
+  "fingerprint": "14085c72e152",
+  "gold_fingerprint": "785431331851"
+ },
+ "kn-produce-JBLU-2017Q4": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JBLU"
+  ],
+  "fingerprint": "403e617eaf62",
+  "gold_fingerprint": "1a30461e770a"
+ },
+ "kn-produce-JBLU-2018Q2": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JBLU"
+  ],
+  "fingerprint": "dd7131e19fb4",
+  "gold_fingerprint": "a99dc2dca769"
+ },
+ "kn-produce-JBLU-2018Q4": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JBLU"
+  ],
+  "fingerprint": "d314a13a8143",
+  "gold_fingerprint": "a60ec069ea79"
+ },
+ "kn-produce-JCP-FY2017Q3": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JCP"
+  ],
+  "fingerprint": "60b543281595",
+  "gold_fingerprint": "3c046a195810"
+ },
+ "kn-produce-JCP-FY2018Q1": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JCP"
+  ],
+  "fingerprint": "cacff3369927",
+  "gold_fingerprint": "9fea8759ea1c"
+ },
+ "kn-produce-JCP-FY2018Q3": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JCP"
+  ],
+  "fingerprint": "59db6dd3a92d",
+  "gold_fingerprint": "710081273ab4"
+ },
+ "kn-produce-JWN_FP-FY2017Q3": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JWN"
+  ],
+  "fingerprint": "db5c18558d76",
+  "gold_fingerprint": "e4e18819aca6"
+ },
+ "kn-produce-JWN_FP-FY2018Q1": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JWN"
+  ],
+  "fingerprint": "bd42ef32be8b",
+  "gold_fingerprint": "c53ff3192768"
+ },
+ "kn-produce-JWN_FP-FY2018Q3": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JWN"
+  ],
+  "fingerprint": "1d9158de4e30",
+  "gold_fingerprint": "f4b181017121"
+ },
+ "kn-produce-JWN_OP-FY2017Q3": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JWN"
+  ],
+  "fingerprint": "f4d769cbddb3",
+  "gold_fingerprint": "4ca49415b348"
+ },
+ "kn-produce-JWN_OP-FY2018Q1": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JWN"
+  ],
+  "fingerprint": "2ec0a4aee16b",
+  "gold_fingerprint": "1f0f805156d2"
+ },
+ "kn-produce-JWN_OP-FY2018Q3": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JWN"
+  ],
+  "fingerprint": "f133e8982a38",
+  "gold_fingerprint": "e813fbc2a879"
+ },
+ "kn-produce-KSS-FY2017Q3": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "KSS"
+  ],
+  "fingerprint": "b37120e8f030",
+  "gold_fingerprint": "593ee9c1c6ce"
+ },
+ "kn-produce-KSS-FY2018Q1": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "KSS"
+  ],
+  "fingerprint": "7f93b6d9f833",
+  "gold_fingerprint": "3a3b72a94b71"
+ },
+ "kn-produce-KSS-FY2018Q3": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "KSS"
+  ],
+  "fingerprint": "b80d44d03194",
+  "gold_fingerprint": "081f1be1cb36"
+ },
+ "kn-produce-LUV-2017Q4": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "LUV"
+  ],
+  "fingerprint": "37e70e75571c",
+  "gold_fingerprint": "f1cf15bd237f"
+ },
+ "kn-produce-LUV-2018Q2": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "LUV"
+  ],
+  "fingerprint": "7419e46e731c",
+  "gold_fingerprint": "6f9cac54090c"
+ },
+ "kn-produce-LUV-2018Q4": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "LUV"
+  ],
+  "fingerprint": "505c4169f036",
+  "gold_fingerprint": "a8ceeeeef6a2"
+ },
+ "kn-produce-M-FY2017Q3": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "M"
+  ],
+  "fingerprint": "368e067dc8d2",
+  "gold_fingerprint": "7363c425b071"
+ },
+ "kn-produce-M-FY2018Q1": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "M"
+  ],
+  "fingerprint": "40e71729f9c3",
+  "gold_fingerprint": "0e5b41386c61"
+ },
+ "kn-produce-M-FY2018Q3": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "M"
+  ],
+  "fingerprint": "9be466fe4e50",
+  "gold_fingerprint": "7483c1877ccb"
+ },
+ "kn-produce-RET01-FY2017Q3-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "TJX"
+  ],
+  "fingerprint": "537682eda484",
+  "gold_fingerprint": "e20591774490"
+ },
+ "kn-produce-RET01-FY2018Q1-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "TJX"
+  ],
+  "fingerprint": "ede8e57b5cd5",
+  "gold_fingerprint": "cc6cb06d8508"
+ },
+ "kn-produce-RET01-FY2018Q3-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "TJX"
+  ],
+  "fingerprint": "92f1c5e3b201",
+  "gold_fingerprint": "9bc5a3c29a13"
+ },
+ "kn-produce-RET02-FY2017Q3-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JWN"
+  ],
+  "fingerprint": "44281fd5db28",
+  "gold_fingerprint": "7921b20645f6"
+ },
+ "kn-produce-RET02-FY2018Q1-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JWN"
+  ],
+  "fingerprint": "5aafd2d21964",
+  "gold_fingerprint": "3c7eaac2fe78"
+ },
+ "kn-produce-RET02-FY2018Q3-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JWN"
+  ],
+  "fingerprint": "3de863b704db",
+  "gold_fingerprint": "34665abde1f8"
+ },
+ "kn-produce-RET03-FY2017Q3-anon": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JCP"
+  ],
+  "fingerprint": "2d83782ecb9a",
+  "gold_fingerprint": "f8227c83e87f"
+ },
+ "kn-produce-RET03-FY2018Q1-anon": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JCP"
+  ],
+  "fingerprint": "e055201c3847",
+  "gold_fingerprint": "e78bbd4b3bb8"
+ },
+ "kn-produce-RET03-FY2018Q3-anon": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JCP"
+  ],
+  "fingerprint": "4a9911addb09",
+  "gold_fingerprint": "25ef465bbe8c"
+ },
+ "kn-produce-RET04-FY2017Q3-anon": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "M"
+  ],
+  "fingerprint": "36169940e953",
+  "gold_fingerprint": "fc5ce0853f4d"
+ },
+ "kn-produce-RET04-FY2018Q1-anon": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "M"
+  ],
+  "fingerprint": "33d08d3b336e",
+  "gold_fingerprint": "771463820e5c"
+ },
+ "kn-produce-RET04-FY2018Q3-anon": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "M"
+  ],
+  "fingerprint": "7971f9466841",
+  "gold_fingerprint": "2a9450a8b027"
+ },
+ "kn-produce-RET05-FY2017Q3-anon": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "DDS"
+  ],
+  "fingerprint": "b840d3111266",
+  "gold_fingerprint": "923e0fc246ca"
+ },
+ "kn-produce-RET05-FY2018Q1-anon": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "DDS"
+  ],
+  "fingerprint": "e5060017b8be",
+  "gold_fingerprint": "e7f4e09eae98"
+ },
+ "kn-produce-RET05-FY2018Q3-anon": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "DDS"
+  ],
+  "fingerprint": "044315b2bf0a",
+  "gold_fingerprint": "925677426b68"
+ },
+ "kn-produce-RET07-FY2017Q3-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "ROST"
+  ],
+  "fingerprint": "a319065e8986",
+  "gold_fingerprint": "80ce54748f63"
+ },
+ "kn-produce-RET07-FY2018Q1-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "ROST"
+  ],
+  "fingerprint": "a3f5a231d252",
+  "gold_fingerprint": "0d527e627399"
+ },
+ "kn-produce-RET07-FY2018Q3-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "ROST"
+  ],
+  "fingerprint": "fa0a2990feec",
+  "gold_fingerprint": "faebdcdf3077"
+ },
+ "kn-produce-RET08-FY2017Q3-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JWN"
+  ],
+  "fingerprint": "c4048b161b7c",
+  "gold_fingerprint": "89873ef086fa"
+ },
+ "kn-produce-RET08-FY2018Q1-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JWN"
+  ],
+  "fingerprint": "16e61fd27e7f",
+  "gold_fingerprint": "0336788f560d"
+ },
+ "kn-produce-RET08-FY2018Q3-anon": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "JWN"
+  ],
+  "fingerprint": "dec12b99fc61",
+  "gold_fingerprint": "af2e46f24f12"
+ },
+ "kn-produce-RET10-FY2017Q3-anon": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "KSS"
+  ],
+  "fingerprint": "25be4cc43bbc",
+  "gold_fingerprint": "1f5b123fd6a1"
+ },
+ "kn-produce-RET10-FY2018Q1-anon": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "KSS"
+  ],
+  "fingerprint": "4efa9a6295d6",
+  "gold_fingerprint": "a53f7d1f530f"
+ },
+ "kn-produce-RET10-FY2018Q3-anon": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "KSS"
+  ],
+  "fingerprint": "c3522f2527a4",
+  "gold_fingerprint": "c8c6989b02ac"
+ },
+ "kn-produce-ROST-FY2017Q3": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "ROST"
+  ],
+  "fingerprint": "f922bb533943",
+  "gold_fingerprint": "f8d516e97308"
+ },
+ "kn-produce-ROST-FY2018Q1": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "ROST"
+  ],
+  "fingerprint": "bf32c3c3245f",
+  "gold_fingerprint": "570dc25ed97e"
+ },
+ "kn-produce-ROST-FY2018Q3": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "ROST"
+  ],
+  "fingerprint": "dec4e398136d",
+  "gold_fingerprint": "679d49a12148"
+ },
+ "kn-produce-SAVE-2017Q4": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "SAVE"
+  ],
+  "fingerprint": "dd1eb4f11f25",
+  "gold_fingerprint": "f3a798a54e84"
+ },
+ "kn-produce-SAVE-2018Q2": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "SAVE"
+  ],
+  "fingerprint": "30812abdfe9c",
+  "gold_fingerprint": "966c3c07fdb1"
+ },
+ "kn-produce-SAVE-2018Q4": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "SAVE"
+  ],
+  "fingerprint": "a1d472bb5114",
+  "gold_fingerprint": "be471a3da444"
+ },
+ "kn-produce-TJX_MARMAXX-FY2017Q3": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "TJX"
+  ],
+  "fingerprint": "e98bae236280",
+  "gold_fingerprint": "f607b23fc379"
+ },
+ "kn-produce-TJX_MARMAXX-FY2018Q1": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "TJX"
+  ],
+  "fingerprint": "a35bb02a5af2",
+  "gold_fingerprint": "d82640c094c8"
+ },
+ "kn-produce-TJX_MARMAXX-FY2018Q3": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "TJX"
+  ],
+  "fingerprint": "cd7d85222789",
+  "gold_fingerprint": "865bebfb8b2e"
+ },
+ "kn-produce-UAL-2017Q4": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "UAL"
+  ],
+  "fingerprint": "a2e0ce5ade60",
+  "gold_fingerprint": "0c30f38fc621"
+ },
+ "kn-produce-UAL-2018Q2": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "UAL"
+  ],
+  "fingerprint": "fe9818852099",
+  "gold_fingerprint": "5bbf0fd495d0"
+ },
+ "kn-produce-UAL-2018Q4": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "companies": [
+   "UAL"
+  ],
+  "fingerprint": "f444867fc1f7",
+  "gold_fingerprint": "ce150521d602"
+ }
+}

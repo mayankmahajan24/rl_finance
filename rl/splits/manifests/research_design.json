@@ -1,0 +1,522 @@
+{
+ "rd-funding-S1": {
+  "split": "eval",
+  "role": "pm",
+  "workflow": "research_funding",
+  "mode": "compare",
+  "world": "midsize_ls",
+  "status": "graded",
+  "fingerprint": "3a2276335156",
+  "gold_fingerprint": "8cd411a11063"
+ },
+ "rd-funding-S10": {
+  "split": "eval",
+  "role": "pm",
+  "workflow": "research_funding",
+  "mode": "compare",
+  "world": "small_lo",
+  "status": "graded",
+  "fingerprint": "3a2276335156",
+  "gold_fingerprint": "5052577e7978"
+ },
+ "rd-funding-S2": {
+  "split": "eval",
+  "role": "pm",
+  "workflow": "research_funding",
+  "mode": "compare",
+  "world": "midsize_ls",
+  "status": "graded",
+  "fingerprint": "3a2276335156",
+  "gold_fingerprint": "59369c3fd546"
+ },
+ "rd-funding-S2F": {
+  "split": "eval",
+  "role": "pm",
+  "workflow": "research_funding",
+  "mode": "compare",
+  "world": "small_lo",
+  "status": "ungraded",
+  "fingerprint": "3a2276335156",
+  "gold_fingerprint": null
+ },
+ "rd-funding-S3": {
+  "split": "eval",
+  "role": "pm",
+  "workflow": "research_funding",
+  "mode": "compare",
+  "world": "ls_altdata",
+  "status": "graded",
+  "fingerprint": "3a2276335156",
+  "gold_fingerprint": "96dda2fbe9e4"
+ },
+ "rd-funding-S4": {
+  "split": "eval",
+  "role": "pm",
+  "workflow": "research_funding",
+  "mode": "compare",
+  "world": "event_desk",
+  "status": "graded",
+  "fingerprint": "3a2276335156",
+  "gold_fingerprint": "45d1de279f33"
+ },
+ "rd-funding-S5": {
+  "split": "eval",
+  "role": "pm",
+  "workflow": "research_funding",
+  "mode": "compare",
+  "world": "systematic",
+  "status": "graded",
+  "fingerprint": "3a2276335156",
+  "gold_fingerprint": "fa09ea7ef494"
+ },
+ "rd-funding-S5F": {
+  "split": "eval",
+  "role": "pm",
+  "workflow": "research_funding",
+  "mode": "compare",
+  "world": "small_lo",
+  "status": "ungraded",
+  "fingerprint": "3a2276335156",
+  "gold_fingerprint": null
+ },
+ "rd-funding-S6": {
+  "split": "eval",
+  "role": "pm",
+  "workflow": "research_funding",
+  "mode": "compare",
+  "world": "midsize_ls",
+  "status": "graded",
+  "fingerprint": "3a2276335156",
+  "gold_fingerprint": "ccc0fcf66cea"
+ },
+ "rd-funding-S7": {
+  "split": "eval",
+  "role": "pm",
+  "workflow": "research_funding",
+  "mode": "compare",
+  "world": "event_desk",
+  "status": "graded",
+  "fingerprint": "3a2276335156",
+  "gold_fingerprint": "5a4d6473daee"
+ },
+ "rd-funding-S8": {
+  "split": "eval",
+  "role": "pm",
+  "workflow": "research_funding",
+  "mode": "compare",
+  "world": "market_maker",
+  "status": "graded",
+  "fingerprint": "3a2276335156",
+  "gold_fingerprint": "20b65de3ffeb"
+ },
+ "rd-funding-S8F": {
+  "split": "eval",
+  "role": "pm",
+  "workflow": "research_funding",
+  "mode": "compare",
+  "world": "small_lo",
+  "status": "ungraded",
+  "fingerprint": "3a2276335156",
+  "gold_fingerprint": null
+ },
+ "rd-funding-S9": {
+  "split": "eval",
+  "role": "pm",
+  "workflow": "research_funding",
+  "mode": "compare",
+  "world": "small_lo",
+  "status": "graded",
+  "fingerprint": "3a2276335156",
+  "gold_fingerprint": "b146713285bb"
+ },
+ "rd-funding-S9F": {
+  "split": "eval",
+  "role": "pm",
+  "workflow": "research_funding",
+  "mode": "compare",
+  "world": "systematic",
+  "status": "ungraded",
+  "fingerprint": "3a2276335156",
+  "gold_fingerprint": null
+ },
+ "rd-produce-S1": {
+  "split": "eval",
+  "role": "fundamental_analyst",
+  "workflow": "research_design",
+  "mode": "produce",
+  "world": "midsize_ls",
+  "status": "needs_rubric",
+  "fingerprint": "a193b3949f47",
+  "gold_fingerprint": "151c10fed19e"
+ },
+ "rd-produce-S10": {
+  "split": "eval",
+  "role": "fundamental_analyst",
+  "workflow": "research_design",
+  "mode": "produce",
+  "world": "small_lo",
+  "status": "needs_rubric",
+  "fingerprint": "a193b3949f47",
+  "gold_fingerprint": "75338e59b64f"
+ },
+ "rd-produce-S2": {
+  "split": "eval",
+  "role": "quant_researcher",
+  "workflow": "research_design",
+  "mode": "produce",
+  "world": "midsize_ls",
+  "status": "needs_rubric",
+  "fingerprint": "a193b3949f47",
+  "gold_fingerprint": "9b9f9d3a30fa"
+ },
+ "rd-produce-S3": {
+  "split": "eval",
+  "role": "quant_researcher",
+  "workflow": "research_design",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "needs_rubric",
+  "fingerprint": "a193b3949f47",
+  "gold_fingerprint": "958c900e04c6"
+ },
+ "rd-produce-S4": {
+  "split": "eval",
+  "role": "fundamental_analyst",
+  "workflow": "research_design",
+  "mode": "produce",
+  "world": "event_desk",
+  "status": "needs_rubric",
+  "fingerprint": "a193b3949f47",
+  "gold_fingerprint": "d1e97e3b5e8f"
+ },
+ "rd-produce-S5": {
+  "split": "eval",
+  "role": "quant_researcher",
+  "workflow": "research_design",
+  "mode": "produce",
+  "world": "systematic",
+  "status": "needs_rubric",
+  "fingerprint": "a193b3949f47",
+  "gold_fingerprint": "75ff92647200"
+ },
+ "rd-produce-S6": {
+  "split": "eval",
+  "role": "quant_researcher",
+  "workflow": "research_design",
+  "mode": "produce",
+  "world": "midsize_ls",
+  "status": "needs_rubric",
+  "fingerprint": "a193b3949f47",
+  "gold_fingerprint": "dbdfc71d1060"
+ },
+ "rd-produce-S7": {
+  "split": "eval",
+  "role": "fundamental_analyst",
+  "workflow": "research_design",
+  "mode": "produce",
+  "world": "event_desk",
+  "status": "needs_rubric",
+  "fingerprint": "a193b3949f47",
+  "gold_fingerprint": "0fce538b2ab9"
+ },
+ "rd-produce-S8": {
+  "split": "eval",
+  "role": "quant_researcher",
+  "workflow": "research_design",
+  "mode": "produce",
+  "world": "market_maker",
+  "status": "needs_rubric",
+  "fingerprint": "a193b3949f47",
+  "gold_fingerprint": "1fe15c9e75d0"
+ },
+ "rd-produce-S9": {
+  "split": "eval",
+  "role": "fundamental_analyst",
+  "workflow": "research_design",
+  "mode": "produce",
+  "world": "small_lo",
+  "status": "needs_rubric",
+  "fingerprint": "a193b3949f47",
+  "gold_fingerprint": "29de1f56149c"
+ },
+ "rd-review-S1-A": {
+  "split": "eval",
+  "role": "fundamental_analyst",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "midsize_ls",
+  "status": "graded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": "4f7ee8b13189"
+ },
+ "rd-review-S1-B": {
+  "split": "eval",
+  "role": "fundamental_analyst",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "midsize_ls",
+  "status": "graded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": "4989ec9fe728"
+ },
+ "rd-review-S10-A": {
+  "split": "eval",
+  "role": "fundamental_analyst",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "small_lo",
+  "status": "graded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": "880ca62fb935"
+ },
+ "rd-review-S10-B": {
+  "split": "eval",
+  "role": "fundamental_analyst",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "small_lo",
+  "status": "graded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": "21211aafb3a9"
+ },
+ "rd-review-S2-A": {
+  "split": "eval",
+  "role": "quant_researcher",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "midsize_ls",
+  "status": "graded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": "162d78d58340"
+ },
+ "rd-review-S2-B": {
+  "split": "eval",
+  "role": "quant_researcher",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "midsize_ls",
+  "status": "graded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": "dc867bf4c26b"
+ },
+ "rd-review-S2F-A": {
+  "split": "eval",
+  "role": "quant_researcher",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "small_lo",
+  "status": "ungraded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": null
+ },
+ "rd-review-S2F-B": {
+  "split": "eval",
+  "role": "quant_researcher",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "small_lo",
+  "status": "ungraded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": null
+ },
+ "rd-review-S3-A": {
+  "split": "eval",
+  "role": "quant_researcher",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": "b508594cb7fa"
+ },
+ "rd-review-S3-B": {
+  "split": "eval",
+  "role": "quant_researcher",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": "a4a573b2f81a"
+ },
+ "rd-review-S4-A": {
+  "split": "eval",
+  "role": "fundamental_analyst",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "event_desk",
+  "status": "graded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": "66ab61460e1c"
+ },
+ "rd-review-S4-B": {
+  "split": "eval",
+  "role": "fundamental_analyst",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "event_desk",
+  "status": "graded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": "f2e171e9405c"
+ },
+ "rd-review-S5-A": {
+  "split": "eval",
+  "role": "quant_researcher",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "systematic",
+  "status": "graded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": "0dff5ae67891"
+ },
+ "rd-review-S5-B": {
+  "split": "eval",
+  "role": "quant_researcher",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "systematic",
+  "status": "graded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": "d991b82f81d7"
+ },
+ "rd-review-S5F-A": {
+  "split": "eval",
+  "role": "quant_researcher",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "small_lo",
+  "status": "ungraded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": null
+ },
+ "rd-review-S5F-B": {
+  "split": "eval",
+  "role": "quant_researcher",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "small_lo",
+  "status": "ungraded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": null
+ },
+ "rd-review-S6-A": {
+  "split": "eval",
+  "role": "quant_researcher",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "midsize_ls",
+  "status": "graded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": "27c0a170359d"
+ },
+ "rd-review-S6-B": {
+  "split": "eval",
+  "role": "quant_researcher",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "midsize_ls",
+  "status": "graded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": "49f921ff1ffe"
+ },
+ "rd-review-S7-A": {
+  "split": "eval",
+  "role": "fundamental_analyst",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "event_desk",
+  "status": "graded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": "cbe7b9790e6f"
+ },
+ "rd-review-S7-B": {
+  "split": "eval",
+  "role": "fundamental_analyst",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "event_desk",
+  "status": "graded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": "35e5d16116a8"
+ },
+ "rd-review-S8-A": {
+  "split": "eval",
+  "role": "quant_researcher",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "market_maker",
+  "status": "graded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": "1141eaf80fb0"
+ },
+ "rd-review-S8-B": {
+  "split": "eval",
+  "role": "quant_researcher",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "market_maker",
+  "status": "graded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": "5f5710a4b42a"
+ },
+ "rd-review-S8F-A": {
+  "split": "eval",
+  "role": "quant_researcher",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "small_lo",
+  "status": "ungraded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": null
+ },
+ "rd-review-S8F-B": {
+  "split": "eval",
+  "role": "quant_researcher",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "small_lo",
+  "status": "ungraded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": null
+ },
+ "rd-review-S9-A": {
+  "split": "eval",
+  "role": "fundamental_analyst",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "small_lo",
+  "status": "graded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": "872d8bf28bd2"
+ },
+ "rd-review-S9-B": {
+  "split": "eval",
+  "role": "fundamental_analyst",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "small_lo",
+  "status": "graded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": "03a0ac7dacf2"
+ },
+ "rd-review-S9F-A": {
+  "split": "eval",
+  "role": "fundamental_analyst",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "systematic",
+  "status": "ungraded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": null
+ },
+ "rd-review-S9F-B": {
+  "split": "eval",
+  "role": "fundamental_analyst",
+  "workflow": "research_design",
+  "mode": "review",
+  "world": "systematic",
+  "status": "ungraded",
+  "fingerprint": "ee6dd1a4f99e",
+  "gold_fingerprint": null
+ }
+}

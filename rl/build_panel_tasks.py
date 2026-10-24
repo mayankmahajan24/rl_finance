@@ -2,8 +2,8 @@
 
 Each split's tasks are generated only from that split's companies (splits/txn_panel.yaml), from
 that split's seeds (splits/seeds.yaml; held-out seeds are secret). Output goes to
-rl/tasks/<split>/<task_id>/ (gitignored: tasks are rebuilt, not committed) and a manifest of what
-was built, with hashes, to splits/manifests/ (held-out: splits/secrets/manifests/).
+rl/tasks/<split>/<task_id>/ (gitignored: tasks are rebuilt, not committed) and a record of what was
+built, with hashes, to splits/manifests/<family>.json.
 
 Usage:
     python rl/build_panel_tasks.py --split bench                       # all three families
@@ -14,8 +14,8 @@ from __future__ import annotations
 
 import argparse
 import importlib
-import json
 import pathlib
+import shutil
 import sys
 
 import yaml
@@ -41,11 +41,6 @@ def render(template: str, **kw) -> str:
 def task_id(prefix: str, split: str, seed: int, control: bool, index: int) -> str:
     # never the seed itself: held-out seeds are secret, and ids are not
     return f"{prefix}-{split}-" + (f"control-{index:02d}" if control else f"{index:03d}")
-
-
-def manifest_path(split: str) -> pathlib.Path:
-    base = splits.SECRETS / "manifests" if split == "heldout" else splits.HERE / "manifests"
-    return base / f"txn_panel_{split}.json"
 
 
 def build_family(fam_id: str, split: str, n: int | None, controls: int | None, full) -> dict:
@@ -81,14 +76,16 @@ def build_family(fam_id: str, split: str, n: int | None, controls: int | None, f
         instruction = render(instruction_t, schema=SCHEMA,
                              **({"y1": truth["year_start"], "y2": truth["year_end"]} if fam_id == "growth_thesis" else {}))
         data = {"transactions.csv": df.to_csv(index=False, date_format="%Y-%m-%d")}
-        meta = {"family": fam_id, "role": fam["role"], "workflow": fam["workflow"], "mode": fam["mode"],
+        meta = {"id": tid, "family": fam_id, "role": fam["role"], "workflow": fam["workflow"], "mode": fam["mode"],
                 "world": fam["world"], "source": fam["source"], "split": split,
                 "seed": None if split == "heldout" else seed, "control": control, "companies": used,
                 "generator": f"rl/families/{fam_id}/{fam['generator']}"}
         params = ({"year_start": truth["year_start"], "year_end": truth["year_end"]}
                   if fam_id == "growth_thesis" else None)
-        info = harbor.write_task(TASKS / split / tid, fam_dir, fam, instruction, data, truth, meta, params)
-        built[tid] = {"family": fam_id, "seed": seed, "control": control, "companies": used, **info}
+        info = harbor.write_panel_task(TASKS / split / tid, fam_dir, fam, instruction, data, truth, meta, params)
+        built[tid] = {"split": split, "role": fam["role"], "workflow": fam["workflow"], "mode": fam["mode"],
+                      "world": fam["world"], "status": "graded", "seed": seed, "control": control,
+                      "companies": used, **info}
         print(f"  {tid}")
     return built
 
@@ -102,18 +99,14 @@ def main() -> None:
     args = ap.parse_args()
 
     full = panel.load_df()
-    mpath = manifest_path(args.split)
-    manifest = json.loads(mpath.read_text()) if mpath.exists() else {}
     for fam_id in args.family or FAMILIES:
         print(f"{fam_id} ({args.split})")
-        manifest = {k: v for k, v in manifest.items() if v["family"] != fam_id}   # rebuilt family replaces its entries
-        for stale in (TASKS / args.split).glob(f"{yaml.safe_load((RL / 'families' / fam_id / 'family.yaml').read_text())['task_prefix']}-*"):
-            import shutil
+        prefix = yaml.safe_load((RL / "families" / fam_id / "family.yaml").read_text())["task_prefix"]
+        for stale in (TASKS / args.split).glob(f"{prefix}-*"):   # a rebuilt split replaces its tasks
             shutil.rmtree(stale)
-        manifest.update(build_family(fam_id, args.split, args.n, args.controls, full))
-    mpath.parent.mkdir(parents=True, exist_ok=True)
-    mpath.write_text(json.dumps(dict(sorted(manifest.items())), indent=1) + "\n")
-    print(f"{len(manifest)} tasks in {mpath.relative_to(RL.parent)}")
+        built = build_family(fam_id, args.split, args.n, args.controls, full)
+        mpath = splits.write_manifest(fam_id, built, splits_rebuilt={args.split})
+        print(f"{len(built)} tasks; {mpath.relative_to(RL.parent)}")
 
 
 if __name__ == "__main__":

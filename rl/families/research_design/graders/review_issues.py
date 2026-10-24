@@ -81,17 +81,15 @@ def format_issues(issues: list[dict]) -> str:
     )
 
 
-def run_scorer(client, model: str, task_dir: pathlib.Path, response: dict,
+def run_scorer(client, model: str, gold: dict, inp: dict, response: dict,
                max_tokens: int = 48000) -> dict:
     """Call the scorer model on one response. The scorer sees the same context, seed
-    and plan the model saw (prompt/inputs.json) plus the gold issues."""
+    and plan the model saw (the task's inputs.json) plus the gold issues."""
     import re
     text = (HERE / "review_scorer.md").read_text()
     m = re.search(r"^## SYSTEM\s*$(.*?)^## USER\s*$(.*)", text, re.S | re.M)
     system, template = m.group(1).strip(), m.group(2).strip()
-    gold = json.loads((task_dir / "grader" / "gold.json").read_text())
     issues = response["issues"]
-    inp = json.loads((task_dir / "prompt" / "inputs.json").read_text())
     user = template.format(context=inp["context"], seed=inp["seed"], plan=inp["plan"],
                            gold=format_gold(gold["issues"]),
                            issues=format_issues(issues), n=len(issues))

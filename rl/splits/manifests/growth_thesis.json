@@ -1,0 +1,438 @@
+{
+ "thesis-bench-001": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200000,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "cb6504bcc199",
+  "gold_fingerprint": "910e88a1d2dc"
+ },
+ "thesis-bench-002": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200001,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "bc39a975c990",
+  "gold_fingerprint": "56d2a068ce8c"
+ },
+ "thesis-bench-003": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200002,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "39b94ef91f57",
+  "gold_fingerprint": "a89603b26be6"
+ },
+ "thesis-bench-004": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200003,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "fc962e9c365c",
+  "gold_fingerprint": "b68051ced914"
+ },
+ "thesis-bench-005": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200004,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "4846b4f7d797",
+  "gold_fingerprint": "d728e890bf9c"
+ },
+ "thesis-bench-006": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200005,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "c06277644315",
+  "gold_fingerprint": "e198bc720305"
+ },
+ "thesis-bench-007": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200006,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "5a67000895b2",
+  "gold_fingerprint": "86588ae0e38b"
+ },
+ "thesis-bench-008": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200007,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "411f845a3079",
+  "gold_fingerprint": "dbb4dedf9ffd"
+ },
+ "thesis-bench-009": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200008,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "a80a02251d55",
+  "gold_fingerprint": "4d926ddbe822"
+ },
+ "thesis-bench-010": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200009,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "8bc5904075ad",
+  "gold_fingerprint": "8368f7152b37"
+ },
+ "thesis-bench-control-01": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 290000,
+  "control": true,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "e2193c6e2a75",
+  "gold_fingerprint": "259b86016307"
+ },
+ "thesis-bench-control-02": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 290001,
+  "control": true,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "fe54b87d0dd8",
+  "gold_fingerprint": "3b55d4b8a8cb"
+ },
+ "thesis-heldout-001": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU"
+  ],
+  "fingerprint": "89a0edbc8f97",
+  "gold_fingerprint": "161a4b36e236"
+ },
+ "thesis-heldout-002": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU"
+  ],
+  "fingerprint": "0e431e33b730",
+  "gold_fingerprint": "817dc16a50b1"
+ },
+ "thesis-heldout-003": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU"
+  ],
+  "fingerprint": "ee41e45cf3b4",
+  "gold_fingerprint": "40b37fd43b3f"
+ },
+ "thesis-heldout-004": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU"
+  ],
+  "fingerprint": "60f1ff21407d",
+  "gold_fingerprint": "78d209e168a8"
+ },
+ "thesis-heldout-005": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU"
+  ],
+  "fingerprint": "c783cd141a86",
+  "gold_fingerprint": "a860b820f24f"
+ },
+ "thesis-heldout-006": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU"
+  ],
+  "fingerprint": "4d4c037ea2bc",
+  "gold_fingerprint": "2a0024803142"
+ },
+ "thesis-heldout-007": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU"
+  ],
+  "fingerprint": "f8ba93f3caf8",
+  "gold_fingerprint": "528851e73bc7"
+ },
+ "thesis-heldout-008": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU"
+  ],
+  "fingerprint": "a2374cb0cd03",
+  "gold_fingerprint": "f714df19d869"
+ },
+ "thesis-heldout-009": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU"
+  ],
+  "fingerprint": "a45ef14efbe8",
+  "gold_fingerprint": "115540fa83f1"
+ },
+ "thesis-heldout-010": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU"
+  ],
+  "fingerprint": "57a1cc3de7e6",
+  "gold_fingerprint": "cc79ba9b8b0b"
+ },
+ "thesis-heldout-control-01": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": true,
+  "companies": [
+   "ALK",
+   "JBLU"
+  ],
+  "fingerprint": "c918598c2c79",
+  "gold_fingerprint": "2340152c43e1"
+ },
+ "thesis-heldout-control-02": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": true,
+  "companies": [
+   "ALK",
+   "JBLU"
+  ],
+  "fingerprint": "ec7595c504c8",
+  "gold_fingerprint": "47b67c3bc587"
+ },
+ "thesis-train-001": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 100000,
+  "control": false,
+  "companies": [
+   "LUV",
+   "UAL"
+  ],
+  "fingerprint": "0f13af1b41b6",
+  "gold_fingerprint": "0b13278de3df"
+ },
+ "thesis-train-002": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 100001,
+  "control": false,
+  "companies": [
+   "LUV",
+   "UAL"
+  ],
+  "fingerprint": "0144534d69ea",
+  "gold_fingerprint": "cb7ca0f9ed1b"
+ },
+ "thesis-train-003": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 100002,
+  "control": false,
+  "companies": [
+   "LUV",
+   "UAL"
+  ],
+  "fingerprint": "07ed6fcfc635",
+  "gold_fingerprint": "ac589ded2f3b"
+ },
+ "thesis-train-control-01": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "growth_thesis",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 190000,
+  "control": true,
+  "companies": [
+   "LUV",
+   "UAL"
+  ],
+  "fingerprint": "27d7869c1c1c",
+  "gold_fingerprint": "cf946cdabe6f"
+ }
+}

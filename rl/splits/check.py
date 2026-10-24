@@ -1,10 +1,12 @@
 """Verify that splits are disjoint and that every built task obeys them. Exits non-zero on any failure.
 
   1. every company of a source is in exactly one split
-  2. seed ranges never overlap across splits, and every built task's seed is in its split's range
-  3. every built task's companies are all in its split
-  4. kpi_nowcast tasks carry their company's split, or "retired" for retired cases
-  5. no task id appears in two splits; nothing grader-side sits in a Harbor task's environment/
+  2. seed ranges never overlap, and every built task's seed is in its split's range and not a
+     held-out seed
+  3. every built task sits in the folder of its split: train, bench or heldout (its companies all in
+     that split), eval (a source with no split assignment yet) or retired (a listed retired case)
+  4. held-out tasks record no seed; nothing grader-side sits where the agent can see it
+  5. every built task matches its family's committed manifest (same split, same fingerprints)
 
 Usage:
     python rl/splits/check.py
@@ -12,20 +14,26 @@ Usage:
 
 from __future__ import annotations
 
-import json
 import pathlib
 import sys
-import tomllib
 
 import yaml
 
 RL = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RL))
 import splits  # noqa: E402
-from lib import iter_tasks  # noqa: E402
+from lib import fingerprint, iter_tasks  # noqa: E402
 from sources.txn_panel import panel  # noqa: E402
 
-SOURCES = {"txn_panel": panel}
+SOURCES = {"txn_panel": panel}          # sources with a company split
+GRADER_ONLY = ("ground_truth", "gold", "draft_rubric", "reference")
+
+
+def case_key(m: dict) -> str | None:
+    """The key a retired case is listed under (kpi_nowcast: series-period)."""
+    if m["family"] == "kpi_nowcast":
+        return f"{m['meta']['series']}-{m['meta']['target_period'].replace(' ', '')}"
+    return None
 
 
 def check() -> list[str]:
@@ -55,58 +63,68 @@ def check() -> list[str]:
         problems.append(f"seeds.yaml ranges are not in increasing order: {bounds}")
     if bounds[0] < cfg["retired_below"]:
         problems.append(f"train seeds start below retired_below ({cfg['retired_below']})")
-    ranges = {"train": (bounds[0], bounds[2]), "bench": (bounds[2], 10**8),
-              "heldout": (10**8, 10**9)}
+    ranges = {"train": (bounds[0], bounds[2]), "bench": (bounds[2], 10**8), "heldout": (10**8, 10**9)}
     held = {s for f in splits.heldout_seeds().values() for v in f.values() for s in v}
 
-    # 3 and 5. Harbor tasks
+    # 3-5. built tasks
     owner: dict[str, str] = {}
-    for toml in sorted((RL / "tasks").glob("*/*/task.toml")):
-        d, split_dir = toml.parent, toml.parent.parent.name
-        m = tomllib.loads(toml.read_text())["metadata"]
-        tid = d.name
-        if m.get("split") != split_dir:
-            problems.append(f"{tid}: metadata split {m.get('split')} but built under tasks/{split_dir}")
+    manifests: dict[str, dict] = {}
+    for d, m in iter_tasks():
+        tid, folder = d.name, d.parent.name
+        if m.get("id") != tid:
+            problems.append(f"{tid}: metadata id is {m.get('id')!r}")
+        if m.get("split") != folder:
+            problems.append(f"{tid}: metadata split {m.get('split')} but built under tasks/{folder}")
         if tid in owner:
-            problems.append(f"{tid}: built in both {owner[tid]} and {split_dir}")
-        owner[tid] = split_dir
-        if split_dir not in splits.SPLITS:
-            problems.append(f"{tid}: built under tasks/{split_dir}, which is not a split")
-            continue
-        allowed = set(splits.companies(m["source"], split_dir))
-        extra = set(m.get("companies", [])) - allowed
-        if extra:
-            problems.append(f"{tid}: uses {sorted(extra)}, not in {split_dir}")
+            problems.append(f"{tid}: built in both {owner[tid]} and {folder}")
+        owner[tid] = folder
+        if folder in splits.SPLITS:
+            if m.get("source") not in SOURCES:
+                problems.append(f"{tid}: source {m.get('source')} has no split assignment, so it can't be in {folder}")
+            else:
+                extra = set(m.get("companies") or ["(none recorded)"]) - set(splits.companies(m["source"], folder))
+                if extra:
+                    problems.append(f"{tid}: uses {sorted(extra)}, not in {folder}")
+        elif folder == splits.UNSPLIT:
+            if m.get("source") in SOURCES:
+                problems.append(f"{tid}: source {m['source']} has a split assignment; eval is for sources without one")
+        elif folder == splits.RETIRED:
+            if case_key(m) not in splits.retired(m["source"], m["family"]):
+                problems.append(f"{tid}: in retired/ but its case is not listed as retired")
+        else:
+            problems.append(f"{tid}: built under tasks/{folder}, which is not a split")
+        retired = splits.retired(m["source"], m["family"]) if m.get("source") in SOURCES else {}
+        if folder != splits.RETIRED and case_key(m) in retired:
+            problems.append(f"{tid}: its case is retired but it is built under {folder}")
+
         seed = m.get("seed")
-        if split_dir == "heldout":
-            if seed is not None:
-                problems.append(f"{tid}: held-out task records its seed")
-        elif seed is not None:
-            lo, hi = ranges[split_dir]
+        if folder == "heldout" and seed is not None:
+            problems.append(f"{tid}: held-out task records its seed")
+        elif seed is not None and folder in ranges:
+            lo, hi = ranges[folder]
             if not lo <= seed < hi:
-                problems.append(f"{tid}: seed {seed} outside the {split_dir} range [{lo}, {hi})")
+                problems.append(f"{tid}: seed {seed} outside the {folder} range [{lo}, {hi})")
             if seed in held:
                 problems.append(f"{tid}: seed {seed} is a held-out seed")
-        if any("ground_truth" in p.name for p in (d / "environment").rglob("*")):
-            problems.append(f"{tid}: ground truth inside environment/")
+        for sub in ("environment", "prompt"):
+            if any(p.name.startswith(GRADER_ONLY) for p in (d / sub).rglob("*")):
+                problems.append(f"{tid}: grader-only file under {sub}/")
 
-    # manifests agree with the secrets file (held-out seeds really are the drawn ones)
-    hman = splits.SECRETS / "manifests" / "txn_panel_heldout.json"
-    if hman.exists():
-        for tid, v in json.loads(hman.read_text()).items():
-            if v["seed"] not in held:
-                problems.append(f"{tid}: held-out manifest seed not in secrets/heldout_seeds.yaml")
+        man = manifests.setdefault(m["family"], splits.manifest(m["family"]))
+        entry = man.get(tid)
+        fp = m.get("fingerprint") or m.get("prompt", {}).get("fingerprint")
+        gold = next((p for p in (d / "tests" / n for n in ("ground_truth.json", "gold.json", "draft_rubric.json"))
+                     if p.exists()), None)
+        if entry is None:
+            problems.append(f"{tid}: not in splits/manifests/{m['family']}.json")
+        elif (entry["split"], entry["fingerprint"], entry["gold_fingerprint"]) != (
+                folder, fp, fingerprint(gold.read_text()) if gold else None):
+            problems.append(f"{tid}: differs from splits/manifests/{m['family']}.json (rebuild, or commit the new manifest)")
 
-    # 4. kpi_nowcast (repo task format); retired cases carry split "retired"
-    retired_kpi = splits.retired("txn_panel", "kpi_nowcast")
-    for d, t in iter_tasks():
-        if t.get("workflow") != "kpi_nowcast":
-            continue
-        want = splits.split_of("txn_panel", panel.company_of_series(t["meta"]["series"]))
-        if f"{t['meta']['series']}-{t['meta']['target_period'].replace(' ', '')}" in retired_kpi:
-            want = "retired"
-        if t.get("split") != want:
-            problems.append(f"{t['id']}: split {t.get('split')}, company split is {want}")
+    for fam, man in manifests.items():
+        for tid, v in man.items():
+            if v["split"] == "heldout" and "seed" in v:
+                problems.append(f"{fam} manifest: held-out {tid} records its seed")
     return problems
 
 

@@ -31,15 +31,12 @@ from lib import RL, fingerprint, iter_tasks, write_json  # noqa: E402
 from families.research_design.graders import pairwise_pick, review_issues  # noqa: E402
 from skills import manage as skills  # noqa: E402
 
-WORKFLOWS = ("research_design", "research_funding")
 SKILL_PATH = re.compile(r"/skills/([a-z0-9-]+)")
 
 
 def select(args) -> list[tuple[pathlib.Path, dict]]:
     out = []
-    for d, t in iter_tasks():
-        if t["workflow"] not in WORKFLOWS:   # other families have their own runners
-            continue
+    for d, t in iter_tasks("research_design"):   # other families have their own runners
         if args.tasks and t["id"] not in args.tasks:
             continue
         if not args.tasks and t["status"] not in args.status:
@@ -151,12 +148,13 @@ def run_task(client, args, cond: dict, d: pathlib.Path, t: dict) -> dict:
     if rec["status"] != "ok" or t["status"] != "graded":
         rec["reward"] = None
         return rec
-    gold = json.loads((d / "grader" / "gold.json").read_text())
+    gold = json.loads((d / "tests" / "gold.json").read_text())
     if t["mode"] == "compare":
         rec.update(pairwise_pick.grade(gold, parsed))
     elif t["mode"] == "review":
         # The scorer is a grader, never output generation: no skills.
-        scored = review_issues.run_scorer(client, args.scorer, d, parsed["single"])
+        inputs = json.loads((d / "prompt" / "inputs.json").read_text())
+        scored = review_issues.run_scorer(client, args.scorer, gold, inputs, parsed["single"])
         rec["scorer"] = {"model": args.scorer, **scored}
         rec.update(review_issues.grade(gold, scored, **t["grader"].get("params", {})))
     return rec

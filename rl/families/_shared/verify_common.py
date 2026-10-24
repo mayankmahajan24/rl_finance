@@ -1,5 +1,5 @@
 """Shared helpers for the verifiers. Paths default to the Harbor container layout and can be
-overridden with environment variables for local runs (see run_local.py)."""
+overridden with environment variables for local runs (see rl/harness/run_solutions.py)."""
 import json
 import os
 from pathlib import Path
@@ -21,6 +21,17 @@ def write_reward(reward: float, details: dict):
     (out / 'details.json').write_text(json.dumps(dict(details, reward=reward), indent=1, default=str))
     print(json.dumps(dict(details, reward=round(reward, 4)), indent=1, default=str))
     return reward
+
+
+def write_rewards(rewards: dict, details: dict):
+    """Several named rewards (Harbor reads reward.json in place of reward.txt). An empty dict means
+    the task has no grader yet; details say why."""
+    out = LOGS / 'verifier'
+    out.mkdir(parents=True, exist_ok=True)
+    (out / 'reward.json').write_text(json.dumps(rewards))
+    (out / 'details.json').write_text(json.dumps(dict(details, rewards=rewards), indent=1, default=str))
+    print(json.dumps(dict(details, rewards=rewards), indent=1, default=str))
+    return rewards
 
 
 def f1(p, r):

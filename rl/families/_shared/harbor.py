@@ -1,14 +1,16 @@
-"""Write one task directory in Harbor layout (schema_version 1.3).
+"""Write one task directory in Harbor layout. Every family's builder writes through here.
 
     <task_id>/
-      instruction.md
-      task.toml                          harness metadata; never shown to the agent
+      instruction.md                     what a Harbor agent is given
+      task.toml                          Harbor config; [metadata] holds the repo's task metadata
       environment/Dockerfile, environment/data/...   what the agent sees, under /app
-      tests/test.sh, tests/<verifier>, tests/common.py, tests/ground_truth.json   copied in only after the agent finishes
-      solution/solve.sh (+ files)        reference solution, run by Harbor's oracle agent
+      prompt/                            exact messages for the repo's API runners (model-visible;
+                                         only families with an API runner have it)
+      tests/test.sh, tests/<verifier>, tests/common.py, gold   copied in only after the agent finishes
+      solution/solve.sh (+ files)        reference solution for Harbor's oracle agent, where one exists
 
-Dockerfile, test.sh and the toml body are the pilot's (~/altdata_evals/build_tasks.py); task.toml
-gains the repo's metadata (role, workflow, split, companies, fingerprint) under [metadata].
+Dockerfile, test.sh and the toml body are the ~/altdata_evals pilot's; families add pip packages and
+gzip-compressed data files (unpacked in the image) where they need them.
 """
 
 from __future__ import annotations
@@ -17,6 +19,8 @@ import json
 import pathlib
 import shutil
 import sys
+
+import toml
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 from lib import fingerprint  # noqa: E402
@@ -27,7 +31,7 @@ DOCKERFILE = """FROM python:3.12-slim
 RUN pip install --no-cache-dir pandas==2.2.3 numpy==2.1.3 scipy==1.14.1{extra}
 WORKDIR /app
 COPY data /app/data
-RUN mkdir -p /app/output /app/solution
+{gunzip}RUN mkdir -p /app/output /app/solution
 """
 
 TEST_SH = """#!/bin/bash
@@ -41,25 +45,15 @@ JUDGE_ENV = ('\n[verifier.env]\n# LLM judge for the memo rubric; falls back to k
              'ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY:-}"\nJUDGE = "${JUDGE:-auto}"\n'
              'JUDGE_MODEL = "${JUDGE_MODEL:-claude-opus-5-5}"\n')
 
-
-def _toml_value(v) -> str:
-    if isinstance(v, bool):
-        return str(v).lower()
-    if isinstance(v, (int, float)):
-        return str(v)
-    if isinstance(v, (list, tuple)):
-        return "[" + ", ".join(_toml_value(x) for x in v) + "]"
-    return json.dumps(str(v))
+COMMON = HERE / "verify_common.py"
 
 
-def task_toml(task_id: str, fam: dict, meta: dict) -> str:
-    lines = ['schema_version = "1.3"', "", "[task]", f'name = "rl_finance/{task_id}"',
-             f"description = {_toml_value(fam['description'])}",
-             f'keywords = ["alt-data", "data-science", "{fam["task_prefix"]}"]', "", "[metadata]"]
-    lines += [f"{k} = {_toml_value(v)}" for k, v in meta.items() if v is not None]
-    lines += ["", "[verifier]", f"timeout_sec = {fam['verifier_timeout_sec']}"]
-    body = "\n".join(lines) + "\n" + (JUDGE_ENV if fam.get("llm_judge") else "")
-    return body + """[agent]
+def task_toml(task_id: str, description: str, keywords: list[str], metadata: dict, verifier_timeout: int,
+              verifier_env: str = "") -> str:
+    head = toml.dumps({"task": {"name": f"rl_finance/{task_id}", "description": description, "keywords": keywords}})
+    return ('schema_version = "1.3"\n\n' + head + "\n" + toml.dumps({"metadata": metadata})
+            + f"\n[verifier]\ntimeout_sec = {verifier_timeout}\n" + verifier_env + """
+[agent]
 timeout_sec = 3600
 
 [environment]
@@ -68,35 +62,61 @@ cpus = 2
 memory_mb = 4096
 storage_mb = 4096
 workdir = "/app"
-"""
+""")
 
 
-def write_task(dest: pathlib.Path, fam_dir: pathlib.Path, fam: dict, instruction: str, data: dict[str, str],
-               truth: dict, meta: dict, solution_params: dict | None = None) -> dict:
-    """Write the task; return manifest info (sha256 of what the agent sees and of the ground truth)."""
+def _put(path: pathlib.Path, content) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if isinstance(content, pathlib.Path):
+        shutil.copy(content, path)
+    elif isinstance(content, bytes):
+        path.write_bytes(content)
+    else:
+        path.write_text(content)
+
+
+def write(dest: pathlib.Path, *, instruction: str, metadata: dict, description: str, keywords: list[str],
+          verifier: str, tests: dict, verifier_timeout: int = 600, verifier_env: str = "",
+          data: dict | None = None, prompt: dict | None = None, solution: dict | None = None,
+          pip: str = "") -> None:
+    """Write the task. `tests`, `data`, `prompt` and `solution` map file names to text, bytes, or a
+    path to copy; `verifier` names the file in `tests` that test.sh runs. Data files ending in .gz
+    are unpacked when the image is built, so the agent sees them uncompressed."""
     if dest.exists():
         shutil.rmtree(dest)
     (dest / "environment" / "data").mkdir(parents=True)
-    (dest / "tests").mkdir()
-    (dest / "solution").mkdir()
-    for name, text in data.items():
-        (dest / "environment" / "data" / name).write_text(text)
+    for name, c in (data or {}).items():
+        _put(dest / "environment" / "data" / name, c)
+    gunzip = "RUN gunzip /app/data/*.gz\n" if any(n.endswith(".gz") for n in data or {}) else ""
+    (dest / "environment" / "Dockerfile").write_text(DOCKERFILE.format(extra=pip, gunzip=gunzip))
     (dest / "instruction.md").write_text(instruction)
-    verifier = pathlib.Path(fam["verifier"]).name
-    extra = " anthropic" if fam.get("llm_judge") else ""   # LLM judge; agents may ignore it
-    (dest / "environment" / "Dockerfile").write_text(DOCKERFILE.format(extra=extra))
+    for name, c in (prompt or {}).items():
+        _put(dest / "prompt" / name, c)
+    (dest / "tests").mkdir()
     (dest / "tests" / "test.sh").write_text(TEST_SH.format(verifier=verifier))
     (dest / "tests" / "test.sh").chmod(0o755)
-    shutil.copy(fam_dir / fam["verifier"], dest / "tests" / verifier)
-    shutil.copy(HERE / "verify_common.py", dest / "tests" / "common.py")
+    _put(dest / "tests" / "common.py", COMMON)
+    for name, c in tests.items():
+        _put(dest / "tests" / name, c)
+    (dest / "solution").mkdir()
+    for name, c in (solution or {}).items():
+        _put(dest / "solution" / name, c)
+    (dest / "task.toml").write_text(task_toml(dest.name, description, keywords, metadata, verifier_timeout,
+                                              verifier_env))
+
+
+def write_panel_task(dest: pathlib.Path, fam_dir: pathlib.Path, fam: dict, instruction: str, data: dict[str, str],
+                     truth: dict, meta: dict, solution_params: dict | None = None) -> dict:
+    """A generated txn_panel task; returns manifest info (fingerprint of what the agent sees, ground-truth hash)."""
     gt = json.dumps(truth, indent=1, default=str)
-    (dest / "tests" / "ground_truth.json").write_text(gt)
-    for f in (fam_dir / "solutions" / "reference").iterdir():
-        if f.is_file():
-            shutil.copy(f, dest / "solution")
+    verifier = pathlib.Path(fam["verifier"]).name
+    solution = {f.name: f for f in (fam_dir / "solutions" / "reference").iterdir() if f.is_file()}
     if solution_params is not None:
-        (dest / "solution" / "params.json").write_text(json.dumps(solution_params))
+        solution["params.json"] = json.dumps(solution_params)
     fp = fingerprint(instruction, *[data[k] for k in sorted(data)])
-    meta = dict(meta, fingerprint=fp)
-    (dest / "task.toml").write_text(task_toml(dest.name, fam, meta))
-    return {"fingerprint": fp, "ground_truth_sha256": fingerprint(gt)}
+    write(dest, instruction=instruction, metadata=dict(meta, fingerprint=fp), description=fam["description"],
+          keywords=["alt-data", "data-science", fam["task_prefix"]], verifier=verifier,
+          tests={verifier: fam_dir / fam["verifier"], "ground_truth.json": gt},
+          verifier_timeout=fam["verifier_timeout_sec"], verifier_env=JUDGE_ENV if fam.get("llm_judge") else "",
+          data=data, solution=solution, pip=" anthropic" if fam.get("llm_judge") else "")   # LLM judge; agents may ignore it
+    return {"fingerprint": fp, "gold_fingerprint": fingerprint(gt)}

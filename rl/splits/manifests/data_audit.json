@@ -1,0 +1,510 @@
+{
+ "audit-bench-001": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200000,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "44bc1e962600",
+  "gold_fingerprint": "95fc3fa577a7"
+ },
+ "audit-bench-002": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200001,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "7436c53a9b69",
+  "gold_fingerprint": "9bc98700846a"
+ },
+ "audit-bench-003": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200002,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "79e01e9515d5",
+  "gold_fingerprint": "fc0e2bbf18ab"
+ },
+ "audit-bench-004": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200003,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "7a43279f455d",
+  "gold_fingerprint": "c516c26f94d0"
+ },
+ "audit-bench-005": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200004,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "9744a98b317e",
+  "gold_fingerprint": "0ddc2c845434"
+ },
+ "audit-bench-006": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200005,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "eda5908e0f40",
+  "gold_fingerprint": "3778e291f4ff"
+ },
+ "audit-bench-007": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200006,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "420183c5f624",
+  "gold_fingerprint": "89065b042fe6"
+ },
+ "audit-bench-008": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200007,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "c66eda99630f",
+  "gold_fingerprint": "c17974ef69c9"
+ },
+ "audit-bench-009": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200008,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "26d7fe671192",
+  "gold_fingerprint": "955037668fb9"
+ },
+ "audit-bench-010": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200009,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "86217af7d3e8",
+  "gold_fingerprint": "1109ece76493"
+ },
+ "audit-bench-control-01": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 290000,
+  "control": true,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "3c26df1d64e1",
+  "gold_fingerprint": "d8351670a0f7"
+ },
+ "audit-bench-control-02": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 290001,
+  "control": true,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "758e7c9642ba",
+  "gold_fingerprint": "12fa8453ecb9"
+ },
+ "audit-heldout-001": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "a76db3a60e91",
+  "gold_fingerprint": "d9337191616c"
+ },
+ "audit-heldout-002": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "3a91fa331a60",
+  "gold_fingerprint": "5c10ba11f6e0"
+ },
+ "audit-heldout-003": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "ba8486b63a37",
+  "gold_fingerprint": "e91db46f87b6"
+ },
+ "audit-heldout-004": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "296878d12454",
+  "gold_fingerprint": "88d8de2e8265"
+ },
+ "audit-heldout-005": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "e1ead2f40b97",
+  "gold_fingerprint": "8e6d90d3ea77"
+ },
+ "audit-heldout-006": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "55527a87c3a5",
+  "gold_fingerprint": "030a5ca74cbd"
+ },
+ "audit-heldout-007": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "17b4f09c3291",
+  "gold_fingerprint": "d2ec999eb652"
+ },
+ "audit-heldout-008": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "ca0e87fda4c8",
+  "gold_fingerprint": "a6445f76a577"
+ },
+ "audit-heldout-009": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "41934d623e30",
+  "gold_fingerprint": "a91e848aee6d"
+ },
+ "audit-heldout-010": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "7ec8a550d3bc",
+  "gold_fingerprint": "46a9d94982ed"
+ },
+ "audit-heldout-control-01": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": true,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "2f0b8696fa5b",
+  "gold_fingerprint": "572e679afb30"
+ },
+ "audit-heldout-control-02": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": true,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "fe464a5627ce",
+  "gold_fingerprint": "6a817fdd67a1"
+ },
+ "audit-train-001": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 100000,
+  "control": false,
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "a8bac707a92e",
+  "gold_fingerprint": "ca76dd1afe23"
+ },
+ "audit-train-002": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 100001,
+  "control": false,
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "9072708bbc90",
+  "gold_fingerprint": "06b3e919686c"
+ },
+ "audit-train-003": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 100002,
+  "control": false,
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "019565ec0757",
+  "gold_fingerprint": "7a2e01aef87d"
+ },
+ "audit-train-control-01": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "data_audit",
+  "mode": "review",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 190000,
+  "control": true,
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "0edd3da20cd9",
+  "gold_fingerprint": "1d0c65b3f113"
+ }
+}

@@ -1,16 +1,21 @@
 """Build the research_design and research_funding tasks from rl/sources/research_design_case/.
 
-Idempotent: wipes and regenerates the 6 worlds and the rd-* task folders, then
-rewrites rl/catalog.json over every task in the tree. Other workflows' tasks
-(kpi_nowcast, earnings_recap) and hand-written files (prompts, schemas, rubrics,
-graders, docs) are not touched.
+Idempotent: wipes and regenerates the 6 worlds and the rd-* tasks, and rewrites
+splits/manifests/research_design.json. Nothing else is touched.
 
-What gets built:
+What gets built (tasks in Harbor layout, families/_shared/harbor.py):
 
-  worlds/<firm>/world.yaml              6 firm briefs from contexts.json
-  roles/*/research_design/rd-review-*   28 review tasks (14 items x 2 plans)
-  roles/pm/research_funding/rd-funding-* 14 pairwise funding decisions
-  roles/*/research_design/rd-produce-*  10 produce tasks (seed + firm -> plan)
+  worlds/<firm>/world.yaml        6 firm briefs from contexts.json
+  tasks/eval/rd-review-*          28 review tasks (14 items x 2 plans)
+  tasks/eval/rd-funding-*         14 pairwise funding decisions
+  tasks/eval/rd-produce-*         10 produce tasks (seed + firm -> plan)
+
+All are split `eval`: one eval set until whole worlds can be held out (FORMAT.md).
+
+prompt/ holds the exact messages run.py sends (system.md, user.md or user.AB.md + user.BA.md,
+inputs.json); their template is what the fingerprint covers. instruction.md is the same text for a
+Harbor agent, plus where to write the answer; a compare task's Harbor copy shows the AB ordering
+only. tests/ holds gold, the graders and verifier/verify.py.
 
 The source data, and what was deliberately left out of it, is described in
 rl/sources/research_design_case/README.md.
@@ -28,7 +33,9 @@ import shutil
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
-from lib import RL, ROLES, WORLDS, fingerprint, iter_tasks, load_prompt, write_json, write_yaml  # noqa: E402
+import splits  # noqa: E402
+from families._shared import harbor  # noqa: E402
+from lib import RL, TASKS, WORLDS, fingerprint, load_prompt, write_yaml  # noqa: E402
 
 DATA = RL / "sources" / "research_design_case"
 GOLD = DATA / "grader_only" / "gold"
@@ -36,6 +43,14 @@ SEED_ONLY = DATA / "grader_only" / "seed_only_runs"
 SRC = "sources/research_design_case"   # prefix for `sources` paths, relative to rl/
 HERE = RL / "families" / "research_design"
 PROMPTS = HERE / "prompts"
+GRADERS = HERE / "graders"
+OUT = TASKS / splits.UNSPLIT
+
+SCHEMA_NOTE = ("---\nWrite your answer as one JSON object matching the schema in /app/data/output_schema.json, "
+               "to /app/output/response.json.")
+PLAN_NOTE = "---\nWrite your plan, in markdown, to /app/output/plan.md."
+SCORER_ENV = ('\n[verifier.env]\n# scorer model for review tasks (matches issues to gold); compare tasks need no key\n'
+              'ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY:-}"\nSCORER_MODEL = "${SCORER_MODEL:-claude-opus-5}"\n')
 
 WORLD_NAMES = {
     "systematic": "Systematic trading firm",
@@ -92,12 +107,14 @@ def base_task(tid, role, workflow, mode, world, status, sources, prompt_file, ex
     system, template = load_prompt(prompt_file)
     t = {
         "id": tid,
+        "family": "research_design",
+        "source": "research_design_case",
         "role": role,
         "workflow": workflow,
         "mode": mode,
         "world": world,
         "status": status,
-        "split": "eval",
+        "split": splits.UNSPLIT,
         "prompt": {
             "template": str(prompt_file.relative_to(RL)),
             "fingerprint": fingerprint(system, template),
@@ -135,7 +152,7 @@ def build_worlds(d: dict) -> None:
         })
 
 
-def build_review(d: dict, catalog: list) -> None:
+def build_review(d: dict, built: list) -> None:
     prompt = PROMPTS / "review.md"
     for sid in sorted(d["items"], key=order):
         it = d["items"][sid]
@@ -171,14 +188,11 @@ def build_review(d: dict, catalog: list) -> None:
             if not graded:
                 t["status_note"] = ("gold empty: context-flip item, labels never filled "
                                     f"({SRC}/grader_only/gold/HOW-TO-FILL.md)")
-            out = ROLES / role / "research_design" / tid
-            (out / "prompt").mkdir(parents=True, exist_ok=True)
-            (out / "prompt" / "system.md").write_text(system + "\n")
             inputs = {"context": it["context"], "seed": it["seed"], "plan": it[f"plan_{slot}"]}
-            write_json(out / "prompt" / "inputs.json", inputs)
-            (out / "prompt" / "user.md").write_text(template.format(**inputs) + "\n")
+            user = template.format(**inputs)
+            tests = {}
             if graded:
-                write_json(out / "grader" / "gold.json", {
+                tests["gold.json"] = dumps({
                     "issues": gold_issues,
                     "frame": {"goal_type": g.get("goal_type"),
                               "error_asymmetry": g.get("error_asymmetry")},
@@ -190,11 +204,13 @@ def build_review(d: dict, catalog: list) -> None:
                                        "anti_objection / praise",
                     },
                 })
-            write_yaml(out / "task.yaml", t)
-            catalog.append(t)
+                tests |= {"review_issues.py": GRADERS / "review_issues.py",
+                          "review_scorer.md": GRADERS / "review_scorer.md",
+                          "review_scorer_schema.json": GRADERS / "review_scorer_schema.json"}
+            write_task(t, system, {"user.md": user}, inputs, user, SCHEMA_NOTE, tests, built)
 
 
-def build_funding(d: dict, catalog: list) -> None:
+def build_funding(d: dict, built: list) -> None:
     prompt = PROMPTS / "funding_decision.md"
     for sid in sorted(d["items"], key=order):
         it = d["items"][sid]
@@ -217,26 +233,21 @@ def build_funding(d: dict, catalog: list) -> None:
         )
         if not graded:
             t["status_note"] = "gold empty: context-flip item, labels never filled"
-        out = ROLES / "pm" / "research_funding" / tid
-        (out / "prompt").mkdir(parents=True, exist_ok=True)
-        (out / "prompt" / "system.md").write_text(system + "\n")
-        write_json(out / "prompt" / "inputs.json", {"context": it["context"], "seed": it["seed"],
-                                                    "plan_A": it["plan_A"], "plan_B": it["plan_B"]})
-        for tag, (a, b) in {"AB": ("plan_A", "plan_B"), "BA": ("plan_B", "plan_A")}.items():
-            (out / "prompt" / f"user.{tag}.md").write_text(
-                template.format(context=it["context"], seed=it["seed"],
-                                plan_A=it[a], plan_B=it[b]) + "\n")
+        inputs = {"context": it["context"], "seed": it["seed"], "plan_A": it["plan_A"], "plan_B": it["plan_B"]}
+        users = {f"user.{tag}.md": template.format(context=it["context"], seed=it["seed"], plan_A=it[a], plan_B=it[b])
+                 for tag, (a, b) in {"AB": ("plan_A", "plan_B"), "BA": ("plan_B", "plan_A")}.items()}
+        tests = {}
         if graded:
-            write_json(out / "grader" / "gold.json", {
+            tests["gold.json"] = dumps({
                 k: g[k] for k in ("preference", "preference_strength", "decisive_tenets",
                                   "preference_rationale", "why_loser_was_defensible",
                                   "goal_type", "error_asymmetry")
             } | {"provenance": {"labeller": "human (case-study author), judged blind"}})
-        write_yaml(out / "task.yaml", t)
-        catalog.append(t)
+            tests["pairwise_pick.py"] = GRADERS / "pairwise_pick.py"
+        write_task(t, system, users, inputs, users["user.AB.md"], SCHEMA_NOTE, tests, built)
 
 
-def build_produce(d: dict, catalog: list) -> None:
+def build_produce(d: dict, built: list) -> None:
     prompt = PROMPTS / "produce.md"
 
     firms, assign = d["ctx"]["firms"], d["ctx"]["assignment"]
@@ -258,13 +269,9 @@ def build_produce(d: dict, catalog: list) -> None:
                 "meta": {"seed": sid, "seed_style": s["style"], "seed_bucket": s["bucket"]},
             },
         )
-        out = ROLES / role / "research_design" / tid
-        (out / "prompt").mkdir(parents=True, exist_ok=True)
-        (out / "prompt" / "system.md").write_text(system + "\n")
         inputs = {"context": firms[assign[sid]], "seed": s["text"]}
-        write_json(out / "prompt" / "inputs.json", inputs)
-        (out / "prompt" / "user.md").write_text(template.format(**inputs) + "\n")
-        write_json(out / "grader" / "draft_rubric.json", {
+        user = template.format(**inputs)
+        tests = {"draft_rubric.json": dumps({
             "status": "draft — one human-written item; needs a full expert rubric",
             "items": [{
                 "id": "must_address_known_flaw",
@@ -278,31 +285,56 @@ def build_produce(d: dict, catalog: list) -> None:
                 "two_competent_approaches_with_human_preference": f"rd-funding-{sid}",
                 "blocking_issues_on_those_approaches": [f"rd-review-{sid}-A", f"rd-review-{sid}-B"],
             },
-        })
-        ref = out / "grader" / "reference"
-        ref.mkdir(parents=True, exist_ok=True)
-        shutil.copy(SEED_ONLY / "plans" / f"{sid}.md", ref / "claude_plan_no_context.md")
-        shutil.copy(SEED_ONLY / "critiques" / f"{sid}.md", ref / "claude_critique_no_context.md")
-        (ref / "human_verdict.md").write_text(
+        })}
+        tests["reference/claude_plan_no_context.md"] = SEED_ONLY / "plans" / f"{sid}.md"
+        tests["reference/claude_critique_no_context.md"] = SEED_ONLY / "critiques" / f"{sid}.md"
+        tests["reference/human_verdict.md"] = (
             f"# Human verdict on the Part 1 plan and critique ({sid})\n\n"
             f"{d['verdicts'].get(sid, '(missing)')}\n\n"
             f"Source: `your_verdict` column of `{SRC}/grader_only/seed_only_runs/findings-table.md`. "
             "The plan and critique "
             "in this folder were generated from the seed alone, with no firm context, so they "
             "are reference outputs for this task rather than runs of it.\n")
-        write_yaml(out / "task.yaml", t)
-        catalog.append(t)
+        write_task(t, system, {"user.md": user}, inputs, user, PLAN_NOTE, tests, built)
 
 
-def leak_check(catalog: list) -> list[str]:
+def dumps(data) -> str:
+    return json.dumps(data, indent=2, ensure_ascii=False) + "\n"
+
+
+def write_task(t: dict, system: str, users: dict[str, str], inputs: dict, harbor_user: str, note: str,
+               tests: dict, built: list) -> None:
+    """One task in Harbor layout. `users` are the user messages run.py sends; `harbor_user` is the one
+    a Harbor agent gets, followed by `note` on where to write its answer."""
+    graded = "gold.json" in tests
+    tests = dict(tests, **{"inputs.json": dumps(inputs),
+                           "grader.json": dumps({"mode": t["mode"] if graded else None,
+                                                 "params": t["grader"].get("params", {}),
+                                                 "ordering": "AB" if t.get("orderings") else None,
+                                                 "status": t["status"]}),
+                           "verify.py": HERE / "verifier" / "verify.py"})
+    data = {"output_schema.json": (RL / t["output_schema"]).read_text()} if t.get("output_schema") else {}
+    harbor.write(OUT / t["id"], instruction=f"{system}\n\n{harbor_user}\n\n{note}\n", metadata=t,
+                 description=f"{t['workflow']} {t['mode']}: {t['id']}", keywords=["research-design", t["mode"]],
+                 verifier="verify.py", tests=tests, verifier_env=SCORER_ENV if t["mode"] == "review" else "",
+                 data=data, prompt={"system.md": system + "\n", **{k: v + "\n" for k, v in users.items()},
+                                    "inputs.json": dumps(inputs)},
+                 pip=" anthropic" if t["mode"] == "review" else "")
+    gold = tests.get("gold.json") or tests.get("draft_rubric.json")
+    built.append(dict(t, gold_fingerprint=fingerprint(gold) if gold else None))
+
+
+def leak_check(built: list) -> list[str]:
     """No gold text may appear in anything the model sees."""
     problems = []
-    for t in catalog:
-        d = next(ROLES.glob(f"*/*/{t['id']}"))
-        visible = "\n".join(p.read_text() for p in (d / "prompt").iterdir())
-        gp = d / "grader"
+    for t in built:
+        d = OUT / t["id"]
+        visible = "\n".join(p.read_text() for p in [d / "instruction.md", *(d / "prompt").iterdir(),
+                                                      *(d / "environment" / "data").iterdir()])
         needles = []
-        for f in gp.glob("*.json"):
+        for f in (d / "tests" / "gold.json", d / "tests" / "draft_rubric.json"):
+            if not f.exists():
+                continue
             g = json.loads(f.read_text())
             needles += [i["text"] for i in g.get("issues", [])]
             needles += [g.get(k) or "" for k in ("preference_rationale", "why_loser_was_defensible",
@@ -319,26 +351,26 @@ def main() -> None:
     d = load()
     if WORLDS.exists():
         shutil.rmtree(WORLDS)
-    for p in ROLES.glob("*/research_*/rd-*"):   # only this builder's tasks
+    for p in OUT.glob("rd-*"):   # only this builder's tasks
         shutil.rmtree(p)
     build_worlds(d)
-    catalog: list = []
-    build_review(d, catalog)
-    build_funding(d, catalog)
-    build_produce(d, catalog)
+    built: list = []
+    build_review(d, built)
+    build_funding(d, built)
+    build_produce(d, built)
 
-    problems = leak_check(catalog)
+    problems = leak_check(built)
     if problems:
         raise SystemExit("LEAK CHECK FAILED\n" + "\n".join(problems))
 
-    write_json(RL / "catalog.json", [
-        {k: t.get(k) for k in ("id", "role", "workflow", "mode", "world", "status", "split")}
-        for _, t in iter_tasks()
-    ])
+    splits.write_manifest("research_design", {
+        t["id"]: {"split": t["split"], **{k: t[k] for k in ("role", "workflow", "mode", "world", "status")},
+                  "fingerprint": t["prompt"]["fingerprint"], "gold_fingerprint": t["gold_fingerprint"]}
+        for t in built})
     from collections import Counter
-    print(f"{len(catalog)} tasks, {len(d['ctx']['firms'])} worlds, leak check passed")
+    print(f"{len(built)} tasks, {len(d['ctx']['firms'])} worlds, leak check passed")
     for (role, wf, mode, st), n in sorted(Counter(
-            (t["role"], t["workflow"], t["mode"], t["status"]) for t in catalog).items()):
+            (t["role"], t["workflow"], t["mode"], t["status"]) for t in built).items()):
         print(f"  {role:<20}{wf:<18}{mode:<9}{st:<14}{n:>3}")
 
 

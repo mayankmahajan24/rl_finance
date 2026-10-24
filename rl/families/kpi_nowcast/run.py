@@ -34,8 +34,6 @@ import time
 from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutTimeout
 
-import yaml
-
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 from lib import RL, iter_tasks  # noqa: E402
 from families.kpi_nowcast import grader as G  # noqa: E402
@@ -49,7 +47,7 @@ MAX_CONTINUATIONS = 40
 HTTP_TIMEOUT = {"connect": 30.0, "read": 300.0, "write": 120.0, "pool": 30.0}
 HARNESS = ["families/kpi_nowcast/run.py", "families/kpi_nowcast/grader.py", "families/kpi_nowcast/judge.md",
            "families/kpi_nowcast/prompts/system.md", "families/kpi_nowcast/prompts/user.md",
-           "families/kpi_nowcast/build.py", "families/kpi_nowcast/schema.json"]
+           "families/kpi_nowcast/build.py", "families/kpi_nowcast/schema.json", "families/kpi_nowcast/verifier/verify.py"]
 lock = threading.Lock()
 
 
@@ -78,13 +76,14 @@ def check_harness(approve: bool) -> None:
 
 # ---------- one run ----------
 
-def materialize(d: pathlib.Path) -> dict[str, bytes]:
+def materialize(d: pathlib.Path, t: dict) -> dict[str, bytes]:
+    """The attached files, uncompressed, checked against the hashes recorded at build time."""
     files = {}
-    for name, m in yaml.safe_load((d / "prompt" / "files.yaml").read_text()).items():
-        raw = (RL / m["path"]).read_bytes()
-        data = gzip.decompress(raw) if m["gzip"] else raw
-        if hashlib.sha256(data).hexdigest() != m["sha256"]:
-            raise RuntimeError(f"{name}: sha256 mismatch with files.yaml")
+    for name, sha in t["prompt"]["file_sha256"].items():
+        p = d / "environment" / "data" / name
+        data = p.read_bytes() if p.exists() else gzip.decompress((d / "environment" / "data" / f"{name}.gz").read_bytes())
+        if hashlib.sha256(data).hexdigest() != sha:
+            raise RuntimeError(f"{name}: sha256 mismatch with task.toml")
         files[name] = data
     return files
 
@@ -142,7 +141,7 @@ def run_once(client, args, d: pathlib.Path, t: dict, rep: int) -> dict:
     started_at, deadline = now(), time.time() + (args.timeout_s or 10 ** 9)
     system = (d / "prompt" / "system.md").read_text().strip()
     user = (d / "prompt" / "user.md").read_text().strip()
-    files = materialize(d)
+    files = materialize(d, t)
     uploaded = [client.beta.files.upload(file=(name, data, "text/csv" if name.endswith(".csv") else "text/markdown"))
                 for name, data in files.items()]
     content = [{"type": "text", "text": user}] + [{"type": "container_upload", "file_id": f.id} for f in uploaded]
@@ -186,7 +185,7 @@ def run_once(client, args, d: pathlib.Path, t: dict, rep: int) -> dict:
     if msg.stop_reason == "max_tokens":
         row.update(status="truncated", grade={})
         return row, turns
-    gold = json.loads((d / "grader" / "gold.json").read_text())
+    gold = json.loads((d / "tests" / "gold.json").read_text())
     fc, writeup, perr = G.parse_response(final_text)
     grade = G.grade_accuracy(fc, gold)
     row["parse_error"] = perr
@@ -251,12 +250,12 @@ def main() -> None:
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
-    tasks = [(d, t) for d, t in iter_tasks() if t["workflow"] == "kpi_nowcast" and (not args.tasks or t["id"] in args.tasks)]
+    tasks = [(d, t) for d, t in iter_tasks("kpi_nowcast") if not args.tasks or t["id"] in args.tasks]
     if not tasks:
         raise SystemExit("no tasks match")
     if args.dry_run:
         d, t = tasks[0]
-        files = materialize(d)
+        files = materialize(d, t)
         print(f"{len(tasks)} tasks; first {t['id']}; files {[(k, len(v)) for k, v in files.items()]}")
         print("system:", (d / "prompt" / "system.md").read_text()[:300])
         print("user:", (d / "prompt" / "user.md").read_text()[:600])

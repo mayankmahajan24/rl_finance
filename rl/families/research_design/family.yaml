@@ -1,0 +1,17 @@
+id: research_design
+task_prefix: rd
+description: Review, compare or write a research plan for a named fund
+role: [quant_researcher, fundamental_analyst, pm]   # by seed style; compare tasks are the PM's
+workflow: [research_design, research_funding]
+mode: [review, compare, produce]
+world: per task (worlds/<firm>/world.yaml)
+source: research_design_case
+format: harbor
+companies: none          # no company data; split eval until whole worlds can be held out
+builder: build.py
+runner: run.py           # API runner with or without financial-services skills; replay.py re-grades the case-study runs
+verifier: verifier/verify.py
+verifier_timeout_sec: 600
+reward: >-
+  review: blocking-issue recall - 0.1 x manufactured - 0.2 x contradicts-gold (scorer model matches issues);
+  compare: 1 if the pick matches gold, averaged over both orderings (Harbor: AB only); produce: no grader yet

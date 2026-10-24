@@ -1,7 +1,7 @@
 """Grader for kpi_nowcast produce tasks.
 
 Two parts from one agent response, kept as separate metrics:
-  accuracy  programmatic: the forecast JSON block vs grader/gold.json
+  accuracy  programmatic: the forecast JSON block vs the task's tests/gold.json
   writeup   LLM judge: rubric C1-C12 (judge.md), pass/fail/na per item
 
 A response without a valid forecast JSON gets schema_ok = 0 and blank accuracy metrics (no answer

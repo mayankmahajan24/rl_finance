@@ -1,0 +1,510 @@
+{
+ "anomaly-bench-001": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200000,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "6398389d68c3",
+  "gold_fingerprint": "03ff92fc0e99"
+ },
+ "anomaly-bench-002": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200001,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "8590fbbba92e",
+  "gold_fingerprint": "0dfd093a1a93"
+ },
+ "anomaly-bench-003": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200002,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "bcb9efbb0820",
+  "gold_fingerprint": "e5742164a2ed"
+ },
+ "anomaly-bench-004": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200003,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "9e2dcb4875d0",
+  "gold_fingerprint": "f1eee4177002"
+ },
+ "anomaly-bench-005": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200004,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "c0bd90f4549d",
+  "gold_fingerprint": "f1710845845e"
+ },
+ "anomaly-bench-006": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200005,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "7d12a4ec9826",
+  "gold_fingerprint": "8689cc51af3c"
+ },
+ "anomaly-bench-007": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200006,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "bd9260bcd040",
+  "gold_fingerprint": "219c714c2f02"
+ },
+ "anomaly-bench-008": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200007,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "f4d14fe673ed",
+  "gold_fingerprint": "a47b0d2b49d7"
+ },
+ "anomaly-bench-009": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200008,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "179783e369a2",
+  "gold_fingerprint": "757934edde23"
+ },
+ "anomaly-bench-010": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200009,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "68ec66097582",
+  "gold_fingerprint": "a4a7ce78f79b"
+ },
+ "anomaly-bench-control-01": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 290000,
+  "control": true,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "024d2b7d21b7",
+  "gold_fingerprint": "c4479437b8d6"
+ },
+ "anomaly-bench-control-02": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 290001,
+  "control": true,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "4b5c6e135079",
+  "gold_fingerprint": "b6f63748f709"
+ },
+ "anomaly-heldout-001": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "0e117d20c48d",
+  "gold_fingerprint": "136272743777"
+ },
+ "anomaly-heldout-002": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "a00c5a96ee55",
+  "gold_fingerprint": "7bf8fa3c85e7"
+ },
+ "anomaly-heldout-003": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "95658cae4bdb",
+  "gold_fingerprint": "fb1e4568a6c9"
+ },
+ "anomaly-heldout-004": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "166fd6795c5e",
+  "gold_fingerprint": "965a04102d19"
+ },
+ "anomaly-heldout-005": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "8bd0b529766f",
+  "gold_fingerprint": "802c1427e935"
+ },
+ "anomaly-heldout-006": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "804ace3ae795",
+  "gold_fingerprint": "55dcb1ba70f7"
+ },
+ "anomaly-heldout-007": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "d91eb9e3f404",
+  "gold_fingerprint": "e3a3d1c7d499"
+ },
+ "anomaly-heldout-008": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "b29aaeb51a16",
+  "gold_fingerprint": "590dfcf3ec46"
+ },
+ "anomaly-heldout-009": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "a710fac9c8aa",
+  "gold_fingerprint": "fa7be4d54a44"
+ },
+ "anomaly-heldout-010": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "f6adf4080576",
+  "gold_fingerprint": "771963430903"
+ },
+ "anomaly-heldout-control-01": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": true,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "427ecd0cbe3d",
+  "gold_fingerprint": "45afd36725b6"
+ },
+ "anomaly-heldout-control-02": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": true,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "5f7c7d7ff5e4",
+  "gold_fingerprint": "fa52d2f145ff"
+ },
+ "anomaly-train-001": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 100000,
+  "control": false,
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "39f70d6789f2",
+  "gold_fingerprint": "145e0392edeb"
+ },
+ "anomaly-train-002": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 100001,
+  "control": false,
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "7307e6cd8a23",
+  "gold_fingerprint": "535edb4deffc"
+ },
+ "anomaly-train-003": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 100002,
+  "control": false,
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "e0f0aaec4c68",
+  "gold_fingerprint": "54cec69adc10"
+ },
+ "anomaly-train-control-01": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 190000,
+  "control": true,
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "120efa055149",
+  "gold_fingerprint": "d63cf8c3d6a0"
+ }
+}

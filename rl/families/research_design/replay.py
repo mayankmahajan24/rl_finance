@@ -38,7 +38,7 @@ EXPECTED = {
 
 
 def main() -> None:
-    tasks = {t["id"]: (d, t) for d, t in iter_tasks()}
+    tasks = {t["id"]: (d, t) for d, t in iter_tasks("research_design")}
     scores = json.loads((RUNS / "_issue_scores.json").read_text())
     failures, summary = [], {}
 
@@ -63,7 +63,7 @@ def main() -> None:
             d, t = tasks[f"rd-funding-{sid}"]
             if t["status"] != "graded":
                 continue
-            gold = json.loads((d / "grader" / "gold.json").read_text())
+            gold = json.loads((d / "tests" / "gold.json").read_text())
             g = pairwise_pick.grade(gold, resp)
             records.append({"task": t["id"], "model": model, "responses": resp, **g})
             if gold["preference_strength"] == "strong":
@@ -86,7 +86,7 @@ def main() -> None:
                                 for x in s["recall"] if (x["item"], x["slot"]) == key],
                 "issue_buckets": [x for x in s["buckets"] if (x["item"], x["slot"]) == key],
             }
-            gold = json.loads((d / "grader" / "gold.json").read_text())
+            gold = json.loads((d / "tests" / "gold.json").read_text())
             g = review_issues.grade(gold, cached, **t["grader"]["params"])
             records.append({"task": tid, "model": model, "response": r["result"],
                             "scorer": {"model": s["scorer"], "cached": True, **cached}, **g})

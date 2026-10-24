@@ -1,12 +1,8 @@
 """Shared helpers for the rl/ task tree.
 
-A task lives at rl/roles/<role>/<workflow>/<task_id>/ and has two halves that
-must never mix:
-
-  prompt/   what the model sees — rendered system and user messages
-  grader/   what only the grader sees — gold labels, rubrics, reference outputs
-
-See FORMAT.md for the full spec.
+Every built task lives at rl/tasks/<split>/<task_id>/ in Harbor layout (families/_shared/harbor.py).
+What the model sees (instruction.md, environment/, prompt/) and what only the grader sees (tests/)
+must never mix. See FORMAT.md for the full spec.
 """
 
 from __future__ import annotations
@@ -15,12 +11,13 @@ import hashlib
 import json
 import pathlib
 import re
+import tomllib
 
 import yaml
 
 RL = pathlib.Path(__file__).resolve().parent
 ROOT = RL.parent
-ROLES = RL / "roles"
+TASKS = RL / "tasks"
 WORLDS = RL / "worlds"
 
 
@@ -55,10 +52,17 @@ def write_yaml(path: pathlib.Path, data) -> None:
     path.write_text(yaml.safe_dump(data, sort_keys=False, allow_unicode=True, width=100))
 
 
-def iter_tasks():
-    """Yield (task_dir, task_yaml) for every task in the tree."""
-    for p in sorted(ROLES.glob("*/*/*/task.yaml")):
-        yield p.parent, yaml.safe_load(p.read_text())
+def task_meta(task_dir: pathlib.Path) -> dict:
+    """The [metadata] table of a task's task.toml."""
+    return tomllib.loads((task_dir / "task.toml").read_text())["metadata"]
+
+
+def iter_tasks(family: str | None = None):
+    """Yield (task_dir, metadata) for every built task, optionally one family's."""
+    for p in sorted(TASKS.glob("*/*/task.toml")):
+        m = task_meta(p.parent)
+        if family is None or m.get("family") == family:
+            yield p.parent, m
 
 
 def load_task(task_id: str) -> tuple[pathlib.Path, dict]:

@@ -2,11 +2,17 @@
 
 A split is decided per source by company (splits/<source>.yaml) and, for generated families, by
 seed (splits/seeds.yaml; held-out seeds in splits/secrets/). Builders ask this module rather than
-reading the files, so the rules live in one place. splits/check.py verifies built tasks obey them.
+reading the files, so the rules live in one place, and record what they built in
+splits/manifests/<family>.json. splits/check.py verifies built tasks obey the rules.
+
+Besides the three splits, a task folder can be `eval` (a source with no split assignment yet:
+research_design_case, whose tasks are all one eval set until whole worlds can be held out) or
+`retired` (a case listed under `retired:` in its source's split file).
 """
 
 from __future__ import annotations
 
+import json
 import pathlib
 import random
 
@@ -14,7 +20,9 @@ import yaml
 
 HERE = pathlib.Path(__file__).resolve().parent
 SPLITS = ("train", "bench", "heldout")
+UNSPLIT, RETIRED = "eval", "retired"
 SECRETS = HERE / "secrets"
+MANIFESTS = HERE / "manifests"
 
 
 def assignment(source: str) -> dict:
@@ -82,3 +90,22 @@ def seeds(family: str, split: str, n: int | None = None, controls: int | None = 
         raise ValueError(f"{split}: pass n (how many seeds to build)")
     return ([(c["seed_start"] + i, False) for i in range(n)]
             + [(c["control_start"] + i, True) for i in range(controls)])
+
+
+def manifest(family: str) -> dict[str, dict]:
+    p = MANIFESTS / f"{family}.json"
+    return json.loads(p.read_text()) if p.exists() else {}
+
+
+def write_manifest(family: str, built: dict[str, dict], splits_rebuilt=None) -> pathlib.Path:
+    """Record the tasks a build wrote. Entries of the rebuilt splits (default: all) are replaced.
+    Held-out entries never carry a seed: the manifest is committed, the seeds are secret."""
+    old = manifest(family)
+    keep = {k: v for k, v in old.items() if splits_rebuilt is not None and v["split"] not in splits_rebuilt}
+    for v in built.values():
+        if v["split"] == "heldout":
+            v.pop("seed", None)
+    MANIFESTS.mkdir(parents=True, exist_ok=True)
+    p = MANIFESTS / f"{family}.json"
+    p.write_text(json.dumps(dict(sorted({**keep, **built}.items())), indent=1) + "\n")
+    return p

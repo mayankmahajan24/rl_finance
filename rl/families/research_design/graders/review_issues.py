@@ -21,7 +21,7 @@ double because the expert ruled that objection out in writing.
 
 The penalty weights are v0. They reproduce the case-study ordering of models but
 have not been calibrated against a second expert. Set them per task in
-task.yaml `grader.params`.
+task.toml `[metadata.grader.params]`.
 """
 
 from __future__ import annotations

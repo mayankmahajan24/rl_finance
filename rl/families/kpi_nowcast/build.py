@@ -26,7 +26,7 @@ prompt/ holds the exact system and user messages run.py sends (the fingerprinted
 instruction.md the same text plus a note on where a Harbor agent finds the files and writes its
 answer. What was built is recorded in splits/manifests/kpi_nowcast.json.
 
-usage: python rl/families/kpi_nowcast/build.py [--only UAL-2018Q4 ...]
+usage: python rl/build.py kpi_nowcast   (or this file directly, with [--only UAL-2018Q4 ...])
 """
 
 from __future__ import annotations
@@ -235,10 +235,10 @@ def render(template: str, **kw) -> str:
     return out
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--only", nargs="*", help="series-period keys like UAL-2018Q4 (named and anon both built)")
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
 
     rows_all = read_csv(panel.RAW)
     facts = read_csv(panel.GRADER_ONLY / "kpi_facts.csv")

@@ -6,22 +6,26 @@ kind of task each), and assigned to **splits** (train, bench, heldout) by compan
 | Folder | What it holds |
 |---|---|
 | [`sources/`](sources/) | `txn_panel` (card-transaction panel + anomaly-detection brief) and `research_design_case` (the take-home) |
-| [`families/`](families/) | `research_design`, `kpi_nowcast`, `data_audit`, `anomaly_scoring`, `growth_thesis` |
-| [`splits/`](splits/) | company and seed assignment per split, manifests of built tasks, `check.py` |
-| `roles/` | built tasks in the repo format (research_design, kpi_nowcast, earnings_recap) |
-| `tasks/` | built Harbor tasks, `tasks/<split>/<task_id>/`. Gitignored; rebuilt from `splits/manifests/` |
-| `harness/` | `run_solutions.py` (reference vs naive, no Docker), `calibrate.py` (pass@k, pass^k) |
-| `worlds/`, `skills/`, `runs/` | fund briefs, financial-services skills, run records |
+| [`families/`](families/) | one folder per kind of task: builder or generator, instruction, verifier and graders, runner, baseline solutions |
+| [`splits/`](splits/) | company and seed assignment per split, retired cases, `manifests/<family>.json` (the committed index of every task), `check.py` |
+| `tasks/` | every built task, in Harbor layout, at `tasks/<split>/<task_id>/` ([`FORMAT.md`](FORMAT.md)). Gitignored; `build.py` rebuilds it |
+| [`harness/`](harness/) | `run_solutions.py` (reference vs naive, no Docker), `calibrate.py` (pass@k, pass^k) |
+| `worlds/`, `skills/`, [`runs/`](runs/) | fund briefs, financial-services skills, run records |
 
-Format spec for repo-format tasks: `FORMAT.md`. Harbor tasks follow Harbor's layout (`families/README.md`).
+| Family | Tasks | Splits |
+|---|---|---|
+| research_design | 52 (30 graded) | eval |
+| kpi_nowcast | 102 | 54 train, 24 bench, 22 heldout, 2 retired |
+| data_audit, anomaly_scoring, growth_thesis | generated: 12 bench and 12 heldout each; train on demand | train, bench, heldout |
 
 ```sh
-python rl/families/research_design/build.py                     # research_design + research_funding tasks, worlds, catalog
-python rl/families/research_design/replay.py                    # case-study baselines must reproduce
-python rl/families/kpi_nowcast/build.py                # 102 kpi_nowcast tasks
-python rl/build_panel_tasks.py --split bench           # data_audit, anomaly_scoring, growth_thesis
-python rl/harness/run_solutions.py --split bench       # reference should beat naive on every family
-python rl/splits/check.py                              # no company or seed in two splits
+python rl/build.py                                     # build every family, then the split check
+python rl/build.py data_audit --split train --n 200 --controls 20
+python rl/families/research_design/replay.py           # case-study baselines must reproduce
+python rl/harness/run_solutions.py --split bench       # reference should beat naive on every generated family
+python rl/families/research_design/run.py --model claude-opus-5-5 --dry-run
+python rl/families/kpi_nowcast/run.py --variant baseline --dry-run
+harbor run -p rl/tasks/bench -a oracle                 # not yet validated: needs Docker
 ```
 
 Dependencies: `pip install pandas numpy scipy openpyxl pyyaml anthropic harbor` (versions pinned in

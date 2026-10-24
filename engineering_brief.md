@@ -103,17 +103,23 @@ in git history at commit `a75441c`, under `case_study/`.
 
 ### What `rl/` contains today
 
-**52 tasks in 6 "worlds"**, all converted from the case study by
+**52 research_design tasks in 6 "worlds"**, all converted from the case study by
 `rl/families/research_design/build.py`. The script is idempotent: it regenerates
-`rl/worlds/` and its own `rd-*` tasks, and rewrites `rl/catalog.json`.
+`rl/worlds/` and its own `rd-*` tasks, and records them in
+`rl/splits/manifests/research_design.json`. Since then the repo has added the alt-data
+families (kpi_nowcast and three generated panel families) on a second source; `rl/README.md`
+lists them all.
 
-Tasks are organized **role → workflow → task**:
+Every task, in every family, is built in Harbor's layout at `rl/tasks/<split>/<task_id>/`
+(`rl/FORMAT.md`); `python rl/build.py` rebuilds them all:
 
 ```
-rl/roles/<role>/<workflow>/<task_id>/
-  task.yaml     metadata for the harness. Never shown to the model
-  prompt/       what the model sees: system.md, user.md (or user.AB.md / user.BA.md), inputs.json
-  grader/       what only the grader sees: gold.json, draft_rubric.json, reference outputs
+<task_id>/
+  task.toml        Harbor config; [metadata] is the harness metadata. Never shown to the model
+  instruction.md   what a Harbor agent gets
+  prompt/          what the model sees through the API runner: system.md, user.md (or user.AB.md / user.BA.md), inputs.json
+  environment/     data files the agent sees
+  tests/           what only the grader sees: gold.json, draft_rubric.json, reference outputs, the verifier
 ```
 
 Each task has a **mode**, and graders are written per mode, not per topic:
@@ -163,7 +169,7 @@ Dependencies: Python 3, `anthropic` (installed: 0.89), `pyyaml`. An
 `ANTHROPIC_API_KEY` is needed only for `sync` and real runs.
 
 ```sh
-python rl/families/research_design/build.py         # regenerate tasks; runs the leak check
+python rl/build.py research_design         # regenerate tasks; runs the leak check and the split check
 python rl/families/research_design/replay.py        # must print "All fingerprints and GRADED.md numbers reproduced."
 python rl/skills/manage.py fetch           # check out the pinned skills repo
 python rl/skills/manage.py check
@@ -176,7 +182,7 @@ python rl/families/research_design/run.py --model claude-opus-5-5 --dry-run --sk
 1. **Never edit gold.** Gold labels, rubric items and task wording are Mayank's.
    If something looks wrong or ambiguous, flag it to him; don't fix it. A
    plausible-looking fix to gold invalidates the product.
-2. **Nothing under `grader/` may reach the model.** Keep the leak check passing,
+2. **Nothing under `tests/` may reach the model.** Keep the leak check passing,
    and extend it to every new kind of task.
 3. **The replay must keep passing.** It is the regression test showing our graders
    still measure what the case study measured.

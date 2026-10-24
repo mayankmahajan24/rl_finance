@@ -21,7 +21,7 @@ The source data, and what was deliberately left out of it, is described in
 rl/sources/research_design_case/README.md.
 
 Usage:
-    python rl/families/research_design/build.py
+    python rl/build.py research_design   (or this file directly)
 """
 
 from __future__ import annotations
@@ -264,7 +264,7 @@ def build_produce(d: dict, built: list) -> None:
             {
                 "output_schema": None,
                 "grader": {"type": "rubric", "module": None,
-                           "note": "no grader until an expert rubric exists; see grader/draft_rubric.json"},
+                           "note": "no grader until an expert rubric exists; see tests/draft_rubric.json"},
                 "related_tasks": [f"rd-funding-{sid}", f"rd-review-{sid}-A", f"rd-review-{sid}-B"],
                 "meta": {"seed": sid, "seed_style": s["style"], "seed_bucket": s["bucket"]},
             },

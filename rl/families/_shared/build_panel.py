@@ -5,14 +5,13 @@ that split's seeds (splits/seeds.yaml; held-out seeds are secret). Output goes t
 rl/tasks/<split>/<task_id>/ (gitignored: tasks are rebuilt, not committed) and a record of what was
 built, with hashes, to splits/manifests/<family>.json.
 
-Usage:
-    python rl/build_panel_tasks.py --split bench                       # all three families
-    python rl/build_panel_tasks.py --split train --family data_audit --n 200 --controls 20
+Run through rl/build.py:
+    python rl/build.py panel --split bench                       # all three families
+    python rl/build.py data_audit --split train --n 200 --controls 20
 """
 
 from __future__ import annotations
 
-import argparse
 import importlib
 import pathlib
 import shutil
@@ -20,7 +19,7 @@ import sys
 
 import yaml
 
-RL = pathlib.Path(__file__).resolve().parent
+RL = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(RL))
 import splits  # noqa: E402
 from families._shared import harbor  # noqa: E402
@@ -90,24 +89,14 @@ def build_family(fam_id: str, split: str, n: int | None, controls: int | None, f
     return built
 
 
-def main() -> None:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--split", required=True, choices=splits.SPLITS)
-    ap.add_argument("--family", choices=FAMILIES, action="append", help="default: all three")
-    ap.add_argument("--n", type=int, help="seeds per family (train needs it; bench/heldout use seeds.yaml)")
-    ap.add_argument("--controls", type=int)
-    args = ap.parse_args()
-
+def build(families: list[str], split: str, n: int | None = None, controls: int | None = None) -> None:
+    """Build `families` for one split. bench and heldout take their counts from seeds.yaml; train needs `n`."""
     full = panel.load_df()
-    for fam_id in args.family or FAMILIES:
-        print(f"{fam_id} ({args.split})")
+    for fam_id in families:
+        print(f"{fam_id} ({split})")
         prefix = yaml.safe_load((RL / "families" / fam_id / "family.yaml").read_text())["task_prefix"]
-        for stale in (TASKS / args.split).glob(f"{prefix}-*"):   # a rebuilt split replaces its tasks
+        for stale in (TASKS / split).glob(f"{prefix}-*"):   # a rebuilt split replaces its tasks
             shutil.rmtree(stale)
-        built = build_family(fam_id, args.split, args.n, args.controls, full)
-        mpath = splits.write_manifest(fam_id, built, splits_rebuilt={args.split})
+        built = build_family(fam_id, split, n, controls, full)
+        mpath = splits.write_manifest(fam_id, built, splits_rebuilt={split})
         print(f"{len(built)} tasks; {mpath.relative_to(RL.parent)}")
-
-
-if __name__ == "__main__":
-    main()

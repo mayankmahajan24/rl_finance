@@ -1,7 +1,7 @@
 # research_design_case: source data
 
 Raw inputs for the `research_design` and `research_funding` tasks. `rl/families/research_design/build.py`
-renders them into `rl/worlds/` and `rl/roles/*/research_*/rd-*`; `rl/families/research_design/replay.py`
+renders them into `rl/worlds/` and `rl/tasks/eval/rd-*`; `rl/families/research_design/replay.py`
 re-grades the baseline runs against the built tree.
 
 All of it comes from the Finance Domain Research Lead take-home (August 2026). The full
@@ -27,7 +27,7 @@ git archive a75441c case_study | tar -x -C /tmp    # the whole thing
 | `grader_only/seed_only_runs/` | Claude's plan and critique per seed with no firm context, and the human verdict on each (`findings-table.md`). Reference outputs for the produce tasks | `part1/plans/`, `part1/critiques/`, `part1/findings-table.md`, `part1/PROVENANCE.md` |
 | `baseline_runs/` | Four models' saved responses on every review and compare item, the scorer's cached decisions, and the headline numbers the replay must reproduce (`GRADED.md`) | `part2/runs/`, `part2/GRADED.md` |
 
-`grader_only/` follows the same rule as a task's `grader/` folder: nothing in it may reach a
+`grader_only/` follows the same rule as a task's `tests/` folder: nothing in it may reach a
 model under test. The build's leak check enforces that for the rendered prompts.
 
 ## Left out, on purpose

@@ -13,8 +13,9 @@ report builder):
 A refusal is a graded outcome (row with status "refusal"), not an error. Re-running skips
 (task, rep) pairs already in results.jsonl.
 
-The harness (this file, the graders, the prompts, the builder) is hashed; the runner refuses to
-start until a human approves the current hash with --approve-harness.
+The family's instrument (this file, the grader and judge rubric, the prompts, the builder, the
+verifier: `instrument` in family.yaml) is hashed; the runner refuses a live run until a human has
+approved the current hash with rl/harness/approve.py (rl/instrument.py).
 
 Usage:
     python rl/families/kpi_nowcast/run.py --variant baseline --model claude-opus-5-5 --tasks kn-produce-UAL-2018Q4
@@ -37,45 +38,19 @@ from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutTimeout
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 from lib import RL, iter_tasks  # noqa: E402
+import instrument  # noqa: E402
 from families.kpi_nowcast import grader as G  # noqa: E402
 
 sys.path.insert(0, str(RL / "harness"))
 import records  # noqa: E402
 
 RUNS = RL / "runs" / "kpi_nowcast"
-STATE = RUNS / "_state.json"
 TOOL = {"type": "code_execution_20260521", "name": "code_execution"}
 MAX_CONTINUATIONS = 40
 # Per-request HTTP timeouts. `read` is the longest gap allowed between streamed bytes; the server sends
 # keepalive pings while code runs, so a gap this long means a stalled connection, not a slow task.
 HTTP_TIMEOUT = {"connect": 30.0, "read": 300.0, "write": 120.0, "pool": 30.0}
-HARNESS = ["families/kpi_nowcast/run.py", "families/kpi_nowcast/grader.py", "families/kpi_nowcast/judge.md",
-           "families/kpi_nowcast/prompts/system.md", "families/kpi_nowcast/prompts/user.md",
-           "families/kpi_nowcast/build.py", "families/kpi_nowcast/schema.json", "families/kpi_nowcast/verifier/verify.py"]
 lock = threading.Lock()
-
-
-# ---------- harness gate ----------
-
-def harness_sha() -> str:
-    h = hashlib.sha256()
-    for rel in sorted(HARNESS):
-        h.update(rel.encode())
-        h.update((RL / rel).read_bytes())
-    return h.hexdigest()
-
-
-def check_harness(approve: bool) -> None:
-    st = json.loads(STATE.read_text())
-    sha = harness_sha()
-    if approve:
-        st["harness_sha"] = sha
-        STATE.write_text(json.dumps(st, indent=2) + "\n")
-        print(f"harness approved: {sha[:12]} over {len(HARNESS)} files")
-        return
-    if st.get("harness_sha") != sha:
-        raise SystemExit(f"harness changed or never approved (now {sha[:12]}, approved {str(st.get('harness_sha'))[:12]}). "
-                         "Review it, then run once with --approve-harness.")
 
 
 # ---------- one run ----------
@@ -210,7 +185,7 @@ def write_row(vdir: pathlib.Path, name: str, row: dict, args=None) -> None:
     if args is not None:
         trace = vdir / "traces" / f"{row['prompt_id']}_rep{row['rep']}.json"
         rec = records.from_kpi(row, runner={"name": "rl/families/kpi_nowcast/run.py", "variant": vdir.name,
-                                            "harness_sha256": harness_sha()},
+                                            "instrument_sha256": instrument.sha256("kpi_nowcast")},
                                trace=str(trace.relative_to(RL.parent)) if trace.exists() else None,
                                model=args.model, effort=args.effort, max_tokens=args.max_tokens,
                                repo_commit=records.repo_commit())
@@ -267,7 +242,6 @@ def main() -> None:
     ap.add_argument("--timeout-s", type=int, default=1800)
     ap.add_argument("--max-tokens", type=int, default=64000)
     ap.add_argument("--budget", type=float, help="stop starting runs once model and judge cost reach this many USD")
-    ap.add_argument("--approve-harness", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
@@ -282,9 +256,7 @@ def main() -> None:
         print("user:", (d / "prompt" / "user.md").read_text()[:600])
         return
     args.budget_ = records.Budget(args.budget, args.model, args.judge)
-    check_harness(args.approve_harness)
-    if args.approve_harness:
-        return
+    instrument.require_approved("kpi_nowcast")
     vdir = RUNS / args.variant
     vdir.mkdir(parents=True, exist_ok=True)
     done = set()

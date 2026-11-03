@@ -24,3 +24,16 @@ judge:                   # the review scorer: matches a review's issues to gold 
   effort: null
   votes: 1
   max_tokens: 48000
+instrument:              # what decides what the model sees and how it is scored; live use needs its hash
+                         # approved (rl/instrument.py, rl/harness/approve.py)
+  - families/research_design/build.py
+  - families/research_design/run.py
+  - families/research_design/prompts/*.md
+  - families/research_design/schemas/*.json
+  - families/research_design/graders/*
+  - families/research_design/verifier/verify.py
+  - families/research_design/TENETS.md
+  - families/_shared/harbor.py
+  - families/_shared/judge.py
+  - families/research_design/family.yaml       # pins the judge
+  - families/_shared/verify_common.py

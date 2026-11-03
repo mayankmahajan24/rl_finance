@@ -1,0 +1,25 @@
+id: kpi_nowcast
+task_prefix: kn
+description: Nowcast a company's quarterly KPI from the transaction-sensor panel and its filed actuals
+version: 1.0.0          # bump when the family's tasks change in a way results can't be compared across
+authors:
+  - name: Mayank Mahajan
+    email: mayank.mahajan@gmail.com
+role: quant_researcher
+workflow: kpi_nowcast
+mode: produce            # write-up + forecast JSON
+world: ls_altdata
+source: txn_panel
+format: harbor
+companies: one per task  # named and anonymised variants of a case share its company's split
+builder: build.py
+runner: run.py           # API runner with code execution; refuses live runs until the harness hash is approved
+verifier: verifier/verify.py
+verifier_timeout_sec: 600
+reward: >-
+  separate metrics, never blended: forecast accuracy (abs % error, skill vs naive, coverage,
+  interval score; code) and the C1-C12 write-up rubric (LLM judge)
+rubric_visibility: partial  # the instruction states the fund's write-up conventions (headline estimate, range
+                            # and units first; in-sample accuracy next to a simple benchmark; low <= point <= high)
+                            # but not the judgment items (C2-C5, C7, C9, C11, C12): models are graded on whether
+                            # they do what a careful analyst would, unprompted. Deliberate.

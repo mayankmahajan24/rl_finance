@@ -1,4 +1,0 @@
-{
-  "context": "An electronic market-making firm that internalizes and quotes against retail order flow. ~60 engineers and quantitative researchers, colocated infrastructure, full order-book and tick data, and its own matching, quoting and risk systems. Horizon is nanoseconds to seconds; inventory held overnight is a failure of the hedging stack rather than a trade. Work is judged on realized spread capture net of adverse selection, on inventory risk, and on whether a classification can run inside the quoting loop at production latency. What kills them is systematically quoting into informed flow they had labelled uninformed.",
-  "seed": "Do round-lot orders identify retail flow that is profitable to trade against?"
-}

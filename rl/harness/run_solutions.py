@@ -1,12 +1,13 @@
 """Run the reference and naive solutions against built Harbor tasks locally (no Docker),
 emulating the container layout with temp directories. Ported from ~/altdata_evals/run_local.py.
 
-The reference solver should score well and the naive one badly; if they don't, the verifier is
-not separating quality. Results go to rl/runs/solutions/<split>.csv.
+Covers the families that ship baseline solutions (solutions/reference and solutions/naive). The
+reference solver should score well and the naive one badly; if they don't, the verifier is not
+separating quality. Results go to rl/runs/solutions/<split>.csv.
 
-    python rl/harness/run_solutions.py --split pilot             # both solvers, every task in the split
+    python rl/harness/run_solutions.py --split bench             # both solvers, every task in the split
     python rl/harness/run_solutions.py --split bench --family data_audit --solvers naive
-    JUDGE=keyword python rl/harness/run_solutions.py --split pilot   # thesis memo by keyword fallback (no API calls)
+    JUDGE=keyword python rl/harness/run_solutions.py --split bench   # thesis memo by keyword fallback (no API calls)
 """
 import argparse
 import os
@@ -66,7 +67,8 @@ if __name__ == '__main__':
     ap.add_argument('--workers', type=int, default=4)
     a = ap.parse_args()
     tasks = sorted(p for p in (RL / 'tasks' / a.split).iterdir()
-                   if p.is_dir() and (a.family is None or family_of(p)['id'] == a.family))
+                   if p.is_dir() and (family_of(p)['dir'] / 'solutions').is_dir()   # families with baseline solvers
+                   and (a.family is None or family_of(p)['id'] == a.family))
     jobs = [(str(t), s) for t in tasks for s in a.solvers.split(',')]
     with ProcessPoolExecutor(a.workers) as ex:
         rows = list(ex.map(run_one, *zip(*jobs)))

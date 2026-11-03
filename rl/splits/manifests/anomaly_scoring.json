@@ -1,0 +1,538 @@
+{
+ "anomaly-bench-001": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200000,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "6398389d68c3",
+  "gold_fingerprint": "03ff92fc0e99",
+  "content_sha256": "dd5120b3c31347a3a23f9736be582084b33e84710c9a5f94d6d9e0a9bab3ba37"
+ },
+ "anomaly-bench-002": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200001,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "8590fbbba92e",
+  "gold_fingerprint": "0dfd093a1a93",
+  "content_sha256": "b62c680fd53d2e390bf9902c32bc8b06d746e1de28c884fe8e8c9f7891a3ce68"
+ },
+ "anomaly-bench-003": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200002,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "bcb9efbb0820",
+  "gold_fingerprint": "e5742164a2ed",
+  "content_sha256": "c33da398440b4888452d4a4dfb348a12f3674a913f610b614e65b0340a289942"
+ },
+ "anomaly-bench-004": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200003,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "9e2dcb4875d0",
+  "gold_fingerprint": "f1eee4177002",
+  "content_sha256": "d8abb5366498db5c6b478b7749410103090197cdfcc59e2611048e52ba0841c4"
+ },
+ "anomaly-bench-005": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200004,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "c0bd90f4549d",
+  "gold_fingerprint": "f1710845845e",
+  "content_sha256": "babbba5d9926442bbcf3c47fd497c3cf48e236278fa745def2784f1e3054c5ce"
+ },
+ "anomaly-bench-006": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200005,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "7d12a4ec9826",
+  "gold_fingerprint": "8689cc51af3c",
+  "content_sha256": "fd83681b620e287b6a822ffeaa5dfd9b4cc615b1bf5da04da9c1b47bd901ed5f"
+ },
+ "anomaly-bench-007": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200006,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "bd9260bcd040",
+  "gold_fingerprint": "219c714c2f02",
+  "content_sha256": "6a005d9407fb5f203b7663a8b697c04462ae1bb3c91c3719884c116c98dc6f9f"
+ },
+ "anomaly-bench-008": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200007,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "f4d14fe673ed",
+  "gold_fingerprint": "a47b0d2b49d7",
+  "content_sha256": "55661a036103f5d0cae180e77ecb543b507e5e70400f354c6a31a5e76ecc103d"
+ },
+ "anomaly-bench-009": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200008,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "179783e369a2",
+  "gold_fingerprint": "757934edde23",
+  "content_sha256": "f34b2aeb08ef52c418f9fe8be08516b9884a20b0a91bc2870b0558fc535a42bc"
+ },
+ "anomaly-bench-010": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 200009,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "68ec66097582",
+  "gold_fingerprint": "a4a7ce78f79b",
+  "content_sha256": "92ee79cce3b549ddbd64c4f39bba66fd31b57d22e56e04f2ae07b879873383ea"
+ },
+ "anomaly-bench-control-01": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 290000,
+  "control": true,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "024d2b7d21b7",
+  "gold_fingerprint": "c4479437b8d6",
+  "content_sha256": "31d08c602d939cb26703d3e50136bcce7f6e3467d77602181ec65fedadd2cc46"
+ },
+ "anomaly-bench-control-02": {
+  "split": "bench",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 290001,
+  "control": true,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "4b5c6e135079",
+  "gold_fingerprint": "b6f63748f709",
+  "content_sha256": "de4b5b8d50ce32fadf280e0fe224227a0e7f9c79aa987f3cace2a8d446657929"
+ },
+ "anomaly-heldout-001": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "0e117d20c48d",
+  "gold_fingerprint": "136272743777",
+  "content_sha256": "f9ad9ca04d53465395b48b4dcfe087fac3084ca06ff8c12045de35c280a87666"
+ },
+ "anomaly-heldout-002": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "a00c5a96ee55",
+  "gold_fingerprint": "7bf8fa3c85e7",
+  "content_sha256": "6980bfab01d8b8939d3a997b5b7d5edb843ec39fe04cd6097735ea601d6e6363"
+ },
+ "anomaly-heldout-003": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "95658cae4bdb",
+  "gold_fingerprint": "fb1e4568a6c9",
+  "content_sha256": "4a96bf1048af79a8e3738f5162bcb919dcecb7feab0c5d1538fbeb56db171576"
+ },
+ "anomaly-heldout-004": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "166fd6795c5e",
+  "gold_fingerprint": "965a04102d19",
+  "content_sha256": "30e969d93faeff28e7f0c5f2ed283595823f07869bd0d3fe29361f20780a179f"
+ },
+ "anomaly-heldout-005": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "8bd0b529766f",
+  "gold_fingerprint": "802c1427e935",
+  "content_sha256": "03b1c93ced1e45632468b28e1db6eab13a6a661b917f00e94af8715952f71efe"
+ },
+ "anomaly-heldout-006": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "804ace3ae795",
+  "gold_fingerprint": "55dcb1ba70f7",
+  "content_sha256": "1fa0c8d0f54ec9c90196ab4d0d0bcff937c31677ba937c7610f3a9f5012224a5"
+ },
+ "anomaly-heldout-007": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "d91eb9e3f404",
+  "gold_fingerprint": "e3a3d1c7d499",
+  "content_sha256": "095de3cb8174e49f910b22f8bbf99b00d0489de0e1a3a3360614664f8b1d69fd"
+ },
+ "anomaly-heldout-008": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "b29aaeb51a16",
+  "gold_fingerprint": "590dfcf3ec46",
+  "content_sha256": "116357ae97e774c4709a0c6ca361ec3c4293c4cce976610cbe01ea143add6b66"
+ },
+ "anomaly-heldout-009": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "a710fac9c8aa",
+  "gold_fingerprint": "fa7be4d54a44",
+  "content_sha256": "8fd905c8f5196cb802d508d7a88b894f707ad642a119cd661f25b11a654fad46"
+ },
+ "anomaly-heldout-010": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": false,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "f6adf4080576",
+  "gold_fingerprint": "771963430903",
+  "content_sha256": "1da30e58e4799430c79d4159a7d8e2cfce6b4d01dbd50d488917e7df7f9e074f"
+ },
+ "anomaly-heldout-control-01": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": true,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "427ecd0cbe3d",
+  "gold_fingerprint": "45afd36725b6",
+  "content_sha256": "92817436eb118f56241996d0a3b70d7197a02edfb314957bf2ee123b500d9806"
+ },
+ "anomaly-heldout-control-02": {
+  "split": "heldout",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "control": true,
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "5f7c7d7ff5e4",
+  "gold_fingerprint": "fa52d2f145ff",
+  "content_sha256": "f24b8bd54905aafb3ecc336bc23f6dc25a929ab3f1121a3f81a73aa0a3ed6621"
+ },
+ "anomaly-train-001": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 100000,
+  "control": false,
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "39f70d6789f2",
+  "gold_fingerprint": "145e0392edeb",
+  "content_sha256": "9e2ebd69702eaadf2e3ad1af4c0d15199bb33a4e5bd3813b46ff7567204fb53e"
+ },
+ "anomaly-train-002": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 100001,
+  "control": false,
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "7307e6cd8a23",
+  "gold_fingerprint": "535edb4deffc",
+  "content_sha256": "a7a5ab9148f44ef7247d51e4e1dc72d55acec1afde2283ba9624f805c0bdadbe"
+ },
+ "anomaly-train-003": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 100002,
+  "control": false,
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "e0f0aaec4c68",
+  "gold_fingerprint": "54cec69adc10",
+  "content_sha256": "6022418c94642af7535862b70116f4e2bb65aa1739d372f334c67b32b9360b24"
+ },
+ "anomaly-train-control-01": {
+  "split": "train",
+  "role": "quant_researcher",
+  "workflow": "anomaly_scoring",
+  "mode": "produce",
+  "world": "ls_altdata",
+  "status": "graded",
+  "seed": 190000,
+  "control": true,
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "120efa055149",
+  "gold_fingerprint": "d63cf8c3d6a0",
+  "content_sha256": "1783973c4bae6364b00765c7221076048edda4ff7d2bbd8f5784e4be86f1c14d"
+ }
+}

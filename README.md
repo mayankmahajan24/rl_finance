@@ -4,7 +4,7 @@ RL environments and evals for buy-side financial services, built for frontier la
 
 | Folder | What it is |
 |---|---|
-| [`rl/`](rl/) | The environments: tasks by role and workflow, fund worlds, graders by mode, a model runner with Anthropic's financial-services skills. Start at [`rl/README.md`](rl/README.md). |
+| [`rl/`](rl/) | The environments: sources, task families, train/bench/held-out splits, fund worlds, and model runners (one with Anthropic's financial-services skills). Start at [`rl/README.md`](rl/README.md). |
 | [`engineering_brief.md`](engineering_brief.md) | Start here if you are an engineer joining: goal, vocabulary, what exists, invariants, next work. |
 
 The first environment (research design) was built from the Finance Domain Research

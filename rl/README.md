@@ -6,23 +6,42 @@ kind of task each), and assigned to **splits** (train, bench, heldout) by compan
 | Folder | What it holds |
 |---|---|
 | [`sources/`](sources/) | `txn_panel` (card-transaction panel + anomaly-detection brief) and `research_design_case` (the take-home) |
-| [`families/`](families/) | `kpi_nowcast`, `data_audit`, `anomaly_scoring`, `growth_thesis`; research_design still lives in `build_research_design.py`, `graders/`, `prompts/` until step 4 |
-| [`splits/`](splits/) | company and seed assignment per split, manifests of built tasks, `check.py` |
-| `roles/` | built tasks in the repo format (research_design, kpi_nowcast, earnings_recap) |
-| `tasks/` | built Harbor tasks, `tasks/<split>/<task_id>/`. Gitignored; rebuilt from `splits/manifests/` |
-| `harness/` | `run_solutions.py` (reference vs naive, no Docker), `calibrate.py` (pass@k, pass^k) |
-| `worlds/`, `rubrics/`, `skills/`, `runs/` | fund briefs, rubric tenets, financial-services skills, run outputs |
+| [`families/`](families/) | one folder per kind of task: builder or generator, instruction, verifier and graders, runner, baseline solutions |
+| [`splits/`](splits/) | company and seed assignment per split, retired cases, `manifests/<family>.json` (the committed index of every task), `check.py` |
+| `tasks/` | every built task, in Harbor layout, at `tasks/<split>/<task_id>/` ([`FORMAT.md`](FORMAT.md)). Gitignored; `build.py` rebuilds it |
+| [`harness/`](harness/) | `run_solutions.py` (reference vs naive, no Docker), `calibrate.py` (pass@k, pass^k) |
+| `worlds/`, `skills/`, [`runs/`](runs/) | fund briefs, financial-services skills, run records |
 
-Format spec for repo-format tasks: `FORMAT.md`. Harbor tasks follow Harbor's layout (`families/README.md`).
+| Family | Tasks | Splits |
+|---|---|---|
+| research_design | 52 (30 graded) | eval |
+| kpi_nowcast | 102 | 54 train, 24 bench, 22 heldout, 2 retired |
+| data_audit, anomaly_scoring, growth_thesis | generated: 12 bench and 12 heldout each; train on demand | train, bench, heldout |
 
 ```sh
-python rl/build_research_design.py                     # research_design + research_funding tasks, worlds, catalog
-python rl/replay_research_design.py                    # case-study baselines must reproduce
-python rl/families/kpi_nowcast/build.py                # 102 kpi_nowcast tasks
-python rl/build_panel_tasks.py --split bench           # data_audit, anomaly_scoring, growth_thesis
-python rl/harness/run_solutions.py --split bench       # reference should beat naive on every family
-python rl/splits/check.py                              # no company or seed in two splits
+python rl/build.py                                     # build every family, then the split check
+python rl/splits/check.py --release                    # before handing tasks to a lab: one clean commit, checksums, manifests
+python rl/build.py data_audit --split train --n 200 --controls 20
+python rl/families/research_design/replay.py           # case-study baselines must reproduce
+python rl/harness/run_solutions.py --split bench       # reference should beat naive on every generated family
+python rl/families/research_design/run.py --model claude-opus-5-5 --dry-run
+python rl/families/kpi_nowcast/run.py --variant baseline --dry-run
+harbor run -p rl/tasks/bench -a oracle                 # not yet validated: needs Docker
 ```
+
+**Running Claude Code through Harbor on a Claude subscription** instead of API credit: run
+`./setup_oauth.sh` once (it runs `claude setup-token` and saves the token to `.oauth.env`, which is
+git-ignored), then
+
+```sh
+set -a; . ./.oauth.env; set +a; export CLAUDE_FORCE_OAUTH=1
+harbor run -p rl/tasks/bench -a claude-code -m claude-opus-5-5 --ak max_budget_usd=5 --ak disable_web_search=true
+harbor check rl/tasks/bench -a claude-code -m claude-sonnet-5-5   # Harbor's task-quality rubric
+```
+
+`CLAUDE_FORCE_OAUTH=1` makes Harbor drop `ANTHROPIC_API_KEY` for the agent. The subscription covers
+the Claude Code agent only: verifiers that call a model (growth_thesis memo judge, research_design
+review scorer, kpi_nowcast write-up judge) and the repo's API runners still use `ANTHROPIC_API_KEY`.
 
 Dependencies: `pip install pandas numpy scipy openpyxl pyyaml anthropic harbor` (versions pinned in
 `../requirements.txt`).
@@ -34,8 +53,8 @@ The rest of this file describes the research_design environment.
 ```sh
 python rl/skills/manage.py fetch    # pinned checkout of anthropics/financial-services
 python rl/skills/manage.py sync     # upload the profile's skills to your API workspace (once)
-python rl/run.py --model claude-opus-5-5                  # skills on (default for claude-*)
-python rl/run.py --model claude-opus-5-5 --skills off     # same tasks, no skills
+python rl/families/research_design/run.py --model claude-opus-5-5                  # skills on (default for claude-*)
+python rl/families/research_design/run.py --model claude-opus-5-5 --skills off     # same tasks, no skills
 ```
 
 Anthropic models get the `buy_side_core` profile from `skills/config.yaml` by
@@ -74,7 +93,7 @@ as reference outputs.
 
 ## Verified against the case study
 
-`replay_research_design.py` re-grades all four models' saved runs with the new graders.
+`families/research_design/replay.py` re-grades all four models' saved runs with the new graders.
 Prompt fingerprints match the runs, and every headline number in
 `sources/research_design_case/baseline_runs/GRADED.md` reproduces:
 

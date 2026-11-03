@@ -103,37 +103,43 @@ in git history at commit `a75441c`, under `case_study/`.
 
 ### What `rl/` contains today
 
-**52 tasks in 6 "worlds"**, all converted from the case study by
-`rl/build_research_design.py`. The script is idempotent: it regenerates
-`rl/worlds/` and its own `rd-*` tasks, and rewrites `rl/catalog.json`.
+**52 research_design tasks in 6 "worlds"**, all converted from the case study by
+`rl/families/research_design/build.py`. The script is idempotent: it regenerates
+`rl/worlds/` and its own `rd-*` tasks, and records them in
+`rl/splits/manifests/research_design.json`. Since then the repo has added the alt-data
+families (kpi_nowcast and three generated panel families) on a second source; `rl/README.md`
+lists them all.
 
-Tasks are organized **role → workflow → task**:
+Every task, in every family, is built in Harbor's layout at `rl/tasks/<split>/<task_id>/`
+(`rl/FORMAT.md`); `python rl/build.py` rebuilds them all:
 
 ```
-rl/roles/<role>/<workflow>/<task_id>/
-  task.yaml     metadata for the harness. Never shown to the model
-  prompt/       what the model sees: system.md, user.md (or user.AB.md / user.BA.md), inputs.json
-  grader/       what only the grader sees: gold.json, draft_rubric.json, reference outputs
+<task_id>/
+  task.toml        Harbor config; [metadata] is the harness metadata. Never shown to the model
+  instruction.md   what a Harbor agent gets
+  prompt/          what the model sees through the API runner: system.md, user.md (or user.AB.md / user.BA.md), inputs.json
+  environment/     data files the agent sees
+  tests/           what only the grader sees: gold.json, draft_rubric.json, reference outputs, the verifier
 ```
 
 Each task has a **mode**, and graders are written per mode, not per topic:
 
 | Mode | The model's job | Grader | Tasks |
 |---|---|---|---|
-| review | Find the problems in a research plan | `rl/graders/review_issues.py`: share of expert-flagged blocking issues found, minus 0.1 per invented objection and 0.2 per objection the expert explicitly ruled out | 20 graded, 8 waiting on labels |
-| compare | Pick which of two plans to fund | `rl/graders/pairwise_pick.py`: 1 if it matches the expert's pick. Each pair is shown in both orders to cancel position bias | 10 graded, 4 waiting on labels |
+| review | Find the problems in a research plan | `rl/families/research_design/graders/review_issues.py`: share of expert-flagged blocking issues found, minus 0.1 per invented objection and 0.2 per objection the expert explicitly ruled out | 20 graded, 8 waiting on labels |
+| compare | Pick which of two plans to fund | `rl/families/research_design/graders/pairwise_pick.py`: 1 if it matches the expert's pick. Each pair is shown in both orders to cancel position bias | 10 graded, 4 waiting on labels |
 | produce | Write a research plan | None yet: needs an expert rubric | 10 |
 
 A **world** is a simulated fund. Today each is a one-paragraph description
 (`rl/worlds/<id>/world.yaml`). Making them full worlds (holdings, theses, past
 memos, data) is upcoming work.
 
-**Verified.** `rl/replay_research_design.py` re-grades four models' saved outputs with
+**Verified.** `rl/families/research_design/replay.py` re-grades four models' saved outputs with
 the new graders and reproduces every headline number from the case study, with no
 API calls. The build refuses to write the task tree if any gold text appears in a
 model-visible prompt; that leak check has been tested by planting a leak.
 
-**Model runner.** `rl/run.py` runs any Claude model on any task and grades the
+**Model runner.** `rl/families/research_design/run.py` runs any Claude model on the research_design tasks and grades the
 result. It has **not yet been run against the live API**; only `--dry-run` has
 been exercised.
 
@@ -163,12 +169,12 @@ Dependencies: Python 3, `anthropic` (installed: 0.89), `pyyaml`. An
 `ANTHROPIC_API_KEY` is needed only for `sync` and real runs.
 
 ```sh
-python rl/build_research_design.py         # regenerate tasks; runs the leak check
-python rl/replay_research_design.py        # must print "All fingerprints and GRADED.md numbers reproduced."
+python rl/build.py research_design         # regenerate tasks; runs the leak check and the split check
+python rl/families/research_design/replay.py        # must print "All fingerprints and GRADED.md numbers reproduced."
 python rl/skills/manage.py fetch           # check out the pinned skills repo
 python rl/skills/manage.py check
-python rl/run.py --model claude-opus-5-5 --dry-run               # print a request, no API call
-python rl/run.py --model claude-opus-5-5 --dry-run --skills off
+python rl/families/research_design/run.py --model claude-opus-5-5 --dry-run               # print a request, no API call
+python rl/families/research_design/run.py --model claude-opus-5-5 --dry-run --skills off
 ```
 
 ## 4. Invariants: do not break these
@@ -176,7 +182,7 @@ python rl/run.py --model claude-opus-5-5 --dry-run --skills off
 1. **Never edit gold.** Gold labels, rubric items and task wording are Mayank's.
    If something looks wrong or ambiguous, flag it to him; don't fix it. A
    plausible-looking fix to gold invalidates the product.
-2. **Nothing under `grader/` may reach the model.** Keep the leak check passing,
+2. **Nothing under `tests/` may reach the model.** Keep the leak check passing,
    and extend it to every new kind of task.
 3. **The replay must keep passing.** It is the regression test showing our graders
    still measure what the case study measured.
@@ -211,7 +217,7 @@ provenance.
 
 **Mayank's loop:** write a judgment spec, then edit and adjudicate AI drafts.
 - **Judgment specs are the most valuable thing he writes.** One per workflow, in
-  the style of `rl/rubrics/research_design/TENETS.md`: what matters, which
+  the style of `rl/families/research_design/TENETS.md`: what matters, which
   objections never apply, which errors count. They steer every draft and every
   grader prompt.
 - **He also writes exemplars and blind-first labels.** Drafts of worlds,

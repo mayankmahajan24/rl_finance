@@ -59,6 +59,19 @@ _shared/               harbor.py (the one task writer), build_panel.py (builds t
 - **A naive solution that scores near zero and a reference that scores well.** If both score the
   same, the task measures nothing.
 
+## Versions
+
+`version` in `family.yaml` goes into every task's `[task] version`. Bump it in the same change that
+alters the family's tasks, so a score is only ever compared with scores of the same version:
+
+| Bump | When | Examples |
+|---|---|---|
+| major | the reward means something different | gold or ground truth changed, the verifier or grader logic changed, the reward formula or its weights changed |
+| minor | the instrument changed, the reward did not | a prompt fingerprint changed (instruction, prompt or visible data), the sandbox changed (image, network, clock) |
+| patch | nothing a model or grader sees | task metadata or documentation only |
+
+A release (`../release/release.yaml`) bumps by the largest family bump it contains.
+
 ## Adding a family
 
 1. Copy the closest family folder; fill in `family.yaml`.

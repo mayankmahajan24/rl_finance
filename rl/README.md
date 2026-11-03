@@ -9,7 +9,7 @@ kind of task each), and assigned to **splits** (train, bench, heldout) by compan
 | [`families/`](families/) | one folder per kind of task: builder or generator, instruction, verifier and graders, runner, baseline solutions |
 | [`splits/`](splits/) | company and seed assignment per split, retired cases, `manifests/<family>.json` (the committed index of every task), `check.py` |
 | `tasks/` | every built task, in Harbor layout, at `tasks/<split>/<task_id>/` ([`FORMAT.md`](FORMAT.md)). Gitignored; `build.py` rebuilds it |
-| [`harness/`](harness/) | `run_solutions.py` (reference vs naive, no Docker), `calibrate.py` (pass@k, pass^k) |
+| [`harness/`](harness/) | `run_solutions.py` (reference vs naive, no Docker), `calibrate.py` (pass@k, pass^k), `sandbox_probe.py` (an agent that tries to get out of the sandbox; Docker) |
 | `worlds/`, `skills/`, [`runs/`](runs/) | fund briefs, financial-services skills, run records |
 
 | Family | Tasks | Splits |
@@ -28,6 +28,7 @@ python rl/harness/run_solutions.py --split bench       # reference should beat n
 python rl/families/research_design/run.py --model claude-opus-5-5 --dry-run
 python rl/families/kpi_nowcast/run.py --variant baseline --dry-run
 harbor run -p rl/tasks/bench -a oracle                 # not yet validated: needs Docker
+python rl/harness/sandbox_probe.py --judge rl/tasks/bench/kn-produce-ALK-2017Q4   # no internet for the agent; clock at as_of
 ```
 
 **Running Claude Code through Harbor on a Claude subscription** instead of API credit: run
@@ -36,11 +37,15 @@ git-ignored), then
 
 ```sh
 set -a; . ./.oauth.env; set +a; export CLAUDE_FORCE_OAUTH=1
-harbor run -p rl/tasks/bench -a claude-code -m claude-opus-5-5 --ak max_budget_usd=5 --ak disable_web_search=true
+harbor run -p rl/tasks/bench -a claude-code -m claude-opus-5-5 --ak max_budget_usd=5 --ak disable_web_search=true \
+  --allow-agent-host api.anthropic.com \
+  --allow-environment-host deb.debian.org --allow-environment-host downloads.claude.ai
 harbor check rl/tasks/bench -a claude-code -m claude-sonnet-5-5   # Harbor's task-quality rubric
 ```
 
-`CLAUDE_FORCE_OAUTH=1` makes Harbor drop `ANTHROPIC_API_KEY` for the agent. The subscription covers
+Tasks give the agent no network (`../FORMAT.md`, Point in time): the run adds the model API for the
+agent phase and the installer's hosts for setup. Those host lists are not yet validated against a
+live Claude Code run. `CLAUDE_FORCE_OAUTH=1` makes Harbor drop `ANTHROPIC_API_KEY` for the agent. The subscription covers
 the Claude Code agent only: verifiers that call a model (growth_thesis memo judge, research_design
 review scorer, kpi_nowcast write-up judge) and the repo's API runners still use `ANTHROPIC_API_KEY`.
 

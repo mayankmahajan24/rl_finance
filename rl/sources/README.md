@@ -29,8 +29,10 @@ grader side: no family may put it where an agent can see it.
 ## Adding a source
 
 1. Make the folder, put the data in `raw/` and the brief in `assignment/`.
-2. Write `source.yaml`, including `licence.status`. Unknown licence means nothing from this source
-   is published.
+2. Write `source.yaml`, including `licence.status`, one of `unknown`, `internal_only`,
+   `licensed_for_eval`, `licensed_for_training` or `public`. `rl/export.py` exports a source's tasks
+   for eval use only when it is `licensed_for_eval` or above, for training only when it is
+   `licensed_for_training` or `public`; unknown means nothing from this source is published.
 3. Write `annotations/entities.yaml`: the unit splits are assigned by (usually the company), and
    which raw identifiers belong to each.
 4. Add `../splits/<source>.yaml` assigning every entity to train, bench or heldout, and register

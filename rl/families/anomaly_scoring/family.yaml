@@ -16,3 +16,8 @@ generator: generate.py
 verifier: verifier/anomaly_verify.py
 verifier_timeout_sec: 3600
 reward: F1 on planted spikes, drops and level shifts x coverage, zeroed if the no-foresight check fails
+gold_inputs:             # files its gold comes from; each has a provenance entry (rl/provenance.py)
+  - sources/txn_panel/annotations/data_artifacts.yaml
+  - sources/txn_panel/annotations/entities.yaml
+  - families/anomaly_scoring/generate.py
+  - families/_shared/panel_perturb.py

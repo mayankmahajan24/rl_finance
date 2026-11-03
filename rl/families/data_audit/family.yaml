@@ -16,3 +16,8 @@ generator: generate.py
 verifier: verifier/audit_verify.py
 verifier_timeout_sec: 600
 reward: F1 of precision and recall against planted problems plus required natural breaks
+gold_inputs:             # files its gold comes from; each has a provenance entry (rl/provenance.py)
+  - sources/txn_panel/annotations/data_artifacts.yaml
+  - sources/txn_panel/annotations/entities.yaml
+  - families/data_audit/generate.py
+  - families/_shared/panel_perturb.py

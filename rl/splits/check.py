@@ -8,9 +8,13 @@
   4. held-out tasks record no seed; nothing grader-side sits where the agent can see it
   5. every built task matches its family's committed manifest (same split, fingerprints and
      content_sha256), its files match its checksums.sha256, and it carries a build record
+  6. provenance: every family's gold inputs have well-formed provenance entries (rl/provenance.py),
+     every task of such a family carries them (tests/provenance.json, [metadata.provenance]), and
+     no task claims approved gold that is no longer approved
 
 With --release (before handing tasks to anyone): every task was also built from one clean commit,
-with no uncommitted changes to tracked files.
+with no uncommitted changes to tracked files, and every bench and held-out task's gold is approved,
+unchanged since review, and recorded so in the task.
 
 Usage:
     python rl/splits/check.py
@@ -29,6 +33,7 @@ import yaml
 RL = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RL))
 import splits  # noqa: E402
+import provenance  # noqa: E402
 from families._shared import harbor  # noqa: E402
 from lib import fingerprint, iter_tasks  # noqa: E402
 from sources.txn_panel import panel  # noqa: E402
@@ -57,8 +62,27 @@ def checksum_problems(d: pathlib.Path) -> list[str]:
     return out
 
 
+def provenance_problems(d: pathlib.Path, m: dict, release: bool) -> list[str]:
+    """Check 6 for one task: its gold's provenance is recorded, current, and (for release) approved."""
+    tid, current = d.name, provenance.for_family(m["family"])
+    if not current:
+        return []
+    out, recorded = [], m.get("provenance")
+    if recorded is None or not (d / "tests" / "provenance.json").exists():
+        return [f"{tid}: no gold provenance recorded (rebuild)"]
+    now = provenance.summary(current)
+    if recorded["status"] == "approved" and now["status"] != "approved":
+        out.append(f"{tid}: built as approved, but {', '.join(now['unapproved'])} no longer is (rebuild)")
+    if release and d.parent.name in ("bench", "heldout"):
+        if now["status"] != "approved":
+            out.append(f"{tid}: gold not approved: {', '.join(now['unapproved'])} (rl/review/review.py)")
+        elif recorded != now:
+            out.append(f"{tid}: gold approved since it was built (rebuild)")
+    return out
+
+
 def check(release: bool = False) -> list[str]:
-    problems: list[str] = []
+    problems: list[str] = provenance.problems()
     commits: set[str] = set()
 
     # 1. companies
@@ -133,6 +157,7 @@ def check(release: bool = False) -> list[str]:
                 problems.append(f"{tid}: grader-only file under {sub}/")
 
         problems += checksum_problems(d)
+        problems += provenance_problems(d, m, release)
         b = m.get("build")
         if not b:
             problems.append(f"{tid}: no [metadata.build] record")

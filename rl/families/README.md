@@ -53,6 +53,8 @@ _shared/               harbor.py (the one task writer), build_panel.py (builds t
 - **Nothing grader-side in `environment/` or `prompt/`.** Gold lives in `tests/`; every builder
   runs a leak check.
 - **Write through `_shared/harbor.py` and record a manifest** (`splits.write_manifest`).
+- **List the files your gold comes from** under `gold_inputs` in `family.yaml`, each with a
+  provenance entry (`../FORMAT.md`, Gold provenance). Nothing ships until they are approved.
 - **A naive solution that scores near zero and a reference that scores well.** If both score the
   same, the task measures nothing.
 

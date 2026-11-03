@@ -4,7 +4,8 @@ reproduce rl/sources/research_design_case/baseline_runs/GRADED.md.
 No API calls. Model responses come from baseline_runs/<model>/{pairwise,pointwise}.json;
 the scorer's semantic decisions come from the cached baseline_runs/_issue_scores.json.
 Writes one record per (model, task) to rl/runs/research_design/baseline/<model>.jsonl,
-which also gives every graded task a baseline reward from four models.
+which also gives every graded task a baseline reward from four models, and the same rows as run
+records (rl/harness/records.py) to <model>.records.jsonl.
 
 Checks, and exits non-zero if any fail:
   - prompt fingerprints in the task tree match the fingerprints recorded on the runs
@@ -24,6 +25,9 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 from lib import RL, iter_tasks, write_json  # noqa: E402
 from families.research_design.graders import pairwise_pick, review_issues  # noqa: E402
+
+sys.path.insert(0, str(RL / "harness"))
+import records as run_records  # noqa: E402
 
 RUNS = RL / "sources" / "research_design_case" / "baseline_runs"
 OUT = RL / "runs" / "research_design" / "baseline"
@@ -99,6 +103,7 @@ def main() -> None:
         OUT.mkdir(parents=True, exist_ok=True)
         (OUT / f"{model}.jsonl").write_text("".join(json.dumps(x, ensure_ascii=False) + "\n"
                                                     for x in records))
+        run_records.write(OUT / f"{model}.records.jsonl", [run_records.from_replay(x) for x in records])
         got = (strong_hits / strong_n, surfaced / blocking, bad / reviews)
         summary[model] = {"strong_pairwise_accuracy": round(got[0], 3),
                           "review_recall": round(got[1], 3),

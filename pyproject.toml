@@ -1,4 +1,28 @@
-# Tool configuration only: the repo is not packaged yet (rl/ scripts run from a checkout).
+# Package metadata for the checkout: `pip install -e .` installs the pinned dependencies and the
+# console entry points (rl_finance_cli.py). The rl/ scripts still run from the checkout itself.
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rl-finance"
+version = "0.1.0"
+description = "RL environments and evals for buy-side financial services"
+requires-python = ">=3.12"
+dynamic = ["dependencies", "optional-dependencies"]
+
+[project.scripts]
+rl-build = "rl_finance_cli:build"
+rl-check = "rl_finance_cli:check"
+rl-export = "rl_finance_cli:export"
+
+[tool.setuptools]
+py-modules = ["rl_finance_cli"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+optional-dependencies.dev = { file = ["requirements-dev.txt"] }
 
 [tool.pytest.ini_options]
 testpaths = ["rl/tests"]

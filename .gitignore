@@ -12,3 +12,6 @@ rl/splits/secrets/
 # run scratch: console logs and applied patches (rl/runs/README.md)
 rl/runs/**/*.log
 rl/runs/**/*.patch
+
+# Claude subscription token for Harbor runs (setup_oauth.sh)
+.oauth.env

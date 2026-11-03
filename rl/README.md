@@ -29,6 +29,20 @@ python rl/families/kpi_nowcast/run.py --variant baseline --dry-run
 harbor run -p rl/tasks/bench -a oracle                 # not yet validated: needs Docker
 ```
 
+**Running Claude Code through Harbor on a Claude subscription** instead of API credit: run
+`./setup_oauth.sh` once (it runs `claude setup-token` and saves the token to `.oauth.env`, which is
+git-ignored), then
+
+```sh
+set -a; . ./.oauth.env; set +a; export CLAUDE_FORCE_OAUTH=1
+harbor run -p rl/tasks/bench -a claude-code -m claude-opus-5-5 --ak max_budget_usd=5 --ak disable_web_search=true
+harbor check rl/tasks/bench -a claude-code -m claude-sonnet-5-5   # Harbor's task-quality rubric
+```
+
+`CLAUDE_FORCE_OAUTH=1` makes Harbor drop `ANTHROPIC_API_KEY` for the agent. The subscription covers
+the Claude Code agent only: verifiers that call a model (growth_thesis memo judge, research_design
+review scorer, kpi_nowcast write-up judge) and the repo's API runners still use `ANTHROPIC_API_KEY`.
+
 Dependencies: `pip install pandas numpy scipy openpyxl pyyaml anthropic harbor` (versions pinned in
 `../requirements.txt`).
 

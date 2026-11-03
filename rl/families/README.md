@@ -55,6 +55,9 @@ _shared/               harbor.py (the one task writer), build_panel.py (builds t
 - **Write through `_shared/harbor.py` and record a manifest** (`splits.write_manifest`).
 - **List the files your gold comes from** under `gold_inputs` in `family.yaml`, each with a
   provenance entry (`../FORMAT.md`, Gold provenance). Nothing ships until they are approved.
+- **Declare the instrument** under `instrument` in `family.yaml`: every file that decides what the
+  model sees or how it is scored. Live runs and releases need its hash approved
+  (`../harness/approve.py`); changing any of them reopens the approval.
 - **A naive solution that scores near zero and a reference that scores well.** If both score the
   same, the task measures nothing.
 

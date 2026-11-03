@@ -16,8 +16,9 @@
      no task claims approved gold that is no longer approved
 
 With --release (before handing tasks to anyone): every task was also built from one clean commit,
-with no uncommitted changes to tracked files, and every bench and held-out task's gold is approved,
-unchanged since review, and recorded so in the task.
+with no uncommitted changes to tracked files, every family with bench or held-out tasks has its
+current instrument approved (rl/instrument.py), and every bench and held-out task's gold is
+approved, unchanged since review, and recorded so in the task.
 
 Usage:
     python rl/splits/check.py
@@ -37,6 +38,7 @@ import yaml
 RL = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RL))
 import splits  # noqa: E402
+import instrument  # noqa: E402
 import provenance  # noqa: E402
 from families._shared import harbor  # noqa: E402
 from lib import fingerprint, iter_tasks  # noqa: E402
@@ -213,6 +215,9 @@ def check(release: bool = False) -> list[str]:
 
     if release and len(commits) > 1:
         problems.append(f"tasks were built from {len(commits)} different commits; rebuild everything from one")
+    if release:
+        released = sorted({m["family"] for d, m in iter_tasks() if d.parent.name in ("bench", "heldout")})
+        problems += [why for ok, why in map(instrument.status, released) if not ok]
     for fam, man in manifests.items():
         for tid, v in man.items():
             if v["split"] == "heldout" and "seed" in v:

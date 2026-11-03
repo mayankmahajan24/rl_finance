@@ -38,6 +38,7 @@ Every task can be checked on its own, without the repo:
 | What | Where |
 |---|---|
 | Who made it, which version | `[task] authors`, `[task] version` (from `family.yaml`; bump the version when a family's tasks change in a way results can't be compared across) |
+| That the instrument is the approved one | `family.yaml` lists the family's `instrument` files (prompts, schemas, graders, judge rubric, verifier, builder or generator, the shared writer); `families/<family>/approval.yaml` records the approved hash over them, who approved it, when and at which commit (`instrument.py`). Live API runs refuse to start and `check.py --release` fails while the current hash isn't the approved one. `python rl/harness/approve.py --family <f> --show` prints the diff since approval |
 | When and from what it was built | `[metadata.build]`: UTC `built_at`, `repo_commit`, `repo_dirty` (uncommitted changes to tracked files), `builder`, Python and library versions, `source` and `source_sha256` (every file of `sources/<source>/`), `base_image` |
 | That no file changed since | `checksums.sha256` |
 | That it is the task the repo recorded | its `content_sha256` (every file but `task.toml` and `checksums.sha256`, plus the parsed `task.toml` without `[metadata.build]`) equals the one in `splits/manifests/<family>.json`. Identical across rebuilds of the same content |

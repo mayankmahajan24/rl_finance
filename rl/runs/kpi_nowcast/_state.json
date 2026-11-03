@@ -73,16 +73,5 @@
       "in": 2.0,
       "out": 10.0
     }
-  },
-  "harness_paths": [
-    "families/kpi_nowcast/run.py",
-    "families/kpi_nowcast/grader.py",
-    "families/kpi_nowcast/judge.md",
-    "families/kpi_nowcast/prompts/system.md",
-    "families/kpi_nowcast/prompts/user.md",
-    "families/kpi_nowcast/build.py",
-    "families/kpi_nowcast/schema.json",
-    "families/kpi_nowcast/verifier/verify.py"
-  ],
-  "harness_sha": "cda678e00e70d99474af086b4837199285ec341e91db1d243addaf31333d4674"
+  }
 }

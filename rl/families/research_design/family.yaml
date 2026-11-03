@@ -40,3 +40,14 @@ gold_inputs:             # files its gold comes from; each has a provenance entr
   - sources/research_design_case/grader_only/seed_only_runs/plans/*.md
   - sources/research_design_case/grader_only/seed_only_runs/critiques/*.md
   - sources/research_design_case/grader_only/seed_only_runs/findings-table.md
+instrument:              # what decides what the model sees and how it is scored; live use needs its hash
+                         # approved (rl/instrument.py, rl/harness/approve.py)
+  - families/research_design/build.py
+  - families/research_design/run.py
+  - families/research_design/prompts/*.md
+  - families/research_design/schemas/*.json
+  - families/research_design/graders/*
+  - families/research_design/verifier/verify.py
+  - families/research_design/TENETS.md
+  - families/_shared/harbor.py
+  - families/_shared/verify_common.py

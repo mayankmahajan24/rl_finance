@@ -21,3 +21,14 @@ gold_inputs:             # files its gold comes from; each has a provenance entr
   - sources/txn_panel/annotations/entities.yaml
   - families/anomaly_scoring/generate.py
   - families/_shared/panel_perturb.py
+instrument:              # what decides what the model sees and how it is scored; live use needs its hash
+                         # approved (rl/instrument.py, rl/harness/approve.py)
+  - families/anomaly_scoring/instruction.md
+  - families/anomaly_scoring/generate.py
+  - families/anomaly_scoring/verifier/anomaly_verify.py
+  - families/_shared/build_panel.py
+  - families/_shared/panel_perturb.py
+  - families/_shared/panel_schema.md
+  - sources/txn_panel/panel.py
+  - families/_shared/harbor.py
+  - families/_shared/verify_common.py

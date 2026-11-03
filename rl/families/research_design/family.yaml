@@ -19,6 +19,27 @@ verifier_timeout_sec: 600
 reward: >-
   review: blocking-issue recall - 0.1 x manufactured - 0.2 x contradicts-gold (scorer model matches issues);
   compare: 1 if the pick matches gold, averaged over both orderings (Harbor: AB only); produce: no grader yet
+gold_inputs:             # files its gold comes from; each has a provenance entry (rl/provenance.py)
+  - sources/research_design_case/grader_only/gold/S1.json
+  - sources/research_design_case/grader_only/gold/S2.json
+  - sources/research_design_case/grader_only/gold/S3.json
+  - sources/research_design_case/grader_only/gold/S4.json
+  - sources/research_design_case/grader_only/gold/S5.json
+  - sources/research_design_case/grader_only/gold/S6.json
+  - sources/research_design_case/grader_only/gold/S7.json
+  - sources/research_design_case/grader_only/gold/S8.json
+  - sources/research_design_case/grader_only/gold/S9.json
+  - sources/research_design_case/grader_only/gold/S10.json
+  - sources/research_design_case/grader_only/gold/S2F.json
+  - sources/research_design_case/grader_only/gold/S5F.json
+  - sources/research_design_case/grader_only/gold/S8F.json
+  - sources/research_design_case/grader_only/gold/S9F.json
+  - sources/research_design_case/grader_only/gold/_issues.json
+  - sources/research_design_case/seeds.json
+  - sources/research_design_case/grader_only/seed_catalog.md
+  - sources/research_design_case/grader_only/seed_only_runs/plans/*.md
+  - sources/research_design_case/grader_only/seed_only_runs/critiques/*.md
+  - sources/research_design_case/grader_only/seed_only_runs/findings-table.md
 instrument:              # what decides what the model sees and how it is scored; live use needs its hash
                          # approved (rl/instrument.py, rl/harness/approve.py)
   - families/research_design/build.py

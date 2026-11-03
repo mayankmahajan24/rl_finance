@@ -1,0 +1,28 @@
+# Provenance index (rl/provenance.py): one entry per gold-bearing file. Review entries with
+# rl/review/review.py, which rewrites this file; don't hand-edit `review` or `sha256`.
+- path: families/growth_thesis/generate.py
+  kind: generator
+  produced_by:
+    type: code
+    ref: families/growth_thesis/generate.py
+    commit: 0411bc4
+  produced_at: '2026-10-21'
+  sha256: fc147e476abac3a52233652cec012433dc57b60726038405d27d187f8bfc1734
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  note: builds the semi-synthetic panel and its traps; the right answer follows from it
+- path: families/growth_thesis/verifier/thesis_verify.py
+  kind: rubric
+  produced_by:
+    type: unrecorded
+  produced_at: '2026-10-21'
+  sha256: 0c07bb3cc02fe526807d2594ac089929624bcae702f6b5a2399a4a81dab70f22
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  note: 'rubric_items(): the memo rubric, and the 0.35/0.25/0.15/0.25 reward weights'

@@ -17,6 +17,11 @@ verifier: verifier/thesis_verify.py
 verifier_timeout_sec: 600
 llm_judge: true          # memo rubric; falls back to keywords without ANTHROPIC_API_KEY
 reward: 0.35 right answer + 0.25 growth accuracy + 0.15 unreliable-list F1 + 0.25 memo rubric
+gold_inputs:             # files its gold comes from; each has a provenance entry (rl/provenance.py)
+  - sources/txn_panel/annotations/entities.yaml
+  - families/growth_thesis/generate.py
+  - families/growth_thesis/verifier/thesis_verify.py
+  - families/_shared/panel_perturb.py
 instrument:              # what decides what the model sees and how it is scored; live use needs its hash
                          # approved (rl/instrument.py, rl/harness/approve.py)
   - families/growth_thesis/instruction.md

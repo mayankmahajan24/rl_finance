@@ -1,0 +1,282 @@
+# Provenance index (rl/provenance.py): one entry per gold-bearing file. Review entries with
+# rl/review/review.py, which rewrites this file; don't hand-edit `review` or `sha256`.
+- path: sources/research_design_case/grader_only/gold/S1.json
+  kind: gold
+  produced_by: &id001
+    type: human
+    who: case-study author (Mayank Mahajan)
+  produced_at: 2026-08
+  sha256: 5563da75b5f2fb786da05488f57c98c0d870057f7a3384f08bc3fc1c7d393f82
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  evidence:
+  - sources/research_design_case/items/S1.json (the pair it labels)
+  - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
+  note: human label written for the take-home; no sign-off recorded since
+- path: sources/research_design_case/grader_only/gold/S2.json
+  kind: gold
+  produced_by: *id001
+  produced_at: 2026-08
+  sha256: deaeeabd3a6e4ba89fe80eca4788ffb51943c722d36b48c0eca1934a812b7782
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  evidence:
+  - sources/research_design_case/items/S2.json (the pair it labels)
+  - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
+  note: human label written for the take-home; no sign-off recorded since
+- path: sources/research_design_case/grader_only/gold/S3.json
+  kind: gold
+  produced_by: *id001
+  produced_at: 2026-08
+  sha256: 033b98fe0caffb8b6b4927e6e64375b08ccb2eb8f26096ec4ccc196371346713
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  evidence:
+  - sources/research_design_case/items/S3.json (the pair it labels)
+  - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
+  note: human label written for the take-home; no sign-off recorded since
+- path: sources/research_design_case/grader_only/gold/S4.json
+  kind: gold
+  produced_by: *id001
+  produced_at: 2026-08
+  sha256: f53208f14dc41c5726859fd9670d0bcbbc71881a96b9dccb25276deb132b1ce2
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  evidence:
+  - sources/research_design_case/items/S4.json (the pair it labels)
+  - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
+  note: human label written for the take-home; no sign-off recorded since
+- path: sources/research_design_case/grader_only/gold/S5.json
+  kind: gold
+  produced_by: *id001
+  produced_at: 2026-08
+  sha256: d253e65573e8962c9d0f86540c3cf40f624cfa5c9d06c1b4de3f27720e549d4a
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  evidence:
+  - sources/research_design_case/items/S5.json (the pair it labels)
+  - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
+  note: human label written for the take-home; no sign-off recorded since
+- path: sources/research_design_case/grader_only/gold/S6.json
+  kind: gold
+  produced_by: *id001
+  produced_at: 2026-08
+  sha256: 25fa085ab0e63184a11852fd8e960bb7f4468683965609865a77065b74547132
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  evidence:
+  - sources/research_design_case/items/S6.json (the pair it labels)
+  - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
+  note: human label written for the take-home; no sign-off recorded since
+- path: sources/research_design_case/grader_only/gold/S7.json
+  kind: gold
+  produced_by: *id001
+  produced_at: 2026-08
+  sha256: fad959c474a87bb75f2ca2c151d3308cc3faf7a93ed9fdc077cdaa324b0a4b60
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  evidence:
+  - sources/research_design_case/items/S7.json (the pair it labels)
+  - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
+  note: human label written for the take-home; no sign-off recorded since
+- path: sources/research_design_case/grader_only/gold/S8.json
+  kind: gold
+  produced_by: *id001
+  produced_at: 2026-08
+  sha256: 75bb47afcf6e75dbb778ab8b07672df7b3f6ab3411cb13435e4cdd93a7d9d5ae
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  evidence:
+  - sources/research_design_case/items/S8.json (the pair it labels)
+  - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
+  note: human label written for the take-home; no sign-off recorded since
+- path: sources/research_design_case/grader_only/gold/S9.json
+  kind: gold
+  produced_by: *id001
+  produced_at: 2026-08
+  sha256: 40ea19bc91a49f9f2a2d623f49b8b76fcda98e5bf1f6704f36ce1980608e8074
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  evidence:
+  - sources/research_design_case/items/S9.json (the pair it labels)
+  - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
+  note: human label written for the take-home; no sign-off recorded since
+- path: sources/research_design_case/grader_only/gold/S10.json
+  kind: gold
+  produced_by: *id001
+  produced_at: 2026-08
+  sha256: 4eb8c9adba7ce7cab01b3f1eb60db4bbe2fb7233f028bc95fc54274b83d95859
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  evidence:
+  - sources/research_design_case/items/S10.json (the pair it labels)
+  - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
+  note: human label written for the take-home; no sign-off recorded since
+- path: sources/research_design_case/grader_only/gold/S2F.json
+  kind: gold
+  produced_by: *id001
+  produced_at: 2026-08
+  sha256: 9621401d1e4c0512d51bcde8282df05fea8010e18c7e64cb27d8f360e969bbbb
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  evidence:
+  - sources/research_design_case/items/S2F.json (the pair it labels)
+  - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
+  note: context-flip item, not yet labelled (its tasks are ungraded)
+- path: sources/research_design_case/grader_only/gold/S5F.json
+  kind: gold
+  produced_by: *id001
+  produced_at: 2026-08
+  sha256: 9621401d1e4c0512d51bcde8282df05fea8010e18c7e64cb27d8f360e969bbbb
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  evidence:
+  - sources/research_design_case/items/S5F.json (the pair it labels)
+  - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
+  note: context-flip item, not yet labelled (its tasks are ungraded)
+- path: sources/research_design_case/grader_only/gold/S8F.json
+  kind: gold
+  produced_by: *id001
+  produced_at: 2026-08
+  sha256: 9621401d1e4c0512d51bcde8282df05fea8010e18c7e64cb27d8f360e969bbbb
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  evidence:
+  - sources/research_design_case/items/S8F.json (the pair it labels)
+  - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
+  note: context-flip item, not yet labelled (its tasks are ungraded)
+- path: sources/research_design_case/grader_only/gold/S9F.json
+  kind: gold
+  produced_by: *id001
+  produced_at: 2026-08
+  sha256: 9621401d1e4c0512d51bcde8282df05fea8010e18c7e64cb27d8f360e969bbbb
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  evidence:
+  - sources/research_design_case/items/S9F.json (the pair it labels)
+  - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
+  note: context-flip item, not yet labelled (its tasks are ungraded)
+- path: sources/research_design_case/grader_only/gold/_issues.json
+  kind: gold
+  produced_by:
+    type: code
+    ref: case_study/scripts/split_gold.py
+    commit: a75441c
+  produced_at: 2026-08
+  sha256: 2daa2b5a5529c220c50a096aaf49b45b9c8806fd5bf58c444d1aaeaf22442763
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  evidence:
+  - sources/research_design_case/grader_only/gold/S*.json (the prose it splits)
+  note: the gold prose split into blocking / secondary / anti-objection / praise issues by a script; the
+    split itself was never reviewed
+- path: sources/research_design_case/seeds.json
+  kind: gold
+  produced_by: *id001
+  produced_at: 2026-08
+  sha256: 1eade4b68fafd6c4466e86cb5c742cc7616b3a68fd4a5c804b543829ff02cfaa
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  note: the `discriminator` field is the produce tasks' must-hit item, written before generation
+- path: sources/research_design_case/grader_only/seed_catalog.md
+  kind: rubric
+  produced_by: *id001
+  produced_at: 2026-08
+  sha256: b024e9e5e1c0607a9a4b709061fb73989b85d8a372d61282dd8d39f40f2ac684
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  note: raw material for the produce rubrics; no produce task is graded yet
+- path: sources/research_design_case/grader_only/seed_only_runs/plans/*.md
+  kind: reference
+  produced_by:
+    type: model
+    model: claude-opus-5
+    prompt_fingerprint: null
+  produced_at: 2026-08
+  sha256: c2e82257d3e4618b3cd76f4fc932fae1eed360c8de1b971a128d49e168e45def
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  evidence:
+  - sources/research_design_case/grader_only/seed_only_runs/PROVENANCE.md (which harness wrote each)
+  note: Claude's plans with no firm context; reference outputs only, never gold
+- path: sources/research_design_case/grader_only/seed_only_runs/critiques/*.md
+  kind: reference
+  produced_by:
+    type: model
+    model: claude-opus-5
+    prompt_fingerprint: null
+  produced_at: 2026-08
+  sha256: 630c5f895ac969271c02dd1b293d4f90abe1eee2463a0c05c68a696d10a4201e
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  evidence:
+  - sources/research_design_case/grader_only/seed_only_runs/PROVENANCE.md
+  note: Claude's critiques with no firm context; reference outputs only, never gold
+- path: sources/research_design_case/grader_only/seed_only_runs/findings-table.md
+  kind: gold
+  produced_by: *id001
+  produced_at: 2026-08
+  sha256: 666cab956d773cc535972774ce65c619220c1ecb172d4e1a1b5c552f34c74b66
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  note: the human verdict on each Claude plan

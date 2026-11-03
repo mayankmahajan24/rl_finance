@@ -24,6 +24,12 @@ rubric_visibility: partial  # the instruction states the fund's write-up convent
                             # and units first; in-sample accuracy next to a simple benchmark; low <= point <= high)
                             # but not the judgment items (C2-C5, C7, C9, C11, C12): models are graded on whether
                             # they do what a careful analyst would, unprompted. Deliberate.
+gold_inputs:             # files its gold comes from; each has a provenance entry (rl/provenance.py)
+  - sources/txn_panel/grader_only/kpi_facts.csv
+  - sources/txn_panel/grader_only/kpi_quarterly.csv
+  - sources/txn_panel/annotations/company_facts.yaml
+  - sources/txn_panel/annotations/entities.yaml
+  - families/kpi_nowcast/judge.md
 instrument:              # what decides what the model sees and how it is scored; live use needs its hash
                          # approved (rl/instrument.py, rl/harness/approve.py)
   - families/kpi_nowcast/build.py

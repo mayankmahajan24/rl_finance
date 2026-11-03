@@ -1,0 +1,16 @@
+# Provenance index (rl/provenance.py): one entry per gold-bearing file. Review entries with
+# rl/review/review.py, which rewrites this file; don't hand-edit `review` or `sha256`.
+- path: families/data_audit/generate.py
+  kind: generator
+  produced_by:
+    type: code
+    ref: families/data_audit/generate.py
+    commit: 0411bc4
+  produced_at: '2026-10-21'
+  sha256: 7b053029366516fd070818085735686baa482f72c2d5ba484bb918602ecaac9a
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  note: plants the problems that are the task's ground truth

@@ -1,0 +1,16 @@
+# Provenance index (rl/provenance.py): one entry per gold-bearing file. Review entries with
+# rl/review/review.py, which rewrites this file; don't hand-edit `review` or `sha256`.
+- path: families/anomaly_scoring/generate.py
+  kind: generator
+  produced_by:
+    type: code
+    ref: families/anomaly_scoring/generate.py
+    commit: 0411bc4
+  produced_at: '2026-10-21'
+  sha256: 0d5a19915ecf0031476d8143203ad442c93c175fc6a9afec7e47ff9d28d119e5
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  note: plants the anomalies that are the task's ground truth

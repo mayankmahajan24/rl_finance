@@ -11,7 +11,7 @@
   ],
   "fingerprint": "e8152ae5f7d4",
   "gold_fingerprint": "f3f851ee584f",
-  "content_sha256": "e2002643916313098693cb1ffba1af112bd0975259777b8b1e6fac5530514b23"
+  "content_sha256": "559ae4f43744067311fd2c28e786199bddeb7fa2eaa190d56518e19442efa05c"
  },
  "kn-produce-AAL-2018Q2": {
   "split": "train",
@@ -25,7 +25,7 @@
   ],
   "fingerprint": "f4533d7fe56e",
   "gold_fingerprint": "7611cdbd2a84",
-  "content_sha256": "faa7bef4a14896167073c046b37b9537b337302db7dadb0bf4a3078520e2c6e2"
+  "content_sha256": "ab2acc641d3641fb7da49f61f1186f505061328fd509b14aa94dd39102a855bd"
  },
  "kn-produce-AAL-2018Q4": {
   "split": "train",
@@ -39,7 +39,7 @@
   ],
   "fingerprint": "2b7a6ffc036b",
   "gold_fingerprint": "bd8187956720",
-  "content_sha256": "8180064d1ed6abdece61ef106698340b43efb32b038346571a9fde89d3bff8da"
+  "content_sha256": "9873846e749598668cac28d4265412c9ff15261c14612d949216558e283aaf49"
  },
  "kn-produce-AIR01-2017Q4-anon": {
   "split": "train",
@@ -53,7 +53,7 @@
   ],
   "fingerprint": "b598e75d48ae",
   "gold_fingerprint": "0d87ea0df9b6",
-  "content_sha256": "752fc475921856f564eda61cfa4b948fa95c4b08df0c18f904f5f8823369482f"
+  "content_sha256": "c3f129f17c29c24b625528ab4b5ee4ff60db0f3d46c96b2abec35c9e535c4ccb"
  },
  "kn-produce-AIR01-2018Q2-anon": {
   "split": "train",
@@ -67,7 +67,7 @@
   ],
   "fingerprint": "d6b3d120143a",
   "gold_fingerprint": "173201f8d757",
-  "content_sha256": "1ad05650facb7e27832fd32661478cab9a931c494f617e33d157c4d26da4e981"
+  "content_sha256": "e88ac490b81662e0561cc977e84e7f0c3734b319a050cf3614048e8eaaa58915"
  },
  "kn-produce-AIR01-2018Q4-anon": {
   "split": "train",
@@ -81,7 +81,7 @@
   ],
   "fingerprint": "9774a4851fa8",
   "gold_fingerprint": "a33cb43ebf8f",
-  "content_sha256": "573889c3d742889fb895b63f17653bcce2352ed7e1b7786cd87ce71124295fb7"
+  "content_sha256": "de522fccebb3742bb19ea83b14558a51397a2ac33cbfd6bee5827dd5ba60bdf7"
  },
  "kn-produce-AIR02-2017Q4-anon": {
   "split": "bench",
@@ -95,7 +95,7 @@
   ],
   "fingerprint": "aad41343f934",
   "gold_fingerprint": "9789ba6f66dc",
-  "content_sha256": "582520157a8e28c72fc1ed49a9c35bf7afde7a13fdd0f604f2bb500d42446126"
+  "content_sha256": "48f6c0f24f9f2c0c7dbe7480a7d5a5a7de66e9faa03459eb64d356deecd7550d"
  },
  "kn-produce-AIR02-2018Q2-anon": {
   "split": "bench",
@@ -109,7 +109,7 @@
   ],
   "fingerprint": "04fc8e9e9f84",
   "gold_fingerprint": "1317bec6561e",
-  "content_sha256": "e99a9b108a886cf40b7578800474addac673bcc1d5f71c1946cfd13a6940f5f5"
+  "content_sha256": "3e872dc941c0d7a62b9f25944bb470cd3be92a89fcdcfebf477411b303228f6c"
  },
  "kn-produce-AIR02-2018Q4-anon": {
   "split": "bench",
@@ -123,7 +123,7 @@
   ],
   "fingerprint": "d2128030e710",
   "gold_fingerprint": "226d3a7092fb",
-  "content_sha256": "5df55c064ce67e1699510b1f5255196c376d67a67eb191da85b29fc29450f491"
+  "content_sha256": "a45afb8c33d9a4a9e69d9fe6660760cccc506b671622bec543190f20fbd3b5b3"
  },
  "kn-produce-AIR03-2017Q4-anon": {
   "split": "train",
@@ -137,7 +137,7 @@
   ],
   "fingerprint": "b2d5da9af29d",
   "gold_fingerprint": "98841d9a4e49",
-  "content_sha256": "8d12d261b76bcac71640112d2a3f6db8aa36fb31c685656f1ee82ee52b170cea"
+  "content_sha256": "4a35335f2e14405773c9629f4cde4f61b9ab5bd5409deef5a573b0e3709e5671"
  },
  "kn-produce-AIR03-2018Q2-anon": {
   "split": "train",
@@ -151,7 +151,7 @@
   ],
   "fingerprint": "d0e250da2cbd",
   "gold_fingerprint": "0a0054c2b6e7",
-  "content_sha256": "9f26e29af94a58406cdf1a05e432d0b5f77ffdff423b079b2faec2c181ee9355"
+  "content_sha256": "8d3c327116a3ee66f058a9ae2c6ed18c4ad09838dd2c6376582e05a019e8df6f"
  },
  "kn-produce-AIR03-2018Q4-anon": {
   "split": "train",
@@ -165,7 +165,7 @@
   ],
   "fingerprint": "c59f1212036a",
   "gold_fingerprint": "a0d8da48f577",
-  "content_sha256": "a9d08ff3e362171f142b7647bf4af6f8b5e7abd069cfccfa4ee3c1cdb4d2801f"
+  "content_sha256": "23859029cf0cf222fa7d171f4d907747600294f10450014f0fa2529673013f3f"
  },
  "kn-produce-AIR04-2017Q4-anon": {
   "split": "train",
@@ -179,7 +179,7 @@
   ],
   "fingerprint": "d09bc42396d0",
   "gold_fingerprint": "dc14cb10c986",
-  "content_sha256": "a4b30cf8a37a70678419165c415617755eea3cd473d33eabe9f11d14de0397aa"
+  "content_sha256": "ae44b5ffe4fdc40356d053353f289eb00e83d81a1df20d18607b2d188fa836dd"
  },
  "kn-produce-AIR04-2018Q2-anon": {
   "split": "train",
@@ -193,7 +193,7 @@
   ],
   "fingerprint": "849ddb98a103",
   "gold_fingerprint": "7ce578bed6bc",
-  "content_sha256": "e9bed5cb2a96c1de329a3695f91485e1bc52ab3a41279d2c44e82119659fad84"
+  "content_sha256": "cd94a58a141015bc134f075c981f915f25030abc0ec2c94df036fea85baba5fa"
  },
  "kn-produce-AIR04-2018Q4-anon": {
   "split": "train",
@@ -207,7 +207,7 @@
   ],
   "fingerprint": "fab0b315a4c8",
   "gold_fingerprint": "e0d2f02ad482",
-  "content_sha256": "e1f9f333065c96e8a16962edf250b814d9cc3d4a139992818be845f96c92c0e4"
+  "content_sha256": "ad363777f08b4f827e8c5578be884412d2112a4ceade484843e4bd2fd67a6fb6"
  },
  "kn-produce-AIR05-2017Q4-anon": {
   "split": "train",
@@ -221,7 +221,7 @@
   ],
   "fingerprint": "56e1327a74df",
   "gold_fingerprint": "0ac3b4c2d396",
-  "content_sha256": "a871ab354d27c6991f42d3a1d94f9767392db4a204a7d9e9cf86e9f122a549cb"
+  "content_sha256": "9c889c8adc24610684c6347ea654f7b70f22d1c341b5c51f5db532630118ee50"
  },
  "kn-produce-AIR05-2018Q2-anon": {
   "split": "train",
@@ -235,7 +235,7 @@
   ],
   "fingerprint": "1749cd9a2344",
   "gold_fingerprint": "e27c81b4c1bc",
-  "content_sha256": "a2089aa5006b4269503b5799e9320c0cb7d4d620e585c4578c569e3b31f77f48"
+  "content_sha256": "e13b6e297fdcdb8e233b10408ec425a5d96e65eab6adb93d7a8cf6a3b3b30a07"
  },
  "kn-produce-AIR05-2018Q4-anon": {
   "split": "train",
@@ -249,7 +249,7 @@
   ],
   "fingerprint": "687fe06b72a5",
   "gold_fingerprint": "c821e64f7071",
-  "content_sha256": "6c2c18bb6e9cc8326eb1d775a7e8170112b300b05d96f1d7c4e20acd3a1ef192"
+  "content_sha256": "17dfa2d7c76e1b092946fc383c8a0aa81c8f380c26543f091f440427369c4fd9"
  },
  "kn-produce-AIR06-2017Q4-anon": {
   "split": "bench",
@@ -263,7 +263,7 @@
   ],
   "fingerprint": "4ec53f8f0f81",
   "gold_fingerprint": "6bed269bbebe",
-  "content_sha256": "df0e9ee0f46eeb507ad09d9368b505e80182a37fb99b47bd39223b4ac3ca84bf"
+  "content_sha256": "fc4e8325002a308b229c4773b0a329a6bc369758e5235f62d010c2b486981713"
  },
  "kn-produce-AIR06-2018Q2-anon": {
   "split": "bench",
@@ -277,7 +277,7 @@
   ],
   "fingerprint": "c809ef6c9ab6",
   "gold_fingerprint": "f98d24d9b2e6",
-  "content_sha256": "9b48c14b4790ccb4908f5327f9a175ceba6169d2bc08f86640d4acf2d8e6efa6"
+  "content_sha256": "a84958e3dbf06cd4ba337608b5423071f2a8e36e7051e66ae6d82d3f5d3c5a51"
  },
  "kn-produce-AIR06-2018Q4-anon": {
   "split": "bench",
@@ -291,7 +291,7 @@
   ],
   "fingerprint": "2f650b4757ae",
   "gold_fingerprint": "6e5d11fe1cdb",
-  "content_sha256": "882c29a246502b78a021ee118267e39279fb2eb6b6b386b1c8f1baa4edf48249"
+  "content_sha256": "1db943990c7ad291481f0bb44c17cea402e44a3442480e67c03e742c42a125a8"
  },
  "kn-produce-AIR07-2017Q4-anon": {
   "split": "train",
@@ -305,7 +305,7 @@
   ],
   "fingerprint": "7dddbb15b90e",
   "gold_fingerprint": "a1a345fb815e",
-  "content_sha256": "edd0d2c11d9830f9cdae3605d4a8a1c37137cc7b92404fc48dfc3bf31e10af48"
+  "content_sha256": "f87cad0f5f22277555c93584cf2e6d13e2af1633e8ce51446f94e2086571ee99"
  },
  "kn-produce-AIR07-2018Q2-anon": {
   "split": "train",
@@ -319,7 +319,7 @@
   ],
   "fingerprint": "133a49954fbb",
   "gold_fingerprint": "c81e33fcab4c",
-  "content_sha256": "5d353e1893d6d03d632004a70b50983907e72194d98f76c1dfb8ac487abb6c23"
+  "content_sha256": "654ff4f28985246a8f7bc208ef3abc9a99bc6e0fae371f9d7918a9557c7f0106"
  },
  "kn-produce-AIR07-2018Q4-anon": {
   "split": "train",
@@ -333,7 +333,7 @@
   ],
   "fingerprint": "04882b79be10",
   "gold_fingerprint": "81dc74324cce",
-  "content_sha256": "175e50da00a9f32b77ff92c3ff5be4f3c02151f64a8eaf8a190bde59844bef6e"
+  "content_sha256": "1d0ccd6b2f76acefef2e4e8411a19d5ce259b936142d9e1ef4be06a288de6d9d"
  },
  "kn-produce-AIR08-2017Q4-anon": {
   "split": "retired",
@@ -347,7 +347,7 @@
   ],
   "fingerprint": "f4b91c971639",
   "gold_fingerprint": "1cba5626423d",
-  "content_sha256": "9c5230367b1469c24de2c18c1ef29f900ba63a465c2e1e77e23bdbb3851a3241"
+  "content_sha256": "7d7c446dea11565a83edc3e5c39ff39b3d49e165c5a8782dc9074f9be5c7c9be"
  },
  "kn-produce-AIR08-2018Q2-anon": {
   "split": "heldout",
@@ -361,7 +361,7 @@
   ],
   "fingerprint": "8aa03229da27",
   "gold_fingerprint": "cdff1bfd1abd",
-  "content_sha256": "6c4fb496623748aa35910b820686fb7d0441dbb429324a623af3a950c04534be"
+  "content_sha256": "15c8d619ad78a0cb6c01eb5534e96a7eca463c5a55fba9ba1593b3f5ae3b09c4"
  },
  "kn-produce-AIR08-2018Q4-anon": {
   "split": "heldout",
@@ -375,7 +375,7 @@
   ],
   "fingerprint": "fe8752555cfa",
   "gold_fingerprint": "3e4b72444b95",
-  "content_sha256": "0018661a99aab379a74b4db3752e846014b1ca0cedac4ab4546cf6b0528a2fb4"
+  "content_sha256": "af1b11acc8236b4bf5691ccfa4c8f758bada7a0fa42c4cdca9d87a936c19e3b8"
  },
  "kn-produce-AIR09-2017Q4-anon": {
   "split": "heldout",
@@ -389,7 +389,7 @@
   ],
   "fingerprint": "bee834e2c16f",
   "gold_fingerprint": "477487dc5729",
-  "content_sha256": "2d8f41686e6bc402a86cf5d527328b73ba73802fe129e82dbc2338b89b065f46"
+  "content_sha256": "ea959da27d20d81a3c615647b8c9181c9d213b8255e971d84d9f8117bd81a586"
  },
  "kn-produce-AIR09-2018Q2-anon": {
   "split": "heldout",
@@ -403,7 +403,7 @@
   ],
   "fingerprint": "013e671e61d6",
   "gold_fingerprint": "e254dd33a4c9",
-  "content_sha256": "33b9ad2bf4e7b5c060c1abe8201e1410e793f58dea841195913b8c912f5d42c5"
+  "content_sha256": "59484bbea4b4b1481ef9bd4ed377bdca6d343d5f605c04d5cca21d9350cd254d"
  },
  "kn-produce-AIR09-2018Q4-anon": {
   "split": "heldout",
@@ -417,7 +417,7 @@
   ],
   "fingerprint": "8b38791048a3",
   "gold_fingerprint": "79543fb5286b",
-  "content_sha256": "6170d61d09f23c447a42cb421cb5b164e26808620c7a09f324bb0e548e09b070"
+  "content_sha256": "71032b469e052d30e7329854d409aaed2b9821206eb8a6de9ed3dd16d5d10597"
  },
  "kn-produce-ALGT-2017Q4": {
   "split": "train",
@@ -431,7 +431,7 @@
   ],
   "fingerprint": "4cd51a51a78b",
   "gold_fingerprint": "0976d0a3d771",
-  "content_sha256": "805bb467933fd1e4c1bc4924fb12d5daae8d9c583cbee2faa7e5bb7a90726399"
+  "content_sha256": "870dbdf98bb4d6e962435cce7074feae47b1ec709e891a2471bdac5bcc294339"
  },
  "kn-produce-ALGT-2018Q2": {
   "split": "train",
@@ -445,7 +445,7 @@
   ],
   "fingerprint": "51b4a9062c36",
   "gold_fingerprint": "df5dec8e75dd",
-  "content_sha256": "aa7ce060bbb1e434e07bf32bc9b8ed7d5231cc15379b4a46304f625164387bc6"
+  "content_sha256": "12cd83a0aecc016dcfd41faf8b2b6f339ad1aeb04b44130b6e2176757ff320a2"
  },
  "kn-produce-ALGT-2018Q4": {
   "split": "train",
@@ -459,7 +459,7 @@
   ],
   "fingerprint": "f25a0d0f34b4",
   "gold_fingerprint": "1ec7e78440b4",
-  "content_sha256": "56067092917a2de23812bc6798643dfeeef676186bae9eef42edd112301780fa"
+  "content_sha256": "aa5cf2fd133a893d429335500b37e9b32c1e9faa217d6d655682104dd039bcb2"
  },
  "kn-produce-ALK-2017Q4": {
   "split": "retired",
@@ -473,7 +473,7 @@
   ],
   "fingerprint": "bbb35e316dcb",
   "gold_fingerprint": "db997eb306be",
-  "content_sha256": "ae2faa7e86113ab5aeccb1864f2489f50a4b4aa83ddc19a7917cf82a3eb59816"
+  "content_sha256": "e0ce94d637c1feceaaf7a8eca2ead10b46d03097d21c53aa0d99db4464f4c637"
  },
  "kn-produce-ALK-2018Q2": {
   "split": "heldout",
@@ -487,7 +487,7 @@
   ],
   "fingerprint": "5d77aca738b2",
   "gold_fingerprint": "d35fa343dd69",
-  "content_sha256": "3dc9365fdb32658eaa672200dddf72cbaaba1d49e18ccf964c12eea123a5c669"
+  "content_sha256": "4edb15e679bda7c76654499e58cd23223638609c8cb93b960e8cc150c077b533"
  },
  "kn-produce-ALK-2018Q4": {
   "split": "heldout",
@@ -501,7 +501,7 @@
   ],
   "fingerprint": "66c98b2ecd3c",
   "gold_fingerprint": "a999c9cd1c75",
-  "content_sha256": "7364a5a51d3f816d4dbd4c17d52c217b2bbbb0f6c068c58345c60877225281b1"
+  "content_sha256": "e39da2613d0c074f2e2f65fe8fd3696744ca0719c9b65be2b4fa20aeac4a395a"
  },
  "kn-produce-DAL-2017Q4": {
   "split": "bench",
@@ -515,7 +515,7 @@
   ],
   "fingerprint": "d163dd7ed74b",
   "gold_fingerprint": "ccf476ee9c9a",
-  "content_sha256": "d30b4141dd22d4b29328d52507dce90ca91ef9d8c1a82fb9a598e9b8c2a9f0ae"
+  "content_sha256": "d8d3ad31c89a8967048b0ddb53e14963b376c8dfc5d5ba95e17fc1b0108d1102"
  },
  "kn-produce-DAL-2018Q2": {
   "split": "bench",
@@ -529,7 +529,7 @@
   ],
   "fingerprint": "2bbc3c5a8393",
   "gold_fingerprint": "f6eb37a4782b",
-  "content_sha256": "cb1f25e416f3b5d2272b10a5cd016a375245602b83a55eb2d0f089397b26df4a"
+  "content_sha256": "02d3c352143443a93b47a146d29d7baa40ad70cf93b26ffcbe0d8c09c1ef3ec9"
  },
  "kn-produce-DAL-2018Q4": {
   "split": "bench",
@@ -543,7 +543,7 @@
   ],
   "fingerprint": "e8b3530cea18",
   "gold_fingerprint": "c85514758d85",
-  "content_sha256": "653e641e2e62734e4ff07b4c8f74c212e606dbbdd40f41bee9d90fc909d84151"
+  "content_sha256": "a3a255c393a0c3da93cc1d9b7b0ec803cd96fe17d4d8f5edd4b2eebd5e80604d"
  },
  "kn-produce-DDS-FY2017Q3": {
   "split": "bench",
@@ -557,7 +557,7 @@
   ],
   "fingerprint": "50964cee5b36",
   "gold_fingerprint": "5b8ad606f6e4",
-  "content_sha256": "d26fb5a86d2c08d90fd7c8b3d27fc5ae724ba9c41ca5837e9101b0b1f8dd226b"
+  "content_sha256": "44df9ee98f33127eeb022c059557ba1ce6e471e7dac4d5e3841310b75d261d76"
  },
  "kn-produce-DDS-FY2018Q1": {
   "split": "bench",
@@ -571,7 +571,7 @@
   ],
   "fingerprint": "227d504dddce",
   "gold_fingerprint": "d55188949a48",
-  "content_sha256": "ccbdac627816520fef9688dda93c29281c95e75fb50983f79c11777f7d23c4a3"
+  "content_sha256": "5cfb4ceebbb9abba9123b6b14449617f8bb766c9bc932b0f15c7bc45f5b3f8a7"
  },
  "kn-produce-DDS-FY2018Q3": {
   "split": "bench",
@@ -585,7 +585,7 @@
   ],
   "fingerprint": "e665985ad54f",
   "gold_fingerprint": "3a073a00535e",
-  "content_sha256": "2d3a0de1ff92d9eb87bdd060fb1a1f525547bac7deccd4f333802982ed43d479"
+  "content_sha256": "da16891757373874d54d569458e79472be7a7437ff0211c962fd6dab19ea46e5"
  },
  "kn-produce-HA-2017Q4": {
   "split": "train",
@@ -599,7 +599,7 @@
   ],
   "fingerprint": "df4448802e52",
   "gold_fingerprint": "d4dc24feae68",
-  "content_sha256": "69461fd855b5a56aa09144bd3030b1203b9548cc4151675404dcd8712e08feb7"
+  "content_sha256": "8f36e089058d523d885d00a9ad0e55627e9aad60e2cfd2acb7398d4554fff823"
  },
  "kn-produce-HA-2018Q2": {
   "split": "train",
@@ -613,7 +613,7 @@
   ],
   "fingerprint": "44d5fb2987a2",
   "gold_fingerprint": "6453a7ebb850",
-  "content_sha256": "4a088c477fc66ea3ff9f9e81be3c12df711f4f9864a268565af585b50cc12b77"
+  "content_sha256": "5a7584e99f58eb6450bde3847f0ce1413619e7c8214c010cde5b638558b1a10e"
  },
  "kn-produce-HA-2018Q4": {
   "split": "train",
@@ -627,7 +627,7 @@
   ],
   "fingerprint": "56ff11afbc92",
   "gold_fingerprint": "785431331851",
-  "content_sha256": "577f5dd4997a61f79df2f3a484cf89b50589950ce60f3b161dcfc3fddec2f589"
+  "content_sha256": "70747a2994fc1bedff1ddce45c3a2409d5c9e8e401696466d5ef0cf4e69c564e"
  },
  "kn-produce-JBLU-2017Q4": {
   "split": "heldout",
@@ -641,7 +641,7 @@
   ],
   "fingerprint": "a591611fbc13",
   "gold_fingerprint": "1a30461e770a",
-  "content_sha256": "8482ea5c2d8fc7905ae1a0eea17d46a956a234075a04effa46d3620f279358ec"
+  "content_sha256": "1ee732c670b295a35f18466b6d51650d6e72423bce1834002108d8487a5683f3"
  },
  "kn-produce-JBLU-2018Q2": {
   "split": "heldout",
@@ -655,7 +655,7 @@
   ],
   "fingerprint": "714774597878",
   "gold_fingerprint": "a99dc2dca769",
-  "content_sha256": "3eeacd74e934a1a9f34727420cd02c403e22be6498930e0f7d71982379b4e9ab"
+  "content_sha256": "4064f38c356cb12867697dc7845082290d92599a8057bf22671e209775497adb"
  },
  "kn-produce-JBLU-2018Q4": {
   "split": "heldout",
@@ -669,7 +669,7 @@
   ],
   "fingerprint": "59ca9b5926a8",
   "gold_fingerprint": "a60ec069ea79",
-  "content_sha256": "d0ebfdc9245181410de6b07f170efcdcc164ca691143fe5a0aa0bb365e2cb34d"
+  "content_sha256": "dfde203290b24e419dec2bd0db6068f87227c7a92ff7a6b87cd9b2a95f071005"
  },
  "kn-produce-JCP-FY2017Q3": {
   "split": "heldout",
@@ -683,7 +683,7 @@
   ],
   "fingerprint": "0b91c0129342",
   "gold_fingerprint": "3c046a195810",
-  "content_sha256": "e03e94722fedeb20fbe0f4942422af4746b8e61206f3186a6e898ff0a70cdbae"
+  "content_sha256": "5c9d5c86a4634b0d5e5b285b67c94d7382dff46c64fc058bba5912300bab389b"
  },
  "kn-produce-JCP-FY2018Q1": {
   "split": "heldout",
@@ -697,7 +697,7 @@
   ],
   "fingerprint": "3dad90c48678",
   "gold_fingerprint": "9fea8759ea1c",
-  "content_sha256": "e5439b66c1117f367e61ec9478d5d001c8c348f14a7f70d3e5b7d0bac41ea794"
+  "content_sha256": "cadc7892da39ac074c22ba799c3bed54935f1d1b60a469be594de7a36c461608"
  },
  "kn-produce-JCP-FY2018Q3": {
   "split": "heldout",
@@ -711,7 +711,7 @@
   ],
   "fingerprint": "20754ecd95da",
   "gold_fingerprint": "710081273ab4",
-  "content_sha256": "ba8ccc6e5e0436d249d8ca2b3a06ca097fda16e6a933a97dc29bb4226c855ba2"
+  "content_sha256": "54ca48c4bf8e50a0cc1307003fb8e9e9db805a1b8cc5007ffef01e350ab32f0f"
  },
  "kn-produce-JWN_FP-FY2017Q3": {
   "split": "train",
@@ -725,7 +725,7 @@
   ],
   "fingerprint": "8307efcfd1c3",
   "gold_fingerprint": "e4e18819aca6",
-  "content_sha256": "00b286da58290e678cf573173c73f20565a6da2d3ce6c3dfd0717b7abdc8d71d"
+  "content_sha256": "5fb438ef4c7ec4649627148aeeb223c38e729a01864ba653f8e39ddcb42330e3"
  },
  "kn-produce-JWN_FP-FY2018Q1": {
   "split": "train",
@@ -739,7 +739,7 @@
   ],
   "fingerprint": "2e45a0806c74",
   "gold_fingerprint": "c53ff3192768",
-  "content_sha256": "d23968f8534cf8daa4c15b4689c5f63f099e1d26811bb6c40c9f569211cdd853"
+  "content_sha256": "108190a72dabee493ed13e9828a843773fb2bc0b229a272cb299a78986d375a3"
  },
  "kn-produce-JWN_FP-FY2018Q3": {
   "split": "train",
@@ -753,7 +753,7 @@
   ],
   "fingerprint": "3cddd2e1228e",
   "gold_fingerprint": "f4b181017121",
-  "content_sha256": "a2b7f2d76b7edd8218a97582475c99b5702bcde81e42673984bef2210462dc7a"
+  "content_sha256": "33140228dc5a93e97d060cc8a084738a1bbc6456b2d1867956c736bed8f96bc8"
  },
  "kn-produce-JWN_OP-FY2017Q3": {
   "split": "train",
@@ -767,7 +767,7 @@
   ],
   "fingerprint": "8fc4dbd4edb3",
   "gold_fingerprint": "4ca49415b348",
-  "content_sha256": "704f634a519bb04ecb06bd6cdbd7fcd38cd774ab0d961b3af01308da14327451"
+  "content_sha256": "58f8bbb44ba63ab991a38eef516b7f55c9cd237ee2af5aaf31cce7fa511b878b"
  },
  "kn-produce-JWN_OP-FY2018Q1": {
   "split": "train",
@@ -781,7 +781,7 @@
   ],
   "fingerprint": "e0efa971b716",
   "gold_fingerprint": "1f0f805156d2",
-  "content_sha256": "08d2a641d2ec786c4949686df1332482591c597e2cfbacd7867c04b96a04fc5f"
+  "content_sha256": "15073ccab5042582566321d6ef09dcbd3eb2d5a0ac9e70850ea15c08489cc208"
  },
  "kn-produce-JWN_OP-FY2018Q3": {
   "split": "train",
@@ -795,7 +795,7 @@
   ],
   "fingerprint": "3c0e981d5118",
   "gold_fingerprint": "e813fbc2a879",
-  "content_sha256": "633f9ec80854a763adb456faa013a856be01919fd54a28956670f8e60d63113a"
+  "content_sha256": "a59320e7c1ebfd353009790fdca08ea7288199ad7f238b742711cab3a523350c"
  },
  "kn-produce-KSS-FY2017Q3": {
   "split": "heldout",
@@ -809,7 +809,7 @@
   ],
   "fingerprint": "5b46dde439dc",
   "gold_fingerprint": "593ee9c1c6ce",
-  "content_sha256": "37cd849976cffee1b73766a481f7c1aaba25166afe5b9d5d5a157cab61bf629c"
+  "content_sha256": "7541a1858289d3929a748a6d5d3a3701e27ac356766bbf55717d3e361f83d50e"
  },
  "kn-produce-KSS-FY2018Q1": {
   "split": "heldout",
@@ -823,7 +823,7 @@
   ],
   "fingerprint": "a62505f386fe",
   "gold_fingerprint": "3a3b72a94b71",
-  "content_sha256": "4c1c8468ffd69f1b594aab9ab393cf3eaeade89548027e64a231b1e2a616d857"
+  "content_sha256": "03392e99f2581fba3416741cd761c7ead3bfb6aaebc0a79f631e43bca8287de1"
  },
  "kn-produce-KSS-FY2018Q3": {
   "split": "heldout",
@@ -837,7 +837,7 @@
   ],
   "fingerprint": "83245a87c514",
   "gold_fingerprint": "081f1be1cb36",
-  "content_sha256": "aa3d53c7fd87c0f75fcc7ffe1114b89056f878850d9ca80370e0ee42f8bd0762"
+  "content_sha256": "f237414bdcbc595d0caaa9d1e44e75ad545e05167c6c0a495be224abcc5fca25"
  },
  "kn-produce-LUV-2017Q4": {
   "split": "train",
@@ -851,7 +851,7 @@
   ],
   "fingerprint": "9dfe4ff6c745",
   "gold_fingerprint": "f1cf15bd237f",
-  "content_sha256": "f9198a7207088a9fef8b7225388cadf53347fa91fe803eb462d575ffdd1ccd25"
+  "content_sha256": "a2b0e5914a08896b5d205f6081e327eba3720d92752101595534e68a2175b636"
  },
  "kn-produce-LUV-2018Q2": {
   "split": "train",
@@ -865,7 +865,7 @@
   ],
   "fingerprint": "68388dd38ff8",
   "gold_fingerprint": "6f9cac54090c",
-  "content_sha256": "c9b3e7fcbaf576c54b34e382a7347306be1a877122e2c15922786654e954a43b"
+  "content_sha256": "72abb4a9b0b8bb04abda7a1028c085fd30521d8592461451e1dd4154d9086fee"
  },
  "kn-produce-LUV-2018Q4": {
   "split": "train",
@@ -879,7 +879,7 @@
   ],
   "fingerprint": "03dcd51cdde0",
   "gold_fingerprint": "a8ceeeeef6a2",
-  "content_sha256": "27fb89198e3f82e123a2826c7821d4b853989c6f6cc5924d30c0f4d578da34fa"
+  "content_sha256": "73e4da895ac72d566c79e28288c9b59252a67cca31e419d260d1d7239a971f0c"
  },
  "kn-produce-M-FY2017Q3": {
   "split": "bench",
@@ -893,7 +893,7 @@
   ],
   "fingerprint": "d14d64e7100a",
   "gold_fingerprint": "7363c425b071",
-  "content_sha256": "da28a4aea7aad5de21242561f437dec746d6830f94f029e00eb55417943732a8"
+  "content_sha256": "24cdec3e08a180e5bd3285c6c535abe2bcbd401b1b715499f4886a15f4d8f5f8"
  },
  "kn-produce-M-FY2018Q1": {
   "split": "bench",
@@ -907,7 +907,7 @@
   ],
   "fingerprint": "a746d4c5e0e3",
   "gold_fingerprint": "0e5b41386c61",
-  "content_sha256": "39682ea2d5f2b4176abc2f5250d4429000cb539032fdc9573037f3219e88239d"
+  "content_sha256": "c8eb5aa196c0f87fb7caa72ab0172afcf1da66fa4321bb5478ed541ecd9431ed"
  },
  "kn-produce-M-FY2018Q3": {
   "split": "bench",
@@ -921,7 +921,7 @@
   ],
   "fingerprint": "cd8a7322c5b1",
   "gold_fingerprint": "7483c1877ccb",
-  "content_sha256": "7373573936ccee30ddbd25b9df520f2f5f26cb64b452979c0b95e542e6494fa1"
+  "content_sha256": "ed731135a1130e9692fb93edae322eda254bdaa4f6e3fcecfc2bb32e915b2d7a"
  },
  "kn-produce-RET01-FY2017Q3-anon": {
   "split": "train",
@@ -935,7 +935,7 @@
   ],
   "fingerprint": "6a3e16c339e2",
   "gold_fingerprint": "e20591774490",
-  "content_sha256": "3040b8cc075a01091f3dc473b95361d869c681cad7dba6e70caa23a11006a63f"
+  "content_sha256": "1ce3842bf3cdc710c086bc09a5b1e7919f9d13bd3b09c0983f567ea052619ad1"
  },
  "kn-produce-RET01-FY2018Q1-anon": {
   "split": "train",
@@ -949,7 +949,7 @@
   ],
   "fingerprint": "c14397e21048",
   "gold_fingerprint": "cc6cb06d8508",
-  "content_sha256": "0c07c23828b2b7924b48c4087a18b115b81708ed11b6369e9d98b2d66aac3b9c"
+  "content_sha256": "155abc1ed6394a87b7a82a0b64151cd4ccb312bf436156a6a5ca0b08b82a6f1a"
  },
  "kn-produce-RET01-FY2018Q3-anon": {
   "split": "train",
@@ -963,7 +963,7 @@
   ],
   "fingerprint": "0bb620980e2b",
   "gold_fingerprint": "9bc5a3c29a13",
-  "content_sha256": "1001086f10379ffeae59b8792c022ff800db3872b35891a6c3e0b01ea20a62d8"
+  "content_sha256": "99c17eb5d6f647a6b28394c78c2cb7a31fac616717579dc32baddbbf35744263"
  },
  "kn-produce-RET02-FY2017Q3-anon": {
   "split": "train",
@@ -977,7 +977,7 @@
   ],
   "fingerprint": "4d694e305f1b",
   "gold_fingerprint": "7921b20645f6",
-  "content_sha256": "407ba6b85f5a2e6468a086338108b21b56e69115a896d67947555524a347a311"
+  "content_sha256": "e799661013d45589cac71dd957181ae3b47fe7aaafb8430748bd0b95842bffd4"
  },
  "kn-produce-RET02-FY2018Q1-anon": {
   "split": "train",
@@ -991,7 +991,7 @@
   ],
   "fingerprint": "8b2d36ae4a76",
   "gold_fingerprint": "3c7eaac2fe78",
-  "content_sha256": "d7c63726e4b116fa5539db3d1693714652b7355e2ef97614ac6f0d9679a59516"
+  "content_sha256": "df130a9d46084e34544ba10103e2e1e330a0baf83c9222ac41a5c66aa3c67ba1"
  },
  "kn-produce-RET02-FY2018Q3-anon": {
   "split": "train",
@@ -1005,7 +1005,7 @@
   ],
   "fingerprint": "e4aa8cd6e90d",
   "gold_fingerprint": "34665abde1f8",
-  "content_sha256": "54ffb559ed7976e9fbc93bf49625c94af2203019ee45ef3900f9b3223a498ce6"
+  "content_sha256": "12fb9cfe70111879b072a769ee58c4aefaab337a68973490fa2982c61301666b"
  },
  "kn-produce-RET03-FY2017Q3-anon": {
   "split": "heldout",
@@ -1019,7 +1019,7 @@
   ],
   "fingerprint": "ed367ed1ed0a",
   "gold_fingerprint": "f8227c83e87f",
-  "content_sha256": "c76111ac44b49b10ef2dfa30f900c3491ffe903e7a49043f7e40a3f70666996d"
+  "content_sha256": "273c72306ee64ea41784550276ca130d6249615061c55928e61dc5e4bf00f5dc"
  },
  "kn-produce-RET03-FY2018Q1-anon": {
   "split": "heldout",
@@ -1033,7 +1033,7 @@
   ],
   "fingerprint": "c1980534b751",
   "gold_fingerprint": "e78bbd4b3bb8",
-  "content_sha256": "e3b455f13d62294f0da46f9f3b12f2c240224162d3c64796944044d30d75f7bf"
+  "content_sha256": "e94fbf34cf10a19376bdc822aa7dfc2323db5190d40f8a8b33252cc47596bcff"
  },
  "kn-produce-RET03-FY2018Q3-anon": {
   "split": "heldout",
@@ -1047,7 +1047,7 @@
   ],
   "fingerprint": "6a027d3d59e0",
   "gold_fingerprint": "25ef465bbe8c",
-  "content_sha256": "0c5b3c02af5fc910ec86552a622263619574cb474c6d2cca46bd802e6404b642"
+  "content_sha256": "8612592b55e6e414dfa5caedab8117baa7db68e287132250cf20a501baa1155a"
  },
  "kn-produce-RET04-FY2017Q3-anon": {
   "split": "bench",
@@ -1061,7 +1061,7 @@
   ],
   "fingerprint": "7798eb408e88",
   "gold_fingerprint": "fc5ce0853f4d",
-  "content_sha256": "bf5f7cd4b7690326d588b615520d07a5c063341037405ac7cf9071a2441e6853"
+  "content_sha256": "b1343f644f3de49472b8b00abba23e98975a1c01566d41087875166748341902"
  },
  "kn-produce-RET04-FY2018Q1-anon": {
   "split": "bench",
@@ -1075,7 +1075,7 @@
   ],
   "fingerprint": "256cfff75369",
   "gold_fingerprint": "771463820e5c",
-  "content_sha256": "f4311ed2622b30fe7509ecec0b8ea0762ac0938d24272a0abcc55f8271420665"
+  "content_sha256": "8234b14c7266baa2c1e822e82b8c25f5f3a66b512513657028a09fd4372217ee"
  },
  "kn-produce-RET04-FY2018Q3-anon": {
   "split": "bench",
@@ -1089,7 +1089,7 @@
   ],
   "fingerprint": "06ca9e1da02b",
   "gold_fingerprint": "2a9450a8b027",
-  "content_sha256": "a4d3782ce15bac0f1d5f0b2826f3c96544ddbc1e6cfe26dd291acd807e547502"
+  "content_sha256": "5b0f4d1bad3745b29b08f67950be2ec06d3cf08461d5e5db531783579fe4d953"
  },
  "kn-produce-RET05-FY2017Q3-anon": {
   "split": "bench",
@@ -1103,7 +1103,7 @@
   ],
   "fingerprint": "caae387df57a",
   "gold_fingerprint": "923e0fc246ca",
-  "content_sha256": "5f711e6d6827fbb23dca35e963ab096def54f626711c0b39581caa87f40e3c15"
+  "content_sha256": "cecf071943f8d71b6c621836a6255e2d41f314456f75a79a41855e06636b6696"
  },
  "kn-produce-RET05-FY2018Q1-anon": {
   "split": "bench",
@@ -1117,7 +1117,7 @@
   ],
   "fingerprint": "3be8007566d1",
   "gold_fingerprint": "e7f4e09eae98",
-  "content_sha256": "139fd43bb2fdf996061d785949cb20db594df32a3cc165e4cf7321a7a30e6b0a"
+  "content_sha256": "9128ca5acc753bbdb21cbff6934c467b767e0bee9ecb28329c179bbcda4d1c51"
  },
  "kn-produce-RET05-FY2018Q3-anon": {
   "split": "bench",
@@ -1131,7 +1131,7 @@
   ],
   "fingerprint": "918af7bbde84",
   "gold_fingerprint": "925677426b68",
-  "content_sha256": "e86d594e6bbafe07d9f354047431e0297a207f2807ee0c2547074536ee8b8fa8"
+  "content_sha256": "3c824b11f97b6c81f20f3f9468e70ed39738eca06399d73ac9d4ddf190f7a1c5"
  },
  "kn-produce-RET07-FY2017Q3-anon": {
   "split": "train",
@@ -1145,7 +1145,7 @@
   ],
   "fingerprint": "0ebd7c7f7f1f",
   "gold_fingerprint": "80ce54748f63",
-  "content_sha256": "4e0df0b10f1355515682955cb1b03b1d59b9871c794a98b0542d79790f8c7972"
+  "content_sha256": "259efaf32e03e7a438b97284bc9d2ef0c6af9f37a95af7d35e7f25137e41fad8"
  },
  "kn-produce-RET07-FY2018Q1-anon": {
   "split": "train",
@@ -1159,7 +1159,7 @@
   ],
   "fingerprint": "2e17aa82a6e0",
   "gold_fingerprint": "0d527e627399",
-  "content_sha256": "e8ab1cf81bf6de1c0900e0ba1f7e75f539c554d8acaf25ab3b0b065c3a4b2309"
+  "content_sha256": "4b13b3f7c9aaf49f603085a6b325dbe9962b2cd7668f0104fd2199a7280f67f4"
  },
  "kn-produce-RET07-FY2018Q3-anon": {
   "split": "train",
@@ -1173,7 +1173,7 @@
   ],
   "fingerprint": "a1f61e947723",
   "gold_fingerprint": "faebdcdf3077",
-  "content_sha256": "13f0d840c1fae62ee959e3a976f50af81d7353e198f114c87a4bd11237e5d0a0"
+  "content_sha256": "2d4b5e0409fe1c12061a94fb30f24a1ac4e5e94d63092752a6b6b1afb34284bc"
  },
  "kn-produce-RET08-FY2017Q3-anon": {
   "split": "train",
@@ -1187,7 +1187,7 @@
   ],
   "fingerprint": "d6c46b6eb97b",
   "gold_fingerprint": "89873ef086fa",
-  "content_sha256": "47b21f5d1824d8952bf7a8193d57edb9cf55ccdc56e09662cc1975b510298e34"
+  "content_sha256": "949365e7b356642b11afcbfa23f3430bcc3c9b6fa6ba47f2532cb99bc621ce2c"
  },
  "kn-produce-RET08-FY2018Q1-anon": {
   "split": "train",
@@ -1201,7 +1201,7 @@
   ],
   "fingerprint": "ff3188df738d",
   "gold_fingerprint": "0336788f560d",
-  "content_sha256": "17e1175c8b519f7ea177118e91148d3a98004d2f77542929e0c7c1c2e0115f77"
+  "content_sha256": "e69e2672df8c3b92f546c55d6eaa8bda64515e09149655781c77aa2eca0a8f6c"
  },
  "kn-produce-RET08-FY2018Q3-anon": {
   "split": "train",
@@ -1215,7 +1215,7 @@
   ],
   "fingerprint": "f2db29167ca2",
   "gold_fingerprint": "af2e46f24f12",
-  "content_sha256": "fd06d9838e0c881da6d59c354e5228acb7fb56b57ed111f4a14108059f4e1eff"
+  "content_sha256": "f23434bd3dc17170e4fcab2dbd936943f69ed3bff36e9d7db5b319d5344af12d"
  },
  "kn-produce-RET10-FY2017Q3-anon": {
   "split": "heldout",
@@ -1229,7 +1229,7 @@
   ],
   "fingerprint": "b890660c2459",
   "gold_fingerprint": "1f5b123fd6a1",
-  "content_sha256": "2c03ba4e414a1d7ba1c57d8e0ba5a2c9d220ba431724a19cb4722837d9418fe0"
+  "content_sha256": "12fd877940859c4503d40a47135996fe3475a2669acda29f36753183ae9a6260"
  },
  "kn-produce-RET10-FY2018Q1-anon": {
   "split": "heldout",
@@ -1243,7 +1243,7 @@
   ],
   "fingerprint": "388bb57eecac",
   "gold_fingerprint": "a53f7d1f530f",
-  "content_sha256": "57128c405bd8ea2efb702fce84e77066b1f65fab064c47d178c831faaf0de2b2"
+  "content_sha256": "387a5a16addbca162c2ae6ebfecb17c3896708d6b8136e287f305f8deecd661e"
  },
  "kn-produce-RET10-FY2018Q3-anon": {
   "split": "heldout",
@@ -1257,7 +1257,7 @@
   ],
   "fingerprint": "bfe2b3fb9348",
   "gold_fingerprint": "c8c6989b02ac",
-  "content_sha256": "155c05654d6bb9753be0fa30eac5ca7f69e2d694e0aa00fd1ba91a7aff720d1a"
+  "content_sha256": "07092f34ce72dffee8aba9497838a73d37c97e13e1a83b0e5180a87d02a2d6a7"
  },
  "kn-produce-ROST-FY2017Q3": {
   "split": "train",
@@ -1271,7 +1271,7 @@
   ],
   "fingerprint": "aa291ca1ef48",
   "gold_fingerprint": "f8d516e97308",
-  "content_sha256": "1afa33a1e6a45956a0c1e843adec46b69505c2241ef9e00da5fa65d8f3f28f22"
+  "content_sha256": "b37d182297be802f2be97985d0793a37fd9893c101654d9a37f9607370fb2972"
  },
  "kn-produce-ROST-FY2018Q1": {
   "split": "train",
@@ -1285,7 +1285,7 @@
   ],
   "fingerprint": "608cf7cb5ffb",
   "gold_fingerprint": "570dc25ed97e",
-  "content_sha256": "c190e737b3a4cb91c20cf0dd0336930a0ba9802715e33aa94f81049eca100055"
+  "content_sha256": "ab4b28430431c03f655fc83bc72d69de56eba981ffce33e9e35371e1c7d10af2"
  },
  "kn-produce-ROST-FY2018Q3": {
   "split": "train",
@@ -1299,7 +1299,7 @@
   ],
   "fingerprint": "a36b458bf858",
   "gold_fingerprint": "679d49a12148",
-  "content_sha256": "ec9db3c9e1a2c2aace1b08a081afa8d67e7605644ad061ba95ab7fe6b3d7cb79"
+  "content_sha256": "a164e56dcf4b4f04bfa2b2049d722aaaa88618481ef1e7d4b42f0f11c957f2fb"
  },
  "kn-produce-SAVE-2017Q4": {
   "split": "bench",
@@ -1313,7 +1313,7 @@
   ],
   "fingerprint": "215b9e9a82a8",
   "gold_fingerprint": "f3a798a54e84",
-  "content_sha256": "389ba19c17759f48bc99c33399e1d20dee7a9c54a8d820d0af4099a5757e4de7"
+  "content_sha256": "fc7945954fa3d9b3587b9512128a2031f5740801ecd74f6edf8c32622f05f045"
  },
  "kn-produce-SAVE-2018Q2": {
   "split": "bench",
@@ -1327,7 +1327,7 @@
   ],
   "fingerprint": "37fe0513955f",
   "gold_fingerprint": "966c3c07fdb1",
-  "content_sha256": "be9604b44994244fde0661ecfe822e2855c0d6c7de3e03a7180f7be82c8afb20"
+  "content_sha256": "8c444f0a1913de0f0a034059a0dd6307fb485f5b38b486e1fe3c1b7722371a1d"
  },
  "kn-produce-SAVE-2018Q4": {
   "split": "bench",
@@ -1341,7 +1341,7 @@
   ],
   "fingerprint": "d1b734ac93cd",
   "gold_fingerprint": "be471a3da444",
-  "content_sha256": "a9fc8f17773560bba4dc0831b93516b779ee01f846a8b038ad27208c62eb589e"
+  "content_sha256": "345e33a8cae883d132e209d7b2568bbcb2692d245f1c1afad339ac2150731f9a"
  },
  "kn-produce-TJX_MARMAXX-FY2017Q3": {
   "split": "train",
@@ -1355,7 +1355,7 @@
   ],
   "fingerprint": "1e561144ece3",
   "gold_fingerprint": "f607b23fc379",
-  "content_sha256": "6d6e819982e600f6bb8518df4ce05983cdcd6284671d52694c94a7043f90eb2b"
+  "content_sha256": "30f59f646e2b30a129f1e222fa727942c34e549d291e67b5a280f1a84a32919e"
  },
  "kn-produce-TJX_MARMAXX-FY2018Q1": {
   "split": "train",
@@ -1369,7 +1369,7 @@
   ],
   "fingerprint": "e7c677d3ac4d",
   "gold_fingerprint": "d82640c094c8",
-  "content_sha256": "4e80dc94eb2435368e2b69ef5d5e58dac0394e2ecc8e01fa25130970b17c39f8"
+  "content_sha256": "1f7512746df781f2950aad865790e6624a70d072947e4b01377645533f21653f"
  },
  "kn-produce-TJX_MARMAXX-FY2018Q3": {
   "split": "train",
@@ -1383,7 +1383,7 @@
   ],
   "fingerprint": "7ab80a1657ed",
   "gold_fingerprint": "865bebfb8b2e",
-  "content_sha256": "a893e0aeb420a34b251350b1f0430659f71650450dcd0f75509d8fe116543cd1"
+  "content_sha256": "f4bb6adaecc362883747391c4312d09ccb2658a92938ed0708c451f68cd98c8a"
  },
  "kn-produce-UAL-2017Q4": {
   "split": "train",
@@ -1397,7 +1397,7 @@
   ],
   "fingerprint": "3068dc980132",
   "gold_fingerprint": "0c30f38fc621",
-  "content_sha256": "735b7243d4a8c64a9f0ed6de649daf9eacb670e556f539698504895ae3df44cd"
+  "content_sha256": "9fc7261ab5c26e614d876cd6137d18bd1522b587b3e949265926ebef60786bc4"
  },
  "kn-produce-UAL-2018Q2": {
   "split": "train",
@@ -1411,7 +1411,7 @@
   ],
   "fingerprint": "da168f7abb68",
   "gold_fingerprint": "5bbf0fd495d0",
-  "content_sha256": "54fdb7db9f9b666ef82eeb741683a9376153a61fb34470ff40dd12d31c4040f6"
+  "content_sha256": "3d8e16e5eab9d213aa1cdc9464b6e038a6b97d44364c997c4e1de31cc461b235"
  },
  "kn-produce-UAL-2018Q4": {
   "split": "train",
@@ -1425,6 +1425,6 @@
   ],
   "fingerprint": "507186d98d54",
   "gold_fingerprint": "ce150521d602",
-  "content_sha256": "f3bf3f738e9b68a3a5dea41d32913c203144ff054b47cd9c1db44e849075461a"
+  "content_sha256": "ba2746c60ef30cdd95ff439a5d99da0dd3dda001fbc8c16a90d07ffba85e74c1"
  }
 }

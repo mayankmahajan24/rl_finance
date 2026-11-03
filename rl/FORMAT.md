@@ -42,6 +42,31 @@ Every task can be checked on its own, without the repo:
 | That it is the task the repo recorded | its `content_sha256` (every file but `task.toml` and `checksums.sha256`, plus the parsed `task.toml` without `[metadata.build]`) equals the one in `splits/manifests/<family>.json`. Identical across rebuilds of the same content |
 | That the environment is reproducible | base image pinned by digest, every pip package pinned; packages only the verifier needs (the LLM judge's client) are installed by `tests/test.sh`, not in the agent's image |
 
+## Sandbox: network and clock
+
+A task is only valid if the agent can't look up the answer, so every `task.toml` sets Harbor's
+network policy per phase (`families/_shared/harbor.py`):
+
+| Phase | Policy |
+|---|---|
+| `[agent]` | `no-network`. An agent that calls its model API from inside the container (claude-code, codex) gets that host from the run, not the task: `harbor run ... --allow-agent-host api.anthropic.com` turns the phase into an allowlist of that one host |
+| `[verifier]` | `allowlist` of the judge's API host (`api.anthropic.com`) and the package index `tests/test.sh` installs from (`pypi.org`, `files.pythonhosted.org`) when the verifier needs them; otherwise `no-network` |
+| `[environment]` | `public`: the baseline Harbor uses to install the agent before the agent phase starts |
+
+`[metadata.environment]` records the same policy (`internet = false`, `agent_network`,
+`verifier_network`, `verifier_allowed_hosts`). Harbor's Docker environment enforces it with an
+egress-control sidecar and refuses the task when it can't; Docker Desktop's linuxkit kernel lacks
+`CONFIG_NFT_FIB_INET`, which that sidecar needs, so on a Mac these tasks fail to start rather than
+run with internet. Harbor still resolves DNS in every phase; it blocks the connections.
+
+Dated tasks record `as_of` in `[metadata]`, and the image sets `TASK_AS_OF` to it (and `TZ=UTC`).
+kpi_nowcast: the forecast date, which the instruction states ("Today is ..."); `calendar = "real"`.
+Generated panel families: the last date in the agent's data, on the panel's shifted calendar
+(`calendar = "shifted"`), so not a real date. research_design cases are undated. The system clock
+is not faked (`clock = "real"`): the agent's model API and the verifier's judge are reached over
+TLS, and a clock set years back fails certificate and token validity checks. Without network, the
+real date gives the agent nothing to act on.
+
 `python rl/splits/check.py` checks all of this for every built task. Before handing tasks to
 anyone, run `python rl/splits/check.py --release`: it also requires every task to come from one
 commit with no uncommitted changes. Commit first, then rebuild, then check.
@@ -63,6 +88,8 @@ commit with no uncommitted changes. Commit first, then rebuild, then check.
 | `seed`, `control` | Generator seed and whether nothing was planted (generated families; held-out tasks record no seed) |
 | `fingerprint` or `prompt.fingerprint` | Hash of exactly what the model sees. Two runs are comparable only if fingerprints match |
 | `prompt.template` | The template the prompt was rendered from |
+| `as_of`, `calendar` | The task's as-of date and whether it is a real date or on a shifted calendar (dated families; Sandbox, above) |
+| `environment` | The network policy `task.toml` sets, and `clock` (Sandbox, above) |
 | `output_schema`, `grader`, `sources`, `meta` | Response schema, grader type and parameters, where every piece came from, grader-side facts about the task |
 | `build` | the build record (Integrity, above) |
 

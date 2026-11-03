@@ -8,6 +8,9 @@
   4. held-out tasks record no seed; nothing grader-side sits where the agent can see it
   5. every built task matches its family's committed manifest (same split, fingerprints and
      content_sha256), its files match its checksums.sha256, and it carries a build record
+  6. every built task sets an explicit network policy for its agent (no-network) and verifier
+     phases in task.toml, and [metadata.environment] records the same policy; every dated task
+     records `as_of` and its image sets TASK_AS_OF to it
 
 With --release (before handing tasks to anyone): every task was also built from one clean commit,
 with no uncommitted changes to tracked files.
@@ -23,6 +26,7 @@ import argparse
 import hashlib
 import pathlib
 import sys
+import tomllib
 
 import yaml
 
@@ -35,6 +39,7 @@ from sources.txn_panel import panel  # noqa: E402
 
 SOURCES = {"txn_panel": panel}          # sources with a company split
 GRADER_ONLY = ("ground_truth", "gold", "draft_rubric", "reference")
+DATED = ("kpi_nowcast", "data_audit", "anomaly_scoring", "growth_thesis")   # families that must record as_of
 
 
 def case_key(m: dict) -> str | None:
@@ -54,6 +59,33 @@ def checksum_problems(d: pathlib.Path) -> list[str]:
     out += [f"{d.name}: {n} listed but missing" for n in sorted(set(listed) - present)]
     out += [f"{d.name}: {n} does not match its checksum" for n in sorted(present & set(listed))
             if hashlib.sha256((d / n).read_bytes()).hexdigest() != listed[n]]
+    return out
+
+
+def sandbox_problems(d: pathlib.Path, m: dict) -> list[str]:
+    """Network policy and clock: task.toml must set what [metadata] says (families/_shared/harbor.py)."""
+    tid, cfg = d.name, tomllib.loads((d / "task.toml").read_text())
+    env = m.get("environment") or {}
+    if "agent_network" not in env:
+        return [f"{tid}: [metadata.environment] records no network policy"]
+    out = []
+    agent, verifier = cfg.get("agent", {}), cfg.get("verifier", {})
+    if agent.get("network_mode") != env["agent_network"]:
+        out.append(f"{tid}: [agent] network_mode {agent.get('network_mode')!r}, metadata says {env['agent_network']!r}")
+    if env["agent_network"] != "no-network" or agent.get("allowed_hosts") or env.get("internet") is not False:
+        out.append(f"{tid}: agent phase is not no-network (model API hosts come from the run, not the task)")
+    if (verifier.get("network_mode"), verifier.get("allowed_hosts", [])) != (
+            env.get("verifier_network"), env.get("verifier_allowed_hosts")):
+        out.append(f"{tid}: [verifier] network policy differs from [metadata.environment]")
+    if extra := set(env.get("verifier_allowed_hosts") or []) - {*harbor.JUDGE_HOSTS, *harbor.PIP_HOSTS}:
+        out.append(f"{tid}: verifier allowlists {sorted(extra)}, beyond the judge and package index")
+    if "network_mode" not in cfg.get("environment", {}):
+        out.append(f"{tid}: [environment] sets no network_mode")
+    as_of = m.get("as_of")
+    if m.get("family") in DATED and not as_of:
+        out.append(f"{tid}: dated family but no as_of in [metadata]")
+    if as_of and f"TASK_AS_OF={as_of}\n" not in (d / "environment" / "Dockerfile").read_text():
+        out.append(f"{tid}: as_of {as_of} but the image does not set TASK_AS_OF to it")
     return out
 
 
@@ -133,6 +165,7 @@ def check(release: bool = False) -> list[str]:
                 problems.append(f"{tid}: grader-only file under {sub}/")
 
         problems += checksum_problems(d)
+        problems += sandbox_problems(d, m)
         b = m.get("build")
         if not b:
             problems.append(f"{tid}: no [metadata.build] record")

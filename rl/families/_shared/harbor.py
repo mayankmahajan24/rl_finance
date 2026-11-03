@@ -17,6 +17,24 @@ hashes everything except that build record, so it is identical across rebuilds o
 content. The base image is pinned by digest and every pip package by version; packages only the
 verifier needs are installed by test.sh, not baked into the agent's image.
 
+Network: every task.toml sets Harbor's policy per phase, and [metadata.environment] records it
+(splits/check.py fails when the two disagree). The agent phase is `no-network`: the agent cannot
+look up the reported figure it is asked to forecast. An agent that needs its model API from inside
+the container (claude-code, codex) gets that one host from the run, not the task:
+`harbor run ... --allow-agent-host api.anthropic.com`, which turns the agent phase into an allowlist
+of that host. The verifier phase allowlists only what the verifier uses: the judge's API host when
+it calls a model, and the package index when test.sh installs packages; otherwise `no-network`.
+The [environment] baseline stays `public` because Harbor uses it to install the agent (claude-code's
+installer) before the agent phase starts; Harbor switches to the agent policy for the agent's run.
+
+Clock: dated tasks record `as_of` in [metadata] (kpi_nowcast: the forecast date, which the
+instruction also states as "Today is ..."; generated panel tasks: the last date in the agent's data,
+on the panel's shifted calendar, so it is not a real date). The image sets `TASK_AS_OF` to it and
+`TZ=UTC`. The system clock itself is not faked (no libfaketime): the agent's model API and the
+verifier's judge are reached over TLS, and a clock set years back fails certificate validity checks
+and token expiry, and Harbor's own logs need real time. With no network the real date leaks nothing
+the agent can act on; [metadata.environment] records `clock = "real"`.
+
 Dockerfile, test.sh and the toml body started as the ~/altdata_evals pilot's.
 """
 
@@ -43,10 +61,12 @@ HERE = pathlib.Path(__file__).resolve().parent
 # python:3.12-slim as of 2026-11-03. Change the digest deliberately: it changes every task's environment.
 BASE_IMAGE = "python:3.12-slim@sha256:b18b261e1b4974b4f321451ad5251ded85abb22c2b8b262da527dda1d031ab30"
 JUDGE_PIP = "anthropic==0.89.0"   # verifier-only: LLM judge / scorer client, installed by test.sh
+JUDGE_HOSTS = ["api.anthropic.com"]                  # verifier allowlist when it calls the judge
+PIP_HOSTS = ["pypi.org", "files.pythonhosted.org"]   # verifier allowlist when test.sh installs packages
 
 DOCKERFILE = """FROM {base}
 RUN pip install --no-cache-dir pandas==2.2.3 numpy==2.1.3 scipy==1.14.1{extra}
-WORKDIR /app
+{clock}WORKDIR /app
 COPY data /app/data
 {gunzip}RUN mkdir -p /app/output /app/solution
 """
@@ -98,22 +118,38 @@ def build_record(builder: str, source: str) -> dict:
             "source": source, "source_sha256": source_sha256(source), "base_image": BASE_IMAGE}
 
 
+def network_policy(verifier_env: str, test_pip: str) -> dict:
+    """The task's network policy, as recorded in [metadata.environment] and set in task.toml."""
+    hosts = (JUDGE_HOSTS if "ANTHROPIC_API_KEY" in verifier_env else []) + (PIP_HOSTS if test_pip.strip() else [])
+    return {"internet": False, "agent_network": "no-network",
+            "verifier_network": "allowlist" if hosts else "no-network", "verifier_allowed_hosts": hosts}
+
+
+def _phase(policy: str, hosts: list[str] = ()) -> str:
+    return f'network_mode = "{policy}"\n' + (f"allowed_hosts = {json.dumps(list(hosts))}\n" if hosts else "")
+
+
 def task_toml(task_id: str, description: str, keywords: list[str], metadata: dict, verifier_timeout: int,
               verifier_env: str = "", authors: list[dict] = (), version: str | None = None) -> str:
     task = {"name": f"rl_finance/{task_id}", "version": version, "description": description,
             "authors": list(authors), "keywords": keywords}
     head = toml.dumps({"task": {k: v for k, v in task.items() if v not in (None, [])}})
+    net = metadata["environment"]
     return ('schema_version = "1.3"\n\n' + head + "\n" + toml.dumps({"metadata": metadata})
-            + f"\n[verifier]\ntimeout_sec = {verifier_timeout}\n" + verifier_env + """
+            + f"\n[verifier]\ntimeout_sec = {verifier_timeout}\n"
+            + _phase(net["verifier_network"], net["verifier_allowed_hosts"]) + verifier_env + """
 [agent]
 timeout_sec = 3600
-
+# a run that needs the model API adds its host: --allow-agent-host api.anthropic.com
+""" + _phase(net["agent_network"]) + """
 [environment]
 build_timeout_sec = 900
 cpus = 2
 memory_mb = 4096
 storage_mb = 4096
 workdir = "/app"
+# baseline for agent setup (installing the agent) only; the agent and verifier phases override it
+network_mode = "public"
 """)
 
 
@@ -135,14 +171,18 @@ def write(dest: pathlib.Path, *, family: dict, builder: str, instruction: str, m
     `tests`, `data`, `prompt` and `solution` map file names to text, bytes, or a path to copy;
     `verifier` names the file in `tests` that test.sh runs. `pip` adds pinned packages to the agent's
     image, `test_pip` pinned packages test.sh installs for the verifier only. Data files ending in
-    .gz are unpacked when the image is built, so the agent sees them uncompressed."""
+    .gz are unpacked when the image is built, so the agent sees them uncompressed. A dated task
+    puts `as_of` (YYYY-MM-DD) in `metadata`; the image then sets TASK_AS_OF to it."""
     if dest.exists():
         shutil.rmtree(dest)
     (dest / "environment" / "data").mkdir(parents=True)
     for name, c in (data or {}).items():
         _put(dest / "environment" / "data" / name, c)
     gunzip = "RUN gunzip /app/data/*.gz\n" if any(n.endswith(".gz") for n in data or {}) else ""
-    (dest / "environment" / "Dockerfile").write_text(DOCKERFILE.format(base=BASE_IMAGE, extra=pip, gunzip=gunzip))
+    as_of = metadata.get("as_of")
+    clock = f"ENV TZ=UTC TASK_AS_OF={as_of}\n" if as_of else ""
+    (dest / "environment" / "Dockerfile").write_text(
+        DOCKERFILE.format(base=BASE_IMAGE, extra=pip, clock=clock, gunzip=gunzip))
     (dest / "instruction.md").write_text(instruction)
     for name, c in (prompt or {}).items():
         _put(dest / "prompt" / name, c)
@@ -156,7 +196,8 @@ def write(dest: pathlib.Path, *, family: dict, builder: str, instruction: str, m
     (dest / "solution").mkdir()
     for name, c in (solution or {}).items():
         _put(dest / "solution" / name, c)
-    meta = dict(metadata, build=build_record(builder, metadata["source"]))
+    env = dict(metadata.get("environment", {}), **network_policy(verifier_env, test_pip), clock="real")
+    meta = dict(metadata, environment=env, build=build_record(builder, metadata["source"]))
     (dest / "task.toml").write_text(task_toml(dest.name, description, keywords, meta, verifier_timeout, verifier_env,
                                               family.get("authors", []), family.get("version")))
     files = sorted(p for p in dest.rglob("*") if p.is_file())

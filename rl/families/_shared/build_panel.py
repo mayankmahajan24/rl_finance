@@ -17,6 +17,7 @@ import pathlib
 import shutil
 import sys
 
+import pandas as pd
 import yaml
 
 RL = pathlib.Path(__file__).resolve().parents[2]
@@ -78,7 +79,9 @@ def build_family(fam_id: str, split: str, n: int | None, controls: int | None, f
         meta = {"id": tid, "family": fam_id, "role": fam["role"], "workflow": fam["workflow"], "mode": fam["mode"],
                 "world": fam["world"], "source": fam["source"], "split": split,
                 "seed": None if split == "heldout" else seed, "control": control, "companies": used,
-                "generator": f"rl/families/{fam_id}/{fam['generator']}"}
+                "generator": f"rl/families/{fam_id}/{fam['generator']}",
+                # last date the agent sees, on the shifted calendar (panel_perturb), not a real date
+                "as_of": pd.to_datetime(df["date"]).max().strftime("%Y-%m-%d"), "calendar": "shifted"}
         params = ({"year_start": truth["year_start"], "year_end": truth["year_end"]}
                   if fam_id == "growth_thesis" else None)
         info = harbor.write_panel_task(TASKS / split / tid, fam_dir, fam, instruction, data, truth, meta, params)

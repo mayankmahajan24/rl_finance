@@ -28,6 +28,9 @@ def main():
         write_reward(0.0, {'error': f'no valid /app/output/response.json: {e}'})
         return
     if cfg['mode'] == 'compare':
+        if not isinstance(response, dict) or response.get('winner') not in ('A', 'B'):
+            write_reward(0.0, {'error': 'response.json has no winner "A" or "B"'})
+            return
         import pairwise_pick
         g = pairwise_pick.grade(gold, {cfg['ordering']: response})
         write_reward(g['reward'], g['breakdown'])

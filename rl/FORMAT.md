@@ -74,8 +74,10 @@ families have no as-of date: their data carries no "today" for a model to exploi
 `splits/check.py` fails when a task's policy is missing, isn't `no-network` for the agent, or
 disagrees with that record, and when a dated task lacks `as_of` or its pinned clock.
 `python rl/harness/sandbox_probe.py <task>...` runs tasks in Docker with an agent that only tries
-to reach public hosts and read the clock; it fails if any attempt succeeds (`--judge` also checks
-that a judged verifier still reaches its API).
+to reach public hosts and read the clock; it fails if any request gets a response (`--judge` also
+checks that a judged verifier still reaches its API). Harbor's Docker egress control answers DNS
+from the container's resolver even with no network, so a name still resolves; nothing beyond it
+connects.
 
 ## [metadata]
 

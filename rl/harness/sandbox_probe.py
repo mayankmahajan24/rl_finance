@@ -1,10 +1,15 @@
 """Sandbox-escape probe: run built tasks through Harbor in Docker with an agent that only tries to get out.
 
-The probe agent ignores the task. In the agent phase it tries to resolve and connect to public hosts
-(the open web, the package index, the model API), and reads the clock the way analysis code would
-(`date`, Python's datetime, data file mtimes). It records what it saw in its log folder and leaves no
-answer, so the task scores 0. A task passes when every attempt failed and, for a dated task, every
-clock reading is the task's as_of. With --judge, a judged task's verifier must still reach its
+The probe agent ignores the task. In the agent phase it sends HTTP(S) requests to public hosts (the
+open web, the package index, the model API, a bare IP), and reads the clock the way analysis code
+would (`date`, Python's datetime, data file mtimes). It records what it saw in its log folder and
+leaves no answer, so the task scores 0. A task passes when no request got a response and, for a
+dated task, every clock reading is the task's as_of.
+
+Only a response counts as reaching a host. Harbor's Docker egress control is a transparent proxy:
+nftables sends every TCP connection to a local proxy, which drops hosts outside the policy, so a bare
+TCP connect always succeeds and proves nothing. DNS to the container's own resolver is allowed by
+Harbor's design; the probe records what resolved but does not fail on it. With --judge, a judged task's verifier must still reach its
 model API: the run passes a dummy key, so the judge call reaching api.anthropic.com shows up as an
 authentication error, and a blocked one as a connection error. No real key is ever sent. Only
 verifiers that call the judge on an empty answer can show this (kpi_nowcast's does).
@@ -35,24 +40,25 @@ from harbor.environments.base import BaseEnvironment
 from harbor.models.agent.context import AgentContext
 
 RL = pathlib.Path(__file__).resolve().parents[1]
-TARGETS = [("example.com", 443), ("pypi.org", 443), ("api.anthropic.com", 443), ("1.1.1.1", 53)]
+TARGETS = ["https://example.com/", "https://pypi.org/simple/", "https://api.anthropic.com/", "http://1.1.1.1/"]
 
 # runs in the container; network attempts drop the fake clock so a blocked host can't pass for a TLS failure
 NET = """
-import json, socket
+import json, socket, urllib.error, urllib.parse, urllib.request
 out = {}
-for host, port in %r:
+for url in %r:
     r = {}
     try:
-        r['resolved'] = socket.gethostbyname(host)
+        r['resolved'] = socket.gethostbyname(urllib.parse.urlsplit(url).hostname)
     except OSError as e:
         r['resolve_error'] = str(e)
     try:
-        socket.create_connection((r.get('resolved', host), port), timeout=5).close()
-        r['connected'] = True
-    except OSError as e:
-        r['connected'], r['connect_error'] = False, str(e)
-    out[f'{host}:{port}'] = r
+        r['status'] = urllib.request.urlopen(url, timeout=10).status
+    except urllib.error.HTTPError as e:
+        r['status'] = e.code
+    except Exception as e:
+        r['error'] = f'{type(e).__name__}: {e}'
+    out[url] = r
 print(json.dumps(out))
 """ % TARGETS
 CLOCK = "import datetime; print(datetime.date.today().isoformat())"
@@ -92,9 +98,8 @@ def verdict(task: pathlib.Path, trial: pathlib.Path, judge: bool) -> list[str]:
     if not isinstance(probe["network"], dict):
         out.append(f"network probe did not run: {probe['network']}")
     else:
-        out += [f"agent phase reached {t}" for t, r in probe["network"].items() if r.get("connected")]
-        out += [f"agent phase resolved {t} to {r['resolved']}" for t, r in probe["network"].items()
-                if "resolved" in r and not t.split(":")[0].replace(".", "").isdigit()]
+        out += [f"agent phase reached {t} (HTTP {r['status']})" for t, r in probe["network"].items()
+                if "status" in r]
     if meta.get("as_of"):
         c = probe["clock"]
         for k, v in (("date", c["date"]), ("python", c["python"]), ("TASK_AS_OF", c["TASK_AS_OF"])):

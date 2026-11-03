@@ -161,10 +161,10 @@ def check(release: bool = False) -> list[str]:
     return problems
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--release", action="store_true", help="also require one clean commit for every task")
-    problems = check(ap.parse_args().release)
+    problems = check(ap.parse_args(argv).release)
     status = splits.assignment("txn_panel").get("status")
     if problems:
         print("SPLIT CHECK FAILED\n  " + "\n  ".join(problems))

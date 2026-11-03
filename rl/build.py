@@ -52,7 +52,7 @@ def main() -> None:
             build_panel.build(panel_fams, split, args.n, args.controls)
 
     from splits import check
-    check.main()
+    check.main([])
 
 
 if __name__ == "__main__":

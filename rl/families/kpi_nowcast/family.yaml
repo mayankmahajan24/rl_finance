@@ -19,6 +19,7 @@ verifier_timeout_sec: 600
 reward: >-
   separate metrics, never blended: forecast accuracy (abs % error, skill vs naive, coverage,
   interval score; code) and the C1-C12 write-up rubric (LLM judge)
-rubric_visibility: hidden   # deliberate: the instruction asks for an interpretable write-up but does not list
-                            # C1-C12, so models are graded on judgment, not on following a checklist.
-                            # harbor check flags this as behavior_in_task_description; expected, not a defect.
+rubric_visibility: partial  # the instruction states the fund's write-up conventions (headline estimate, range
+                            # and units first; in-sample accuracy next to a simple benchmark; low <= point <= high)
+                            # but not the judgment items (C2-C5, C7, C9, C11, C12): models are graded on whether
+                            # they do what a careful analyst would, unprompted. Deliberate.

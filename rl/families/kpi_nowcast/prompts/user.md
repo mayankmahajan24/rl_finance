@@ -7,6 +7,8 @@ Attached:
 
 {{target}} ended on {{target_end}} and has not been reported yet. Provide in-sample estimates for the prior quarters and an out-of-sample estimate, with a range, for {{target}}.
 
+The investment staff read every write-up the same way: put the target quarter, your point estimate, your range and the units at the top, before any discussion of method, and show your in-sample accuracy next to a simple benchmark (for example, the same quarter last year) so they can see what your method adds.
+
 End your final message with:
 1. A write-up for the investment staff, in markdown.
 2. A fenced ```json block with exactly these fields:
@@ -18,4 +20,4 @@ End your final message with:
  "vs_consensus": "no_consensus"}
 ```
 
-`low` and `high` bound your range at `interval_level` confidence. `in_sample` lists your estimate for each prior quarter you modeled.
+`low` and `high` bound your range at `interval_level` confidence, which must be between 0 and 1; `low` ≤ `point` ≤ `high` is required, and a forecast that breaks either rule is not scored. `in_sample` lists your estimate for each prior quarter you modeled.

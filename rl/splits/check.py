@@ -8,6 +8,9 @@
   4. held-out tasks record no seed; nothing grader-side sits where the agent can see it
   5. every built task matches its family's committed manifest (same split, fingerprints and
      content_sha256), its files match its checksums.sha256, and it carries a build record
+  6. point in time: every built task sets an explicit network policy for the container, the agent
+     phase (none) and the verifier phase, matching what [metadata.environment] records; a task of a
+     dated family records an as_of, and a dated task's image pins its clock to it
 
 With --release (before handing tasks to anyone): every task was also built from one clean commit,
 with no uncommitted changes to tracked files.
@@ -23,6 +26,7 @@ import argparse
 import hashlib
 import pathlib
 import sys
+import tomllib
 
 import yaml
 
@@ -54,6 +58,35 @@ def checksum_problems(d: pathlib.Path) -> list[str]:
     out += [f"{d.name}: {n} listed but missing" for n in sorted(set(listed) - present)]
     out += [f"{d.name}: {n} does not match its checksum" for n in sorted(present & set(listed))
             if hashlib.sha256((d / n).read_bytes()).hexdigest() != listed[n]]
+    return out
+
+
+def sandbox_problems(d: pathlib.Path, m: dict) -> list[str]:
+    """Check 6: the task's network policy and clock are explicit and agree with its metadata."""
+    tid, cfg = d.name, tomllib.loads((d / "task.toml").read_text())
+    env = m.get("environment") or {}
+    out = []
+    if env.get("internet") is not False:
+        out.append(f"{tid}: [metadata.environment] internet must be false")
+    for phase in ("environment", "agent"):
+        if cfg.get(phase, {}).get("network_mode") != "no-network":
+            out.append(f"{tid}: [{phase}] network_mode is {cfg.get(phase, {}).get('network_mode')!r}, not 'no-network'")
+    hosts = env.get("verifier_hosts")
+    v = cfg.get("verifier", {})
+    want = ("allowlist", sorted(hosts)) if hosts else ("no-network", [])
+    if hosts is None:
+        out.append(f"{tid}: [metadata.environment] records no verifier_hosts")
+    elif (v.get("network_mode"), sorted(v.get("allowed_hosts", []))) != want:
+        out.append(f"{tid}: [verifier] network policy {v.get('network_mode')!r} {v.get('allowed_hosts', [])} "
+                   f"disagrees with [metadata.environment] verifier_hosts {hosts}")
+    fam = RL / "families" / m.get("family", "") / "family.yaml"
+    as_of = m.get("as_of")
+    if as_of is None and fam.exists() and (yaml.safe_load(fam.read_text()) or {}).get("dated"):
+        out.append(f"{tid}: {m['family']} is dated but the task records no as_of")
+    if as_of is not None:
+        docker = (d / "environment" / "Dockerfile").read_text()
+        if f"TASK_AS_OF={as_of} " not in docker or f'FAKETIME="@{as_of} ' not in docker:
+            out.append(f"{tid}: as_of {as_of} but its image does not pin the clock to it")
     return out
 
 
@@ -133,6 +166,7 @@ def check(release: bool = False) -> list[str]:
                 problems.append(f"{tid}: grader-only file under {sub}/")
 
         problems += checksum_problems(d)
+        problems += sandbox_problems(d, m)
         b = m.get("build")
         if not b:
             problems.append(f"{tid}: no [metadata.build] record")

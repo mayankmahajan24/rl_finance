@@ -36,3 +36,6 @@ instrument:              # what decides what the model sees and how it is scored
   - sources/txn_panel/panel.py
   - families/_shared/harbor.py
   - families/_shared/verify_common.py
+calibration:             # scored metric and pass threshold for rl/harness/calibrate.py; proposed, Mayank to confirm
+  metric: skill_vs_naive   # 1 - error / naive error: passing means beating last year's same quarter
+  pass: 0.0

@@ -36,3 +36,10 @@ instrument:              # what decides what the model sees and how it is scored
   - sources/txn_panel/panel.py
   - families/_shared/harbor.py
   - families/_shared/verify_common.py
+leak_check:              # gold fields that must never appear where the agent can see them (rl/leakcheck.py)
+  gold_numbers:
+    gold.json: [actual]
+  number_exempt: [sensor_panel.csv]   # daily counts and dollars: a bare long number there is coincidence
+  anonymised:              # anon variants: no real name, ticker or series id of the task's company
+    tag: anon
+    exempt: [data_brief.md]  # the vendor's note on the sensors, the same for every task

@@ -11,6 +11,8 @@
   6. point in time: every built task sets an explicit network policy for the container, the agent
      phase (none) and the verifier phase, matching what [metadata.environment] records; a task of a
      dated family records an as_of, and a dated task's image pins its clock to it
+  7. leaks: nothing the agent sees gives away gold, the benchmark's identity, a disguised company or
+     the release canary (rl/leakcheck.py, configured per family under `leak_check` in family.yaml)
 
 With --release (before handing tasks to anyone): every task was also built from one clean commit,
 with no uncommitted changes to tracked files, and every family with bench or held-out tasks has its
@@ -35,6 +37,7 @@ RL = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RL))
 import splits  # noqa: E402
 import instrument  # noqa: E402
+import leakcheck  # noqa: E402
 from families._shared import harbor  # noqa: E402
 from lib import fingerprint, iter_tasks  # noqa: E402
 from sources.txn_panel import panel  # noqa: E402
@@ -169,6 +172,7 @@ def check(release: bool = False) -> list[str]:
 
         problems += checksum_problems(d)
         problems += sandbox_problems(d, m)
+        problems += leakcheck.task_problems(d, m)
         b = m.get("build")
         if not b:
             problems.append(f"{tid}: no [metadata.build] record")

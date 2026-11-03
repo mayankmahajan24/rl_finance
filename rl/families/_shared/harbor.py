@@ -7,6 +7,7 @@
       prompt/                            exact messages for the repo's API runners (model-visible;
                                          only families with an API runner have it)
       tests/test.sh, tests/<verifier>, tests/common.py, gold   copied in only after the agent finishes
+      tests/CANARY                       the release's contamination canary (rl/canary.txt), never agent-visible
       solution/solve.sh (+ files)        reference solution for Harbor's oracle agent, where one exists
       checksums.sha256                   sha256 of every other file in the task (`sha256sum -c checksums.sha256`)
 
@@ -89,6 +90,7 @@ JUDGE_ENV = ('\n[verifier.env]\n# LLM judge for the memo rubric; falls back to k
 
 COMMON = HERE / "verify_common.py"
 RL = HERE.parents[1]
+CANARY = RL / "canary.txt"            # contamination canary: grader-side only (leakcheck.py)
 BUILD_PACKAGES = ["pandas", "numpy", "scipy", "PyYAML", "toml"]
 
 
@@ -197,6 +199,7 @@ def write(dest: pathlib.Path, *, family: dict, builder: str, instruction: str, m
     (dest / "tests" / "test.sh").write_text(TEST_SH.format(verifier=verifier, install=install))
     (dest / "tests" / "test.sh").chmod(0o755)
     _put(dest / "tests" / "common.py", COMMON)
+    _put(dest / "tests" / "CANARY", CANARY)
     for name, c in tests.items():
         _put(dest / "tests" / name, c)
     (dest / "solution").mkdir()

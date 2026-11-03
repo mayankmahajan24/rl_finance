@@ -53,6 +53,7 @@ import yaml
 RL = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(RL))
 import splits  # noqa: E402
+import leakcheck  # noqa: E402
 from lib import iter_tasks  # noqa: E402
 from splits import check  # noqa: E402
 
@@ -175,6 +176,9 @@ def datasheet(manifest: dict, tasks) -> str:
            f"Built from commit `{manifest['commit']}` at {manifest['built_at']}; {len(tasks)} tasks in "
            f"{len(fams)} families. Every task verifies on its own: `sha256sum -c checksums.sha256` in its "
            "folder, and its `content_sha256` is listed in `release.json`.", "",
+           "## Contamination canary", "",
+           "Every task's grader-only `tests/CANARY` holds this string, and nothing a model sees does. A model "
+           "that can complete it has trained on this release:", "", f"    {manifest['canary']}", "",
            "## Sources", ""]
     for s, v in manifest["sources"].items():
         y = source_yaml(s)
@@ -223,6 +227,7 @@ def bundle(split: str, families: list[str] | None, use: str, preview: bool = Fal
     b = tasks[0][1]["build"]
     manifest = {
         "name": "rl_finance", "version": cfg["version"], "split": split, "use": use, "commit": b["repo_commit"],
+        "canary": leakcheck.CANARY,
         "built_at": b["built_at"], **({"preview": PREVIEW} if preview else {}),
         "families": {f: {"version": family_yaml(f)["version"], "tasks": len(v)} for f, v in sorted(by_fam.items())},
         "sources": {s: {"licence": (source_yaml(s).get("licence") or {}).get("status"),

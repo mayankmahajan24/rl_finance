@@ -19,8 +19,19 @@ hashes, in `splits/manifests/<family>.json`.
 ```
 
 Two halves must never mix: what the model sees (`instruction.md`, `environment/`, `prompt/`) and
-what only the grader sees (`tests/`). Every builder runs a leak check before it finishes, and
-`splits/check.py` fails if a grader-only file sits where the agent can see it.
+what only the grader sees (`tests/`). One shared check (`leakcheck.py`) runs at the end of every
+build and in `splits/check.py`. It fails a task when anything the agent sees contains its declared
+gold fields (`leak_check` in `family.yaml`), identifying text (repo, source or upstream names, URLs,
+SEC accession numbers, task ids, benchmark framing; `identity_allowlist` in `source.yaml` allows a
+phrase, with the reason), a real company name, ticker or series id in an anonymised task, or the
+release canary. `splits/check.py` also fails if a grader-only file sits where the agent can see it.
+
+**Contamination.** Every task's grader-only `tests/CANARY` holds the release's canary
+(`canary.txt`, replaced with each release), and the export's datasheet prints it.
+`python rl/harness/canary_probe.py --model <m>` asks a model to complete it.
+`python rl/harness/memorisation.py <results.jsonl>` compares a model's scores on the named and
+anonymised variants of the same kpi_nowcast case: a named-variant advantage suggests memory of the
+real company.
 
 **Two ways to run a task.** Harbor runs the agent in the container from `instruction.md`; the
 verifier writes `reward.txt`, or `reward.json` when a family reports several named metrics

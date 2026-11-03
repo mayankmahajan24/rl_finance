@@ -50,8 +50,9 @@ _shared/               harbor.py (the one task writer), build_panel.py (builds t
 - **Seeds from `splits.seeds()`**, never hard-coded. Held-out seeds are secret, so held-out task
   ids and metadata never contain them.
 - **Facts about the data come from the source's `annotations/`**, not constants in the family.
-- **Nothing grader-side in `environment/` or `prompt/`.** Gold lives in `tests/`; every builder
-  runs a leak check.
+- **Nothing grader-side in `environment/` or `prompt/`.** Gold lives in `tests/`. Declare which
+  `tests/` fields are gold, and whether tasks are anonymised, under `leak_check` in `family.yaml`;
+  the shared check (`../leakcheck.py`) does the rest.
 - **Write through `_shared/harbor.py` and record a manifest** (`splits.write_manifest`).
 - **Declare the instrument** under `instrument` in `family.yaml`: every file that decides what the
   model sees or how it is scored. Live runs and releases need its hash approved

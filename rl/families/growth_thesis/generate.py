@@ -60,7 +60,7 @@ def make_variant(seed: int, control: bool, raw: pd.DataFrame, template_tickers=T
     sources = [1, 2, 3, 4]
     cov = {s: np.exp(np.cumsum(rng.normal(0, 0.003, T)) * 0.5) for s in sources}
     traps = {}
-    y1_start = pd.Timestamp(f'{y1}-01-01'); y2_end = pd.Timestamp(f'{y2}-12-31')
+    y1_start = pd.Timestamp(f'{y1}-01-01')
     if not control:
         # (1) source-wide panel ramp in one source: x2.5 over ~90 days, mid-window (affects every airline)
         s_ramp = int(rng.choice(sources))

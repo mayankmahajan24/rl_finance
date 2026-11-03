@@ -10,9 +10,9 @@
       solution/solve.sh (+ files)        reference solution for Harbor's oracle agent, where one exists
       checksums.sha256                   sha256 of every other file in the task (`sha256sum -c checksums.sha256`)
 
-Integrity: task.toml [metadata.build] records when and from what the task was built (UTC time, repo
-commit and whether tracked files had uncommitted changes, builder, Python and library versions,
-sha256 of the source's files). `content_sha256` (returned, and recorded in the family's manifest)
+Integrity: task.toml [metadata.build] records when and from what the task was built (UTC time, or
+SOURCE_DATE_EPOCH when set; repo commit and whether tracked files had uncommitted changes, builder,
+Python and library versions, sha256 of the source's files). `content_sha256` (returned, and recorded in the family's manifest)
 hashes everything except that build record, so it is identical across rebuilds of the same
 content. The base image is pinned by digest and every pip package by version; packages only the
 verifier needs are installed by test.sh, not baked into the agent's image.
@@ -26,6 +26,7 @@ import functools
 import hashlib
 import importlib.metadata
 import json
+import os
 import pathlib
 import platform
 import shutil
@@ -90,9 +91,17 @@ def source_sha256(source: str) -> str:
     return h.hexdigest()
 
 
+def built_at() -> str:
+    """UTC build time; SOURCE_DATE_EPOCH (the reproducible-builds convention) pins it, so a release
+    build stamped with its commit's time (export.py) is byte-identical when rebuilt."""
+    epoch = os.environ.get("SOURCE_DATE_EPOCH")
+    t = datetime.fromtimestamp(int(epoch), timezone.utc) if epoch else datetime.now(timezone.utc)
+    return t.isoformat(timespec="seconds")
+
+
 def build_record(builder: str, source: str) -> dict:
     commit, dirty = _repo()
-    return {"built_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "repo_commit": commit,
+    return {"built_at": built_at(), "repo_commit": commit,
             "repo_dirty": dirty, "builder": builder, "python": platform.python_version(),
             "packages": {p: importlib.metadata.version(p) for p in BUILD_PACKAGES},
             "source": source, "source_sha256": source_sha256(source), "base_image": BASE_IMAGE}

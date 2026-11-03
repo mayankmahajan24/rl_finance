@@ -89,3 +89,29 @@ def test_environment_is_pinned():
     pkgs = re.search(r"pip install --no-cache-dir (.*?)\{extra\}", harbor.DOCKERFILE).group(1).split()
     assert pkgs and all(re.fullmatch(r"[\w-]+==[\w.]+", p) for p in pkgs), pkgs
     assert re.fullmatch(r"[\w-]+==[\w.]+", harbor.JUDGE_PIP)
+
+
+@pytest.mark.parametrize("judged", [False, True])
+def test_every_phase_has_an_explicit_network_policy(tmp_path, judged):
+    import tomllib
+    d = tmp_path / "t1"
+    write(d, test_pip=harbor.JUDGE_PIP if judged else "")
+    cfg = tomllib.loads((d / "task.toml").read_text())
+    assert cfg["agent"]["network_mode"] == cfg["environment"]["network_mode"] == "no-network"
+    hosts = harbor.VERIFIER_HOSTS if judged else []
+    assert cfg["verifier"]["network_mode"] == ("allowlist" if judged else "no-network")
+    assert cfg["verifier"].get("allowed_hosts", []) == hosts
+    assert cfg["metadata"]["environment"] == {"internet": False, "verifier_hosts": hosts}
+    assert check.sandbox_problems(d, cfg["metadata"]) == []
+
+
+def test_as_of_pins_the_clock_for_the_agent_only(tmp_path):
+    d = tmp_path / "t1"
+    write(d, metadata={"id": "t1", "family": "test", "source": "txn_panel", "split": "bench", "as_of": "2018-06-30"})
+    docker = (d / "environment" / "Dockerfile").read_text()
+    assert 'FAKETIME="@2018-06-30 12:00:00"' in docker and "TASK_AS_OF=2018-06-30 " in docker
+    assert re.search(r"libfaketime=[\w.+~-]+ ", docker)                 # pinned apt package
+    assert "FAKETIME_ONLY_CMDS=python,python3,python3.12,date " in docker  # the agent's own process keeps real time
+    assert "unset LD_PRELOAD FAKETIME" in (d / "tests" / "test.sh").read_text()
+    write(d)
+    assert "FAKETIME" not in (d / "environment" / "Dockerfile").read_text()

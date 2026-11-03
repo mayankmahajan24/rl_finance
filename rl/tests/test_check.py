@@ -142,3 +142,40 @@ def test_release_rejects_mixed_commits(tree):
     edit(d, "task.toml", commit, "0" * 40)
     assert problems() == []
     assert "tasks were built from 2 different commits; rebuild everything from one" in problems(release=True)
+
+
+def test_agent_phase_with_network(tree):
+    d = tree()
+    edit(d, "task.toml", '[agent]\ntimeout_sec = 3600\nnetwork_mode = "no-network"',
+         '[agent]\ntimeout_sec = 3600\nnetwork_mode = "public"')
+    assert f"{TASK}: [agent] network_mode is 'public', not 'no-network'" in problems()
+
+
+def test_policy_missing_between_phases(tree):
+    d = tree()
+    edit(d, "task.toml", '[environment]\nnetwork_mode = "no-network"', "[environment]")
+    assert f"{TASK}: [environment] network_mode is None, not 'no-network'" in problems()
+
+
+def test_verifier_policy_disagrees_with_metadata(tree):
+    d = tree()
+    edit(d, "task.toml", '[verifier]\ntimeout_sec = 600\nnetwork_mode = "no-network"',
+         '[verifier]\ntimeout_sec = 600\nnetwork_mode = "public"')
+    assert any(p.startswith(f"{TASK}: [verifier] network policy 'public'") for p in problems())
+
+
+DATED = "kn-produce-AIR02-2017Q4-anon"
+
+
+def test_dated_task_without_as_of(tree, tmp_path):
+    d = tmp_path / "bench" / DATED
+    shutil.copytree(built("bench", DATED), d)
+    edit(d, "task.toml", 'as_of = "2017-12-31"\n', "")
+    assert f"{DATED}: kpi_nowcast is dated but the task records no as_of" in problems()
+
+
+def test_dated_task_with_the_real_clock(tree, tmp_path):
+    d = tmp_path / "bench" / DATED
+    shutil.copytree(built("bench", DATED), d)
+    edit(d, "environment/Dockerfile", "TASK_AS_OF=2017-12-31 ", "TASK_AS_OF=2018-12-31 ")
+    assert f"{DATED}: as_of 2017-12-31 but its image does not pin the clock to it" in problems()

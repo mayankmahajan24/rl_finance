@@ -19,3 +19,14 @@ verifier_timeout_sec: 600
 reward: >-
   review: blocking-issue recall - 0.1 x manufactured - 0.2 x contradicts-gold (scorer model matches issues);
   compare: 1 if the pick matches gold, averaged over both orderings (Harbor: AB only); produce: no grader yet
+instrument:              # what decides what the model sees and how it is scored; live use needs its hash
+                         # approved (rl/instrument.py, rl/harness/approve.py)
+  - families/research_design/build.py
+  - families/research_design/run.py
+  - families/research_design/prompts/*.md
+  - families/research_design/schemas/*.json
+  - families/research_design/graders/*
+  - families/research_design/verifier/verify.py
+  - families/research_design/TENETS.md
+  - families/_shared/harbor.py
+  - families/_shared/verify_common.py

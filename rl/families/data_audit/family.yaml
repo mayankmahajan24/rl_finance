@@ -16,3 +16,14 @@ generator: generate.py
 verifier: verifier/audit_verify.py
 verifier_timeout_sec: 600
 reward: F1 of precision and recall against planted problems plus required natural breaks
+instrument:              # what decides what the model sees and how it is scored; live use needs its hash
+                         # approved (rl/instrument.py, rl/harness/approve.py)
+  - families/data_audit/instruction.md
+  - families/data_audit/generate.py
+  - families/data_audit/verifier/audit_verify.py
+  - families/_shared/build_panel.py
+  - families/_shared/panel_perturb.py
+  - families/_shared/panel_schema.md
+  - sources/txn_panel/panel.py
+  - families/_shared/harbor.py
+  - families/_shared/verify_common.py

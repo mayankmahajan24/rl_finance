@@ -10,7 +10,8 @@
      content_sha256), its files match its checksums.sha256, and it carries a build record
 
 With --release (before handing tasks to anyone): every task was also built from one clean commit,
-with no uncommitted changes to tracked files.
+with no uncommitted changes to tracked files, and every family with bench or held-out tasks has its
+current instrument approved (rl/instrument.py).
 
 Usage:
     python rl/splits/check.py
@@ -29,6 +30,7 @@ import yaml
 RL = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RL))
 import splits  # noqa: E402
+import instrument  # noqa: E402
 from families._shared import harbor  # noqa: E402
 from lib import fingerprint, iter_tasks  # noqa: E402
 from sources.txn_panel import panel  # noqa: E402
@@ -154,6 +156,9 @@ def check(release: bool = False) -> list[str]:
 
     if release and len(commits) > 1:
         problems.append(f"tasks were built from {len(commits)} different commits; rebuild everything from one")
+    if release:
+        released = sorted({m["family"] for d, m in iter_tasks() if d.parent.name in ("bench", "heldout")})
+        problems += [why for ok, why in map(instrument.status, released) if not ok]
     for fam, man in manifests.items():
         for tid, v in man.items():
             if v["split"] == "heldout" and "seed" in v:

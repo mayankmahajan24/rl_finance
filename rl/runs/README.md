@@ -10,7 +10,7 @@ runs/<family>/
   reviews/         human reviews of runs and the grader feedback log, with dispositions
   trajectory/      score per variant over time
   report.html      generated report over the variants
-  _state.json      runner state (kpi_nowcast: the approved harness hash)
+  _state.json      report settings (kpi_nowcast: metrics, prices); instrument approval is families/<family>/approval.yaml
 runs/solutions/<split>.csv   reference vs naive solver scores on built Harbor tasks
 ```
 

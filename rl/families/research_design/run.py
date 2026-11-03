@@ -14,6 +14,8 @@ Usage:
     python rl/families/research_design/run.py --model claude-opus-5-5 --skills off
     python rl/families/research_design/run.py --model claude-opus-5-5 --mode compare --tasks rd-funding-S1
     python rl/families/research_design/run.py --model claude-opus-5-5 --dry-run            # print one request, no API call
+
+Live runs refuse to start until the family's instrument is approved (rl/harness/approve.py).
 """
 
 from __future__ import annotations
@@ -27,6 +29,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
+import instrument  # noqa: E402
 from lib import RL, fingerprint, iter_tasks, write_json  # noqa: E402
 from families.research_design.graders import pairwise_pick, review_issues  # noqa: E402
 from skills import manage as skills  # noqa: E402
@@ -193,6 +196,7 @@ def main() -> None:
         print(json.dumps(req, indent=2))
         return
 
+    instrument.require_approved("research_design")
     import anthropic
     client = anthropic.Anthropic()
     print(f"{args.model} · {label} · {len(tasks)} tasks")

@@ -464,7 +464,7 @@
   ],
   "fingerprint": "39f70d6789f2",
   "gold_fingerprint": "145e0392edeb",
-  "content_sha256": "efb57e612207b03552b736e4506e9967e34b304e0023bbbcd706ff5bc17be16e"
+  "content_sha256": "0997a8fc2597f121bfaa11f0f14f79785d948b7fc50574a1c52f4d31b6f9622a"
  },
  "anomaly-train-002": {
   "split": "train",
@@ -487,7 +487,7 @@
   ],
   "fingerprint": "7307e6cd8a23",
   "gold_fingerprint": "535edb4deffc",
-  "content_sha256": "b046fd266faa940bd3001d38d0570b1a48878db2ceb6d831137749317a405040"
+  "content_sha256": "cdc99d15f367b9e27a024f5ea193175fd2831ee28c114e517a5d3cc0f3a87210"
  },
  "anomaly-train-003": {
   "split": "train",
@@ -510,7 +510,7 @@
   ],
   "fingerprint": "e0f0aaec4c68",
   "gold_fingerprint": "54cec69adc10",
-  "content_sha256": "12a1e276d7ea229aec66aa4053cc9a05b4a6982cd73a94ba93086fdfb6db7991"
+  "content_sha256": "7427876d83b886571f0729cf87cbdd989008fa2eccad39cbb81b6b0788060593"
  },
  "anomaly-train-control-01": {
   "split": "train",
@@ -533,6 +533,6 @@
   ],
   "fingerprint": "120efa055149",
   "gold_fingerprint": "d63cf8c3d6a0",
-  "content_sha256": "6ef25decb5e2dda2cd660c52a94b77382aeb2c954f75cf72cc98abb6293f1bd6"
+  "content_sha256": "918de1da21f39d3eb085d97fed1a856990604133b70b759ec6453f47b678b8e9"
  }
 }

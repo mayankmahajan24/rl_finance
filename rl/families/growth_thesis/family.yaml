@@ -22,6 +22,11 @@ judge:                   # the memo rubric judge; pinned, part of the instrument
   effort: medium
   votes: 1
   max_tokens: 16000
+gold_inputs:             # files its gold comes from; each has a provenance entry (rl/provenance.py)
+  - sources/txn_panel/annotations/entities.yaml
+  - families/growth_thesis/generate.py
+  - families/growth_thesis/verifier/thesis_verify.py
+  - families/_shared/panel_perturb.py
 instrument:              # what decides what the model sees and how it is scored; live use needs its hash
                          # approved (rl/instrument.py, rl/harness/approve.py)
   - families/growth_thesis/instruction.md

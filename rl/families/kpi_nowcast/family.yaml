@@ -29,6 +29,12 @@ judge:                   # the write-up judge (judge.md); pinned, part of the in
   effort: medium
   votes: 1
   max_tokens: 8000
+gold_inputs:             # files its gold comes from; each has a provenance entry (rl/provenance.py)
+  - sources/txn_panel/grader_only/kpi_facts.csv
+  - sources/txn_panel/grader_only/kpi_quarterly.csv
+  - sources/txn_panel/annotations/company_facts.yaml
+  - sources/txn_panel/annotations/entities.yaml
+  - families/kpi_nowcast/judge.md
 instrument:              # what decides what the model sees and how it is scored; live use needs its hash
                          # approved (rl/instrument.py, rl/harness/approve.py)
   - families/kpi_nowcast/build.py

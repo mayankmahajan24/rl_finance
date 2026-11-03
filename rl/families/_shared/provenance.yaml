@@ -1,0 +1,16 @@
+# Provenance index (rl/provenance.py): one entry per gold-bearing file. Review entries with
+# rl/review/review.py, which rewrites this file; don't hand-edit `review` or `sha256`.
+- path: families/_shared/panel_perturb.py
+  kind: generator
+  produced_by:
+    type: code
+    ref: families/_shared/panel_perturb.py
+    commit: 0411bc4
+  produced_at: '2026-10-21'
+  sha256: 47e11eace8fb4af37cd7bf9e777e7bfbfb5d9fa1b0f5f1e168f3e59e7dfb4b19
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  note: 'disguise and injection shared by the generated families: decides what is planted and where'

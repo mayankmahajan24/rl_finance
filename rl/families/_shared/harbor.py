@@ -8,6 +8,7 @@
                                          only families with an API runner have it)
       tests/test.sh, tests/<verifier>, tests/common.py, gold   copied in only after the agent finishes
       tests/judge.py, tests/judge.json   the shared model judge and the family's pinned judge config (judged verifiers)
+      tests/provenance.json              who produced each of the family's gold inputs and its review state
       solution/solve.sh (+ files)        reference solution for Harbor's oracle agent, where one exists
       checksums.sha256                   sha256 of every other file in the task (`sha256sum -c checksums.sha256`)
 
@@ -48,6 +49,7 @@ from datetime import datetime, timezone
 import toml
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
+import provenance  # noqa: E402
 from lib import fingerprint  # noqa: E402
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -207,9 +209,13 @@ def write(dest: pathlib.Path, *, family: dict, builder: str, instruction: str, m
     (dest / "solution").mkdir()
     for name, c in (solution or {}).items():
         _put(dest / "solution" / name, c)
+    prov = provenance.for_family(metadata.get("family", ""))
+    if prov:
+        _put(dest / "tests" / "provenance.json", json.dumps(prov, indent=1, ensure_ascii=False) + "\n")
     env = dict(metadata.get("environment", {}), internet=False,
                verifier_hosts=VERIFIER_HOSTS if test_pip.strip() else [])
-    meta = dict(metadata, environment=env, build=build_record(builder, metadata["source"]))
+    meta = dict(metadata, environment=env, **({"provenance": provenance.summary(prov)} if prov else {}),
+                build=build_record(builder, metadata["source"]))
     (dest / "task.toml").write_text(task_toml(dest.name, description, keywords, meta, verifier_timeout, verifier_env,
                                               family.get("authors", []), family.get("version")))
     files = sorted(p for p in dest.rglob("*") if p.is_file())

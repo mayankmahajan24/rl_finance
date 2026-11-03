@@ -1,6 +1,10 @@
 id: research_design
 task_prefix: rd
 description: Review, compare or write a research plan for a named fund
+version: 1.0.0          # bump when the family's tasks change in a way results can't be compared across
+authors:
+  - name: Mayank Mahajan
+    email: mayank.mahajan@gmail.com
 role: [quant_researcher, fundamental_analyst, pm]   # by seed style; compare tasks are the PM's
 workflow: [research_design, research_funding]
 mode: [review, compare, produce]

@@ -46,6 +46,8 @@ import sys
 from collections import defaultdict
 from datetime import date, timedelta
 
+import yaml
+
 RL = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(RL))
 sys.path.insert(0, str(RL / "sources" / "txn_panel" / "build" / "sec_xbrl"))
@@ -63,7 +65,8 @@ SEED = 20261018
 # finds the files under /app/data and leaves its final message in a file for the verifier.
 HARBOR_NOTE = ("---\nThe attached files are in /app/data/. When you are done, write your final message "
                "(the write-up, then the ```json block) to /app/output/answer.md.")
-PIP = " statsmodels==0.14.4 scikit-learn==1.5.2 anthropic"   # agent tooling close to code execution's; judge client
+PIP = " statsmodels==0.14.4 scikit-learn==1.5.2"   # agent tooling close to code execution's
+FAMILY = yaml.safe_load((HERE / "family.yaml").read_text())
 JUDGE_ENV = ('\n[verifier.env]\n# LLM judge for the write-up (C1-C12); without a key only accuracy is scored\n'
              'ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY:-}"\nJUDGE_MODEL = "${JUDGE_MODEL:-claude-sonnet-5-5}"\n')
 
@@ -357,13 +360,14 @@ def main(argv: list[str] | None = None) -> None:
                           "inputs.json": json.dumps(kw, indent=2, ensure_ascii=False) + "\n"}
                 instruction = f"{system}\n\n{user}\n\n{HARBOR_NOTE}\n"
                 tdir = TASKS / case_split / task_id
-                harbor.write(tdir, instruction=instruction, metadata=meta,
+                content = harbor.write(tdir, family=FAMILY, builder="rl/families/kpi_nowcast/build.py",
+                             instruction=instruction, metadata=meta,
                              description=f"Nowcast {company}'s {label} {s['kpi'].lower()} from transaction sensors",
                              keywords=["alt-data", "kpi-nowcast", variant], verifier="verify.py",
                              tests={"verify.py": HERE / "verifier" / "verify.py", "grader.py": HERE / "grader.py",
                                     "judge.md": HERE / "judge.md", "gold.json": gold_text,
                                     "judge_context.json": json.dumps({"user": user, "as_of": as_of}, indent=1)},
-                             verifier_env=JUDGE_ENV, data=data, prompt=prompt, pip=PIP)
+                             verifier_env=JUDGE_ENV, data=data, prompt=prompt, pip=PIP, test_pip=harbor.JUDGE_PIP)
                 # leak check: the target's value must not appear anywhere the model can see
                 needles = {f"{actual * f:.0f}", f"{actual * f:,.0f}", f"{actual * f:.1f}", f"{actual * f:.3f}"}
                 visible = [tdir / "instruction.md", *(tdir / "prompt").rglob("*"), *(tdir / "environment" / "data").rglob("*")]
@@ -379,7 +383,7 @@ def main(argv: list[str] | None = None) -> None:
                 built[task_id] = {"split": case_split, "role": meta["role"], "workflow": meta["workflow"],
                                   "mode": meta["mode"], "world": meta["world"], "status": meta["status"],
                                   "companies": meta["companies"], "fingerprint": fp,
-                                  "gold_fingerprint": fingerprint(gold_text)}
+                                  "gold_fingerprint": fingerprint(gold_text), "content_sha256": content}
     if problems:
         print("\n".join(problems))
         raise SystemExit(f"leak check failed: {len(problems)} problems")

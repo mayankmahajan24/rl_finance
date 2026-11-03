@@ -32,6 +32,8 @@ import re
 import shutil
 import sys
 
+import yaml
+
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 import splits  # noqa: E402
 from families._shared import harbor  # noqa: E402
@@ -49,6 +51,7 @@ OUT = TASKS / splits.UNSPLIT
 SCHEMA_NOTE = ("---\nWrite your answer as one JSON object matching the schema in /app/data/output_schema.json, "
                "to /app/output/response.json.")
 PLAN_NOTE = "---\nWrite your plan, in markdown, to /app/output/plan.md."
+FAMILY = yaml.safe_load((HERE / "family.yaml").read_text())
 SCORER_ENV = ('\n[verifier.env]\n# scorer model for review tasks (matches issues to gold); compare tasks need no key\n'
               'ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY:-}"\nSCORER_MODEL = "${SCORER_MODEL:-claude-opus-5}"\n')
 
@@ -314,14 +317,14 @@ def write_task(t: dict, system: str, users: dict[str, str], inputs: dict, harbor
                                                  "status": t["status"]}),
                            "verify.py": HERE / "verifier" / "verify.py"})
     data = {"output_schema.json": (RL / t["output_schema"]).read_text()} if t.get("output_schema") else {}
-    harbor.write(OUT / t["id"], instruction=f"{system}\n\n{harbor_user}\n\n{note}\n", metadata=t,
+    content = harbor.write(OUT / t["id"], family=FAMILY, builder="rl/families/research_design/build.py", instruction=f"{system}\n\n{harbor_user}\n\n{note}\n", metadata=t,
                  description=f"{t['workflow']} {t['mode']}: {t['id']}", keywords=["research-design", t["mode"]],
                  verifier="verify.py", tests=tests, verifier_env=SCORER_ENV if t["mode"] == "review" else "",
                  data=data, prompt={"system.md": system + "\n", **{k: v + "\n" for k, v in users.items()},
                                     "inputs.json": dumps(inputs)},
-                 pip=" anthropic" if t["mode"] == "review" else "")
+                 test_pip=harbor.JUDGE_PIP if t["mode"] == "review" else "")
     gold = tests.get("gold.json") or tests.get("draft_rubric.json")
-    built.append(dict(t, gold_fingerprint=fingerprint(gold) if gold else None))
+    built.append(dict(t, gold_fingerprint=fingerprint(gold) if gold else None, content_sha256=content))
 
 
 def leak_check(built: list) -> list[str]:
@@ -365,7 +368,8 @@ def main() -> None:
 
     splits.write_manifest("research_design", {
         t["id"]: {"split": t["split"], **{k: t[k] for k in ("role", "workflow", "mode", "world", "status")},
-                  "fingerprint": t["prompt"]["fingerprint"], "gold_fingerprint": t["gold_fingerprint"]}
+                  "fingerprint": t["prompt"]["fingerprint"], "gold_fingerprint": t["gold_fingerprint"],
+                  "content_sha256": t["content_sha256"]}
         for t in built})
     from collections import Counter
     print(f"{len(built)} tasks, {len(d['ctx']['firms'])} worlds, leak check passed")

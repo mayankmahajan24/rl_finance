@@ -15,6 +15,7 @@ hashes, in `splits/manifests/<family>.json`.
   tests/                GRADER-ONLY: test.sh, the verifier and graders, gold (gold.json or ground_truth.json),
                         reference outputs. Harbor copies it in only after the agent finishes
   solution/             reference solution for Harbor's oracle agent, where one exists
+  checksums.sha256      sha256 of every other file in the task; `sha256sum -c checksums.sha256` verifies it
 ```
 
 Two halves must never mix: what the model sees (`instruction.md`, `environment/`, `prompt/`) and
@@ -28,6 +29,22 @@ send `prompt/` through the Messages API and grade with the same graders. For res
 kpi_nowcast, `instruction.md` is the system and user message plus a note on where the files are
 and where to write the answer; the fingerprint covers the API messages, so a Harbor run and an API
 run of the same task are comparable only up to that note.
+
+## Integrity
+
+Every task can be checked on its own, without the repo:
+
+| What | Where |
+|---|---|
+| Who made it, which version | `[task] authors`, `[task] version` (from `family.yaml`; bump the version when a family's tasks change in a way results can't be compared across) |
+| When and from what it was built | `[metadata.build]`: UTC `built_at`, `repo_commit`, `repo_dirty` (uncommitted changes to tracked files), `builder`, Python and library versions, `source` and `source_sha256` (every file of `sources/<source>/`), `base_image` |
+| That no file changed since | `checksums.sha256` |
+| That it is the task the repo recorded | its `content_sha256` (every file but `task.toml` and `checksums.sha256`, plus the parsed `task.toml` without `[metadata.build]`) equals the one in `splits/manifests/<family>.json`. Identical across rebuilds of the same content |
+| That the environment is reproducible | base image pinned by digest, every pip package pinned; packages only the verifier needs (the LLM judge's client) are installed by `tests/test.sh`, not in the agent's image |
+
+`python rl/splits/check.py` checks all of this for every built task. Before handing tasks to
+anyone, run `python rl/splits/check.py --release`: it also requires every task to come from one
+commit with no uncommitted changes. Commit first, then rebuild, then check.
 
 ## [metadata]
 
@@ -47,6 +64,7 @@ run of the same task are comparable only up to that note.
 | `fingerprint` or `prompt.fingerprint` | Hash of exactly what the model sees. Two runs are comparable only if fingerprints match |
 | `prompt.template` | The template the prompt was rendered from |
 | `output_schema`, `grader`, `sources`, `meta` | Response schema, grader type and parameters, where every piece came from, grader-side facts about the task |
+| `build` | the build record (Integrity, above) |
 
 TOML has no null: a field with no value is absent.
 

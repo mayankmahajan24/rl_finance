@@ -31,9 +31,9 @@ seeded, and neither held-out `task.toml` files nor the manifests carry a seed.
 |---|---|
 | `<source>.yaml` | company → split, with `status: proposed` until approved |
 | `seeds.yaml` | seed ranges per split (held-out: pointer to the secrets file) |
-| `manifests/<family>.json` | every task the family built: split, role, workflow, mode, world, status, companies, seed (not held-out), fingerprint of what the model sees, gold fingerprint. The committed index of all tasks; the tasks themselves are gitignored (`rl/tasks/`) and rebuilt |
+| `manifests/<family>.json` | every task the family built: split, role, workflow, mode, world, status, companies, seed (not held-out), fingerprint of what the model sees, gold fingerprint, `content_sha256` of the whole task (`../FORMAT.md`, Integrity). The committed index of all tasks; the tasks themselves are gitignored (`rl/tasks/`) and rebuilt |
 | `secrets/heldout_seeds.yaml` | held-out seeds. Gitignored |
-| `check.py` | fails if any company or seed is in two splits, any built task breaks its split, or a built task differs from its manifest |
+| `check.py` | fails if any company or seed is in two splits, any built task breaks its split, a built task differs from its manifest or its checksums, or lacks a build record. `--release` also requires one clean commit |
 
 ```sh
 python rl/splits/check.py

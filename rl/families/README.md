@@ -29,7 +29,7 @@ companies, so it was then removed; its seeds are retired (`splits/seeds.yaml`).
 
 ```
 <family>/
-  family.yaml          id, task_prefix, role, workflow, mode, world, source, verifier, reward
+  family.yaml          id, task_prefix, version, authors, role, workflow, mode, world, source, verifier, reward
   build.py             builds every task of the family (research_design, kpi_nowcast), or
   generate.py          (seed, control, split's panel) -> (data, ground truth), for generated families
   instruction.md / prompts/   templates; placeholders filled at build time

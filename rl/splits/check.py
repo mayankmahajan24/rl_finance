@@ -6,14 +6,21 @@
   3. every built task sits in the folder of its split: train, bench or heldout (its companies all in
      that split), eval (a source with no split assignment yet) or retired (a listed retired case)
   4. held-out tasks record no seed; nothing grader-side sits where the agent can see it
-  5. every built task matches its family's committed manifest (same split, same fingerprints)
+  5. every built task matches its family's committed manifest (same split, fingerprints and
+     content_sha256), its files match its checksums.sha256, and it carries a build record
+
+With --release (before handing tasks to anyone): every task was also built from one clean commit,
+with no uncommitted changes to tracked files.
 
 Usage:
     python rl/splits/check.py
+    python rl/splits/check.py --release
 """
 
 from __future__ import annotations
 
+import argparse
+import hashlib
 import pathlib
 import sys
 
@@ -22,6 +29,7 @@ import yaml
 RL = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RL))
 import splits  # noqa: E402
+from families._shared import harbor  # noqa: E402
 from lib import fingerprint, iter_tasks  # noqa: E402
 from sources.txn_panel import panel  # noqa: E402
 
@@ -36,8 +44,22 @@ def case_key(m: dict) -> str | None:
     return None
 
 
-def check() -> list[str]:
+def checksum_problems(d: pathlib.Path) -> list[str]:
+    f = d / "checksums.sha256"
+    if not f.exists():
+        return [f"{d.name}: no checksums.sha256"]
+    listed = dict(reversed(line.split("  ", 1)) for line in f.read_text().splitlines())
+    present = {str(p.relative_to(d)) for p in d.rglob("*") if p.is_file() and p != f}
+    out = [f"{d.name}: {n} not in checksums.sha256" for n in sorted(present - set(listed))]
+    out += [f"{d.name}: {n} listed but missing" for n in sorted(set(listed) - present)]
+    out += [f"{d.name}: {n} does not match its checksum" for n in sorted(present & set(listed))
+            if hashlib.sha256((d / n).read_bytes()).hexdigest() != listed[n]]
+    return out
+
+
+def check(release: bool = False) -> list[str]:
     problems: list[str] = []
+    commits: set[str] = set()
 
     # 1. companies
     for source, mod in SOURCES.items():
@@ -110,6 +132,15 @@ def check() -> list[str]:
             if any(p.name.startswith(GRADER_ONLY) for p in (d / sub).rglob("*")):
                 problems.append(f"{tid}: grader-only file under {sub}/")
 
+        problems += checksum_problems(d)
+        b = m.get("build")
+        if not b:
+            problems.append(f"{tid}: no [metadata.build] record")
+        else:
+            commits.add(b["repo_commit"])
+            if release and b["repo_dirty"]:
+                problems.append(f"{tid}: built with uncommitted changes to tracked files")
+
         man = manifests.setdefault(m["family"], splits.manifest(m["family"]))
         entry = man.get(tid)
         fp = m.get("fingerprint") or m.get("prompt", {}).get("fingerprint")
@@ -117,10 +148,12 @@ def check() -> list[str]:
                      if p.exists()), None)
         if entry is None:
             problems.append(f"{tid}: not in splits/manifests/{m['family']}.json")
-        elif (entry["split"], entry["fingerprint"], entry["gold_fingerprint"]) != (
-                folder, fp, fingerprint(gold.read_text()) if gold else None):
+        elif (entry["split"], entry["fingerprint"], entry["gold_fingerprint"], entry.get("content_sha256")) != (
+                folder, fp, fingerprint(gold.read_text()) if gold else None, harbor.content_sha256(d)):
             problems.append(f"{tid}: differs from splits/manifests/{m['family']}.json (rebuild, or commit the new manifest)")
 
+    if release and len(commits) > 1:
+        problems.append(f"tasks were built from {len(commits)} different commits; rebuild everything from one")
     for fam, man in manifests.items():
         for tid, v in man.items():
             if v["split"] == "heldout" and "seed" in v:
@@ -129,7 +162,9 @@ def check() -> list[str]:
 
 
 def main() -> None:
-    problems = check()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--release", action="store_true", help="also require one clean commit for every task")
+    problems = check(ap.parse_args().release)
     status = splits.assignment("txn_panel").get("status")
     if problems:
         print("SPLIT CHECK FAILED\n  " + "\n  ".join(problems))

@@ -26,10 +26,15 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 
+import yaml
+
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 from lib import RL, fingerprint, iter_tasks, write_json  # noqa: E402
 from families.research_design.graders import pairwise_pick, review_issues  # noqa: E402
+from families._shared import judge  # noqa: E402
 from skills import manage as skills  # noqa: E402
+
+FAMILY = yaml.safe_load((RL / "families" / "research_design" / "family.yaml").read_text())
 
 SKILL_PATH = re.compile(r"/skills/([a-z0-9-]+)")
 
@@ -154,8 +159,10 @@ def run_task(client, args, cond: dict, d: pathlib.Path, t: dict) -> dict:
     elif t["mode"] == "review":
         # The scorer is a grader, never output generation: no skills.
         inputs = json.loads((d / "prompt" / "inputs.json").read_text())
-        scored = review_issues.run_scorer(client, args.scorer, gold, inputs, parsed["single"])
-        rec["scorer"] = {"model": args.scorer, **scored}
+        cfg = dict(FAMILY["judge"], model=args.scorer)
+        scored, meta = review_issues.run_scorer(lambda s, u, sc: judge.judge(s, u, sc, cfg, client),
+                                                gold, inputs, parsed["single"])
+        rec["scorer"] = {"model": args.scorer, "judge": meta, **scored}
         rec.update(review_issues.grade(gold, scored, **t["grader"].get("params", {})))
     return rec
 
@@ -172,7 +179,7 @@ def main() -> None:
     ap.add_argument("--status", nargs="*", default=["graded"])
     ap.add_argument("--max-tokens", type=int, default=32000)   # case-study setting
     ap.add_argument("--effort", choices=["low", "medium", "high", "xhigh", "max"])
-    ap.add_argument("--scorer", default="claude-opus-5")       # case-study scorer
+    ap.add_argument("--scorer", default=FAMILY["judge"]["model"], help="default: the pinned judge in family.yaml")
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--tag", default=time.strftime("%Y%m%d-%H%M%S"))
     ap.add_argument("--dry-run", action="store_true")

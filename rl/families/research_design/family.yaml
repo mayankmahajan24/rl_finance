@@ -19,3 +19,8 @@ verifier_timeout_sec: 600
 reward: >-
   review: blocking-issue recall - 0.1 x manufactured - 0.2 x contradicts-gold (scorer model matches issues);
   compare: 1 if the pick matches gold, averaged over both orderings (Harbor: AB only); produce: no grader yet
+judge:                   # the review scorer: matches a review's issues to gold (graders/review_scorer.md); the case study's scorer; pinned, part of the instrument (families/_shared/judge.py)
+  model: claude-opus-5
+  effort: null
+  votes: 1
+  max_tokens: 48000

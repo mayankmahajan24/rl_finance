@@ -23,3 +23,8 @@ rubric_visibility: partial  # the instruction states the fund's write-up convent
                             # and units first; in-sample accuracy next to a simple benchmark; low <= point <= high)
                             # but not the judgment items (C2-C5, C7, C9, C11, C12): models are graded on whether
                             # they do what a careful analyst would, unprompted. Deliberate.
+judge:                   # the write-up judge (judge.md); pinned, part of the instrument (families/_shared/judge.py)
+  model: claude-sonnet-5-5
+  effort: medium
+  votes: 1
+  max_tokens: 8000

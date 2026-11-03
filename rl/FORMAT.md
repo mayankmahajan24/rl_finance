@@ -78,6 +78,16 @@ TOML has no null: a field with no value is absent.
 | kpi_nowcast | produce | `grader.py` + `judge.md` | named metrics: forecast accuracy (code) and C1–C12 write-up rubric (LLM judge) |
 | data_audit, anomaly_scoring, growth_thesis | review / produce | `verifier/*.py` | see each `family.yaml` |
 
+Every model-graded verifier (growth_thesis memo, research_design review scorer, kpi_nowcast write-up)
+calls the shared judge, `families/_shared/judge.py`, copied into `tests/` with `tests/judge.json`:
+the family's pinned judge (`judge` in `family.yaml`: model, effort, votes, max tokens). It retries
+with backoff, never falls back to another model, and records the requested and served model and
+the judge prompt's fingerprint in `details.json`. With `JUDGE_CACHE=<dir>`, judgments are cached by
+the exact request, so re-grading a saved answer is free and returns the same reward. Without
+`ANTHROPIC_API_KEY`, or when the judge fails, judged metrics are reported as not graded (kpi_nowcast
+keeps its accuracy metrics); `JUDGE=keyword` explicitly opts growth_thesis into its keyword grader.
+`python rl/harness/judge_stability.py` re-judges saved answers to measure per-item agreement.
+
 ## Worlds
 
 A world is a simulated fund. Today each world is only a firm brief

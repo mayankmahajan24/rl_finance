@@ -1,0 +1,13 @@
+# USD per million tokens, for run records' cost_usd (records.py). Pinned on 2026-11-03 from the
+# Anthropic API price list (first-party rates as of 2026-10-06). Input and output are listed rates;
+# cache_read is the listed rate where one is given (Opus 5.5, Sonnet 5.5) and 0.1x input otherwise;
+# cache_write is the 5-minute write rate, 1.25x input. A model not listed here records cost null,
+# and a --budget run refuses to start with it.
+models:
+  claude-opus-5-5:   {input: 4.00, output: 20.00, cache_read: 0.20, cache_write: 5.00}
+  claude-opus-5:     {input: 5.00, output: 25.00, cache_read: 0.50, cache_write: 6.25}
+  claude-opus-4-8:   {input: 5.00, output: 25.00, cache_read: 0.50, cache_write: 6.25}
+  claude-sonnet-5-5: {input: 2.00, output: 10.00, cache_read: 0.20, cache_write: 2.50}
+  claude-sonnet-5:   {input: 2.00, output: 10.00, cache_read: 0.20, cache_write: 2.50}
+  claude-haiku-5-5:  {input: 0.10, output: 0.50, cache_read: 0.01, cache_write: 0.125}
+  claude-haiku-4-5:  {input: 1.00, output: 5.00, cache_read: 0.10, cache_write: 1.25}

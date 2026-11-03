@@ -9,6 +9,7 @@ report builder):
   results.jsonl              one row per scored (task, rep), written as each finishes
   traces/<task>_rep<k>.json  full transcript: system, user, every code call and result, final answer
   errors.jsonl               attempts that produced nothing scorable (API error, timeout, model mismatch)
+  records.jsonl              both of the above as run records (rl/harness/records.py), one per attempt
 A refusal is a graded outcome (row with status "refusal"), not an error. Re-running skips
 (task, rep) pairs already in results.jsonl.
 
@@ -37,6 +38,9 @@ from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutTimeout
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 from lib import RL, iter_tasks  # noqa: E402
 from families.kpi_nowcast import grader as G  # noqa: E402
+
+sys.path.insert(0, str(RL / "harness"))
+import records  # noqa: E402
 
 RUNS = RL / "runs" / "kpi_nowcast"
 STATE = RUNS / "_state.json"
@@ -200,12 +204,28 @@ def run_once(client, args, d: pathlib.Path, t: dict, rep: int) -> dict:
     return row, turns
 
 
-def write_row(vdir: pathlib.Path, name: str, row: dict) -> None:
-    with lock, open(vdir / name, "a") as fh:
-        fh.write(json.dumps(row, default=str) + "\n")
+def write_row(vdir: pathlib.Path, name: str, row: dict, args=None) -> None:
+    """Append a results or errors row, and the same attempt as a run record; count its cost."""
+    rec = None
+    if args is not None:
+        trace = vdir / "traces" / f"{row['prompt_id']}_rep{row['rep']}.json"
+        rec = records.from_kpi(row, runner={"name": "rl/families/kpi_nowcast/run.py", "variant": vdir.name,
+                                            "harness_sha256": harness_sha()},
+                               trace=str(trace.relative_to(RL.parent)) if trace.exists() else None,
+                               model=args.model, effort=args.effort, max_tokens=args.max_tokens,
+                               repo_commit=records.repo_commit())
+    with lock:
+        with open(vdir / name, "a") as fh:
+            fh.write(json.dumps(row, default=str) + "\n")
+        if rec is not None:
+            records.append(vdir / "records.jsonl", [rec])
+            args.budget_.spend(rec["cost_usd"], rec.get("judge_cost_usd"))
 
 
 def run_case(client, args, vdir, d, t, rep):
+    if args.budget_.exhausted:
+        print(f"  {t['id']} rep{rep}: not started, budget ${args.budget} reached", flush=True)
+        return
     started_at, t0 = now(), time.time()
     stamp = lambda: {"started_at": started_at, "ended_at": now(), "elapsed_s": round(time.time() - t0, 1)}  # noqa: E731
     print(f"  {started_at} {t['id']} rep{rep}: start", flush=True)
@@ -216,20 +236,20 @@ def run_case(client, args, vdir, d, t, rep):
         row, turns = fut.result(timeout=(args.timeout_s + 60) if args.timeout_s else None)
     except (FutTimeout, DeadlineExceeded) as e:
         write_row(vdir, "errors.jsonl", {"prompt_id": t["id"], "rep": rep, "failure_class": "timeout",
-                                         "error": f"wall-clock ceiling {args.timeout_s}s: {e}", **stamp()})
+                                         "error": f"wall-clock ceiling {args.timeout_s}s: {e}", **stamp()}, args)
         print(f"  {now()} {t['id']} rep{rep}: timeout", flush=True)
         pool.shutdown(wait=False)
         return
     except Exception as e:
         cls = "served_model_mismatch" if "served model" in str(e) else "harness_or_serving_error"
         write_row(vdir, "errors.jsonl", {"prompt_id": t["id"], "rep": rep, "failure_class": cls,
-                                         "error": f"{type(e).__name__}: {e}", **stamp()})
+                                         "error": f"{type(e).__name__}: {e}", **stamp()}, args)
         print(f"  {now()} {t['id']} rep{rep}: {cls}: {e}", flush=True)
         return
     row["ended_at"] = now()
     (vdir / "traces").mkdir(parents=True, exist_ok=True)
     (vdir / "traces" / f"{t['id']}_rep{rep}.json").write_text(json.dumps(turns, indent=1, default=str))
-    write_row(vdir, "results.jsonl", row)
+    write_row(vdir, "results.jsonl", row, args)
     g = row.get("grade", {})
     print(f"  {t['id']} rep{rep}: {row['status']} err={g.get('abs_pct_error')} writeup={g.get('writeup_score')} "
           f"{row['latency_s']}s {row['usage']['input_tokens']}/{row['usage']['output_tokens']} tok")
@@ -246,6 +266,7 @@ def main() -> None:
     ap.add_argument("--concurrency", type=int, default=4)
     ap.add_argument("--timeout-s", type=int, default=1800)
     ap.add_argument("--max-tokens", type=int, default=64000)
+    ap.add_argument("--budget", type=float, help="stop starting runs once model and judge cost reach this many USD")
     ap.add_argument("--approve-harness", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
@@ -260,6 +281,7 @@ def main() -> None:
         print("system:", (d / "prompt" / "system.md").read_text()[:300])
         print("user:", (d / "prompt" / "user.md").read_text()[:600])
         return
+    args.budget_ = records.Budget(args.budget, args.model, args.judge)
     check_harness(args.approve_harness)
     if args.approve_harness:
         return

@@ -34,6 +34,9 @@ from families.research_design.graders import pairwise_pick, review_issues  # noq
 from families._shared import judge  # noqa: E402
 from skills import manage as skills  # noqa: E402
 
+sys.path.insert(0, str(RL / "harness"))
+import records  # noqa: E402
+
 FAMILY = yaml.safe_load((RL / "families" / "research_design" / "family.yaml").read_text())
 
 SKILL_PATH = re.compile(r"/skills/([a-z0-9-]+)")
@@ -182,6 +185,7 @@ def main() -> None:
     ap.add_argument("--scorer", default=FAMILY["judge"]["model"], help="default: the pinned judge in family.yaml")
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--tag", default=time.strftime("%Y%m%d-%H%M%S"))
+    ap.add_argument("--budget", type=float, help="stop starting tasks once the model's cost reaches this many USD (the scorer reports no usage)")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
@@ -202,19 +206,35 @@ def main() -> None:
 
     import anthropic
     client = anthropic.Anthropic()
+    budget = records.Budget(args.budget, args.model, args.scorer)
+    runner = {"name": "rl/families/research_design/run.py", "tag": args.tag}
+    settings = {"effort": args.effort, "max_tokens": args.max_tokens, "repo_commit": records.repo_commit()}
     print(f"{args.model} · {label} · {len(tasks)} tasks")
+
+    def one(dt):
+        if budget.exhausted:
+            return None
+        r = run_task(client, args, cond, *dt)
+        rec = records.from_research_design(r, runner=runner, **settings)
+        budget.spend(rec["cost_usd"], records.cost(args.scorer, (r.get("scorer") or {}).get("usage")))
+        return r, rec
+
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
-        records = list(pool.map(lambda dt: run_task(client, args, cond, *dt), tasks))
-    for r in records:
+        done = [x for x in pool.map(one, tasks) if x]
+    records_, run_records = [r for r, _ in done], [rec for _, rec in done]
+    if len(done) < len(tasks):
+        print(f"budget ${args.budget} reached after ${budget.spent:.2f}: {len(tasks) - len(done)} tasks not started")
+    for r in records_:
         print(f"  {r['task']:<22} {r['status']:<6} reward={r.get('reward')}")
 
     out = RL / "runs" / "research_design" / args.tag / f"{args.model}__{label}.jsonl"
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text("".join(json.dumps(r, ensure_ascii=False, default=str) + "\n" for r in records))
-    graded = [r["reward"] for r in records if r.get("reward") is not None]
+    out.write_text("".join(json.dumps(r, ensure_ascii=False, default=str) + "\n" for r in records_))
+    records.append(out.with_suffix(".records.jsonl"), run_records)
+    graded = [r["reward"] for r in records_ if r.get("reward") is not None]
     write_json(out.with_suffix(".summary.json"), {
         "model": args.model, "skills": {k: v for k, v in cond.items() if k != "entries"},
-        "n_tasks": len(records), "n_errors": sum(r["status"] == "error" for r in records),
+        "n_tasks": len(records_), "n_errors": sum(r["status"] == "error" for r in records_),
         "mean_reward": sum(graded) / len(graded) if graded else None,
         "max_tokens": args.max_tokens, "effort": args.effort, "scorer": args.scorer,
         "config_fingerprint": fingerprint(json.dumps(cond.get("entries", []), sort_keys=True)),

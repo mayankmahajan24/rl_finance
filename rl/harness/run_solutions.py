@@ -3,7 +3,8 @@ emulating the container layout with temp directories. Ported from ~/altdata_eval
 
 Covers the families that ship baseline solutions (solutions/reference and solutions/naive). The
 reference solver should score well and the naive one badly; if they don't, the verifier is not
-separating quality. Results go to rl/runs/solutions/<split>.csv.
+separating quality. Results go to rl/runs/solutions/<split>.csv, and as run records
+(records.py) to rl/runs/solutions/<split>.records.jsonl.
 
     python rl/harness/run_solutions.py --split bench             # both solvers, every task in the split
     python rl/harness/run_solutions.py --split bench --family data_audit --solvers naive
@@ -82,4 +83,8 @@ if __name__ == '__main__':
     print(res.pivot_table(index='family', columns='solver', values='reward', aggfunc='mean').round(3).to_string())
     out = RL / 'runs' / 'solutions' / f'{a.split}.csv'
     out.parent.mkdir(parents=True, exist_ok=True); res.to_csv(out, index=False)
+    import csv
+    import records
+    records.write(out.with_suffix('.records.jsonl'),
+                  [records.from_solutions(r, runner={'name': 'rl/harness/run_solutions.py'}) for r in csv.DictReader(out.open())])
     print(f'\nsaved {out}')

@@ -6,7 +6,9 @@ RL environments and evals for buy-side financial services, built for frontier la
 |---|---|
 | [`rl/`](rl/) | The environments: tasks by role and workflow, fund worlds, graders by mode, a model runner with Anthropic's financial-services skills. Start at [`rl/README.md`](rl/README.md). |
 | [`engineering_brief.md`](engineering_brief.md) | Start here if you are an engineer joining: goal, vocabulary, what exists, invariants, next work. |
-| [`case_study/`](case_study/) | The Finance Domain Research Lead take-home the first environment is built from: report, Parts 0–3, scripts, every raw model call. `rl/build_from_case_study.py` reads it. |
 
-The case study's summary deck is not here; it stays published from the
+The first environment (research design) was built from the Finance Domain Research
+Lead take-home. The data it needs is in `rl/data/research_design/`; the full take-home
+(report, Parts 0–3, scripts, every raw model call) is in git history at commit
+`a75441c`, under `case_study/`. Its summary deck stays published from the
 `finance_collaborator` repo.

@@ -7,7 +7,7 @@ brief: A systematic trading firm. ~200 quantitative researchers, full tick-level
   trades. Horizon is days to weeks. Work is judged on whether a signal survives transaction costs, has
   capacity, and is not already crowded. Findings go to a research committee that will re-run them independently.
   Building a ten-year intraday dataset is a normal quarter's work here.
-case_study_items:
+source_items:
 - S5
 - S9F
 to_become_a_full_world:
@@ -17,4 +17,4 @@ to_become_a_full_world:
 - past research memos and IC notes
 - point-in-time data snapshot and tool access
 sources:
-- case_study/part2/contexts.json
+- data/research_design/contexts.json

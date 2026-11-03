@@ -32,6 +32,6 @@
   "critique_prose": "My chief complaint is that it circumvents the main question - whether the language is actually informative - and just sizes the potential impact instead. It asserts that a CFO sounds the same either way rather than establishing it.\n\nI would also assume the team has already established that this company is sensitive to its vendors' pricing, which is precisely the work A describes. Much of the plan therefore delivers back what the analyst already holds, rather than addressing the new question the call raised.\n\nA treats the vendor's uplift distribution as observable across five to ten comparable customers renewed in the last 24 months. Those deals are private. Gartner, Forrester and SAM benchmarks give directional ranges, not per-customer realized uplift, so the distribution the likelihood weighting rests on is largely unobtainable.\n\nThe materiality cuts - under 25bp makes tone moot, over 75bp forces a call - are asserted rather than derived.",
   "provenance": {
     "labeller": "human (case-study author), judged blind",
-    "issue_split": "case_study/scripts/split_gold.py classified the prose into blocking / secondary / anti_objection / praise"
+    "issue_split": "the case study's scripts/split_gold.py (commit a75441c) classified the prose into blocking / secondary / anti_objection / praise"
   }
 }

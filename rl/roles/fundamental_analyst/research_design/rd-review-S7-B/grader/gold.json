@@ -32,6 +32,6 @@
   "critique_prose": "Solving for initial land value is totally irrelevant here.\n\nThe quantitative apparatus - bottom-up reconstruction of twelve quarters, ramp-curve fitting, Monte Carlo to p10/p50/p90 - makes sense for a diversified strategy with multiple runs and the benefit of the law of large numbers. With one name and one print there is no law of large numbers to lean on, and the distributional output implies a precision the setting cannot support.\n\nB might make more sense for a fast swing-trading pod, but the horizon here is a bit longer.\n\nIts thresholds are a bit arbitrary too.",
   "provenance": {
     "labeller": "human (case-study author), judged blind",
-    "issue_split": "case_study/scripts/split_gold.py classified the prose into blocking / secondary / anti_objection / praise"
+    "issue_split": "the case study's scripts/split_gold.py (commit a75441c) classified the prose into blocking / secondary / anti_objection / praise"
   }
 }

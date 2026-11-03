@@ -6,7 +6,7 @@ Two steps:
 1. A scorer model (prompt in review_scorer.md) matches the model's issues to the
    gold issues and buckets every model issue as matched / real_unlisted /
    manufactured / contradicts_gold. This is the semantic step from
-   case_study/scripts/score_issues.py, unchanged.
+   the case study's scripts/score_issues.py (commit a75441c), unchanged.
 2. `grade()` turns that into a reward. Deterministic.
 
     recall   = blocking gold issues surfaced / blocking gold issues

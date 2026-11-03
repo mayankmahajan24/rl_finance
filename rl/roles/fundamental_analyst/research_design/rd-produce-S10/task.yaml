@@ -9,10 +9,10 @@ prompt:
   template: prompts/research_design/produce.md
   fingerprint: a193b3949f47
 sources:
-- case_study/seeds.json
-- case_study/part1/plans/S10.md
-- case_study/part1/critiques/S10.md
-- case_study/part1/findings-table.md
+- data/research_design/seeds.json
+- data/research_design/grader_only/seed_only_runs/plans/S10.md
+- data/research_design/grader_only/seed_only_runs/critiques/S10.md
+- data/research_design/grader_only/seed_only_runs/findings-table.md
 output_schema: null
 grader:
   type: rubric

@@ -9,7 +9,7 @@ always picks one position gets no credit for it.
 
 Frame fields (goal_type, error_asymmetry) are reported as diagnostics only. They
 are not in the reward because the case study found the pick is what the
-human-confidence split discriminates on (case_study/part2/GRADED.md).
+human-confidence split discriminates on (data/research_design/baseline_runs/GRADED.md).
 """
 
 from __future__ import annotations

@@ -5,7 +5,7 @@
       "id": "must_address_known_flaw",
       "kind": "must_hit",
       "text": "Seats contracted != seats used; ARR is seats x price and MAU is blind to price/mix",
-      "source": "case_study/seeds.json `discriminator`, written by the case-study author before any plan was generated"
+      "source": "data/research_design/seeds.json `discriminator`, written by the case-study author before any plan was generated"
     }
   ],
   "rubric_inputs": {

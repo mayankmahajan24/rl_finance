@@ -9,8 +9,8 @@ prompt:
   template: prompts/research_design/funding_decision.md
   fingerprint: 3a2276335156
 sources:
-- case_study/part2/items/S5.json
-- case_study/part2/gold/S5.json
+- data/research_design/items/S5.json
+- data/research_design/grader_only/gold/S5.json
 output_schema: schemas/research_funding_compare.json
 orderings:
 - AB

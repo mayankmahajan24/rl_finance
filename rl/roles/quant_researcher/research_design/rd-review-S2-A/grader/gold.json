@@ -14,6 +14,6 @@
   "critique_prose": "Leads with a validation that leaks. The headline is a random 20% company-quarter holdout, and the plan states in the same breath that random splits leak, then relegates rolling-origin to a gate. For a panel with company fixed effects and serially correlated ARR, a random company-quarter split trains on quarters that postdate the ones it predicts for the same company, so the headline number is not a clean out-of-sample result. The honest validation exists in the plan but is not what gets reported.",
   "provenance": {
     "labeller": "human (case-study author), judged blind",
-    "issue_split": "case_study/scripts/split_gold.py classified the prose into blocking / secondary / anti_objection / praise"
+    "issue_split": "the case study's scripts/split_gold.py (commit a75441c) classified the prose into blocking / secondary / anti_objection / praise"
   }
 }

@@ -7,7 +7,7 @@ brief: A single-name event-driven desk inside a multi-manager platform. One PM, 
   and a risk manager who cuts positions fast. No quantitative research staff and no capacity to build
   datasets; they consume sell-side, filings, and expert calls. The question is always whether this specific
   situation is mispriced right now, not whether an effect holds on average.
-case_study_items:
+source_items:
 - S4
 - S7
 to_become_a_full_world:
@@ -17,4 +17,4 @@ to_become_a_full_world:
 - past research memos and IC notes
 - point-in-time data snapshot and tool access
 sources:
-- case_study/part2/contexts.json
+- data/research_design/contexts.json

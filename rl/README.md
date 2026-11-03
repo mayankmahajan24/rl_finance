@@ -1,11 +1,11 @@
 # rl/ — buy-side RL environments, MVP
 
-The case study (`case_study/part1/`, `case_study/part2/`) converted into environment tasks: organized by
+The case study (source data in `data/research_design/`) converted into environment tasks: organized by
 fund role, run inside fund worlds, graded by mode. Format spec: `FORMAT.md`.
 
 ```sh
-python rl/build_from_case_study.py   # regenerate worlds/, roles/, catalog.json from the case study
-python rl/replay_case_study.py       # grade the case-study model runs with the rl/ graders
+python rl/build_research_design.py   # regenerate worlds/ and the rd-* tasks from data/research_design/
+python rl/replay_research_design.py  # grade the case-study baseline runs with the rl/ graders
 ```
 
 ## Running models, with or without financial-services skills
@@ -53,9 +53,9 @@ as reference outputs.
 
 ## Verified against the case study
 
-`replay_case_study.py` re-grades all four models' saved runs with the new graders.
+`replay_research_design.py` re-grades all four models' saved runs with the new graders.
 Prompt fingerprints match the runs, and every headline number in
-`case_study/part2/GRADED.md` reproduces:
+`data/research_design/baseline_runs/GRADED.md` reproduces:
 
 | | Haiku 4.5 | Sonnet 5 | Opus 4.8 | Opus 5 |
 |---|---|---|---|---|
@@ -66,15 +66,18 @@ Prompt fingerprints match the runs, and every headline number in
 
 The review reward penalizes objections that do not apply, so Haiku's high recall
 from 28.6 issues per review does not pay. Per-task records for every model are in
-`runs/case_study/<model>.jsonl` and serve as baseline difficulty.
+`runs/research_design/baseline/<model>.jsonl` and serve as baseline difficulty.
 
 ## Not copied, on purpose
 
 | | Why |
 |---|---|
-| `case_study/part2/gold/design-intent.json` | The author's construction intent, not a gold label (`case_study/part2/ISOLATION.md`) |
-| `case_study/part2/forks.json` | Generator-tier methodology briefs |
-| `case_study/part1/scores/` | Scored by a model; gold must be human |
+| `part2/gold/design-intent.json` | The author's construction intent, not a gold label (`data/research_design/ISOLATION.md`) |
+| `part2/forks.json` | Generator-tier methodology briefs |
+| `part1/scores/` | Scored by a model; gold must be human |
+
+Paths are in the case study at commit `a75441c`. The full list is in
+`data/research_design/README.md`.
 
 ## Known limits
 

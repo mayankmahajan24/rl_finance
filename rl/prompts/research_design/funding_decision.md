@@ -1,8 +1,8 @@
 # Research-funding decision prompt (pairwise)
 
-Copied verbatim from `case_study/part2/evaluator/pairwise.md`; only this header changed.
+Copied verbatim from the case study's `part2/evaluator/pairwise.md` (commit a75441c); only this header changed.
 The text below the `## SYSTEM` and `## USER` markers is the instrument, and its
-fingerprint must match the case-study runs (`rl/replay_case_study.py` checks).
+fingerprint must match the case-study runs (`rl/replay_research_design.py` checks).
 Placeholders: `{context}`, `{seed}`, `{plan_A}`, `{plan_B}`. Judging basis:
 `rl/rubrics/research_design/TENETS.md`.
 

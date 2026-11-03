@@ -1,0 +1,179 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "rl_finance/run_record/1",
+ "title": "rl_finance run record",
+ "description": "One (task, attempt) of any run, API or Harbor. Records are comparable only when task_id, content_sha256 and fingerprint match and the condition (mode, runner, model, skills, effort, max_tokens, judge_model) is the same; rl/harness/report.py enforces it.",
+ "type": "object",
+ "required": [
+  "schema",
+  "task_id",
+  "family",
+  "split",
+  "content_sha256",
+  "fingerprint",
+  "attempt",
+  "runner",
+  "model",
+  "status",
+  "rewards"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {
+   "const": "run_record/1"
+  },
+  "task_id": {
+   "type": "string"
+  },
+  "family": {
+   "type": "string"
+  },
+  "mode": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "description": "the task's mode (review, compare, produce); rewards of different modes are never one number"
+  },
+  "split": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "description": "train, bench, heldout, eval or retired; null if the task is not in its manifest"
+  },
+  "content_sha256": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "description": "the task's content hash (FORMAT.md, Integrity); null when the run predates task bundles"
+  },
+  "fingerprint": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "description": "hash of exactly what the model sees; null when not recorded"
+  },
+  "attempt": {
+   "type": "integer",
+   "description": "0-based repetition of the task under the same condition"
+  },
+  "runner": {
+   "type": "object",
+   "description": "what produced the result: name (script or harbor), agent, version, variant"
+  },
+  "model": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "description": "requested model; null for solvers and the oracle"
+  },
+  "served_model": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "skills": {
+   "type": [
+    "object",
+    "null"
+   ],
+   "description": "skills condition: enabled, profile, source_commit, entries"
+  },
+  "effort": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "max_tokens": {
+   "type": [
+    "integer",
+    "null"
+   ]
+  },
+  "judge_model": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "description": "the grader's model (LLM judge or scorer), if any"
+  },
+  "repo_commit": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "status": {
+   "enum": [
+    "ok",
+    "error",
+    "refusal",
+    "timeout",
+    "truncated",
+    "parse_error",
+    "not_graded"
+   ]
+  },
+  "rewards": {
+   "type": "object",
+   "description": "named metrics as the verifier reports them; never blended"
+  },
+  "error": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "usage": {
+   "type": [
+    "object",
+    "null"
+   ],
+   "description": "input_tokens, output_tokens, cache_read_input_tokens, cache_creation_input_tokens, summed over the attempt"
+  },
+  "cost_usd": {
+   "type": [
+    "number",
+    "null"
+   ],
+   "description": "model cost from rl/harness/prices.yaml; null when the price or usage is unknown"
+  },
+  "judge_cost_usd": {
+   "type": [
+    "number",
+    "null"
+   ]
+  },
+  "latency_s": {
+   "type": [
+    "number",
+    "null"
+   ]
+  },
+  "started_at": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "trace": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "description": "path to the transcript or Harbor trial directory"
+  },
+  "note": {
+   "type": [
+    "string",
+    "null"
+   ]
+  }
+ }
+}

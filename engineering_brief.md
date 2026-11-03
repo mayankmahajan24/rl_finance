@@ -97,7 +97,7 @@ from it drive this company:
   review grader is built to prevent it.
 
 The data `rl/` needs from it (items, gold labels, seeds, firm briefs and four
-models' saved runs) lives in `rl/data/research_design/`. Treat it as read-only
+models' saved runs) lives in `rl/sources/research_design_case/`. Treat it as read-only
 source data: `rl/` is built from it and checked against it. The full take-home is
 in git history at commit `a75441c`, under `case_study/`.
 

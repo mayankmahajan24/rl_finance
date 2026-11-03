@@ -1,0 +1,39 @@
+{
+  "target_period": "2018Q4",
+  "target_period_end": "2018-12-31",
+  "unit": "USD millions",
+  "actual": 9962.0,
+  "actual_first_filed": "2019-02-25",
+  "actual_source": "https://www.sec.gov/Archives/edgar/data/6201/000000620119000009/aal-20181231.xml",
+  "actual_q4_derived": true,
+  "naive_forecast": 10157.797,
+  "consensus": null,
+  "consensus_note": "not compiled for v1",
+  "scale_factor": 1.0,
+  "series": "AAL",
+  "kpi": "Passenger revenue",
+  "facts": {
+    "reporting_basis_and_structural": [
+      "Reporting basis changed: 3 earlier quarter(s) were re-reported in filings from 2018-04-26 on, by +7.7% to +10.3% (e.g. a new accounting standard or a segment redefinition). The target quarter will be reported on the new basis; its same-quarter-last-year comparable is NOT yet available on the new basis (only its original figure is in the feed)."
+    ],
+    "sensor_data_quality_auto": [
+      "AAL source 1: 424 of 1826 days missing",
+      "AAL source 1: 130 days more than 4x above or below the trailing 4-week median",
+      "AAL source 2: 56 days more than 4x above or below the trailing 4-week median",
+      "AAL source 3: 70 days more than 4x above or below the trailing 4-week median",
+      "AAL source 4: 58 days more than 4x above or below the trailing 4-week median",
+      "AAL source 1: spend changed +103% 2014->2015 vs +24% on the other sources (level shift / panel change)",
+      "AAL source 2: spend changed +61% 2014->2015 vs +24% on the other sources (level shift / panel change)",
+      "AAL source 3: spend changed +24% 2014->2015 vs +61% on the other sources (level shift / panel change)",
+      "AAL source 4: spend changed +11% 2014->2015 vs +61% on the other sources (level shift / panel change)",
+      "AAL source 1: spend changed +15130% 2015->2016 vs +1486% on the other sources (level shift / panel change)",
+      "AAL source 2: spend changed +2887% 2015->2016 vs +1486% on the other sources (level shift / panel change)",
+      "AAL source 3: spend changed +1486% 2015->2016 vs +2887% on the other sources (level shift / panel change)",
+      "AAL source 4: spend changed +938% 2015->2016 vs +2887% on the other sources (level shift / panel change)",
+      "AAL source 1: spend changed +141% 2016->2017 vs +25% on the other sources (level shift / panel change)",
+      "AAL source 2: spend changed +102% 2016->2017 vs +25% on the other sources (level shift / panel change)",
+      "AAL source 3: spend changed -18% 2016->2017 vs +102% on the other sources (level shift / panel change)",
+      "AAL source 4: spend changed +25% 2016->2017 vs +102% on the other sources (level shift / panel change)"
+    ]
+  }
+}

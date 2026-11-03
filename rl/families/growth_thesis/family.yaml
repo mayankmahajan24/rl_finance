@@ -1,0 +1,15 @@
+id: growth_thesis
+task_prefix: thesis
+description: 'Artifact-sensitive thesis: fastest-growing airline'
+role: quant_researcher
+workflow: growth_thesis
+mode: produce            # answer.json + memo.md
+world: ls_altdata
+source: txn_panel
+format: harbor
+companies: template      # synthetic airlines; only the seasonality template comes from the split's clean airlines
+generator: generate.py
+verifier: verifier/thesis_verify.py
+verifier_timeout_sec: 600
+llm_judge: true          # memo rubric; falls back to keywords without ANTHROPIC_API_KEY
+reward: 0.35 right answer + 0.25 growth accuracy + 0.15 unreliable-list F1 + 0.25 memo rubric

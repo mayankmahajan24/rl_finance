@@ -1,0 +1,446 @@
+{
+ "anomaly-bench-001": {
+  "family": "anomaly_scoring",
+  "seed": 200000,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "6398389d68c3",
+  "ground_truth_sha256": "03ff92fc0e99"
+ },
+ "anomaly-bench-002": {
+  "family": "anomaly_scoring",
+  "seed": 200001,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "8590fbbba92e",
+  "ground_truth_sha256": "0dfd093a1a93"
+ },
+ "anomaly-bench-003": {
+  "family": "anomaly_scoring",
+  "seed": 200002,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "bcb9efbb0820",
+  "ground_truth_sha256": "e5742164a2ed"
+ },
+ "anomaly-bench-004": {
+  "family": "anomaly_scoring",
+  "seed": 200003,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "9e2dcb4875d0",
+  "ground_truth_sha256": "f1eee4177002"
+ },
+ "anomaly-bench-005": {
+  "family": "anomaly_scoring",
+  "seed": 200004,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "c0bd90f4549d",
+  "ground_truth_sha256": "f1710845845e"
+ },
+ "anomaly-bench-006": {
+  "family": "anomaly_scoring",
+  "seed": 200005,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "7d12a4ec9826",
+  "ground_truth_sha256": "8689cc51af3c"
+ },
+ "anomaly-bench-007": {
+  "family": "anomaly_scoring",
+  "seed": 200006,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "bd9260bcd040",
+  "ground_truth_sha256": "219c714c2f02"
+ },
+ "anomaly-bench-008": {
+  "family": "anomaly_scoring",
+  "seed": 200007,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "f4d14fe673ed",
+  "ground_truth_sha256": "a47b0d2b49d7"
+ },
+ "anomaly-bench-009": {
+  "family": "anomaly_scoring",
+  "seed": 200008,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "179783e369a2",
+  "ground_truth_sha256": "757934edde23"
+ },
+ "anomaly-bench-010": {
+  "family": "anomaly_scoring",
+  "seed": 200009,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "68ec66097582",
+  "ground_truth_sha256": "a4a7ce78f79b"
+ },
+ "anomaly-bench-control-01": {
+  "family": "anomaly_scoring",
+  "seed": 290000,
+  "control": true,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "024d2b7d21b7",
+  "ground_truth_sha256": "c4479437b8d6"
+ },
+ "anomaly-bench-control-02": {
+  "family": "anomaly_scoring",
+  "seed": 290001,
+  "control": true,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "4b5c6e135079",
+  "ground_truth_sha256": "b6f63748f709"
+ },
+ "audit-bench-001": {
+  "family": "data_audit",
+  "seed": 200000,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "44bc1e962600",
+  "ground_truth_sha256": "95fc3fa577a7"
+ },
+ "audit-bench-002": {
+  "family": "data_audit",
+  "seed": 200001,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "7436c53a9b69",
+  "ground_truth_sha256": "9bc98700846a"
+ },
+ "audit-bench-003": {
+  "family": "data_audit",
+  "seed": 200002,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "79e01e9515d5",
+  "ground_truth_sha256": "fc0e2bbf18ab"
+ },
+ "audit-bench-004": {
+  "family": "data_audit",
+  "seed": 200003,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "7a43279f455d",
+  "ground_truth_sha256": "c516c26f94d0"
+ },
+ "audit-bench-005": {
+  "family": "data_audit",
+  "seed": 200004,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "9744a98b317e",
+  "ground_truth_sha256": "0ddc2c845434"
+ },
+ "audit-bench-006": {
+  "family": "data_audit",
+  "seed": 200005,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "eda5908e0f40",
+  "ground_truth_sha256": "3778e291f4ff"
+ },
+ "audit-bench-007": {
+  "family": "data_audit",
+  "seed": 200006,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "420183c5f624",
+  "ground_truth_sha256": "89065b042fe6"
+ },
+ "audit-bench-008": {
+  "family": "data_audit",
+  "seed": 200007,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "c66eda99630f",
+  "ground_truth_sha256": "c17974ef69c9"
+ },
+ "audit-bench-009": {
+  "family": "data_audit",
+  "seed": 200008,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "26d7fe671192",
+  "ground_truth_sha256": "955037668fb9"
+ },
+ "audit-bench-010": {
+  "family": "data_audit",
+  "seed": 200009,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "86217af7d3e8",
+  "ground_truth_sha256": "1109ece76493"
+ },
+ "audit-bench-control-01": {
+  "family": "data_audit",
+  "seed": 290000,
+  "control": true,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "3c26df1d64e1",
+  "ground_truth_sha256": "d8351670a0f7"
+ },
+ "audit-bench-control-02": {
+  "family": "data_audit",
+  "seed": 290001,
+  "control": true,
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "758e7c9642ba",
+  "ground_truth_sha256": "12fa8453ecb9"
+ },
+ "thesis-bench-001": {
+  "family": "growth_thesis",
+  "seed": 200000,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "cb6504bcc199",
+  "ground_truth_sha256": "910e88a1d2dc"
+ },
+ "thesis-bench-002": {
+  "family": "growth_thesis",
+  "seed": 200001,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "bc39a975c990",
+  "ground_truth_sha256": "56d2a068ce8c"
+ },
+ "thesis-bench-003": {
+  "family": "growth_thesis",
+  "seed": 200002,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "39b94ef91f57",
+  "ground_truth_sha256": "a89603b26be6"
+ },
+ "thesis-bench-004": {
+  "family": "growth_thesis",
+  "seed": 200003,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "fc962e9c365c",
+  "ground_truth_sha256": "b68051ced914"
+ },
+ "thesis-bench-005": {
+  "family": "growth_thesis",
+  "seed": 200004,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "4846b4f7d797",
+  "ground_truth_sha256": "d728e890bf9c"
+ },
+ "thesis-bench-006": {
+  "family": "growth_thesis",
+  "seed": 200005,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "c06277644315",
+  "ground_truth_sha256": "e198bc720305"
+ },
+ "thesis-bench-007": {
+  "family": "growth_thesis",
+  "seed": 200006,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "5a67000895b2",
+  "ground_truth_sha256": "86588ae0e38b"
+ },
+ "thesis-bench-008": {
+  "family": "growth_thesis",
+  "seed": 200007,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "411f845a3079",
+  "ground_truth_sha256": "dbb4dedf9ffd"
+ },
+ "thesis-bench-009": {
+  "family": "growth_thesis",
+  "seed": 200008,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "a80a02251d55",
+  "ground_truth_sha256": "4d926ddbe822"
+ },
+ "thesis-bench-010": {
+  "family": "growth_thesis",
+  "seed": 200009,
+  "control": false,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "8bc5904075ad",
+  "ground_truth_sha256": "8368f7152b37"
+ },
+ "thesis-bench-control-01": {
+  "family": "growth_thesis",
+  "seed": 290000,
+  "control": true,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "e2193c6e2a75",
+  "ground_truth_sha256": "259b86016307"
+ },
+ "thesis-bench-control-02": {
+  "family": "growth_thesis",
+  "seed": 290001,
+  "control": true,
+  "companies": [
+   "DAL",
+   "SAVE"
+  ],
+  "fingerprint": "fe54b87d0dd8",
+  "ground_truth_sha256": "3b55d4b8a8cb"
+ }
+}

@@ -279,6 +279,924 @@
     "split": "eval"
   },
   {
+    "id": "kn-produce-AAL-2017Q4",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-AAL-2018Q2",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-AAL-2018Q4",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-AIR01-2017Q4-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-AIR01-2018Q2-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-AIR01-2018Q4-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-AIR02-2017Q4-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-AIR02-2018Q2-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-AIR02-2018Q4-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-AIR03-2017Q4-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-AIR03-2018Q2-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-AIR03-2018Q4-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-AIR04-2017Q4-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-AIR04-2018Q2-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-AIR04-2018Q4-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-AIR05-2017Q4-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-AIR05-2018Q2-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-AIR05-2018Q4-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-AIR06-2017Q4-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-AIR06-2018Q2-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-AIR06-2018Q4-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-AIR07-2017Q4-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-AIR07-2018Q2-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-AIR07-2018Q4-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-AIR08-2017Q4-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-AIR08-2018Q2-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-AIR08-2018Q4-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-AIR09-2017Q4-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-AIR09-2018Q2-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-AIR09-2018Q4-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-ALGT-2017Q4",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-ALGT-2018Q2",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-ALGT-2018Q4",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-ALK-2017Q4",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-ALK-2018Q2",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-ALK-2018Q4",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-DAL-2017Q4",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-DAL-2018Q2",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-DAL-2018Q4",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-DDS-FY2017Q3",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-DDS-FY2018Q1",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-DDS-FY2018Q3",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-HA-2017Q4",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-HA-2018Q2",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-HA-2018Q4",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-JBLU-2017Q4",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-JBLU-2018Q2",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-JBLU-2018Q4",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-JCP-FY2017Q3",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-JCP-FY2018Q1",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-JCP-FY2018Q3",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-JWN_FP-FY2017Q3",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-JWN_FP-FY2018Q1",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-JWN_FP-FY2018Q3",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-JWN_OP-FY2017Q3",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-JWN_OP-FY2018Q1",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-JWN_OP-FY2018Q3",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-KSS-FY2017Q3",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-KSS-FY2018Q1",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-KSS-FY2018Q3",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-LUV-2017Q4",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-LUV-2018Q2",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-LUV-2018Q4",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-M-FY2017Q3",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-M-FY2018Q1",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-M-FY2018Q3",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-RET01-FY2017Q3-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-RET01-FY2018Q1-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-RET01-FY2018Q3-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-RET02-FY2017Q3-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-RET02-FY2018Q1-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-RET02-FY2018Q3-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-RET03-FY2017Q3-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-RET03-FY2018Q1-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-RET03-FY2018Q3-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-RET04-FY2017Q3-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-RET04-FY2018Q1-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-RET04-FY2018Q3-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-RET05-FY2017Q3-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-RET05-FY2018Q1-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-RET05-FY2018Q3-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-RET07-FY2017Q3-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-RET07-FY2018Q1-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-RET07-FY2018Q3-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-RET08-FY2017Q3-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-RET08-FY2018Q1-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-RET08-FY2018Q3-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-RET10-FY2017Q3-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-RET10-FY2018Q1-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-RET10-FY2018Q3-anon",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "heldout"
+  },
+  {
+    "id": "kn-produce-ROST-FY2017Q3",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-ROST-FY2018Q1",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-ROST-FY2018Q3",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-SAVE-2017Q4",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-SAVE-2018Q2",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-SAVE-2018Q4",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "bench"
+  },
+  {
+    "id": "kn-produce-TJX_MARMAXX-FY2017Q3",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-TJX_MARMAXX-FY2018Q1",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-TJX_MARMAXX-FY2018Q3",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-UAL-2017Q4",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-UAL-2018Q2",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
+    "id": "kn-produce-UAL-2018Q4",
+    "role": "quant_researcher",
+    "workflow": "kpi_nowcast",
+    "mode": "produce",
+    "world": "ls_altdata",
+    "status": "graded",
+    "split": "train"
+  },
+  {
     "id": "rd-produce-S2",
     "role": "quant_researcher",
     "workflow": "research_design",

@@ -1,0 +1,42 @@
+id: kn-produce-M-FY2018Q1
+role: quant_researcher
+workflow: kpi_nowcast
+mode: produce
+world: ls_altdata
+status: graded
+split: bench
+prompt:
+  template: families/kpi_nowcast/prompts/{system,user}.md
+  fingerprint: 40e71729f9c3
+  files:
+  - actuals.csv
+  - data_brief.md
+  - sensor_panel.csv
+environment:
+  tools:
+  - code_execution
+  internet: false
+output_schema: families/kpi_nowcast/schema.json
+grader:
+  type: kpi_nowcast
+  module: families/kpi_nowcast/grader.py
+  accuracy: programmatic (forecast JSON vs gold.actual)
+  writeup: LLM judge rubric C1-C12 (families/kpi_nowcast/judge.md)
+sources:
+- rl/sources/txn_panel/raw/sensor_panel.csv.gz
+- rl/sources/txn_panel/grader_only/kpi_facts.csv
+- https://www.sec.gov/Archives/edgar/data/794367/000079436718000078/m-20180505.xml
+tags:
+- fiscal_jan
+- named
+- M
+meta:
+  series: M
+  company: M
+  variant: named
+  as_of: '2018-05-05'
+  target_period: FY2018 Q1
+  sensors:
+  - M_M
+  - M_BL
+  low_signal: null

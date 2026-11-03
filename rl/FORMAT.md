@@ -1,5 +1,9 @@
 # Task format
 
+This is the repo format, used by research_design, research_funding, kpi_nowcast and earnings_recap.
+The generated txn_panel families (data_audit, anomaly_scoring, growth_thesis) are already in
+Harbor's layout (`families/README.md`); converting the rest to Harbor is step 4 of the restructure.
+
 Every task is a folder at `roles/<role>/<workflow>/<task_id>/`. The folder has two
 halves that must never mix: what the model sees, and what only the grader sees.
 
@@ -16,7 +20,7 @@ halves that must never mix: what the model sees, and what only the grader sees.
     reference/       reference outputs with their human verdicts
 ```
 
-Each build script (`build_research_design.py`, `build_kpi_nowcast.py`) refuses to write the tree if any gold text appears
+Each build script (`build_research_design.py`, `families/kpi_nowcast/build.py`) refuses to write the tree if any gold text appears
 anywhere under `prompt/` (the leak check).
 
 ## task.yaml

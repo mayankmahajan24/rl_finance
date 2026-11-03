@@ -1,0 +1,25 @@
+{
+  "target_period": "2018Q4",
+  "target_period_end": "2018-12-31",
+  "unit": "USD millions",
+  "actual": 3631.42,
+  "actual_first_filed": "2019-02-21",
+  "actual_source": "https://www.sec.gov/Archives/edgar/data/1158463/000115846319000018/jblu-20181231.xml",
+  "actual_q4_derived": true,
+  "naive_forecast": 3591.937,
+  "consensus": null,
+  "consensus_note": "not compiled for v1",
+  "scale_factor": 1.92037,
+  "series": "JBLU",
+  "kpi": "Passenger revenue",
+  "facts": {
+    "reporting_basis_and_structural": [
+      "Reporting basis changed: 3 earlier quarter(s) were re-reported in filings from 2018-04-27 on, by +7.0% to +8.0% (e.g. a new accounting standard or a segment redefinition). The target quarter will be reported on the new basis; its same-quarter-last-year comparable is NOT yet available on the new basis (only its original figure is in the feed)."
+    ],
+    "sensor_data_quality_auto": [
+      "JBLU source 1: 69 days more than 4x above or below the trailing 4-week median",
+      "JBLU source 1: spend changed +98% 2015->2016 vs -3% on the other sources (level shift / panel change)",
+      "JBLU source 1: spend changed +85% 2016->2017 vs -3% on the other sources (level shift / panel change)"
+    ]
+  }
+}

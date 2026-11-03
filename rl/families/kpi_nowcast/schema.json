@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["target_period", "unit", "point", "low", "high", "interval_level", "in_sample", "vs_consensus"],
+  "properties": {
+    "target_period": {"type": "string"},
+    "unit": {"type": "string"},
+    "point": {"type": "number"},
+    "low": {"type": "number"},
+    "high": {"type": "number"},
+    "interval_level": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1},
+    "in_sample": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["period_end", "estimate"],
+        "properties": {"period_end": {"type": "string"}, "estimate": {"type": "number"}}
+      }
+    },
+    "vs_consensus": {"type": "string", "enum": ["above", "below", "in_line", "no_consensus"]}
+  }
+}

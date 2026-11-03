@@ -1,0 +1,40 @@
+id: kn-produce-AIR07-2018Q4-anon
+role: quant_researcher
+workflow: kpi_nowcast
+mode: produce
+world: ls_altdata
+status: graded
+split: train
+prompt:
+  template: families/kpi_nowcast/prompts/{system,user}.md
+  fingerprint: 63db3eaaab2c
+  files:
+  - actuals.csv
+  - data_brief.md
+  - sensor_panel.csv
+environment:
+  tools:
+  - code_execution
+  internet: false
+output_schema: families/kpi_nowcast/schema.json
+grader:
+  type: kpi_nowcast
+  module: families/kpi_nowcast/grader.py
+  accuracy: programmatic (forecast JSON vs gold.actual)
+  writeup: LLM judge rubric C1-C12 (families/kpi_nowcast/judge.md)
+sources:
+- rl/sources/txn_panel/raw/sensor_panel.csv.gz
+- rl/sources/txn_panel/grader_only/kpi_facts.csv
+- https://www.sec.gov/Archives/edgar/data/1362468/000136246819000010/algt-20181231.xml
+tags:
+- calendar
+- anon
+meta:
+  series: ALGT
+  company: ALGT
+  variant: anon
+  as_of: '2018-12-31'
+  target_period: 2018Q4
+  sensors:
+  - ALGT
+  low_signal: null

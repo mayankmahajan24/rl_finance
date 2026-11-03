@@ -8,7 +8,7 @@ RL environments and evals for buy-side financial services, built for frontier la
 | [`engineering_brief.md`](engineering_brief.md) | Start here if you are an engineer joining: goal, vocabulary, what exists, invariants, next work. |
 
 The first environment (research design) was built from the Finance Domain Research
-Lead take-home. The data it needs is in `rl/data/research_design/`; the full take-home
+Lead take-home. The data it needs is in `rl/sources/research_design_case/`; the full take-home
 (report, Parts 0–3, scripts, every raw model call) is in git history at commit
 `a75441c`, under `case_study/`. Its summary deck stays published from the
 `finance_collaborator` repo.

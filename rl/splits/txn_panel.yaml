@@ -1,0 +1,32 @@
+# Which split each txn_panel company belongs to. The unit is the company (annotations/entities.yaml):
+# every task built from a company's data, in any family and any disguise, goes to that company's split.
+#
+#   train    RL training. Generated families can mint unlimited tasks here.
+#   bench    the fixed eval set we publish.
+#   heldout  private; never published, never used for tuning. Seeds are secret (see seeds.yaml).
+#
+# status: proposed until Mayank approves. Builders run either way; nothing is exported or
+# published while status is proposed. Changing a company's split after approval invalidates
+# every bench and held-out result built on it.
+
+status: approved
+proposed: '2026-10-21'
+approved: '2026-10-21'  # by Mayank
+
+companies:
+  heldout: [ALK, JBLU, KSS, JCP]
+  bench: [DAL, SAVE, M, DDS]
+  train: [AAL, ALGT, HA, LUV, UAL, JWN, ROST, TJX]
+
+why:
+  heldout: >-
+    One airline with a structural trap (ALK: Virgin America acquisition makes 2017 growth
+    inorganic), one clean airline (JBLU), one retailer with the 53-week year only (KSS), one with
+    a store-closure programme (JCP). No natural all-sensor break, so held-out audit scores depend
+    on planted problems only.
+  bench: >-
+    A clean large airline (DAL), a reporting-basis change (SAVE: fares and non-ticket revenue
+    merged), a two-sensor retailer (M: Macy's + Bloomingdale's), and the DDS all-sensor outage.
+  train: >-
+    The rest, including both other natural breaks (AAL re-map, ALGT outage), the low-signal TJX
+    series, and the multi-sensor ROST and two-series JWN, so training sees every kind of trap.

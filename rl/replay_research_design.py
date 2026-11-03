@@ -1,5 +1,5 @@
 """Replay the case-study baseline runs through the rl/ graders and check they
-reproduce rl/data/research_design/baseline_runs/GRADED.md.
+reproduce rl/sources/research_design_case/baseline_runs/GRADED.md.
 
 No API calls. Model responses come from baseline_runs/<model>/{pairwise,pointwise}.json;
 the scorer's semantic decisions come from the cached baseline_runs/_issue_scores.json.
@@ -25,7 +25,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from lib import RL, iter_tasks, write_json  # noqa: E402
 from graders import pairwise_pick, review_issues  # noqa: E402
 
-RUNS = RL / "data" / "research_design" / "baseline_runs"
+RUNS = RL / "sources" / "research_design_case" / "baseline_runs"
 OUT = RL / "runs" / "research_design" / "baseline"
 
 # baseline_runs/GRADED.md: strong-item pairwise accuracy, review recall, manufactured per review

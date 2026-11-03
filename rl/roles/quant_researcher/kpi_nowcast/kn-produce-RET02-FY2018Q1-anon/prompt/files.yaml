@@ -1,0 +1,12 @@
+sensor_panel.csv:
+  path: roles/quant_researcher/kpi_nowcast/_shared_files/sensor_panel_2018-05-05_anon.csv.gz
+  gzip: true
+  sha256: b73b9493f221b37b24cade8f32f19a026653cff634df7922c320f53f57e92e4c
+actuals.csv:
+  path: roles/quant_researcher/kpi_nowcast/kn-produce-RET02-FY2018Q1-anon/prompt/files/actuals.csv
+  gzip: false
+  sha256: bf4fc9bae1e42965993b00bbd2d271757ac16f1c8b75daae0c6b8e520b1306de
+data_brief.md:
+  path: roles/quant_researcher/kpi_nowcast/kn-produce-RET02-FY2018Q1-anon/prompt/files/data_brief.md
+  gzip: false
+  sha256: b4938cfb14dd251631e17fa831f96210b1f0baf73722b7a33a04281059042b22

@@ -1,0 +1,87 @@
+{
+  "flow": "kpi_nowcast",
+  "metrics": [
+    {
+      "id": "abs_pct_error",
+      "label": "Abs % error",
+      "kind": "float",
+      "scale": 1,
+      "better": "lower"
+    },
+    {
+      "id": "skill_vs_naive",
+      "label": "Skill v naive",
+      "kind": "float",
+      "scale": 1
+    },
+    {
+      "id": "covered",
+      "label": "In range",
+      "kind": "float",
+      "scale": 1
+    },
+    {
+      "id": "interval_score_pct",
+      "label": "Interval score",
+      "kind": "float",
+      "scale": 1,
+      "better": "lower"
+    },
+    {
+      "id": "writeup_score",
+      "label": "Write-up",
+      "kind": "judge",
+      "scale": 1
+    },
+    {
+      "id": "schema_ok",
+      "label": "Forecast JSON",
+      "kind": "float",
+      "scale": 1
+    }
+  ],
+  "perf_fields": [
+    {
+      "id": "cost_usd",
+      "label": "Cost",
+      "unit": "$"
+    },
+    {
+      "id": "in_tokens",
+      "label": "In tok"
+    },
+    {
+      "id": "out_tokens",
+      "label": "Out tok"
+    },
+    {
+      "id": "tool_calls",
+      "label": "Code calls"
+    },
+    {
+      "id": "latency_s",
+      "label": "Latency",
+      "unit": "s"
+    }
+  ],
+  "prices": {
+    "claude-opus-5-5": {
+      "in": 4.0,
+      "out": 20.0
+    },
+    "claude-sonnet-5-5": {
+      "in": 2.0,
+      "out": 10.0
+    }
+  },
+  "harness_paths": [
+    "families/kpi_nowcast/run.py",
+    "families/kpi_nowcast/grader.py",
+    "families/kpi_nowcast/judge.md",
+    "families/kpi_nowcast/prompts/system.md",
+    "families/kpi_nowcast/prompts/user.md",
+    "families/kpi_nowcast/build.py",
+    "families/kpi_nowcast/schema.json"
+  ],
+  "harness_sha": "cda678e00e70d99474af086b4837199285ec341e91db1d243addaf31333d4674"
+}

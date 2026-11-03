@@ -26,7 +26,7 @@ WORLDS = RL / "worlds"
 
 def fingerprint(*parts: str) -> str:
     """Same hash the case study's scripts/run_eval.py used, so a task rendered here can be
-    proven to use the identical instrument as the baseline runs in data/research_design/."""
+    proven to use the identical instrument as the baseline runs in sources/research_design_case/."""
     h = hashlib.sha256()
     for p in parts:
         h.update(p.encode())

@@ -1,0 +1,40 @@
+id: txn_panel
+name: Daily card-transaction panel, 16 US airlines and department stores, 4 sensors
+kind: dataset + assignment
+
+data:
+  file: raw/sensor_panel.csv.gz
+  columns: [date, ct, amt, ticker, industry, source_id]
+  rows: 136129
+  dates: ['2014-01-01', '2018-12-31']
+  companies: 16          # 19 sensor tickers; see annotations/entities.yaml
+  sources: 4             # anonymised data vendors ("sensors")
+  original: >-
+    sample_data.xlsx, tab "flat" (sha256 below). raw/sensor_panel.csv.gz is the same 136,129 rows,
+    checked equal cell for cell on 2026-10-21. The "pivot" tab is a reshaped copy and is not kept.
+  original_sha256: 7bcca794557005014c23f0313bd704c67a977698f07448efdf513ebebd14a659
+
+assignment:
+  file: assignment/brief.txt
+  what: >-
+    "Anomaly Detection Exercise": score every datapoint for how far it can be trusted (one-day
+    anomalies, level shifts), with no foresight. Received with the data as a hiring exercise.
+  worked_solution: ~/anomaly_detection_exercise (notebook, figures, Summary_Report.md); not in the repo
+
+licence:
+  status: unknown
+  note: >-
+    The panel came from another firm with a hiring exercise. Redistribution has not been
+    confirmed. Nothing built on this source goes into a published bench until it is.
+
+annotations:
+  entities.yaml: companies, their sensor tickers and KPI series (the split unit)
+  data_artifacts.yaml: real data breaks in the panel (grader-only)
+  company_facts.yaml: reporting-basis and structural facts per KPI series (grader-only)
+
+grader_only:
+  kpi_facts.csv: KPI actuals per filing, from SEC XBRL (build/sec_xbrl/)
+  kpi_quarterly.csv: first-reported and restated value per quarter
+
+families: [kpi_nowcast, data_audit, anomaly_scoring, growth_thesis]
+splits: ../../splits/txn_panel.yaml

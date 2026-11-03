@@ -1,0 +1,156 @@
+# Data artifacts already in the real panel, in original coordinates (real tickers, real dates).
+# GRADER-ONLY. Families map these into their own coordinates (anonymised tickers, shifted dates).
+#
+# required  clear, all-sensor breaks: an audit should find these. Used by data_audit (required
+#           ground-truth items) and anomaly_scoring (excluded from scoring).
+# optional  real but debatable or source-level behaviour; reporting it is neither rewarded nor
+#           penalised. lo/hi bound the affected window.
+#
+# Found while working the original assignment (Oct 2026) and checked by eye on the panel; not
+# exhaustive. A real problem missing from this list is scored as a false positive, so grow the
+# optional list from transcript review. Order matters: ground-truth files list items in this order.
+required:
+- type: ticker_remap
+  ticker: AAL
+  source_id: null
+  start: '2016-02-02'
+  end: null
+  note: all four sensors jump ~10x overnight
+- type: outage
+  ticker: ALGT
+  source_id: null
+  start: '2015-05-18'
+  end: '2015-08-15'
+  note: every sensor near-dark for ~3 months
+- type: outage
+  ticker: DDS
+  source_id: null
+  start: '2018-03-03'
+  end: '2018-03-21'
+  note: every sensor at 5-10% of normal
+optional:
+- ticker: AAL
+  source_id: 1
+  lo: '2016-05-01'
+  hi: '2017-01-31'
+  note: source-1 airline panel ramp
+- ticker: ALGT
+  source_id: 1
+  lo: '2016-05-01'
+  hi: '2017-01-31'
+  note: source-1 airline panel ramp
+- ticker: ALK
+  source_id: 1
+  lo: '2016-05-01'
+  hi: '2017-01-31'
+  note: source-1 airline panel ramp
+- ticker: DAL
+  source_id: 1
+  lo: '2016-05-01'
+  hi: '2017-01-31'
+  note: source-1 airline panel ramp
+- ticker: HA
+  source_id: 1
+  lo: '2016-05-01'
+  hi: '2017-01-31'
+  note: source-1 airline panel ramp
+- ticker: JBLU
+  source_id: 1
+  lo: '2016-05-01'
+  hi: '2017-01-31'
+  note: source-1 airline panel ramp
+- ticker: LUV
+  source_id: 1
+  lo: '2016-05-01'
+  hi: '2017-01-31'
+  note: source-1 airline panel ramp
+- ticker: SAVE
+  source_id: 1
+  lo: '2016-05-01'
+  hi: '2017-01-31'
+  note: source-1 airline panel ramp
+- ticker: UAL
+  source_id: 1
+  lo: '2016-05-01'
+  hi: '2017-01-31'
+  note: source-1 airline panel ramp
+- ticker: DDS
+  source_id: 3
+  lo: '2015-09-15'
+  hi: '2016-02-15'
+  note: source-3 Q4-2015 under-capture
+- ticker: JCP
+  source_id: 3
+  lo: '2015-09-15'
+  hi: '2016-02-15'
+  note: source-3 Q4-2015 under-capture
+- ticker: JWN_JWN
+  source_id: 3
+  lo: '2015-09-15'
+  hi: '2016-02-15'
+  note: source-3 Q4-2015 under-capture
+- ticker: JWN_RACK
+  source_id: 3
+  lo: '2015-09-15'
+  hi: '2016-02-15'
+  note: source-3 Q4-2015 under-capture
+- ticker: KSS
+  source_id: 3
+  lo: '2015-09-15'
+  hi: '2016-02-15'
+  note: source-3 Q4-2015 under-capture
+- ticker: M_BL
+  source_id: 3
+  lo: '2015-09-15'
+  hi: '2016-02-15'
+  note: source-3 Q4-2015 under-capture
+- ticker: M_M
+  source_id: 3
+  lo: '2015-09-15'
+  hi: '2016-02-15'
+  note: source-3 Q4-2015 under-capture
+- ticker: ROST_DD
+  source_id: 3
+  lo: '2015-09-15'
+  hi: '2016-02-15'
+  note: source-3 Q4-2015 under-capture
+- ticker: ROST_ROST
+  source_id: 3
+  lo: '2015-09-15'
+  hi: '2016-02-15'
+  note: source-3 Q4-2015 under-capture
+- ticker: TJX_TJMAXX
+  source_id: 3
+  lo: '2015-09-15'
+  hi: '2016-02-15'
+  note: source-3 Q4-2015 under-capture
+- ticker: LUV
+  source_id: 3
+  lo: '2015-09-15'
+  hi: '2016-02-15'
+  note: source-3 Q4-2015 under-capture
+- ticker: AAL
+  source_id: 3
+  lo: '2017-03-01'
+  hi: '2017-06-01'
+  note: AAL s3 step down
+- ticker: ALK
+  source_id: 3
+  lo: '2018-03-15'
+  hi: '2018-08-01'
+  note: ALK s3 step down
+- ticker: ALGT
+  source_id: null
+  lo: '2015-05-01'
+  hi: '2016-01-31'
+  note: ALGT outage aftermath
+- ticker: AAL
+  source_id: null
+  lo: '2015-12-01'
+  hi: '2016-12-31'
+  note: AAL post re-map ramps
+- ticker: DDS
+  source_id: null
+  lo: '2018-02-15'
+  hi: '2018-04-15'
+  note: DDS collapse edges

@@ -337,7 +337,7 @@ def main(argv: list[str] | None = None) -> None:
                 meta = {
                     "id": task_id, "family": "kpi_nowcast", "role": "quant_researcher", "workflow": "kpi_nowcast",
                     "mode": "produce", "world": "ls_altdata", "status": "graded", "source": "txn_panel",
-                    "split": case_split, "companies": [company_id],
+                    "split": case_split, "companies": [company_id], "as_of": as_of, "calendar": "real",
                     "prompt": {"template": "families/kpi_nowcast/prompts/{system,user}.md", "fingerprint": fp,
                                "files": sorted(files),
                                "file_sha256": {k: hashlib.sha256(files[k].encode()).hexdigest() for k in sorted(files)}},

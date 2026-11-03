@@ -26,7 +26,7 @@ python rl/families/research_design/replay.py           # case-study baselines mu
 python rl/harness/run_solutions.py --split bench       # reference should beat naive on every generated family
 python rl/families/research_design/run.py --model claude-opus-5-5 --dry-run
 python rl/families/kpi_nowcast/run.py --variant baseline --dry-run
-harbor run -p rl/tasks/bench -a oracle                 # not yet validated: needs Docker
+harbor run -p rl/tasks/bench -a oracle                 # needs Docker with nftables fib-inet (not Docker Desktop): FORMAT.md, Sandbox
 ```
 
 **Running Claude Code through Harbor on a Claude subscription** instead of API credit: run
@@ -35,7 +35,7 @@ git-ignored), then
 
 ```sh
 set -a; . ./.oauth.env; set +a; export CLAUDE_FORCE_OAUTH=1
-harbor run -p rl/tasks/bench -a claude-code -m claude-opus-5-5 --ak max_budget_usd=5 --ak disable_web_search=true
+harbor run -p rl/tasks/bench -a claude-code -m claude-opus-5-5 --allow-agent-host api.anthropic.com --ak max_budget_usd=5 --ak disable_web_search=true
 harbor check rl/tasks/bench -a claude-code -m claude-sonnet-5-5   # Harbor's task-quality rubric
 ```
 

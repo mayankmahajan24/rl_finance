@@ -29,10 +29,8 @@ RL = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RL))
 import splits  # noqa: E402
 
-SCHEMA_FILE = pathlib.Path(__file__).with_name("run_record.schema.json")
-SCHEMA = json.loads(SCHEMA_FILE.read_text())
+SCHEMA = json.loads(pathlib.Path(__file__).with_name("run_record.schema.json").read_text())
 VERSION = SCHEMA["properties"]["schema"]["const"]
-STATUSES = SCHEMA["properties"]["status"]["enum"]
 PRICES = yaml.safe_load(pathlib.Path(__file__).with_name("prices.yaml").read_text())["models"]
 USAGE_KEYS = ("input_tokens", "output_tokens", "cache_read_input_tokens", "cache_creation_input_tokens")
 
@@ -131,8 +129,6 @@ def load(paths) -> list[dict]:
 def numbers(d: dict | None) -> dict:
     return {k: float(v) for k, v in (d or {}).items() if isinstance(v, (int, float)) and not isinstance(v, bool)}
 
-
-# ---------- converters: one per native run format, shared by the runners and the importers ----------
 
 def from_research_design(rec: dict, *, runner: dict, attempt: int = 0, **fields) -> dict:
     """A research_design run.py or replay.py record."""
@@ -241,8 +237,6 @@ def from_harbor_trial(trial: pathlib.Path) -> dict:
                 **({"error": f"{exc.get('exception_type')}: {str(exc.get('exception_message', ''))[:500]}"} if exc else {}),
                 **({"started_at": res["started_at"]} if res.get("started_at") else {}), **ident)
 
-
-# ---------- importers for the run files already in the repo ----------
 
 def import_all() -> list[pathlib.Path]:
     """Convert every run file under rl/runs/ into records beside it; returns the files written."""

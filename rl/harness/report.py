@@ -18,7 +18,7 @@ import argparse
 import json
 import pathlib
 import sys
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 RL = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RL / "harness"))
@@ -64,7 +64,7 @@ def table(recs: list[dict], by: tuple[str, ...], metrics: list[str] | None, mix:
         ok = [r for r in rs if r["status"] == "ok"]
         names = metrics or sorted({m for r in ok for m in r["rewards"]})
         row = dict(zip(by, k), tasks=len({r["task_id"] for r in rs}), attempts=len(rs),
-                   status=", ".join(f"{s} {n}" for s, n in sorted(_count(r["status"] for r in rs).items())))
+                   status=", ".join(f"{s} {n}" for s, n in sorted(Counter(r["status"] for r in rs).items())))
         for m in names:
             vals = [r["rewards"][m] for r in ok if m in r["rewards"]]
             row[m] = round(sum(vals) / len(vals), 4) if vals else None
@@ -72,13 +72,6 @@ def table(recs: list[dict], by: tuple[str, ...], metrics: list[str] | None, mix:
         row["cost_usd"] = round(sum(c for c in costs if c is not None), 4) if any(c is not None for c in costs) else None
         rows.append(row)
     return rows
-
-
-def _count(xs) -> dict:
-    out = defaultdict(int)
-    for x in xs:
-        out[x] += 1
-    return out
 
 
 def render(rows: list[dict]) -> str:

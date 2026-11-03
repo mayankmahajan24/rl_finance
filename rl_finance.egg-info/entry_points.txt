@@ -1,0 +1,3 @@
+[console_scripts]
+rl-build = rl_finance_cli:build
+rl-check = rl_finance_cli:check

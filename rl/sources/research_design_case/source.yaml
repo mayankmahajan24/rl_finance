@@ -1,0 +1,16 @@
+id: research_design_case
+name: Finance Domain Research Lead take-home (research plans, firm briefs, human gold, saved model runs)
+kind: case study + human labels
+provenance: >-
+  Written August 2026. Seeds, firm briefs, plan pairs and gold labels are human-written; plans were
+  generated under the isolation rules in ISOLATION.md. The full take-home is in git history at
+  commit a75441c, under case_study/ (README.md).
+
+licence:
+  status: unknown
+  note: >-
+    Reuse of the take-home material outside its original process is not yet confirmed. Nothing
+    built on this source is exported until it is.
+
+families: [research_design]
+splits: none (one eval set until whole worlds can be held out)

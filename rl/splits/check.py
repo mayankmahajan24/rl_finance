@@ -8,7 +8,10 @@
   4. held-out tasks record no seed; nothing grader-side sits where the agent can see it
   5. every built task matches its family's committed manifest (same split, fingerprints and
      content_sha256), its files match its checksums.sha256, and it carries a build record
-  6. provenance: every family's gold inputs have well-formed provenance entries (rl/provenance.py),
+  6. point in time: every built task sets an explicit network policy for the container, the agent
+     phase (none) and the verifier phase, matching what [metadata.environment] records; a task of a
+     dated family records an as_of, and a dated task's image pins its clock to it
+  7. provenance: every family's gold inputs have well-formed provenance entries (rl/provenance.py),
      every task of such a family carries them (tests/provenance.json, [metadata.provenance]), and
      no task claims approved gold that is no longer approved
 
@@ -27,6 +30,7 @@ import argparse
 import hashlib
 import pathlib
 import sys
+import tomllib
 
 import yaml
 
@@ -62,8 +66,37 @@ def checksum_problems(d: pathlib.Path) -> list[str]:
     return out
 
 
+def sandbox_problems(d: pathlib.Path, m: dict) -> list[str]:
+    """Check 6: the task's network policy and clock are explicit and agree with its metadata."""
+    tid, cfg = d.name, tomllib.loads((d / "task.toml").read_text())
+    env = m.get("environment") or {}
+    out = []
+    if env.get("internet") is not False:
+        out.append(f"{tid}: [metadata.environment] internet must be false")
+    for phase in ("environment", "agent"):
+        if cfg.get(phase, {}).get("network_mode") != "no-network":
+            out.append(f"{tid}: [{phase}] network_mode is {cfg.get(phase, {}).get('network_mode')!r}, not 'no-network'")
+    hosts = env.get("verifier_hosts")
+    v = cfg.get("verifier", {})
+    want = ("allowlist", sorted(hosts)) if hosts else ("no-network", [])
+    if hosts is None:
+        out.append(f"{tid}: [metadata.environment] records no verifier_hosts")
+    elif (v.get("network_mode"), sorted(v.get("allowed_hosts", []))) != want:
+        out.append(f"{tid}: [verifier] network policy {v.get('network_mode')!r} {v.get('allowed_hosts', [])} "
+                   f"disagrees with [metadata.environment] verifier_hosts {hosts}")
+    fam = RL / "families" / m.get("family", "") / "family.yaml"
+    as_of = m.get("as_of")
+    if as_of is None and fam.exists() and (yaml.safe_load(fam.read_text()) or {}).get("dated"):
+        out.append(f"{tid}: {m['family']} is dated but the task records no as_of")
+    if as_of is not None:
+        docker = (d / "environment" / "Dockerfile").read_text()
+        if f"TASK_AS_OF={as_of} " not in docker or f'FAKETIME="@{as_of} ' not in docker:
+            out.append(f"{tid}: as_of {as_of} but its image does not pin the clock to it")
+    return out
+
+
 def provenance_problems(d: pathlib.Path, m: dict, release: bool) -> list[str]:
-    """Check 6 for one task: its gold's provenance is recorded, current, and (for release) approved."""
+    """Check 7 for one task: its gold's provenance is recorded, current, and (for release) approved."""
     tid, current = d.name, provenance.for_family(m["family"])
     if not current:
         return []
@@ -157,6 +190,7 @@ def check(release: bool = False) -> list[str]:
                 problems.append(f"{tid}: grader-only file under {sub}/")
 
         problems += checksum_problems(d)
+        problems += sandbox_problems(d, m)
         problems += provenance_problems(d, m, release)
         b = m.get("build")
         if not b:

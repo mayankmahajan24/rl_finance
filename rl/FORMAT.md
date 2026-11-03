@@ -41,12 +41,45 @@ Every task can be checked on its own, without the repo:
 | When and from what it was built | `[metadata.build]`: UTC `built_at`, `repo_commit`, `repo_dirty` (uncommitted changes to tracked files), `builder`, Python and library versions, `source` and `source_sha256` (every file of `sources/<source>/`), `base_image` |
 | That no file changed since | `checksums.sha256` |
 | That it is the task the repo recorded | its `content_sha256` (every file but `task.toml` and `checksums.sha256`, plus the parsed `task.toml` without `[metadata.build]`) equals the one in `splits/manifests/<family>.json`. Identical across rebuilds of the same content |
-| That the environment is reproducible | base image pinned by digest, every pip package pinned; packages only the verifier needs (the LLM judge's client) are installed by `tests/test.sh`, not in the agent's image |
+| That the environment is reproducible | base image pinned by digest, every pip and apt package pinned; packages only the verifier needs (the LLM judge's client) are installed by `tests/test.sh`, not in the agent's image |
+| That the agent can't look the answer up | Point in time, below |
 
 `python rl/splits/check.py` checks all of this for every built task. Before handing tasks to
 anyone, run `python rl/splits/check.py --release`: it also requires every task to come from one
 commit with no uncommitted changes, and every bench and held-out task's gold to be approved (Gold
 provenance, below). Commit first, then rebuild, then check.
+
+## Point in time
+
+A task is valid only if the agent can't look the answer up, so every task's `task.toml` sets an
+explicit network policy for each phase (Harbor's `network_mode`):
+
+| Phase | Policy | Why |
+|---|---|---|
+| `[agent]` | `no-network` | the agent works from the files it is given |
+| `[environment]` (between phases, agent setup) | `no-network` | a process the agent leaves running can't fetch anything after the agent phase ends |
+| `[verifier]` | `allowlist` of `api.anthropic.com`, `pypi.org`, `files.pythonhosted.org` when the verifier calls a judge; `no-network` otherwise | the judge's API, and the index `test.sh` installs its client from |
+
+Hosts an agent needs come from the run, never the task: its model API with
+`harbor run --allow-agent-host api.anthropic.com`, and whatever its install fetches with
+`--allow-environment-host` (Claude Code's installer uses `deb.debian.org` and `downloads.claude.ai`).
+The oracle and the probe below need neither.
+
+A **dated** task (a family with `dated: true` in `family.yaml`; today kpi_nowcast) records its
+`as_of` and its image pins the clock to it: libfaketime starts `python` and `date` at noon UTC on
+the as-of date, `$TASK_AS_OF` holds it, and the data files carry it as their mtime. Only those
+commands are faked, so the agent's own process (node, a CLI) keeps the real clock its TLS needs;
+`test.sh` drops the fake clock before the verifier runs. research_design and the generated panel
+families have no as-of date: their data carries no "today" for a model to exploit.
+
+`[metadata.environment]` records the policy (`internet = false`, `verifier_hosts`), and
+`splits/check.py` fails when a task's policy is missing, isn't `no-network` for the agent, or
+disagrees with that record, and when a dated task lacks `as_of` or its pinned clock.
+`python rl/harness/sandbox_probe.py <task>...` runs tasks in Docker with an agent that only tries
+to reach public hosts and read the clock; it fails if any request gets a response (`--judge` also
+checks that a judged verifier still reaches its API). Harbor's Docker egress control answers DNS
+from the container's resolver even with no network, so a name still resolves; nothing beyond it
+connects.
 
 ## [metadata]
 
@@ -62,6 +95,8 @@ provenance, below). Commit first, then rebuild, then check.
 | `status` | `graded` (gold exists, grader runs), `ungraded` (gold missing), `needs_rubric` (no grader yet) |
 | `split` | `train`, `bench`, `heldout`; `eval` for a source with no split assignment; `retired` for a retired case (`splits/README.md`). Always the folder the task is in |
 | `companies` | Companies whose data the task contains (sources with a company split) |
+| `as_of` | The date the task is set on (dated families): nothing after it is in the data, and the container's clock reads it |
+| `environment` | `internet` (always false) and `verifier_hosts`, the network policy `task.toml` enforces (Point in time, above). kpi_nowcast adds the API runner's `tools` |
 | `seed`, `control` | Generator seed and whether nothing was planted (generated families; held-out tasks record no seed) |
 | `fingerprint` or `prompt.fingerprint` | Hash of exactly what the model sees. Two runs are comparable only if fingerprints match |
 | `prompt.template` | The template the prompt was rendered from |

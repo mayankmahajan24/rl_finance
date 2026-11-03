@@ -9,7 +9,7 @@ kind of task each), and assigned to **splits** (train, bench, heldout) by compan
 | [`families/`](families/) | one folder per kind of task: builder or generator, instruction, verifier and graders, runner, baseline solutions |
 | [`splits/`](splits/) | company and seed assignment per split, retired cases, `manifests/<family>.json` (the committed index of every task), `check.py` |
 | `tasks/` | every built task, in Harbor layout, at `tasks/<split>/<task_id>/` ([`FORMAT.md`](FORMAT.md)). Gitignored; `build.py` rebuilds it |
-| [`harness/`](harness/) | `run_solutions.py` (reference vs naive, no Docker), `calibrate.py` (pass@k, pass^k), `sandbox_probe.py` (an agent that tries to get out of the sandbox; Docker) |
+| [`harness/`](harness/) | `run_solutions.py` (reference vs naive, no Docker), `oracle_check.py` (Harbor's oracle in Docker vs the local reference), `calibrate.py` (pass@k, pass^k), `sandbox_probe.py` (an agent that tries to get out of the sandbox; Docker) |
 | `worlds/`, `skills/`, [`runs/`](runs/) | fund briefs, financial-services skills, run records |
 
 | Family | Tasks | Splits |
@@ -27,7 +27,7 @@ python rl/families/research_design/replay.py           # case-study baselines mu
 python rl/harness/run_solutions.py --split bench       # reference should beat naive on every generated family
 python rl/families/research_design/run.py --model claude-opus-5-5 --dry-run
 python rl/families/kpi_nowcast/run.py --variant baseline --dry-run
-harbor run -p rl/tasks/bench -a oracle                 # not yet validated: needs Docker
+JUDGE=keyword python rl/harness/oracle_check.py         # oracle in Docker on a bench sample = local reference rewards
 python rl/harness/sandbox_probe.py --judge rl/tasks/bench/kn-produce-ALK-2017Q4   # no internet for the agent; clock at as_of
 ```
 
@@ -58,8 +58,13 @@ pytest -m "not slow"                     # skip the pinned solver rewards (~10 s
 UPDATE_EXPECTED=1 pytest rl/tests/test_verifiers.py -m slow   # re-record rewards after an intended change
 ```
 
-Dependencies: `pip install pandas numpy scipy openpyxl pyyaml anthropic harbor` (versions pinned in
-`../requirements.txt`).
+Dependencies: `pip install -e ".[dev]"` from the repo root installs the pinned versions
+(`../requirements.txt`, `../requirements-dev.txt`) and puts `rl-build`, `rl-check` and `rl-export` on PATH, the
+same as `python rl/build.py`, `python rl/splits/check.py` and `python rl/export.py` from any directory.
+
+The **oracle workflow** (`.github/workflows/oracle.yml`, nightly and on demand) runs Harbor's oracle
+on a bench sample of every family with a reference solution, in Docker, and fails if a reward
+differs from the local reference reward pinned in `tests/expected_rewards.json`.
 
 The rest of this file describes the research_design environment.
 

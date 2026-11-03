@@ -17,6 +17,16 @@ hashes everything except that build record, so it is identical across rebuilds o
 content. The base image is pinned by digest and every pip package by version; packages only the
 verifier needs are installed by test.sh, not baked into the agent's image.
 
+Point in time: the agent phase has no network ([agent] network_mode = "no-network"), and neither
+does the container between phases ([environment]). A run that needs the agent's model API (Claude
+Code, Codex) or an agent install adds those hosts from the run config (`harbor run
+--allow-agent-host`, `--allow-environment-host`), never from the task. The verifier reaches only
+VERIFIER_HOSTS, and only when it calls a judge. A dated task (`as_of`) pins the clock: libfaketime
+makes `python` and `date` start at the as-of date, and data files carry it as their mtime. The
+agent's own process (node, a CLI) keeps the real clock so its TLS still works; test.sh drops the
+fake clock before the verifier runs. [metadata.environment] records the policy and
+splits/check.py fails when it and task.toml disagree.
+
 Dockerfile, test.sh and the toml body started as the ~/altdata_evals pilot's.
 """
 
@@ -43,18 +53,30 @@ HERE = pathlib.Path(__file__).resolve().parent
 # python:3.12-slim as of 2026-11-03. Change the digest deliberately: it changes every task's environment.
 BASE_IMAGE = "python:3.12-slim@sha256:b18b261e1b4974b4f321451ad5251ded85abb22c2b8b262da527dda1d031ab30"
 JUDGE_PIP = "anthropic==0.89.0"   # verifier-only: LLM judge / scorer client, installed by test.sh
+# Debian trixie's (the base image's) libfaketime; change it with the base image
+FAKETIME_DEB = "libfaketime=0.9.10+2024-06-05+gba9ed5b2-0.6"
+# a judged verifier reaches its model API and the package index test.sh installs the client from
+VERIFIER_HOSTS = ["api.anthropic.com", "pypi.org", "files.pythonhosted.org"]
 
 DOCKERFILE = """FROM {base}
 RUN pip install --no-cache-dir pandas==2.2.3 numpy==2.1.3 scipy==1.14.1{extra}
 WORKDIR /app
 COPY data /app/data
-{gunzip}RUN mkdir -p /app/output /app/solution
+{gunzip}{clock}RUN mkdir -p /app/output /app/solution
+"""
+# libfaketime for the commands the agent analyses with; the agent's own process keeps the real clock
+CLOCK = """RUN touch -d "{as_of} 12:00:00" /app/data/*
+RUN apt-get update && apt-get install -y --no-install-recommends {deb} && rm -rf /var/lib/apt/lists/* \\
+    && ln -s /usr/lib/*/faketime/libfaketime.so.1 /usr/local/lib/libfaketime.so.1
+ENV TZ=UTC TASK_AS_OF={as_of} FAKETIME="@{as_of} 12:00:00" FAKETIME_ONLY_CMDS=python,python3,python3.12,date \\
+    LD_PRELOAD=/usr/local/lib/libfaketime.so.1
 """
 
 TEST_SH = """#!/bin/bash
 # Harbor copies this directory to /tests after the agent finishes; the reward goes to /logs/verifier/reward.txt.
 mkdir -p /logs/verifier
 cd /tests
+unset LD_PRELOAD FAKETIME   # the verifier runs on the real clock (a dated task fakes it for the agent)
 {install}python /tests/{verifier} || echo 0 > /logs/verifier/reward.txt
 """
 TEST_PIP = ("pip install --no-cache-dir --quiet {pkgs} "
@@ -98,17 +120,27 @@ def build_record(builder: str, source: str) -> dict:
             "source": source, "source_sha256": source_sha256(source), "base_image": BASE_IMAGE}
 
 
+def network(verifier_hosts: list[str]) -> str:
+    """The verifier's network policy lines: no network unless it calls out to the listed hosts."""
+    if not verifier_hosts:
+        return 'network_mode = "no-network"\n'
+    return 'network_mode = "allowlist"\n' + toml.dumps({"allowed_hosts": list(verifier_hosts)})
+
+
 def task_toml(task_id: str, description: str, keywords: list[str], metadata: dict, verifier_timeout: int,
               verifier_env: str = "", authors: list[dict] = (), version: str | None = None) -> str:
     task = {"name": f"rl_finance/{task_id}", "version": version, "description": description,
             "authors": list(authors), "keywords": keywords}
     head = toml.dumps({"task": {k: v for k, v in task.items() if v not in (None, [])}})
+    hosts = metadata["environment"]["verifier_hosts"]
     return ('schema_version = "1.3"\n\n' + head + "\n" + toml.dumps({"metadata": metadata})
-            + f"\n[verifier]\ntimeout_sec = {verifier_timeout}\n" + verifier_env + """
+            + f"\n[verifier]\ntimeout_sec = {verifier_timeout}\n" + network(hosts) + verifier_env + """
 [agent]
 timeout_sec = 3600
+network_mode = "no-network"   # a run adds its model API host with --allow-agent-host
 
 [environment]
+network_mode = "no-network"   # between phases too; agent installs add hosts with --allow-environment-host
 build_timeout_sec = 900
 cpus = 2
 memory_mb = 4096
@@ -134,15 +166,20 @@ def write(dest: pathlib.Path, *, family: dict, builder: str, instruction: str, m
     """Write the task and return its content_sha256. `family` is the family.yaml (authors, version);
     `tests`, `data`, `prompt` and `solution` map file names to text, bytes, or a path to copy;
     `verifier` names the file in `tests` that test.sh runs. `pip` adds pinned packages to the agent's
-    image, `test_pip` pinned packages test.sh installs for the verifier only. Data files ending in
-    .gz are unpacked when the image is built, so the agent sees them uncompressed."""
+    image, `test_pip` pinned packages test.sh installs for the verifier only; a verifier that installs
+    them calls a judge, so it gets VERIFIER_HOSTS and every other verifier no network. Data files
+    ending in .gz are unpacked when the image is built, so the agent sees them uncompressed. A
+    `metadata["as_of"]` date pins the container's clock to it."""
     if dest.exists():
         shutil.rmtree(dest)
     (dest / "environment" / "data").mkdir(parents=True)
     for name, c in (data or {}).items():
         _put(dest / "environment" / "data" / name, c)
     gunzip = "RUN gunzip /app/data/*.gz\n" if any(n.endswith(".gz") for n in data or {}) else ""
-    (dest / "environment" / "Dockerfile").write_text(DOCKERFILE.format(base=BASE_IMAGE, extra=pip, gunzip=gunzip))
+    as_of = metadata.get("as_of")
+    clock = CLOCK.format(as_of=as_of, deb=FAKETIME_DEB) if as_of else ""
+    (dest / "environment" / "Dockerfile").write_text(
+        DOCKERFILE.format(base=BASE_IMAGE, extra=pip, gunzip=gunzip, clock=clock))
     (dest / "instruction.md").write_text(instruction)
     for name, c in (prompt or {}).items():
         _put(dest / "prompt" / name, c)
@@ -156,7 +193,9 @@ def write(dest: pathlib.Path, *, family: dict, builder: str, instruction: str, m
     (dest / "solution").mkdir()
     for name, c in (solution or {}).items():
         _put(dest / "solution" / name, c)
-    meta = dict(metadata, build=build_record(builder, metadata["source"]))
+    env = dict(metadata.get("environment", {}), internet=False,
+               verifier_hosts=VERIFIER_HOSTS if test_pip.strip() else [])
+    meta = dict(metadata, environment=env, build=build_record(builder, metadata["source"]))
     (dest / "task.toml").write_text(task_toml(dest.name, description, keywords, meta, verifier_timeout, verifier_env,
                                               family.get("authors", []), family.get("version")))
     files = sorted(p for p in dest.rglob("*") if p.is_file())

@@ -64,7 +64,8 @@ SEED = 20261018
 # Harbor delivery: the API runner attaches the files and reads the final message; a Harbor agent
 # finds the files under /app/data and leaves its final message in a file for the verifier.
 HARBOR_NOTE = ("---\nThe attached files are in /app/data/. When you are done, write your final message "
-               "(the write-up, then the ```json block) to /app/output/answer.md.")
+               "(the write-up, then the ```json block) to /app/output/answer.md. The container's clock "
+               "(`python`, `date`) reads the as-of date, {as_of}, which is also in $TASK_AS_OF.")
 PIP = " statsmodels==0.14.4 scikit-learn==1.5.2"   # agent tooling close to code execution's
 FAMILY = yaml.safe_load((HERE / "family.yaml").read_text())
 JUDGE_ENV = ('\n[verifier.env]\n# LLM judge for the write-up (C1-C12); without a key only accuracy is scored\n'
@@ -337,7 +338,7 @@ def main(argv: list[str] | None = None) -> None:
                 meta = {
                     "id": task_id, "family": "kpi_nowcast", "role": "quant_researcher", "workflow": "kpi_nowcast",
                     "mode": "produce", "world": "ls_altdata", "status": "graded", "source": "txn_panel",
-                    "split": case_split, "companies": [company_id],
+                    "split": case_split, "companies": [company_id], "as_of": as_of,
                     "prompt": {"template": "families/kpi_nowcast/prompts/{system,user}.md", "fingerprint": fp,
                                "files": sorted(files),
                                "file_sha256": {k: hashlib.sha256(files[k].encode()).hexdigest() for k in sorted(files)}},
@@ -358,7 +359,7 @@ def main(argv: list[str] | None = None) -> None:
                         "actuals.csv": files["actuals.csv"], "data_brief.md": files["data_brief.md"]}
                 prompt = {"system.md": system + "\n", "user.md": user + "\n",
                           "inputs.json": json.dumps(kw, indent=2, ensure_ascii=False) + "\n"}
-                instruction = f"{system}\n\n{user}\n\n{HARBOR_NOTE}\n"
+                instruction = f"{system}\n\n{user}\n\n{HARBOR_NOTE.format(as_of=as_of)}\n"
                 tdir = TASKS / case_split / task_id
                 content = harbor.write(tdir, family=FAMILY, builder="rl/families/kpi_nowcast/build.py",
                              instruction=instruction, metadata=meta,

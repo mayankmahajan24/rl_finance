@@ -20,7 +20,8 @@ kind of task each), and assigned to **splits** (train, bench, heldout) by compan
 
 ```sh
 python rl/build.py                                     # build every family, then the split check
-python rl/splits/check.py --release                    # before handing tasks to a lab: one clean commit, checksums, manifests
+python rl/splits/check.py --release                    # before handing tasks to a lab: one clean commit, checksums, manifests, approved instruments
+python rl/harness/approve.py                           # which families' instruments are approved; --family X --show for the diff
 python rl/build.py data_audit --split train --n 200 --controls 20
 python rl/families/research_design/replay.py           # case-study baselines must reproduce
 python rl/harness/run_solutions.py --split bench       # reference should beat naive on every generated family

@@ -62,8 +62,8 @@ def test_dirty_build_is_refused(tree, monkeypatch):
     licence(monkeypatch, "public")
     tasks = export.select("bench", None)
     stamped(monkeypatch, tasks)
-    assert export.refusals("bench", "eval", tasks, "0.1.0", False) == [
-        f"split check --release: {TASK}: built with uncommitted changes to tracked files"]
+    assert f"split check --release: {TASK}: built with uncommitted changes to tracked files" in export.refusals(
+        "bench", "eval", tasks, "0.1.0", False)
 
 
 def test_unstamped_build_and_missing_changelog_are_refused(tree, monkeypatch):

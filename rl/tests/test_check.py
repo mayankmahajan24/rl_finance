@@ -1,0 +1,144 @@
+"""splits/check.py: a clean built task passes, and every failure mode is caught. Each test copies a
+real built task into a scratch tasks/ tree, breaks one thing, and runs the check over that tree."""
+
+from __future__ import annotations
+
+import hashlib
+import pathlib
+import shutil
+
+import pytest
+
+import lib
+from conftest import built
+from splits import check
+
+TASK = "audit-bench-001"
+
+
+@pytest.fixture
+def tree(tmp_path, monkeypatch):
+    src = built("bench", TASK)
+    monkeypatch.setattr(lib, "TASKS", tmp_path)
+
+    def put(folder: str = "bench", name: str = TASK) -> pathlib.Path:
+        d = tmp_path / folder / name
+        shutil.copytree(src, d)
+        return d
+    return put
+
+
+def edit(d: pathlib.Path, rel: str, old: str, new: str, rehash: bool = True) -> None:
+    """Change one file; with rehash, update checksums.sha256 too, so only the targeted check fails."""
+    f = d / rel
+    text = f.read_text()
+    assert old in text, (rel, old)
+    f.write_text(text.replace(old, new, 1))
+    if rehash:
+        sums = d / "checksums.sha256"
+        lines = [ln for ln in sums.read_text().splitlines() if not ln.endswith(f"  {rel}")]
+        sums.write_text("\n".join([*lines, f"{hashlib.sha256(f.read_bytes()).hexdigest()}  {rel}"]) + "\n")
+
+
+def problems(release: bool = False) -> list[str]:
+    return check.check(release)
+
+
+def test_clean_task_passes(tree):
+    tree()
+    assert problems() == []
+
+
+def test_tampered_file(tree):
+    d = tree()
+    (d / "environment" / "data" / "transactions.csv").write_text("date,ticker\n")
+    assert f"{TASK}: environment/data/transactions.csv does not match its checksum" in problems()
+
+
+def test_unlisted_and_missing_files(tree):
+    d = tree()
+    (d / "environment" / "data" / "extra.csv").write_text("x")
+    (d / "solution" / "solve.sh").unlink()
+    p = problems()
+    assert f"{TASK}: environment/data/extra.csv not in checksums.sha256" in p
+    assert f"{TASK}: solution/solve.sh listed but missing" in p
+
+
+def test_grader_file_where_the_agent_can_see_it(tree):
+    d = tree()
+    shutil.copy(d / "tests" / "ground_truth.json", d / "environment" / "data" / "ground_truth.json")
+    assert f"{TASK}: grader-only file under environment/" in problems()
+
+
+def test_wrong_split_folder(tree):
+    tree("train")
+    assert f"{TASK}: metadata split bench but built under tasks/train" in problems()
+
+
+def test_not_a_split_folder(tree):
+    tree("pilot")
+    assert f"{TASK}: built under tasks/pilot, which is not a split" in problems()
+
+
+def test_same_task_in_two_splits(tree):
+    tree("bench")
+    tree("train")
+    assert any(p.startswith(f"{TASK}: built in both") for p in problems())
+
+
+def test_heldout_task_with_a_seed(tree):
+    d = tree("heldout")
+    edit(d, "task.toml", 'split = "bench"', 'split = "heldout"')
+    assert f"{TASK}: held-out task records its seed" in problems()
+
+
+def test_seed_outside_its_range(tree):
+    d = tree()
+    edit(d, "task.toml", "seed = 200000", "seed = 100000")
+    assert f"{TASK}: seed 100000 outside the bench range [200000, 100000000)" in problems()
+
+
+def test_company_from_another_split(tree):
+    d = tree()
+    other = check.splits.companies("txn_panel", "heldout")[0]
+    edit(d, "task.toml", 'companies = [ "', f'companies = [ "{other}", "')
+    assert f"{TASK}: uses ['{other}'], not in bench" in problems()
+
+
+def test_missing_build_record(tree):
+    d = tree()
+    toml = (d / "task.toml").read_text()
+    start = toml.index("[metadata.build]")
+    end = toml.index("[verifier]")
+    edit(d, "task.toml", toml[start:end], "")
+    assert f"{TASK}: no [metadata.build] record" in problems()
+
+
+def test_content_differs_from_manifest(tree):
+    d = tree()
+    edit(d, "instruction.md", "issues.json", "answers.json")
+    assert any(p.startswith(f"{TASK}: differs from splits/manifests/data_audit.json") for p in problems())
+
+
+def test_task_not_in_manifest(tree):
+    d = tree(name="audit-bench-999")
+    edit(d, "task.toml", f'id = "{TASK}"', 'id = "audit-bench-999"')
+    assert "audit-bench-999: not in splits/manifests/data_audit.json" in problems()
+
+
+def test_release_rejects_dirty_builds(tree):
+    d = tree()
+    edit(d, "task.toml", "repo_dirty = false", "repo_dirty = true")
+    assert problems() == []
+    assert f"{TASK}: built with uncommitted changes to tracked files" in problems(release=True)
+
+
+def test_release_rejects_mixed_commits(tree):
+    tree()
+    d = tree(name="audit-bench-002")
+    shutil.rmtree(d)
+    shutil.copytree(built("bench", "audit-bench-002"), d)
+    commit = lib.task_meta(d)["build"]["repo_commit"]
+    edit(d, "task.toml", commit, "0" * 40)
+    assert problems() == []
+    assert "tasks were built from 2 different commits; rebuild everything from one" in problems(release=True)

@@ -11,7 +11,7 @@ from collections import defaultdict
 from datetime import date
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from assemble_gold import facts_for, kind, days  # noqa: E402
+from assemble_gold import facts_for  # noqa: E402
 from series import SERIES  # noqa: E402
 
 q = defaultdict(dict)

@@ -1,0 +1,17 @@
+# Tool configuration only: the repo is not packaged yet (rl/ scripts run from a checkout).
+
+[tool.pytest.ini_options]
+testpaths = ["rl/tests"]
+addopts = "-ra"
+markers = ["slow: runs solvers end to end (seconds per task)"]
+
+[tool.ruff]
+extend-exclude = ["rl/vendor", "rl/tasks"]
+
+[tool.ruff.lint]
+select = ["F"]
+
+[tool.ruff.lint.per-file-ignores]
+# Copied into every anomaly_scoring task: editing it changes every task's content_sha256, held-out
+# included. Remove the unused import with the family's next version bump.
+"rl/families/anomaly_scoring/verifier/anomaly_verify.py" = ["F401"]

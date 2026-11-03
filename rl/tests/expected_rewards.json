@@ -1,0 +1,106 @@
+{
+ "anomaly-bench-001": {
+  "reference": 0.645,
+  "naive": 0.0
+ },
+ "anomaly-bench-control-01": {
+  "reference": 0.851,
+  "naive": 0.0
+ },
+ "audit-bench-001": {
+  "reference": 0.857,
+  "naive": 0.033
+ },
+ "audit-bench-002": {
+  "reference": 0.75,
+  "naive": 0.065
+ },
+ "audit-bench-003": {
+  "reference": 0.727,
+  "naive": 0.067
+ },
+ "audit-bench-004": {
+  "reference": 1.0,
+  "naive": 0.061
+ },
+ "audit-bench-005": {
+  "reference": 1.0,
+  "naive": 0.068
+ },
+ "audit-bench-006": {
+  "reference": 0.75,
+  "naive": 0.061
+ },
+ "audit-bench-007": {
+  "reference": 0.8,
+  "naive": 0.064
+ },
+ "audit-bench-008": {
+  "reference": 1.0,
+  "naive": 0.031
+ },
+ "audit-bench-009": {
+  "reference": 0.667,
+  "naive": 0.068
+ },
+ "audit-bench-010": {
+  "reference": 1.0,
+  "naive": 0.062
+ },
+ "audit-bench-control-01": {
+  "reference": 1.0,
+  "naive": 0.0
+ },
+ "audit-bench-control-02": {
+  "reference": 0.667,
+  "naive": 0.0
+ },
+ "thesis-bench-001": {
+  "reference": 0.914,
+  "naive": 0.0
+ },
+ "thesis-bench-002": {
+  "reference": 0.973,
+  "naive": 0.02
+ },
+ "thesis-bench-003": {
+  "reference": 0.979,
+  "naive": 0.017
+ },
+ "thesis-bench-004": {
+  "reference": 0.97,
+  "naive": 0.0
+ },
+ "thesis-bench-005": {
+  "reference": 0.974,
+  "naive": 0.019
+ },
+ "thesis-bench-006": {
+  "reference": 0.94,
+  "naive": 0.015
+ },
+ "thesis-bench-007": {
+  "reference": 0.936,
+  "naive": 0.0
+ },
+ "thesis-bench-008": {
+  "reference": 0.965,
+  "naive": 0.0
+ },
+ "thesis-bench-009": {
+  "reference": 0.949,
+  "naive": 0.0
+ },
+ "thesis-bench-010": {
+  "reference": 0.949,
+  "naive": 0.049
+ },
+ "thesis-bench-control-01": {
+  "reference": 0.982,
+  "naive": 0.97
+ },
+ "thesis-bench-control-02": {
+  "reference": 0.985,
+  "naive": 0.98
+ }
+}

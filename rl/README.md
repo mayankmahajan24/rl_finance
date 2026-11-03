@@ -43,6 +43,15 @@ harbor check rl/tasks/bench -a claude-code -m claude-sonnet-5-5   # Harbor's tas
 the Claude Code agent only: verifiers that call a model (growth_thesis memo judge, research_design
 review scorer, kpi_nowcast write-up judge) and the repo's API runners still use `ANTHROPIC_API_KEY`.
 
+**Tests** (`rl/tests/`, run by `.github/workflows/ci.yml` on every PR after a bench rebuild that must
+reproduce the committed manifests): `pip install -r requirements-dev.txt`, then
+
+```sh
+pytest                                   # everything (~4 min; needs built bench tasks)
+pytest -m "not slow"                     # skip the pinned solver rewards (~10 s)
+UPDATE_EXPECTED=1 pytest rl/tests/test_verifiers.py -m slow   # re-record rewards after an intended change
+```
+
 Dependencies: `pip install pandas numpy scipy openpyxl pyyaml anthropic harbor` (versions pinned in
 `../requirements.txt`).
 

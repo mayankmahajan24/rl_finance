@@ -1,0 +1,10 @@
+# The release rl/export.py writes. Bump `version` (semver) and add a CHANGELOG.md entry for it
+# before every export; export.py refuses a version with no entry.
+#
+#   major  a task's reward is no longer comparable across releases: a family's major version moved
+#          (gold, verifier or reward definition changed), or tasks were removed
+#   minor  tasks added, or a family's minor version moved (what the model sees or its sandbox changed)
+#   patch  documentation or task metadata only (a family patch bump at most)
+#
+# A lab diffs two releases task by task with release.json's content_sha256 per task.
+version: 0.1.0

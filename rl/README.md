@@ -25,6 +25,7 @@ python rl/harness/approve.py                           # which families' instrum
 python rl/build.py data_audit --split train --n 200 --controls 20
 python rl/families/research_design/replay.py           # case-study baselines must reproduce
 python rl/harness/run_solutions.py --split bench       # reference should beat naive on every generated family
+python rl/harness/ablation.py --split bench            # every planted item, and every reference step, must earn reward
 python rl/families/research_design/run.py --model claude-opus-5-5 --dry-run
 python rl/families/kpi_nowcast/run.py --variant baseline --dry-run
 JUDGE=keyword python rl/harness/oracle_check.py         # oracle in Docker on a bench sample = local reference rewards

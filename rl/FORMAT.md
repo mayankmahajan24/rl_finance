@@ -80,9 +80,9 @@ The oracle and the probe below need neither.
 
 A **dated** task (a family with `dated: true` in `family.yaml`; today kpi_nowcast) records its
 `as_of` and its image pins the clock to it: libfaketime starts `python` and `date` at noon UTC on
-the as-of date, `$TASK_AS_OF` holds it, and the data files carry it as their mtime. Only those
-commands are faked, so the agent's own process (node, a CLI) keeps the real clock its TLS needs;
-`test.sh` drops the fake clock before the verifier runs. research_design and the generated panel
+the as-of date, `$TASK_AS_OF` holds it, and the data files carry it as their mtime. Only wrappers
+for those commands load it, so the agent's own process (node, a CLI) keeps the real clock its TLS
+needs; `test.sh` drops the fake clock before the verifier runs. research_design and the generated panel
 families have no as-of date: their data carries no "today" for a model to exploit.
 
 `[metadata.environment]` records the policy (`internet = false`, `verifier_hosts`), and

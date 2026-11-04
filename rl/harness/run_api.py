@@ -51,6 +51,9 @@ yourself. The task's files under /app/data are {where}. Whatever the task says t
 the file's full contents
 </file>
 
+PNG charts are the one exception: save them in your sandbox under the name the task gives, and leave them \
+out of your final message; they are collected for you.
+
 Everything else in your final message is ignored."""
 FILE = re.compile(r'<file path="(/app/(?:output|solution)/[^"<>]+)">\n?(.*?)\n?</file>', re.S)
 lock = threading.Lock()
@@ -118,6 +121,7 @@ class Run:
                 msg, usage, _ = client.stream(req, t0 + a.timeout_s, self.api, f"{meta['id']} #{attempt}")
             finally:
                 client.delete(self.api, uploaded)
+            figures = client.generated_pngs(self.api, msg.content)
         except client.DeadlineExceeded as e:
             return dict(fields, status="timeout", error=str(e), latency_s=round(time.time() - t0, 1))
         except Exception as e:  # recorded, never aborts the run
@@ -134,6 +138,9 @@ class Run:
             for rel, body in files.items():
                 (app / rel).parent.mkdir(parents=True, exist_ok=True)
                 (app / rel).write_text(body)
+            for name, data in figures.items():
+                (app / "output" / "figures").mkdir(parents=True, exist_ok=True)
+                (app / "output" / "figures" / name).write_bytes(data)
 
         g = local.grade(task, write, {"JUDGE_MODEL": a.judge} if a.judge else None)
         status = {"refusal": "refusal", "max_tokens": "truncated"}.get(msg.stop_reason, "ok" if files else "parse_error")

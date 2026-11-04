@@ -33,7 +33,7 @@ why:
 
 # Cases taken out of every split. A case seen during harness or grader development can't measure
 # anything, and its company's split rules out moving it to train. Keyed by family, then case
-# (series-period; named and anon variants retire together). Built with split: retired.
+# (series-period; all of its variants retire together). Built with split: retired.
 retired:
   kpi_nowcast:
     ALK-2017Q4: >-

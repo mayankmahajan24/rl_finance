@@ -99,7 +99,7 @@ def answer_for(task) -> str:
     elif fam == "kpi_nowcast":
         g = json.loads((d / "tests" / "gold.json").read_text())
         fc = {"target_period": g["target_period"].replace(" ", ""), "unit": g["unit"], "point": g["actual"],
-              "low": g["actual"] * 0.98, "high": g["actual"] * 1.02, "interval_level": 0.9, "in_sample": [],
+              "low": g["actual"] * 0.98, "high": g["actual"] * 1.02, "interval_level": 0.95, "in_sample": [],
               "vs_consensus": "no_consensus"}
         files = {"output/answer.md": f"Estimate.\n\n```json\n{json.dumps(fc)}\n```"}
     else:
@@ -162,3 +162,14 @@ def test_heldout_needs_opt_in_and_live_runs_need_a_budget():
 def test_answer_files_stay_under_app():
     text = '<file path="/app/output/a.md">\nhi\n</file><file path="/app/output/../../etc/x">\nno\n</file>'
     assert run_api.answer_files(text) == {"output/a.md": "hi"}
+
+
+def test_generated_pngs_keeps_only_sandbox_pngs():
+    names = {"a": "/tmp/fig1.png", "b": "results.csv"}
+    files = SimpleNamespace(retrieve_metadata=lambda i: SimpleNamespace(filename=names[i]),
+                            download=lambda i: SimpleNamespace(read=lambda: i.encode()))
+    refs = [SimpleNamespace(type="bash_code_execution_output", file_id=i) for i in names]
+    content = [SimpleNamespace(type="text"),
+               SimpleNamespace(type="bash_code_execution_tool_result",
+                               content=SimpleNamespace(type="bash_code_execution_result", content=refs))]
+    assert client.generated_pngs(SimpleNamespace(beta=SimpleNamespace(files=files)), content) == {"fig1.png": b"a"}

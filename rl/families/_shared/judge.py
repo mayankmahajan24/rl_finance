@@ -66,14 +66,14 @@ def fingerprint(system: str, schema: dict | None) -> str:
     return hashlib.sha256((system + '\0' + json.dumps(schema, sort_keys=True)).encode()).hexdigest()[:12]
 
 
-def _request(cfg: dict, system: str, user: str, schema: dict | None) -> dict:
+def _request(cfg: dict, system: str, user: str | list, schema: dict | None) -> dict:
     output = {**({'effort': cfg['effort']} if cfg.get('effort') else {}),
               **({'format': {'type': 'json_schema', 'schema': schema}} if schema else {})}
     return {'model': cfg['model'], 'max_tokens': cfg.get('max_tokens', 16000), 'system': PREAMBLE + system,
             'messages': [{'role': 'user', 'content': user}], **({'output_config': output} if output else {})}
 
 
-def judge(system: str, user: str, schema: dict | None = None, cfg: dict | None = None, client=None) -> tuple[list, dict]:
+def judge(system: str, user: str | list, schema: dict | None = None, cfg: dict | None = None, client=None) -> tuple[list, dict]:
     """Ask the judge `votes` times; returns (parsed outputs, one per vote; meta for details.json)."""
     cfg = cfg or config()
     req = _request(cfg, system, user, schema)

@@ -1,24 +1,25 @@
 """Build the kpi_nowcast tasks: nowcast a company's quarterly KPI from transaction sensors.
 
 One agent run per task. The agent gets a sandbox with code execution (no internet) and files:
-  sensor_panel.csv   every sensor ticker, truncated at the as-of date
+  sensor_panel.csv   every sensor ticker of the companies in the case's split, truncated at the as-of date
   actuals.csv        the KPI's reported history: only values filed on or before the as-of date,
                      including restated comparatives, so the agent sees what an analyst saw
-  data_brief.md      the data description that came with the panel
+  data_brief.md      a description of the panel and its known data issues
 and must return an investor write-up plus a forecast JSON for the target quarter.
 
-Each case exists twice: named, and anonymized (tickers replaced with codes, every dollar series
-multiplied by one hidden factor per company). The score gap measures how much remembered
-reported numbers help.
+Each case exists three times: named; coded (tickers replaced with codes, dollars as reported); and
+anon (codes, and every dollar series multiplied by one hidden factor per company). Each brief says
+which it is. The score gaps measure how much recognising the name and remembering reported numbers
+help.
 
 Inputs (all from the txn_panel source, rl/sources/txn_panel/):
   raw/sensor_panel.csv.gz        the full panel (2014-01-01 .. 2018-12-31)
-  assignment/brief.txt           text of the brief that came with the panel
+  assignment/brief.txt           description of the panel, rewritten from the original note
   annotations/company_facts.yaml reporting-basis and structural facts for the judge; low-signal series
   grader_only/kpi_facts.csv      gold KPI facts with filing dates (built by build/sec_xbrl/)
   grader_only/kpi_quarterly.csv  first-reported and restated value per quarter
 
-Each task's split is its company's split (splits/txn_panel.yaml); named and anon versions of a case
+Each task's split is its company's split (splits/txn_panel.yaml); the variants of a case
 (series and quarter, metadata `case`) always share it. Retired cases (listed in that file) get split
 "retired".
 
@@ -42,6 +43,7 @@ import io
 import json
 import math
 import pathlib
+import re
 import random
 import shutil
 import sys
@@ -60,14 +62,26 @@ from sources.txn_panel import panel  # noqa: E402
 
 HERE = pathlib.Path(__file__).resolve().parent
 PROMPTS = HERE / "prompts"
+FIRM = (HERE.parent / "_shared" / "firm.md").read_text().rstrip("\n")
 SEED = 20261018
 
 # Harbor delivery: the API runner attaches the files and reads the final message; a Harbor agent
 # finds the files under /app/data and leaves its final message in a file for the verifier.
 HARBOR_NOTE = ("---\nThe attached files are in /app/data/. When you are done, write your final message "
-               "(the write-up, then the ```json block) to /app/output/answer.md. The container's clock "
+               "(the write-up, then the ```json block) to /app/output/answer.md, and any charts to /app/output/figures/. The container's clock "
                "(`python`, `date`) reads the as-of date, {as_of}, which is also in $TASK_AS_OF.")
-PIP = " statsmodels==0.14.4 scikit-learn==1.5.2"   # agent tooling close to code execution's
+VARIANTS = ("named", "coded", "anon")
+COPY_NOTE = {
+    "named": "Company names, tickers and dollar figures are as they came. Nothing is disguised or rescaled.",
+    "coded": ("Company and ticker names are replaced with codes. Dollar figures, in `amt` and in actuals.csv, are not "
+              "rescaled, and transaction counts and dates are unchanged."),
+    "anon": ("Company and ticker names are replaced with codes. Every dollar figure for a company or segment, in `amt` "
+             "and in actuals.csv, is multiplied by one hidden factor between 0.35 and 2.8; each company or segment has "
+             "its own. Transaction counts and dates are unchanged. Growth rates and the ratio of a company's `amt` to "
+             "its actuals are therefore real. Dollar levels, average ticket size (`amt` / `ct`) and dollar comparisons "
+             "between companies are not."),
+}
+PIP = " statsmodels==0.14.4 scikit-learn==1.5.2 matplotlib==3.9.2"   # agent tooling close to code execution's
 REFERENCE = HERE / "solutions" / "reference"
 
 # Target quarters. Calendar series end on the given dates; fiscal (Jan year-end) series use the
@@ -234,7 +248,7 @@ def reference_answer(gold: dict) -> str:
     """The reference's final message: the gold actual as the forecast."""
     a = gold["actual"]
     fc = {"target_period": gold["target_period"], "unit": gold["unit"], "point": a, "low": round(a * 0.98, 3),
-          "high": round(a * 1.02, 3), "interval_level": 0.9, "in_sample": [], "vs_consensus": "no_consensus"}
+          "high": round(a * 1.02, 3), "interval_level": 0.95, "in_sample": [], "vs_consensus": "no_consensus"}
     return f"Reference forecast: {a} {gold['unit']} for {gold['target_period']}.\n\n```json\n{json.dumps(fc)}\n```\n"
 
 
@@ -263,6 +277,8 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
     for s in SERIES:
         company_id = panel.company_of_series(s["id"])
         split = splits.split_of("txn_panel", company_id)
+        peers = splits.companies("txn_panel", split)     # a task only ever sees its own split's companies
+        peer_sensors = set(panel.sensors_of(peers))
         ends = sorted({e for (sid, e) in quarterly if sid == s["id"]})
         if s["calendar"] == "calendar":
             targets = [e for e in CALENDAR_TARGETS if e in ends]
@@ -280,7 +296,9 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
             seen_periods = set()
             for r in sorted((r for r in facts if r["series"] == s["id"]), key=lambda r: (r["end"], r["filed"])):
                 if r["filed"] <= as_of and r["end"] < target_end:
-                    feed.append({"period_start": r["start"], "period_end": r["end"],
+                    # a derived Q4's start is the end of the nine months it was derived from
+                    start = str(d(r["start"]) + timedelta(days=1)) if r["derived"] == "True" else r["start"]
+                    feed.append({"period_start": start, "period_end": r["end"],
                                  "value_usd_m": r["value_musd"], "reported_on": r["filed"],
                                  "report": "first report" if r["end"] not in seen_periods else "later filing (comparative, may be restated)",
                                  "q4_derived_from_annual": r["derived"]})
@@ -292,34 +310,36 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
             basis = restatement_facts(feed, target_end)
 
             case_split = "retired" if key in retired else split
-            for variant in ("named", "anon"):
-                anon = variant == "anon"
-                f = factor[s["id"]] if anon else 1.0
+            for variant in VARIANTS:
+                anon = variant != "named"      # disguised: codes for names, in coded and anon
+                f = factor[s["id"]] if variant == "anon" else 1.0
                 code = f"{'Airline' if s['calendar'] == 'calendar' else 'Retailer'} {codes[s['sensors'][0]]}"
                 company = code if anon else s["id"].split("_")[0]
                 tickers_shown = [codes[t] for t in s["sensors"]] if anon else s["sensors"]
                 task_id = f"{prefix}-produce-{codes[s['sensors'][0]] if anon else s['id']}-{label.replace(' ', '')}"
                 if anon:
-                    task_id += "-anon"
+                    task_id += f"-{variant}"
                 files = {}
-                # sensor panel truncated at the as-of date; anonymized tickers and dollars in the anon variant
+                # sensor panel truncated at the as-of date; codes in the disguised variants, scaled dollars in anon
                 rows = []
                 for r in rows_all:
-                    if r["date"] > as_of:
+                    if r["date"] > as_of or r["ticker"] not in peer_sensors:
                         continue
                     rr = dict(r)
                     if anon:
                         rr["ticker"] = codes[r["ticker"]]
-                        rr["amt"] = f"{float(r['amt']) * factor[r['ticker']]:.2f}"
+                        if variant == "anon":
+                            rr["amt"] = f"{float(r['amt']) * factor[r['ticker']]:.2f}"
                     rows.append(rr)
                 files["sensor_panel.csv"] = to_csv(rows, ["date", "ct", "amt", "ticker", "industry", "source_id"])
                 feed_out = [dict(r, value_usd_m=f"{float(r['value_usd_m']) * f:.3f}") for r in feed]
                 files["actuals.csv"] = to_csv(feed_out, ["period_start", "period_end", "value_usd_m", "reported_on", "report", "q4_derived_from_annual"])
                 b = brief
                 if anon:
-                    b = b.replace("(i.e., AAL is American Airlines while JWN_RACK is Nordstrom Rack)",
-                                  "(company and ticker names are replaced with codes in this copy)")
-                files["data_brief.md"] = b
+                    b = b.replace("ticker: a company, or a company segment when the ticker contains an underscore",
+                                  "ticker: a company or company segment; company and ticker names are replaced with codes in this copy")
+                    assert "underscore" not in b
+                files["data_brief.md"] = f"{b.rstrip()}\nAbout this copy\n{COPY_NOTE[variant]}\n"
 
                 kw = dict(company=company, kpi=s["kpi"].lower() if not anon else s["kpi"].lower(),
                           industry=INDUSTRY_LABEL["airlines" if s["calendar"] == "calendar" else "department stores"],
@@ -327,7 +347,8 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                           as_of=as_of, first_quarter=quarter_label(s, first_quarter), prior=prior_label,
                           fiscal_note=("calendar quarters" if s["calendar"] == "calendar"
                                        else "fiscal quarters (fiscal year ends late January / early February)"))
-                system = harbor.render(system_t, **kw)
+                system = harbor.render(system_t, firm=FIRM, **kw)
+                dq_shown = [re.sub(r"^\S+", lambda m: codes[m.group()], x) for x in dq] if anon else dq
                 user = harbor.render(user_t, **kw)
                 gold = {"target_period": label, "target_period_end": target_end, "unit": "USD millions",
                         "actual": round(actual * f, 3), "actual_first_filed": q["first_filed"],
@@ -336,12 +357,12 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                         "consensus": None, "consensus_note": "not compiled for v1",
                         "scale_factor": f, "series": s["id"], "kpi": s["kpi"],
                         "facts": {"reporting_basis_and_structural": known_facts(s["id"], as_of) + basis,
-                                  "sensor_data_quality_auto": dq}}
+                                  "sensor_data_quality_auto": dq_shown}}
                 fp = fingerprint(system, user, *[files[k] for k in sorted(files)])
                 meta = {
                     "id": task_id, "family": family_id, "case": key, "role": "quant_researcher",
-                    "workflow": "kpi_nowcast", "mode": "produce", "world": "ls_altdata", "status": "graded",
-                    "source": fam["source"], "split": case_split, "companies": [company_id], "as_of": as_of,
+                    "workflow": "kpi_nowcast", "mode": "produce", "world": "systematic_consumer", "status": "graded",
+                    "source": fam["source"], "split": case_split, "companies": peers, "as_of": as_of,
                     "fingerprint": fp,
                     "prompt": {"template": "families/kpi_nowcast/prompts/{system,user}.md", "files": sorted(files),
                                "file_sha256": {k: hashlib.sha256(files[k].encode()).hexdigest() for k in sorted(files)}},
@@ -371,7 +392,7 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                     keywords=["alt-data", "kpi-nowcast", variant], verifier="verify.py",
                     tests={"verify.py": HERE / "verifier" / "verify.py", "grader.py": HERE / "grader.py",
                            "judge.md": HERE / "judge.md",
-                           "judge_context.json": json.dumps({"user": user, "as_of": as_of}, indent=1)},
+                           "judge_context.json": json.dumps({"user": f"{system}\n\n{user}", "as_of": as_of}, indent=1)},
                     gold=json.dumps(gold, indent=2, ensure_ascii=False) + "\n", judged=True,
                     data=data, prompt=prompt, solution=solution, pip=PIP)
     if only:
@@ -383,5 +404,5 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--only", nargs="*", help="series-period keys like UAL-2018Q4 (named and anon both built)")
+    ap.add_argument("--only", nargs="*", help="series-period keys like UAL-2018Q4 (all three variants built)")
     build("kpi_nowcast", only=ap.parse_args().only)

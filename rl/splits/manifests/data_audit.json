@@ -15,9 +15,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "44bc1e962600",
+  "fingerprint": "d0397e54073f",
   "gold_fingerprint": "95fc3fa577a7",
-  "content_sha256": "ec0f397a7b520d803bf3539ddebb706189c8a188137ccca272c4ebc9ab2b5700"
+  "content_sha256": "24cea699c2b550783adf97b942a068146641b5ac85251cc813fc3c353ee26823"
  },
  "audit-bench-002": {
   "split": "bench",
@@ -35,9 +35,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "7436c53a9b69",
+  "fingerprint": "240d9647fe87",
   "gold_fingerprint": "9bc98700846a",
-  "content_sha256": "2926fa90eca0d5cf669c3ac190e6511df0a6b56a5d51585633b3068c7c1e3e1c"
+  "content_sha256": "17d08393989e86088633a6a7d41718669efe1c8231d9e4de9bab2e0c6ac1ae11"
  },
  "audit-bench-003": {
   "split": "bench",
@@ -55,9 +55,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "79e01e9515d5",
+  "fingerprint": "61458860a1da",
   "gold_fingerprint": "fc0e2bbf18ab",
-  "content_sha256": "7c937ba7d484a36fbebef58b2ca38cccee154f28aa14176b14ff9aca3eb08bcd"
+  "content_sha256": "c2a6559314ad2d2807514a25ce0493a587ce890dc82bfa4c997f8597fc7da3ac"
  },
  "audit-bench-004": {
   "split": "bench",
@@ -75,9 +75,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "7a43279f455d",
+  "fingerprint": "a879d7078ec7",
   "gold_fingerprint": "c516c26f94d0",
-  "content_sha256": "4dd470ddaef9ae6ed005a72e0a9cda61f8ced42bee24ce839ab7ec836b3d6699"
+  "content_sha256": "b3ac35c61c2467a51e0f60ea4094173c4747d06779920f681be83e0eeeab089a"
  },
  "audit-bench-005": {
   "split": "bench",
@@ -95,9 +95,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "9744a98b317e",
+  "fingerprint": "9d067f4a0833",
   "gold_fingerprint": "0ddc2c845434",
-  "content_sha256": "5360d9c0be05d9f8ebcf22c119317882084eec077ca3d86d67093aba477747be"
+  "content_sha256": "3c7795c3b6d86a6df47e15a44d3b032f65168385191a66e5d1d1da582e5245cd"
  },
  "audit-bench-006": {
   "split": "bench",
@@ -115,9 +115,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "eda5908e0f40",
+  "fingerprint": "eb507fe8e72c",
   "gold_fingerprint": "3778e291f4ff",
-  "content_sha256": "4780bed263087d76571e56a8a7396d8dc6919b4057602f9d19739c2dde3db75b"
+  "content_sha256": "7cf3806f2c986e7904793a3fca69a09663ff811637cf8e4315f8d12ab0044a95"
  },
  "audit-bench-007": {
   "split": "bench",
@@ -135,9 +135,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "420183c5f624",
+  "fingerprint": "2a4447617771",
   "gold_fingerprint": "89065b042fe6",
-  "content_sha256": "b9a5be956dc64ea94b5ed275201b495f85e0bc6fda1898d49c90e7fe7c69de41"
+  "content_sha256": "7bd30e56588249114dd095fd417facff0378f3a3e9fe2919f0fbef47e106aa75"
  },
  "audit-bench-008": {
   "split": "bench",
@@ -155,9 +155,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "c66eda99630f",
+  "fingerprint": "89c54f7fe91e",
   "gold_fingerprint": "c17974ef69c9",
-  "content_sha256": "11a255e8351c35eb43274be0dbceccb1576804c78ceb8a1e3847ff0701c27ec8"
+  "content_sha256": "a6e9fdae59a47f6c73003f187541c968eccc5733b5b8fa3371b38acc996a8a14"
  },
  "audit-bench-009": {
   "split": "bench",
@@ -175,9 +175,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "26d7fe671192",
+  "fingerprint": "e2c914b2db31",
   "gold_fingerprint": "955037668fb9",
-  "content_sha256": "5e02898961940588e8c3d23e7beec88e36e4d43313e3f2f59e0672f32da9a60c"
+  "content_sha256": "f5c086bc1ad64417cc99ffae96d4421b3fd3b52eb39d00250cc945495a2297fb"
  },
  "audit-bench-010": {
   "split": "bench",
@@ -195,9 +195,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "86217af7d3e8",
+  "fingerprint": "ee0125eef137",
   "gold_fingerprint": "1109ece76493",
-  "content_sha256": "6569b65bdb52d80245628c18216c3a912466b5a2c0f71bd60bfc5f514419a377"
+  "content_sha256": "3a5393eca900b626081514a77b5ada71dde0b42cd2d6423055b9416479bf0573"
  },
  "audit-bench-control-01": {
   "split": "bench",
@@ -215,9 +215,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "3c26df1d64e1",
+  "fingerprint": "d184a72e2b6d",
   "gold_fingerprint": "d8351670a0f7",
-  "content_sha256": "6759372b81283299bf5ac152ea709fbedb88af88e12176c6da10477f7785798c"
+  "content_sha256": "721e4842af73163864a06413fe0781f35a5263777a0c49ac30cad4c78f0d4b44"
  },
  "audit-bench-control-02": {
   "split": "bench",
@@ -235,9 +235,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "758e7c9642ba",
+  "fingerprint": "f00164b8b31c",
   "gold_fingerprint": "12fa8453ecb9",
-  "content_sha256": "95c12e1e78446fa4c3e864fa7fad8890672ee4f0a7222aea0083f4932d5f6876"
+  "content_sha256": "9b7308cb82e1429c6500e2db5f1e040e4628a9cb6019841b89d3049ef989ae14"
  },
  "audit-heldout-001": {
   "split": "heldout",
@@ -254,9 +254,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "a76db3a60e91",
+  "fingerprint": "5224045bff21",
   "gold_fingerprint": "d9337191616c",
-  "content_sha256": "e1c7bfa7d13e36fbafdc192ae4424615dd2171887548c5915636c03565e5ee6f"
+  "content_sha256": "5a8c1120a56af3a9550f9d34141470833487d91dc605a8a29a42770b7841ce4f"
  },
  "audit-heldout-002": {
   "split": "heldout",
@@ -273,9 +273,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "3a91fa331a60",
+  "fingerprint": "337190fefa4b",
   "gold_fingerprint": "5c10ba11f6e0",
-  "content_sha256": "9ce0725df02fb33b85d4327cf5cb62f3bad0266242bcf7849acac85c40307c80"
+  "content_sha256": "f193fe6c55fac83bce7e0b3ca04a85c46188c5576a2decfe5044239c4b18f0a7"
  },
  "audit-heldout-003": {
   "split": "heldout",
@@ -292,9 +292,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "ba8486b63a37",
+  "fingerprint": "d01d0c0e9fef",
   "gold_fingerprint": "e91db46f87b6",
-  "content_sha256": "368d902924e149da32d2a79487fbefd145fcc33f223223ce036d380a0ab4cbc8"
+  "content_sha256": "d5e8da62f06eaf1470ddcee2e9b7b8ba0de5dcc40cf3ed9bec9d6f0ef5ae8875"
  },
  "audit-heldout-004": {
   "split": "heldout",
@@ -311,9 +311,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "296878d12454",
+  "fingerprint": "c341c890c320",
   "gold_fingerprint": "88d8de2e8265",
-  "content_sha256": "bc03696ac1e32d0527be19640ace3e9b062f4c287ecc082353e12096815dd9de"
+  "content_sha256": "a132a267c134414814f6a8cecbcb15183ad3de37ad1b95216cfd309cf29f0000"
  },
  "audit-heldout-005": {
   "split": "heldout",
@@ -330,9 +330,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "e1ead2f40b97",
+  "fingerprint": "9b566f3e92bb",
   "gold_fingerprint": "8e6d90d3ea77",
-  "content_sha256": "2fd9ffcb323547c22e2a5622d032c5c6a56e16de35b44f57dcdf3d6ca81f5267"
+  "content_sha256": "7e593c85a35d56cf888bcda9b921f50a358fb7efcbba3fb428211d5beda283d2"
  },
  "audit-heldout-006": {
   "split": "heldout",
@@ -349,9 +349,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "55527a87c3a5",
+  "fingerprint": "d73e950b3db5",
   "gold_fingerprint": "030a5ca74cbd",
-  "content_sha256": "b9bbc0c5ae72127951c6d9699e239e4920add8c2b4a70bc1ebb89215f92654db"
+  "content_sha256": "2098c0dd5c07ce5e19f46ed976bab9ee6679c5cb6c3d1ab42419a8820da05878"
  },
  "audit-heldout-007": {
   "split": "heldout",
@@ -368,9 +368,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "17b4f09c3291",
+  "fingerprint": "b37eaac54284",
   "gold_fingerprint": "d2ec999eb652",
-  "content_sha256": "dcddb2683d4196af4be6d22593f7c351f786ba3889dc371ae86e29f71cead017"
+  "content_sha256": "8af38325cddffbc5c3c54a09b1c85c6c7f96beee1ac1659c911a34a96df54670"
  },
  "audit-heldout-008": {
   "split": "heldout",
@@ -387,9 +387,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "ca0e87fda4c8",
+  "fingerprint": "e1f181960d25",
   "gold_fingerprint": "a6445f76a577",
-  "content_sha256": "af183426e0056ffb8a67093c3843c45f843340cbf7e9f1277f8e3440da5695e9"
+  "content_sha256": "64ac6fbf9e0117d3b89d3cd41beac32cc33b32588f567c9072510c8bc6b740e6"
  },
  "audit-heldout-009": {
   "split": "heldout",
@@ -406,9 +406,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "41934d623e30",
+  "fingerprint": "2826d21e194a",
   "gold_fingerprint": "a91e848aee6d",
-  "content_sha256": "239cd420da88c82a2a4667ce2154575898b42c24faf239f58d405919eba70c4d"
+  "content_sha256": "6b7fcdcef857b4eb1c2d2bf9b29df1c3cd587d9a86cfe10ec75a8f2c0becd065"
  },
  "audit-heldout-010": {
   "split": "heldout",
@@ -425,9 +425,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "7ec8a550d3bc",
+  "fingerprint": "f8066a06ea4f",
   "gold_fingerprint": "46a9d94982ed",
-  "content_sha256": "0af2022ea818bfaaa8646190c384d6d9ab966716825021b55b679c6fa21f28e8"
+  "content_sha256": "632e0c553bbefae6db295f1a07c1c6826224f4dfbbb592c4ffa3dd293f0fbaf5"
  },
  "audit-heldout-control-01": {
   "split": "heldout",
@@ -444,9 +444,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "2f0b8696fa5b",
+  "fingerprint": "f94f8e2552f1",
   "gold_fingerprint": "572e679afb30",
-  "content_sha256": "a138234fc484a8e69ed3c0089e0b0b33acfeb34e05fa2f66fd3bd5d51b21e63e"
+  "content_sha256": "48180653f15300afc9fba086163a92a4df8c7d0a82cc4afcddce2515f6674e5c"
  },
  "audit-heldout-control-02": {
   "split": "heldout",
@@ -463,9 +463,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "fe464a5627ce",
+  "fingerprint": "06068d5b917e",
   "gold_fingerprint": "6a817fdd67a1",
-  "content_sha256": "e365ae78cd85d5783110a57b9a16411f17f0696212aaf67aa6cd2c7e159303ce"
+  "content_sha256": "2db72150a4b2c4d67a62dac7b79bf7513a17e7c358bbcbc2fac714e4c117a7e0"
  },
  "audit-train-001": {
   "split": "train",
@@ -487,9 +487,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "a8bac707a92e",
+  "fingerprint": "4a934dce2407",
   "gold_fingerprint": "ca76dd1afe23",
-  "content_sha256": "c39dba14ccfa2f5062fda901235c28dfa0a8ea55e4aea6726ad5f6ea59a02055"
+  "content_sha256": "650c3719b286783206378b3451ad91085d51def4710458bee7749a5d0c4f0be4"
  },
  "audit-train-002": {
   "split": "train",
@@ -511,9 +511,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "9072708bbc90",
+  "fingerprint": "eaab3c8af44c",
   "gold_fingerprint": "06b3e919686c",
-  "content_sha256": "0d18e33b2e74d3c38c4112a9e39fc9fabfcdd899fe34b3dcb2048690fbee5147"
+  "content_sha256": "5112b47e26f2fdeb895a2d807d1f362c2e4d98009e4e196bc7e16cb962fd8155"
  },
  "audit-train-003": {
   "split": "train",
@@ -535,9 +535,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "019565ec0757",
+  "fingerprint": "81df0a8d3b1f",
   "gold_fingerprint": "7a2e01aef87d",
-  "content_sha256": "cdce3f99319c874a04c03efac3db5839c115f6bcae8e79e4ece58a949594ad19"
+  "content_sha256": "6145474ea9e05ddd2a71ec0ab7f60a1a66445e7cc9e8241c566aa49828eb4912"
  },
  "audit-train-control-01": {
   "split": "train",
@@ -559,8 +559,8 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "0edd3da20cd9",
+  "fingerprint": "7631ed7d188e",
   "gold_fingerprint": "1d0c65b3f113",
-  "content_sha256": "b76f366aa2fad9db1a59476857e8b53375c678c470e2228d5bb6f877eef94a49"
+  "content_sha256": "de5cce6c483aba3004aa6bb73dfcc635db918a7a98a52832adfc340b507fc446"
  }
 }

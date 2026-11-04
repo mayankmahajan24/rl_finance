@@ -32,9 +32,9 @@ CANARY) sits where the agent can see it.
 **Contamination.** Every task's grader-only `tests/CANARY` holds the release's canary
 (`canary.txt`, replaced with each release), and the export's datasheet prints it.
 `python rl/harness/canary_probe.py --model <m>` asks a model to complete it.
-`python rl/harness/memorisation.py <results.jsonl>` compares a model's scores on the named and
-anonymised variants of the same kpi_nowcast case: a named-variant advantage suggests memory of the
-real company.
+`python rl/harness/memorisation.py <results.jsonl>` compares a model's scores across the three variants of
+a kpi_nowcast case (named; coded: names hidden, dollars real; anon: names hidden, dollars rescaled).
+An advantage for the variant showing more suggests memory of the real company.
 
 **Two ways to run a task.** Harbor runs the agent in the container from `instruction.md`.
 `harness/run_api.py` sends the same `instruction.md` and `/app/data` files through the Messages API
@@ -129,7 +129,7 @@ anything else there and clears `PYTHONPATH` before running the verifier.
 | `role` | Who does this work at a fund: `fundamental_analyst`, `quant_researcher`, `pm`, `risk` |
 | `workflow` | The job within the role, e.g. `research_design`, `kpi_nowcast`, `data_audit` |
 | `mode` | `produce` (do the work), `review` (find what is wrong with given work), `compare` (choose between two pieces of work), `revise` (fix work given a critique) |
-| `world` | The kind of fund the task is set in (research_design: the firm brief from `sources/research_design_case/contexts.json`) |
+| `world` | The kind of fund the task is set in (research_design: the firm brief from `sources/research_design_case/contexts.json`; kpi_nowcast: `families/_shared/firm.md`) |
 | `status` | `graded`: gold exists and the grader runs (every task built today) |
 | `split` | `train`, `bench`, `heldout`; `eval` for a source with no split assignment; `retired` for a retired case (`splits/README.md`). Always the folder the task is in |
 | `companies` | Companies whose data the task contains (sources with a company split) |

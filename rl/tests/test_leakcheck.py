@@ -55,7 +55,8 @@ def test_identity_and_allowlist(task):
     assert any("'https://'" in x for x in p) and any("'rl_finance'" in x for x in p)
     assert any("'benchmark task'" in x for x in p)
     d, m = task("bench", "kn-produce-AIR02-2017Q4-anon")
-    assert "Card-transaction sensor panel" in (d / "environment" / "data" / "data_brief.md").read_text()
+    brief = (d / "environment" / "data" / "data_brief.md").read_text()
+    assert "Transaction sensor panel" in brief and "replaced with codes" in brief and "underscore" not in brief
     assert leakcheck.task_problems(d, m) == []
 
 
@@ -94,4 +95,4 @@ def test_memorisation_gap():
     paired = memorisation.pairs([rec("kn-UAL", 0.5, 1), rec("kn-AIR03-anon", 0.05), rec("kn-UAL", 0.01)], case_of)
     assert paired["m"] == [({"abs_pct_error": 0.01, "covered": 1.0}, {"abs_pct_error": 0.05, "covered": 1.0})]
     g = memorisation.gaps(paired["m"])
-    assert g["abs_pct_error"]["named_advantage"] == pytest.approx(0.04) and g["covered"]["named_advantage"] == 0
+    assert g["abs_pct_error"]["advantage"] == pytest.approx(0.04) and g["covered"]["advantage"] == 0

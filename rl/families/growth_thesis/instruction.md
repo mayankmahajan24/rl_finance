@@ -1,6 +1,8 @@
 # Thesis: which airline is growing fastest?
 
-You are a data scientist at an investment firm. A portfolio manager asks: **which airline grew its underlying
+{firm}
+
+A portfolio manager asks: **which airline grew its underlying
 transaction activity the fastest between calendar year {y1} and calendar year {y2}?** They want the growth of the
 company's real activity, not of any one data vendor's panel.
 

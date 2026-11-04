@@ -1,18 +1,18 @@
 id: kpi_nowcast
 task_prefix: kn
 description: Nowcast a company's quarterly KPI from the transaction-sensor panel and its filed actuals
-version: 2.0.0          # bump when the family's tasks change in a way results can't be compared across
+version: 3.0.0          # bump when the family's tasks change in a way results can't be compared across
 authors:
   - name: Mayank Mahajan
 role: [quant_researcher]
 workflow: [kpi_nowcast]
 mode: [produce]          # write-up + forecast JSON
-world: [ls_altdata]
+world: [systematic_consumer]
 source: txn_panel
 format: harbor
 tools: [code_execution]
 dated: true              # every task has an as_of; the container clock is pinned to it (splits/check.py)
-builder: families.kpi_nowcast.build   # case: series and quarter; its named and anonymised variants share a split
+builder: families.kpi_nowcast.build   # case: series and quarter; its three variants share a split
 verifier: verifier/verify.py
 verifier_timeout_sec: 600
 gold_file: gold.json
@@ -21,7 +21,7 @@ reward: >-
   Diagnostics, never blended in: abs % error, coverage, interval score (code) and the C1-C12 write-up
   rubric (LLM judge; left out when the judge can't run)
 rubric_visibility: partial  # the instruction states the fund's write-up conventions (headline estimate, range
-                            # and units first; in-sample accuracy next to a simple benchmark; low <= point <= high)
+                            # and units first; walk-forward accuracy next to a simple benchmark; low <= point <= high)
                             # but not the judgment items (C2-C5, C7, C9, C11, C12): models are graded on whether
                             # they do what a careful analyst would, unprompted. Deliberate.
 judge:                   # the write-up judge (judge.md); pinned, part of the instrument (families/_shared/judge.py)
@@ -41,9 +41,11 @@ instrument:              # what decides what the model sees and how it is scored
   - families/kpi_nowcast/grader.py
   - families/kpi_nowcast/judge.md
   - families/kpi_nowcast/prompts/*.md
+  - families/_shared/firm.md
   - families/kpi_nowcast/schema.json
   - families/kpi_nowcast/verifier/verify.py
   - sources/txn_panel/panel.py
+  - sources/txn_panel/assignment/brief.txt
   - families/kpi_nowcast/family.yaml       # pins the judge
 calibration:             # scored metric and pass threshold for rl/harness/calibrate.py; proposed, Mayank to confirm
   metric: reward
@@ -52,6 +54,6 @@ leak_check:              # gold fields that must never appear where the agent ca
   gold_numbers:
     gold.json: [actual]
   number_exempt: [sensor_panel.csv]   # daily counts and dollars: a bare long number there is coincidence
-  anonymised:              # anon variants: no real name, ticker or series id of the task's company
-    tag: anon
-    exempt: [data_brief.md]  # the vendor's note on the sensors, the same for every task
+  anonymised:              # disguised variants: no real name, ticker or series id of the task's company
+    tags: [coded, anon]
+    exempt: [data_brief.md]  # the panel description; names no company

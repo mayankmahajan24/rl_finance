@@ -11,12 +11,17 @@ gets schema_ok = 0, reward 0 and no other accuracy metrics (no answer is not a w
 
 from __future__ import annotations
 
+import base64
 import json
 import pathlib
 import re
 
 HERE = pathlib.Path(__file__).resolve().parent
 ITEMS = [f"C{i}" for i in range(1, 13)]
+INTERVAL_LEVEL = 0.95
+MAX_FIGURES = 4
+MAX_FIGURE_BYTES = 3_500_000   # the API's 5 MB image limit applies after base64
+PNG = b"\x89PNG\r\n\x1a\n"
 JSON_BLOCK = re.compile(r"```json\s*(\{.*?\})\s*```", re.S)
 REQUIRED = ["target_period", "point", "low", "high", "interval_level", "in_sample"]
 
@@ -40,8 +45,8 @@ def parse_response(text: str) -> tuple[dict | None, str, str | None]:
             fc[k] = float(fc[k])
     except (TypeError, ValueError) as e:
         return None, writeup, f"non-numeric field: {e}"
-    if not (fc["low"] <= fc["point"] <= fc["high"]) or not (0 < fc["interval_level"] < 1):
-        return None, writeup, "range does not contain point, or interval_level outside (0, 1)"
+    if not (fc["low"] <= fc["point"] <= fc["high"]) or fc["interval_level"] != INTERVAL_LEVEL:
+        return None, writeup, f"range does not contain point, or interval_level is not {INTERVAL_LEVEL}"
     return fc, writeup, None
 
 
@@ -98,6 +103,18 @@ def judge_prompt(task_user: str, as_of: str, writeup: str, fc: dict | None, gold
             f"<forecast_json>\n{json.dumps(fc, indent=2) if fc else '(missing or invalid)'}\n</forecast_json>\n\n"
             f"<writeup>\n{writeup or '(empty)'}\n</writeup>")
     return (HERE / "judge.md").read_text(), user
+
+
+def figure_blocks(folder: pathlib.Path) -> list[dict]:
+    """Content blocks for the author's charts: the first MAX_FIGURES valid PNGs, each after its name."""
+    blocks = []
+    for f in sorted(folder.glob("*.png"))[:MAX_FIGURES] if folder.is_dir() else []:
+        data = f.read_bytes()
+        if data.startswith(PNG) and len(data) <= MAX_FIGURE_BYTES:
+            blocks += [{"type": "text", "text": f"figures/{f.name}"},
+                       {"type": "image", "source": {"type": "base64", "media_type": "image/png",
+                                                    "data": base64.b64encode(data).decode()}}]
+    return blocks
 
 
 def grade_writeup(verdicts: dict) -> dict:

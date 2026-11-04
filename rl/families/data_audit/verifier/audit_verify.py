@@ -15,7 +15,7 @@ import json
 
 import pandas as pd
 
-from common import APP, f1, load_truth, write_reward
+from common import APP, f1, load_gold, write_reward
 
 ISSUE_TYPES = ['duplicate_rows', 'swapped_columns', 'unit_scale', 'date_shift', 'series_swap',
                'double_count', 'outage', 'level_shift', 'ticker_remap']
@@ -35,7 +35,7 @@ def _d(x):
 def matches(rep, tr, tol):
     if rep.get('type') not in COMPATIBLE.get(tr['type'], {tr['type']}):
         return False
-    tickers = {tr['ticker'], tr.get('other_ticker')}
+    tickers = {tr['ticker'], tr.get('other_ticker')} - {None}
     if rep.get('ticker') not in tickers:
         return False
     if tr['source_id'] is not None and rep.get('source_id') not in (None, tr['source_id']):
@@ -59,7 +59,7 @@ def optional_match(rep, opt):
 
 
 def main():
-    truth = load_truth()
+    truth = load_gold()
     tol = truth['date_tolerance_days']
     try:
         reported = json.loads((APP / 'output' / 'issues.json').read_text())

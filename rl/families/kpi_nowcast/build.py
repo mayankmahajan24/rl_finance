@@ -19,12 +19,15 @@ Inputs (all from the txn_panel source, rl/sources/txn_panel/):
   grader_only/kpi_quarterly.csv  first-reported and restated value per quarter
 
 Each task's split is its company's split (splits/txn_panel.yaml); named and anon versions of a case
-always share it. Retired cases (listed in that file) get split "retired".
+(series and quarter, metadata `case`) always share it. Retired cases (listed in that file) get split
+"retired".
 
 Tasks are written in Harbor layout to rl/tasks/<split>/<task_id>/ (families/_shared/harbor.py):
-prompt/ holds the exact system and user messages run.py sends (the fingerprinted instrument), and
+prompt/ holds the exact system and user messages the API runner (rl/harness/run_api.py) sends (the fingerprinted instrument), and
 instruction.md the same text plus a note on where a Harbor agent finds the files and writes its
-answer. What was built is recorded in splits/manifests/kpi_nowcast.json.
+answer. solution/ holds the reference (the gold forecast, for Harbor's oracle) and the target the
+naive solution (solutions/naive: last year's seasonal step) needs. What was built is recorded in
+splits/manifests/kpi_nowcast.json.
 
 usage: python rl/build.py kpi_nowcast   (or this file directly, with [--only UAL-2018Q4 ...])
 """
@@ -45,12 +48,9 @@ import sys
 from collections import defaultdict
 from datetime import date, timedelta
 
-import yaml
-
 RL = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(RL))
 sys.path.insert(0, str(RL / "sources" / "txn_panel" / "build" / "sec_xbrl"))
-import leakcheck  # noqa: E402
 import lib  # noqa: E402
 import splits  # noqa: E402
 from families._shared import harbor  # noqa: E402
@@ -68,9 +68,7 @@ HARBOR_NOTE = ("---\nThe attached files are in /app/data/. When you are done, wr
                "(the write-up, then the ```json block) to /app/output/answer.md. The container's clock "
                "(`python`, `date`) reads the as-of date, {as_of}, which is also in $TASK_AS_OF.")
 PIP = " statsmodels==0.14.4 scikit-learn==1.5.2"   # agent tooling close to code execution's
-FAMILY = yaml.safe_load((HERE / "family.yaml").read_text())
-JUDGE_ENV = ('\n[verifier.env]\n# LLM judge for the write-up (C1-C12, tests/judge.json); without a key only accuracy is scored\n'
-             'ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY:-}"\n')
+REFERENCE = HERE / "solutions" / "reference"
 
 # Target quarters. Calendar series end on the given dates; fiscal (Jan year-end) series use the
 # fiscal quarter that ends nearest each anchor.
@@ -232,18 +230,22 @@ def naive_forecast(feed: list[dict], target_end: str) -> float | None:
     return latest[last] * first[t_ly] / first[l_ly]
 
 
-def render(template: str, **kw) -> str:
-    out = template
-    for k, v in kw.items():
-        out = out.replace("{{" + k + "}}", str(v))
-    assert "{{" not in out, out[out.index("{{"):out.index("{{") + 40]
-    return out
+def reference_answer(gold: dict) -> str:
+    """The reference's final message: the gold actual as the forecast."""
+    a = gold["actual"]
+    fc = {"target_period": gold["target_period"], "unit": gold["unit"], "point": a, "low": round(a * 0.98, 3),
+          "high": round(a * 1.02, 3), "interval_level": 0.9, "in_sample": [], "vs_consensus": "no_consensus"}
+    return f"Reference forecast: {a} {gold['unit']} for {gold['target_period']}.\n\n```json\n{json.dumps(fc)}\n```\n"
 
 
-def main(argv: list[str] | None = None) -> None:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--only", nargs="*", help="series-period keys like UAL-2018Q4 (named and anon both built)")
-    args = ap.parse_args(argv)
+def build(family_id: str, split_names: list[str] | None = None, n: int | None = None,
+          controls: int | None = None, only: list[str] | None = None) -> None:
+    """Build every case, each in its company's split (`split_names` doesn't narrow it); `only` rewrites
+    just those cases and leaves the manifest alone."""
+    if n is not None or controls is not None:
+        raise SystemExit(f"{family_id} has one task per case: --n and --controls apply to generated families")
+    fam = lib.family(family_id)
+    prefix = fam["task_prefix"]
 
     rows_all = read_csv(panel.RAW)
     facts = read_csv(panel.GRADER_ONLY / "kpi_facts.csv")
@@ -254,10 +256,10 @@ def main(argv: list[str] | None = None) -> None:
     codes, factor = anon_codes()
     retired = splits.retired("txn_panel", "kpi_nowcast")
 
-    if not args.only:   # a full build replaces every kpi_nowcast task; --only rewrites just those cases
-        for old in TASKS.glob("*/kn-produce-*"):
+    if not only:   # a full build replaces every task of the family; --only rewrites just those cases
+        for old in TASKS.glob(f"*/{prefix}-*"):
             shutil.rmtree(old)
-    built, problems = {}, []
+    built = {}
     for s in SERIES:
         company_id = panel.company_of_series(s["id"])
         split = splits.split_of("txn_panel", company_id)
@@ -269,7 +271,7 @@ def main(argv: list[str] | None = None) -> None:
         for target_end in targets:
             label = quarter_label(s, target_end)
             key = f"{s['id']}-{label.replace(' ', '')}"
-            if args.only and key not in args.only:
+            if only and key not in only:
                 continue
             as_of = target_end
             q = quarterly[(s["id"], target_end)]
@@ -296,7 +298,7 @@ def main(argv: list[str] | None = None) -> None:
                 code = f"{'Airline' if s['calendar'] == 'calendar' else 'Retailer'} {codes[s['sensors'][0]]}"
                 company = code if anon else s["id"].split("_")[0]
                 tickers_shown = [codes[t] for t in s["sensors"]] if anon else s["sensors"]
-                task_id = f"kn-produce-{codes[s['sensors'][0]] if anon else s['id']}-{label.replace(' ', '')}"
+                task_id = f"{prefix}-produce-{codes[s['sensors'][0]] if anon else s['id']}-{label.replace(' ', '')}"
                 if anon:
                     task_id += "-anon"
                 files = {}
@@ -325,8 +327,8 @@ def main(argv: list[str] | None = None) -> None:
                           as_of=as_of, first_quarter=quarter_label(s, first_quarter), prior=prior_label,
                           fiscal_note=("calendar quarters" if s["calendar"] == "calendar"
                                        else "fiscal quarters (fiscal year ends late January / early February)"))
-                system = render(system_t, **kw)
-                user = render(user_t, **kw)
+                system = harbor.render(system_t, **kw)
+                user = harbor.render(user_t, **kw)
                 gold = {"target_period": label, "target_period_end": target_end, "unit": "USD millions",
                         "actual": round(actual * f, 3), "actual_first_filed": q["first_filed"],
                         "actual_source": q["first_source"], "actual_q4_derived": q["first_derived"] == "True",
@@ -337,11 +339,11 @@ def main(argv: list[str] | None = None) -> None:
                                   "sensor_data_quality_auto": dq}}
                 fp = fingerprint(system, user, *[files[k] for k in sorted(files)])
                 meta = {
-                    "id": task_id, "family": "kpi_nowcast", "role": "quant_researcher", "workflow": "kpi_nowcast",
-                    "mode": "produce", "world": "ls_altdata", "status": "graded", "source": "txn_panel",
-                    "split": case_split, "companies": [company_id], "as_of": as_of,
-                    "prompt": {"template": "families/kpi_nowcast/prompts/{system,user}.md", "fingerprint": fp,
-                               "files": sorted(files),
+                    "id": task_id, "family": family_id, "case": key, "role": "quant_researcher",
+                    "workflow": "kpi_nowcast", "mode": "produce", "world": "ls_altdata", "status": "graded",
+                    "source": fam["source"], "split": case_split, "companies": [company_id], "as_of": as_of,
+                    "fingerprint": fp,
+                    "prompt": {"template": "families/kpi_nowcast/prompts/{system,user}.md", "files": sorted(files),
                                "file_sha256": {k: hashlib.sha256(files[k].encode()).hexdigest() for k in sorted(files)}},
                     "environment": {"tools": ["code_execution"], "internet": False},
                     "output_schema": "families/kpi_nowcast/schema.json",
@@ -355,35 +357,31 @@ def main(argv: list[str] | None = None) -> None:
                     "meta": {"series": s["id"], "company": company_id, "variant": variant, "as_of": as_of, "target_period": label,
                              "sensors": s["sensors"], "low_signal": LOW_SIGNAL.get(s["id"])},
                 }
-                gold_text = json.dumps(gold, indent=2, ensure_ascii=False) + "\n"
                 data = {"sensor_panel.csv.gz": gzip.compress(files["sensor_panel.csv"].encode(), mtime=0),
                         "actuals.csv": files["actuals.csv"], "data_brief.md": files["data_brief.md"]}
                 prompt = {"system.md": system + "\n", "user.md": user + "\n",
                           "inputs.json": json.dumps(kw, indent=2, ensure_ascii=False) + "\n"}
                 instruction = f"{system}\n\n{user}\n\n{HARBOR_NOTE.format(as_of=as_of)}\n"
-                tdir = TASKS / case_split / task_id
-                content = harbor.write(tdir, family=FAMILY, builder="rl/families/kpi_nowcast/build.py",
-                             instruction=instruction, metadata=meta,
-                             description=f"Nowcast {company}'s {label} {s['kpi'].lower()} from transaction sensors",
-                             keywords=["alt-data", "kpi-nowcast", variant], verifier="verify.py",
-                             tests={"verify.py": HERE / "verifier" / "verify.py", "grader.py": HERE / "grader.py",
-                                    "judge.md": HERE / "judge.md", "gold.json": gold_text,
-                                    "judge_context.json": json.dumps({"user": user, "as_of": as_of}, indent=1)},
-                             verifier_env=JUDGE_ENV, data=data, prompt=prompt, pip=PIP, test_pip=harbor.JUDGE_PIP)
-                problems += leakcheck.task_problems(tdir, lib.task_meta(tdir))
-                built[task_id] = {"split": case_split, "role": meta["role"], "workflow": meta["workflow"],
-                                  "mode": meta["mode"], "world": meta["world"], "status": meta["status"],
-                                  "companies": meta["companies"], "fingerprint": fp,
-                                  "gold_fingerprint": fingerprint(gold_text), "content_sha256": content}
-    if problems:
-        print("\n".join(problems))
-        raise SystemExit(f"leak check failed: {len(problems)} problems")
-    if args.only:
-        print(f"{len(built)} tasks rewritten (partial build: manifest not updated); leak check passed")
+                solution = {"solve.sh": REFERENCE / "solve.sh", "answer.md": reference_answer(gold),
+                            "params.json": json.dumps({"target_period": label, "target_end": target_end})}
+                built[task_id] = harbor.write(
+                    TASKS / case_split / task_id, family=fam, builder="rl/families/kpi_nowcast/build.py",
+                    instruction=instruction, metadata=meta,
+                    description=f"Nowcast {company}'s {label} {s['kpi'].lower()} from transaction sensors",
+                    keywords=["alt-data", "kpi-nowcast", variant], verifier="verify.py",
+                    tests={"verify.py": HERE / "verifier" / "verify.py", "grader.py": HERE / "grader.py",
+                           "judge.md": HERE / "judge.md",
+                           "judge_context.json": json.dumps({"user": user, "as_of": as_of}, indent=1)},
+                    gold=json.dumps(gold, indent=2, ensure_ascii=False) + "\n", judged=True,
+                    data=data, prompt=prompt, solution=solution, pip=PIP)
+    if only:
+        print(f"{len(built)} tasks rewritten (partial build: manifest not updated)")
         return
-    mpath = splits.write_manifest("kpi_nowcast", built)
-    print(f"{len(built)} tasks written to {TASKS.relative_to(RL.parent)}/<split>/; {mpath.relative_to(RL.parent)}; leak check passed")
+    mpath = splits.write_manifest(family_id, built)
+    print(f"{len(built)} tasks written to {TASKS.relative_to(RL.parent)}/<split>/; {mpath.relative_to(RL.parent)}")
 
 
 if __name__ == "__main__":
-    main()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--only", nargs="*", help="series-period keys like UAL-2018Q4 (named and anon both built)")
+    build("kpi_nowcast", only=ap.parse_args().only)

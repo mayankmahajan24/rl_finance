@@ -6,8 +6,9 @@
       environment/Dockerfile, environment/data/...   what the agent sees, under /app
       prompt/                            exact messages for the repo's API runners (model-visible;
                                          only families with an API runner have it)
-      tests/test.sh, tests/<verifier>, tests/common.py, gold   copied in only after the agent finishes
-      tests/judge.py, tests/judge.json   the shared model judge and the family's pinned judge config (judged verifiers)
+      tests/test.sh, tests/<verifier>, tests/common.py, tests/<gold_file>   copied in only after the agent finishes
+      tests/judge.py, tests/client.py, tests/judge.json   the shared model judge, its API client and the
+                                         family's pinned judge config (judged tasks)
       tests/provenance.json              who produced each of the family's gold inputs and its review state
       tests/CANARY                       the release's contamination canary (rl/canary.txt), never agent-visible
       tests/FILES                        every file tests/ ships; test.sh deletes anything else found in /tests
@@ -16,16 +17,17 @@
 
 Integrity: task.toml [metadata.build] records when and from what the task was built (UTC time, or
 SOURCE_DATE_EPOCH when set; repo commit and whether tracked files had uncommitted changes, builder,
-Python and library versions, sha256 of the source's files). `content_sha256` (returned, and recorded in the family's manifest)
-hashes everything except that build record, so it is identical across rebuilds of the same
-content. The base image is pinned by digest and every pip package by version; packages only the
+Python and library versions, sha256 of the source's files). `content_sha256` hashes everything
+except that build record, so it is identical across rebuilds of the same content. `write` returns
+the task's manifest entry (splits/manifests/<family>.json): its split, case, fingerprint and the
+other metadata in MANIFEST, the gold's fingerprint and content_sha256. The base image is pinned by digest and every pip package by version; packages only the
 verifier needs are installed by test.sh, not baked into the agent's image.
 
 Point in time: the agent phase has no network ([agent] network_mode = "no-network"), and neither
 does the container between phases ([environment]). A run that needs the agent's model API (Claude
 Code, Codex) or an agent install adds those hosts from the run config (`harbor run
 --allow-agent-host`, `--allow-environment-host`), never from the task. The verifier reaches only
-VERIFIER_HOSTS, and only when it calls a judge. A dated task (`as_of`) pins the clock: libfaketime
+VERIFIER_HOSTS, and only when it calls a judge (a `judged` task). A dated task (`as_of`) pins the clock: libfaketime
 makes `python` and `date` start at the as-of date, and data files carry it as their mtime. The
 agent's own process (node, a CLI) keeps the real clock so its TLS still works; test.sh drops the
 fake clock before the verifier runs. [metadata.environment] records the policy and
@@ -43,8 +45,8 @@ import json
 import os
 import pathlib
 import platform
+import re
 import shutil
-import subprocess
 import sys
 from datetime import datetime, timezone
 
@@ -52,7 +54,7 @@ import toml
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 import provenance  # noqa: E402
-from lib import fingerprint  # noqa: E402
+from lib import fingerprint, git  # noqa: E402
 
 HERE = pathlib.Path(__file__).resolve().parent
 
@@ -82,24 +84,31 @@ ENV TZ=UTC TASK_AS_OF={as_of} FAKETIME="@{as_of} 12:00:00" FAKETIME_ONLY_CMDS=py
 # task didn't ship (tests/FILES), so nothing planted there is imported by the verifier.
 TEST_CLEANUP = "cd /tests && find . -type f | sed 's|^\\./||' | grep -vxF -f FILES | tr '\\n' '\\0' | xargs -0 rm -f --"
 TEST_SH = """#!/bin/bash
-# Harbor copies this directory to /tests after the agent finishes; the reward goes to /logs/verifier/reward.txt.
+# Harbor copies this directory to /tests after the agent finishes; the verifier writes /logs/verifier/reward.txt
+# or reward.json. A verifier that crashes writes neither, so Harbor records an error, never a zero.
 mkdir -p /logs/verifier
 """ + TEST_CLEANUP + """
 cd /tests
 unset LD_PRELOAD FAKETIME   # the verifier runs on the real clock (a dated task fakes it for the agent)
 unset PYTHONPATH PYTHONSTARTUP PYTHONHOME; export PYTHONNOUSERSITE=1
-{install}python /tests/{verifier} || echo 0 > /logs/verifier/reward.txt
+{install}python /tests/{verifier}
 """
-TEST_PIP = ("pip install --no-cache-dir --quiet {pkgs} "
-            "|| echo 'verifier packages not installed; LLM grading will be skipped or fail' >&2\n")
-
-JUDGE_ENV = ('\n[verifier.env]\n# LLM judge for the memo rubric (tests/judge.json); without a key the memo is not graded,\n'
-             '# unless JUDGE=keyword opts into the keyword grader\n'
+# a judged verifier installs the judge client; if that fails, the judge reports itself unavailable
+JUDGE_INSTALL = ("pip install --no-cache-dir --quiet " + JUDGE_PIP
+                 + " || echo 'judge client not installed; judged metrics will not be graded' >&2\n")
+JUDGE_ENV = ('\n[verifier.env]\n# the pinned model judge (tests/judge.json); without a key, judged metrics are not\n'
+             '# graded (JUDGE=keyword opts growth_thesis into its keyword grader)\n'
              'ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY:-}"\nJUDGE = "${JUDGE:-auto}"\n')
+
+# file names under tests/ that only the grader may see: the gold (every family's `gold_file`) and the canary
+GRADER_ONLY = ("gold.json", "CANARY")
+# task metadata recorded in the family's manifest, where the task has it
+MANIFEST = ("split", "case", "role", "workflow", "mode", "world", "status", "seed", "control", "companies", "fingerprint")
 
 COMMON = HERE / "verify_common.py"
 JUDGE = HERE / "judge.py"
 RL = HERE.parents[1]
+CLIENT = RL / "harness" / "client.py"   # the model client judge.py calls
 CANARY = RL / "canary.txt"            # contamination canary: grader-side only (leakcheck.py)
 BUILD_PACKAGES = ["pandas", "numpy", "scipy", "PyYAML", "toml"]
 
@@ -110,8 +119,6 @@ def _sha256(b: bytes) -> str:
 
 @functools.cache
 def _repo() -> tuple[str, bool]:
-    def git(*a):
-        return subprocess.run(["git", *a], cwd=RL, capture_output=True, text=True).stdout.strip()
     return git("rev-parse", "HEAD"), bool(git("status", "--porcelain", "--untracked-files=no"))
 
 
@@ -151,7 +158,7 @@ def network(verifier_hosts: list[str]) -> str:
 def task_toml(task_id: str, description: str, keywords: list[str], metadata: dict, verifier_timeout: int,
               verifier_env: str = "", authors: list[dict] = (), version: str | None = None) -> str:
     task = {"name": f"rl_finance/{task_id}", "version": version, "description": description,
-            "authors": list(authors), "keywords": keywords}
+            "authors": [{"name": a["name"]} for a in authors], "keywords": keywords}
     head = toml.dumps({"task": {k: v for k, v in task.items() if v not in (None, [])}})
     hosts = metadata["environment"]["verifier_hosts"]
     return ('schema_version = "1.3"\n\n' + head + "\n" + toml.dumps({"metadata": metadata})
@@ -180,17 +187,30 @@ def _put(path: pathlib.Path, content) -> None:
         path.write_text(content)
 
 
+def render(template: str, **kw) -> str:
+    """Fill a template's {name} placeholders in one pass. Braces that aren't a placeholder (JSON
+    examples) need no escaping; every placeholder must be given."""
+    missing = sorted(set(re.findall(r"\{(\w+)\}", template)) - set(kw))
+    assert not missing, f"no value for placeholders {missing}"
+    return re.sub(r"\{(\w+)\}", lambda m: str(kw[m.group(1)]), template)
+
+
 def write(dest: pathlib.Path, *, family: dict, builder: str, instruction: str, metadata: dict, description: str,
-          keywords: list[str], verifier: str, tests: dict, verifier_timeout: int = 600, verifier_env: str = "",
-          data: dict | None = None, prompt: dict | None = None, solution: dict | None = None,
-          pip: str = "", test_pip: str = "") -> str:
-    """Write the task and return its content_sha256. `family` is the family.yaml (authors, version);
-    `tests`, `data`, `prompt` and `solution` map file names to text, bytes, or a path to copy;
-    `verifier` names the file in `tests` that test.sh runs. `pip` adds pinned packages to the agent's
-    image, `test_pip` pinned packages test.sh installs for the verifier only; a verifier that installs
-    them calls a judge, so it gets VERIFIER_HOSTS and every other verifier no network. Data files
-    ending in .gz are unpacked when the image is built, so the agent sees them uncompressed. A
-    `metadata["as_of"]` date pins the container's clock to it."""
+          keywords: list[str], verifier: str, tests: dict, gold: str, judged: bool = False,
+          data: dict | None = None, prompt: dict | None = None, solution: dict | None = None, pip: str = "") -> dict:
+    """Write the task and return its manifest entry. `family` is the family.yaml (authors, version,
+    verifier timeout, judge); `metadata` must hold the task's `fingerprint` (what the agent sees) and
+    `case` (the unit that never straddles splits). `gold` is the text of the gold, written to
+tests/<family["gold_file"]>; `tests`,
+    `data`, `prompt` and `solution` map file names to text, bytes, or a path to copy; `verifier` names
+    the file in `tests` that test.sh runs. A `judged` task's verifier calls the family's pinned judge:
+    it gets judge.py and judge.json, test.sh installs the judge client, and the verifier may reach
+    VERIFIER_HOSTS; every other verifier gets no network. `pip` adds pinned packages to the agent's
+    image. Data files ending in .gz are unpacked when the image is built, so the agent sees them
+    uncompressed. A `metadata["as_of"]` date pins the container's clock to it."""
+    gold_file = family["gold_file"]
+    assert gold_file in GRADER_ONLY and gold_file not in tests, gold_file
+    assert {"fingerprint", "case"} <= set(metadata), "metadata needs the task's fingerprint and case"
     if dest.exists():
         shutil.rmtree(dest)
     (dest / "environment" / "data").mkdir(parents=True)
@@ -205,34 +225,35 @@ def write(dest: pathlib.Path, *, family: dict, builder: str, instruction: str, m
     for name, c in (prompt or {}).items():
         _put(dest / "prompt" / name, c)
     (dest / "tests").mkdir()
-    install = TEST_PIP.format(pkgs=test_pip.strip()) if test_pip.strip() else ""
-    (dest / "tests" / "test.sh").write_text(TEST_SH.format(verifier=verifier, install=install))
+    (dest / "tests" / "test.sh").write_text(TEST_SH.format(verifier=verifier, install=JUDGE_INSTALL if judged else ""))
     (dest / "tests" / "test.sh").chmod(0o755)
     _put(dest / "tests" / "common.py", COMMON)
-    if family.get("judge") and test_pip.strip():      # a verifier that installs the judge client calls the judge
+    if judged:
         _put(dest / "tests" / "judge.py", JUDGE)
+        _put(dest / "tests" / "client.py", CLIENT)
         _put(dest / "tests" / "judge.json", json.dumps(family["judge"], indent=1) + "\n")
     _put(dest / "tests" / "CANARY", CANARY)
-    for name, c in tests.items():
+    for name, c in {**tests, gold_file: gold}.items():
         _put(dest / "tests" / name, c)
     (dest / "solution").mkdir()
     for name, c in (solution or {}).items():
         _put(dest / "solution" / name, c)
-    prov = provenance.for_family(metadata.get("family", ""))
+    prov = provenance.for_family(metadata["family"]) if family.get("gold_inputs") else []
     if prov:
         _put(dest / "tests" / "provenance.json", json.dumps(prov, indent=1, ensure_ascii=False) + "\n")
     shipped = {str(p.relative_to(dest / "tests")) for p in (dest / "tests").rglob("*") if p.is_file()} | {"FILES"}
     _put(dest / "tests" / "FILES", "".join(f"{f}\n" for f in sorted(shipped)))   # after every other tests/ file
-    env = dict(metadata.get("environment", {}), internet=False,
-               verifier_hosts=VERIFIER_HOSTS if test_pip.strip() else [])
+    env = dict(metadata.get("environment", {}), internet=False, verifier_hosts=VERIFIER_HOSTS if judged else [])
     meta = dict(metadata, environment=env, **({"provenance": provenance.summary(prov)} if prov else {}),
                 build=build_record(builder, metadata["source"]))
-    (dest / "task.toml").write_text(task_toml(dest.name, description, keywords, meta, verifier_timeout, verifier_env,
-                                              family.get("authors", []), family.get("version")))
+    (dest / "task.toml").write_text(task_toml(dest.name, description, keywords, meta, family["verifier_timeout_sec"],
+                                              JUDGE_ENV if judged else "", family.get("authors", []),
+                                              family.get("version")))
     files = sorted(p for p in dest.rglob("*") if p.is_file())
     (dest / "checksums.sha256").write_text(
         "".join(f"{_sha256(p.read_bytes())}  {p.relative_to(dest)}\n" for p in files))
-    return content_sha256(dest)
+    return {**{k: metadata[k] for k in MANIFEST if k in metadata},
+            "gold_fingerprint": fingerprint(gold), "content_sha256": content_sha256(dest)}
 
 
 def content_sha256(dest: pathlib.Path) -> str:
@@ -245,22 +266,3 @@ def content_sha256(dest: pathlib.Path) -> str:
     cfg = tomllib.loads((dest / "task.toml").read_text())
     cfg.get("metadata", {}).pop("build", None)
     return _sha256(("\n".join(lines) + "\n" + json.dumps(cfg, sort_keys=True)).encode())
-
-
-def write_panel_task(dest: pathlib.Path, fam_dir: pathlib.Path, fam: dict, instruction: str, data: dict[str, str],
-                     truth: dict, meta: dict, solution_params: dict | None = None) -> dict:
-    """A generated txn_panel task; returns manifest info (fingerprint of what the agent sees, ground-truth hash)."""
-    gt = json.dumps(truth, indent=1, default=str)
-    verifier = pathlib.Path(fam["verifier"]).name
-    solution = {f.name: f for f in (fam_dir / "solutions" / "reference").iterdir() if f.is_file()}
-    if solution_params is not None:
-        solution["params.json"] = json.dumps(solution_params)
-    fp = fingerprint(instruction, *[data[k] for k in sorted(data)])
-    content = write(dest, family=fam, builder="rl/families/_shared/build_panel.py", instruction=instruction,
-                    metadata=dict(meta, fingerprint=fp), description=fam["description"],
-                    keywords=["alt-data", "data-science", fam["task_prefix"]], verifier=verifier,
-                    tests={verifier: fam_dir / fam["verifier"], "ground_truth.json": gt},
-                    verifier_timeout=fam["verifier_timeout_sec"],
-                    verifier_env=JUDGE_ENV if fam.get("llm_judge") else "", data=data, solution=solution,
-                    test_pip=JUDGE_PIP if fam.get("llm_judge") else "")
-    return {"fingerprint": fp, "gold_fingerprint": fingerprint(gt), "content_sha256": content}

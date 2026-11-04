@@ -1,6 +1,7 @@
 {
  "thesis-bench-001": {
   "split": "bench",
+  "case": "thesis-bench-001",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -12,12 +13,13 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "cb6504bcc199",
-  "gold_fingerprint": "910e88a1d2dc",
-  "content_sha256": "a2e9d429b858072e7b10b30ab2eaa7d47898f110a8e9a06a30b777395d0cf4ba"
+  "fingerprint": "1c366994132b",
+  "gold_fingerprint": "72502ef9d978",
+  "content_sha256": "11b91a5c1fe7ef6e1ce88b6a407604a25584995b9905325533a7626d321ddc97"
  },
  "thesis-bench-002": {
   "split": "bench",
+  "case": "thesis-bench-002",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -29,12 +31,13 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "bc39a975c990",
-  "gold_fingerprint": "56d2a068ce8c",
-  "content_sha256": "0630612ad4d6ac1cb290f02de154d80b28a27006ace7749c899a23d16047c0df"
+  "fingerprint": "d6856392444a",
+  "gold_fingerprint": "2270cefe86de",
+  "content_sha256": "cd03df6c2fcd3175d8c5bd6c948e3e32fbc1fadcef6dbc2dea6800e55c10bb7a"
  },
  "thesis-bench-003": {
   "split": "bench",
+  "case": "thesis-bench-003",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -46,12 +49,13 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "39b94ef91f57",
-  "gold_fingerprint": "a89603b26be6",
-  "content_sha256": "b7fdd2214c860b809b60c876458df42653e708c23c242e711aeaa2e1dc75262e"
+  "fingerprint": "7bbb61b4273a",
+  "gold_fingerprint": "1bc2dd4833f9",
+  "content_sha256": "981ddd58ee084e4d7e82052e9870cd54be287f911b5bf9c7821bbe1a7b76deb1"
  },
  "thesis-bench-004": {
   "split": "bench",
+  "case": "thesis-bench-004",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -63,12 +67,13 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "fc962e9c365c",
-  "gold_fingerprint": "b68051ced914",
-  "content_sha256": "fdcf67c6a46dd39e853af831544688a046bb06830154b7324982056ff113d7e6"
+  "fingerprint": "29b602645e52",
+  "gold_fingerprint": "7d114d28969c",
+  "content_sha256": "f6133c498b86b645f3fae795995dfe14b7d30fbbaa06aa7ff25f72f28c137fbd"
  },
  "thesis-bench-005": {
   "split": "bench",
+  "case": "thesis-bench-005",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -80,12 +85,13 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "4846b4f7d797",
-  "gold_fingerprint": "d728e890bf9c",
-  "content_sha256": "0fe0ca5a221de128dd8d6a2935701b6cbae63e300397056eece8964b4259ae99"
+  "fingerprint": "af59d7a73c1f",
+  "gold_fingerprint": "07b33fe12e82",
+  "content_sha256": "a8b29ca4f597ade1a2e11915927eccec5e888b2d94cdcb6807270b6d5b1aec71"
  },
  "thesis-bench-006": {
   "split": "bench",
+  "case": "thesis-bench-006",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -97,12 +103,13 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "c06277644315",
-  "gold_fingerprint": "e198bc720305",
-  "content_sha256": "f33cc1f7c57404f9325d85f04a40e7add9cc69ef615aa166e659e3e6cfb0a517"
+  "fingerprint": "2afee645234e",
+  "gold_fingerprint": "27d2d45d73ac",
+  "content_sha256": "291e97af742cf9a52ff95c05c29020dc4e57347b2d0559024510ef456d883b19"
  },
  "thesis-bench-007": {
   "split": "bench",
+  "case": "thesis-bench-007",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -114,12 +121,13 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "5a67000895b2",
-  "gold_fingerprint": "86588ae0e38b",
-  "content_sha256": "b7e90c734b236f18a621efd196a92f0f550d89ec3c6bf6dc6faa7f146f34ada3"
+  "fingerprint": "b0eac017abac",
+  "gold_fingerprint": "2f30f31e2b5f",
+  "content_sha256": "09c23269ebcef63b98387230db550a9aedd0ab613b547006db5df9458be4815a"
  },
  "thesis-bench-008": {
   "split": "bench",
+  "case": "thesis-bench-008",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -131,12 +139,13 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "411f845a3079",
-  "gold_fingerprint": "dbb4dedf9ffd",
-  "content_sha256": "a3b1a9c996dbee0cf0507f47bce29609f3a2a208306ab0750c78c0aaee1bdc52"
+  "fingerprint": "e54b2421c5f6",
+  "gold_fingerprint": "328644474874",
+  "content_sha256": "5d354c6223ea680aabf581e4c5afa0c251f9026bd45596f50a73a6d5dc6b99b0"
  },
  "thesis-bench-009": {
   "split": "bench",
+  "case": "thesis-bench-009",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -148,12 +157,13 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "a80a02251d55",
-  "gold_fingerprint": "4d926ddbe822",
-  "content_sha256": "8b86a36bfa11c513f0ae3d2f5194c8284cbc1022ee0430150bbcb8527acdeafa"
+  "fingerprint": "404f3cef36cb",
+  "gold_fingerprint": "b2be7597d68c",
+  "content_sha256": "81b3b9c02b81d21b8c646bfbd41dd5c058917645f42c27506f7152ef07dec4d8"
  },
  "thesis-bench-010": {
   "split": "bench",
+  "case": "thesis-bench-010",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -165,12 +175,13 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "8bc5904075ad",
-  "gold_fingerprint": "8368f7152b37",
-  "content_sha256": "0a5790b2f2e63603a872443337e2abd1b7d3b27ff9fdaa372b44331516d98c79"
+  "fingerprint": "d4815d648a66",
+  "gold_fingerprint": "10f0298a2e77",
+  "content_sha256": "68effd47b966c85622328415a254bdba1ec1f89904a8884c9e2bc17bebb61e91"
  },
  "thesis-bench-control-01": {
   "split": "bench",
+  "case": "thesis-bench-control-01",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -182,12 +193,13 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "e2193c6e2a75",
-  "gold_fingerprint": "259b86016307",
-  "content_sha256": "9a1ef49e2194366ec411c93de62fe6d6fa9652443e34d81e0d6277a50e39a7c5"
+  "fingerprint": "dfdfe083ea66",
+  "gold_fingerprint": "53b4b2cf9baf",
+  "content_sha256": "0a966ad2fb7c4c3bea27229af2732105a800f88a9a96e7b025c8d2649df8661e"
  },
  "thesis-bench-control-02": {
   "split": "bench",
+  "case": "thesis-bench-control-02",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -199,12 +211,13 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "fe54b87d0dd8",
-  "gold_fingerprint": "3b55d4b8a8cb",
-  "content_sha256": "33dfd196e2709a0d8bbc38af1a83f18dd776b60b7eacb8b3edd381301fa86274"
+  "fingerprint": "67b6b854c16a",
+  "gold_fingerprint": "ee5d7dce90a2",
+  "content_sha256": "4540cbc5cf01d4d2b30b51de863ddd853cc74ca0e32f21b2b4df5a10c7c52094"
  },
  "thesis-heldout-001": {
   "split": "heldout",
+  "case": "thesis-heldout-001",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -215,12 +228,13 @@
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "89a0edbc8f97",
-  "gold_fingerprint": "161a4b36e236",
-  "content_sha256": "b4a0293ace648cb942a8dc237fd27541309e18ee66b01ceb606e5f8b0b72d58d"
+  "fingerprint": "18bbf2ca5d02",
+  "gold_fingerprint": "824d48c9ea2c",
+  "content_sha256": "2b24356c87f56ebfcdaa6324dbf9e31229e2e40c7272b2cbccc951ddd211345e"
  },
  "thesis-heldout-002": {
   "split": "heldout",
+  "case": "thesis-heldout-002",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -231,12 +245,13 @@
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "0e431e33b730",
-  "gold_fingerprint": "817dc16a50b1",
-  "content_sha256": "ea4341c219b19680e7485a70e020fc6a83b77d3de4716ad50f1c221f1890e55f"
+  "fingerprint": "ad30a2918093",
+  "gold_fingerprint": "2e572bd9bcd8",
+  "content_sha256": "53ad99e2eee94385bb6354efb6eb95249e6a7e52c2421a665bc80635b949ac95"
  },
  "thesis-heldout-003": {
   "split": "heldout",
+  "case": "thesis-heldout-003",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -247,12 +262,13 @@
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "ee41e45cf3b4",
-  "gold_fingerprint": "40b37fd43b3f",
-  "content_sha256": "eaa1a1e4664c10935c464433796e9a5c2357c86f9c1b3e925fc23f968a8c8093"
+  "fingerprint": "1cf77d6fb177",
+  "gold_fingerprint": "7b763b9e0811",
+  "content_sha256": "12808192fef789e8854ec9f9fc9897e59033bae536865da86cdd438fb2b215be"
  },
  "thesis-heldout-004": {
   "split": "heldout",
+  "case": "thesis-heldout-004",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -263,12 +279,13 @@
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "60f1ff21407d",
-  "gold_fingerprint": "78d209e168a8",
-  "content_sha256": "e0835ed015722191c8c82e1da389de8576f7a609b8706628bddb2abd7561dd8b"
+  "fingerprint": "0a9950835e28",
+  "gold_fingerprint": "49c3e486542b",
+  "content_sha256": "8f04ae55a1ef660183b9013bd5237b10c4a3e44cc05790d2a4aa63d627d617c5"
  },
  "thesis-heldout-005": {
   "split": "heldout",
+  "case": "thesis-heldout-005",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -279,12 +296,13 @@
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "c783cd141a86",
-  "gold_fingerprint": "a860b820f24f",
-  "content_sha256": "a5b2777dc52a6c3208f72fa47da12963892fb760e8ee48da1b189362bfa25a8f"
+  "fingerprint": "60f746bf935a",
+  "gold_fingerprint": "fd6249eb2f65",
+  "content_sha256": "4d0a583f6d9be0bc8b0389dd8159e169f5bd43666987766ed52b9bceb3b9fa50"
  },
  "thesis-heldout-006": {
   "split": "heldout",
+  "case": "thesis-heldout-006",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -295,12 +313,13 @@
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "4d4c037ea2bc",
-  "gold_fingerprint": "2a0024803142",
-  "content_sha256": "823802d2807fd95ca040d35b93fbcadb992154ed45c3a30beb7369b5ecc1c3e5"
+  "fingerprint": "d394b9adbc02",
+  "gold_fingerprint": "802d66da2be8",
+  "content_sha256": "5cb2075e6019ee6e5ea0938e32b5aba7045bdc4fe34b25ce8616519cd9a1c010"
  },
  "thesis-heldout-007": {
   "split": "heldout",
+  "case": "thesis-heldout-007",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -311,12 +330,13 @@
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "f8ba93f3caf8",
-  "gold_fingerprint": "528851e73bc7",
-  "content_sha256": "5ab96c05b88f80edc5972a69a25248d717291787c92702c891e6b9117fe72170"
+  "fingerprint": "7c27432eb378",
+  "gold_fingerprint": "e84369dcf9de",
+  "content_sha256": "caa830d2bb0078f0051b0117d96101dc13cc3fc0a178da9aaa8f890043dacb76"
  },
  "thesis-heldout-008": {
   "split": "heldout",
+  "case": "thesis-heldout-008",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -327,12 +347,13 @@
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "a2374cb0cd03",
-  "gold_fingerprint": "f714df19d869",
-  "content_sha256": "7e4eb671bf0ccb12d8d8b9946e87d9e7adb2ab9de2d2944eaf86df27cdd6c989"
+  "fingerprint": "2fba70e29bbd",
+  "gold_fingerprint": "4eff998a286e",
+  "content_sha256": "132e0a4f6451c1296cbce326bb12700ac83555812d1822dcbbfc0f8c6e4abcf5"
  },
  "thesis-heldout-009": {
   "split": "heldout",
+  "case": "thesis-heldout-009",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -343,12 +364,13 @@
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "a45ef14efbe8",
-  "gold_fingerprint": "115540fa83f1",
-  "content_sha256": "e06d3b7858628ef1fbaebe7ce554a4836eda40e5bd844d55da4b5ab02373da76"
+  "fingerprint": "4b554724aa8f",
+  "gold_fingerprint": "a19e8b5ddc06",
+  "content_sha256": "d01e3156abce6bec064f3761c761d533dbbde9256452c9e91ee0b7c7fc1ff3c1"
  },
  "thesis-heldout-010": {
   "split": "heldout",
+  "case": "thesis-heldout-010",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -359,12 +381,13 @@
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "57a1cc3de7e6",
-  "gold_fingerprint": "cc79ba9b8b0b",
-  "content_sha256": "209eca3af9d03b8f70bced16fbaac1892c624096d9463b68d56dc3fb424cabbf"
+  "fingerprint": "8cfce619e4c1",
+  "gold_fingerprint": "debad0286457",
+  "content_sha256": "48552aa7e36ff54d50ed1ac7471c3e9486c5eb99a6782f0bb24f8f5a2883af40"
  },
  "thesis-heldout-control-01": {
   "split": "heldout",
+  "case": "thesis-heldout-control-01",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -375,12 +398,13 @@
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "c918598c2c79",
-  "gold_fingerprint": "2340152c43e1",
-  "content_sha256": "e9f20aeff65595471c61b1accecae4657330d7839be8114aede2872f2554b7e3"
+  "fingerprint": "2b8816721f46",
+  "gold_fingerprint": "9906b427cd9a",
+  "content_sha256": "2e64c220960d77540f0f035af888bc60a4885ca85bbc6583e8fba4320ddaedb2"
  },
  "thesis-heldout-control-02": {
   "split": "heldout",
+  "case": "thesis-heldout-control-02",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -391,12 +415,13 @@
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "ec7595c504c8",
-  "gold_fingerprint": "47b67c3bc587",
-  "content_sha256": "24ab0360b8613a231f62f2ff40fa18734c8ca636bbfa8680d30f5784f74d6eb5"
+  "fingerprint": "1b6f489e92ba",
+  "gold_fingerprint": "ab49a4c5d41a",
+  "content_sha256": "f112fcea15a032c63c317001f4d7a4281bda1c7c96dffc3cc35659840d7af6db"
  },
  "thesis-train-001": {
   "split": "train",
+  "case": "thesis-train-001",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -408,12 +433,13 @@
    "LUV",
    "UAL"
   ],
-  "fingerprint": "0f13af1b41b6",
-  "gold_fingerprint": "0b13278de3df",
-  "content_sha256": "9bd6296b367cb1ad1c6c0c1e7525d699ae718a06903bbc4c8e45d4708d4f731c"
+  "fingerprint": "12a0f0c32904",
+  "gold_fingerprint": "0d389ca1e27c",
+  "content_sha256": "25e0b47442cb1dec95ed7e02b3629971f8d0d877a1c70fceeaa47a297a588938"
  },
  "thesis-train-002": {
   "split": "train",
+  "case": "thesis-train-002",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -425,12 +451,13 @@
    "LUV",
    "UAL"
   ],
-  "fingerprint": "0144534d69ea",
-  "gold_fingerprint": "cb7ca0f9ed1b",
-  "content_sha256": "032a81e791a01b222507f904188c6f23553e55a4018cb88a206f435cfd338214"
+  "fingerprint": "535f395abeb5",
+  "gold_fingerprint": "475a18a24984",
+  "content_sha256": "d9b2b42a379559da8da469f5b85faff1701a9824a5909ab0bb4442b710e5e2d7"
  },
  "thesis-train-003": {
   "split": "train",
+  "case": "thesis-train-003",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -442,12 +469,13 @@
    "LUV",
    "UAL"
   ],
-  "fingerprint": "07ed6fcfc635",
-  "gold_fingerprint": "ac589ded2f3b",
-  "content_sha256": "640c04b5155c0f43bbfda5d655d811ae1ecca5064165cbf8ecd019349072fd91"
+  "fingerprint": "84fa536bcc3d",
+  "gold_fingerprint": "ba9ff56a174d",
+  "content_sha256": "a56d4e0d4f54f28d81ab7abb447bf53f5cf1bbfd5f02d943e2a033716647f7d8"
  },
  "thesis-train-control-01": {
   "split": "train",
+  "case": "thesis-train-control-01",
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
@@ -459,8 +487,8 @@
    "LUV",
    "UAL"
   ],
-  "fingerprint": "27d7869c1c1c",
-  "gold_fingerprint": "cf946cdabe6f",
-  "content_sha256": "83d0a83d7aa145b6f4ee54e7bf76e9f5fb8c7b99da42da52c4b3b7ce3498e96f"
+  "fingerprint": "f7a399e1a9bc",
+  "gold_fingerprint": "8c468ce2fae4",
+  "content_sha256": "0f99be1c5855e7a947715d3f9356414ad8c1daf45599b3c83d71348595ed5dcf"
  }
 }

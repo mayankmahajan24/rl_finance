@@ -73,10 +73,10 @@ def format_gold(rows: list[dict]) -> str:
 
 def format_issues(issues: list[dict]) -> str:
     return "\n\n".join(
-        f"[{i}] severity={x['severity']} category={x['category']}\n"
-        f"    summary: {x['summary']}\n"
-        f"    why_it_applies_here: {x['why_it_applies_here']}\n"
-        f"    what_breaks: {x['what_breaks']}"
+        f"[{i}] severity={x.get('severity')} category={x.get('category')}\n"
+        f"    summary: {x.get('summary')}\n"
+        f"    why_it_applies_here: {x.get('why_it_applies_here')}\n"
+        f"    what_breaks: {x.get('what_breaks')}"
         for i, x in enumerate(issues)
     )
 

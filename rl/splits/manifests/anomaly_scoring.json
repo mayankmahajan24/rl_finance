@@ -1,6 +1,7 @@
 {
  "anomaly-bench-001": {
   "split": "bench",
+  "case": "anomaly-bench-001",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -16,10 +17,11 @@
   ],
   "fingerprint": "6398389d68c3",
   "gold_fingerprint": "03ff92fc0e99",
-  "content_sha256": "4f62729c6373f3a8e446d463487585f3dd06a01d3aef75edf726050ebb7d314f"
+  "content_sha256": "cb182e3e630b77268b5bfcc6398c2cdf841fa3aa05b57ae90beefe21373cec7f"
  },
  "anomaly-bench-002": {
   "split": "bench",
+  "case": "anomaly-bench-002",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -35,10 +37,11 @@
   ],
   "fingerprint": "8590fbbba92e",
   "gold_fingerprint": "0dfd093a1a93",
-  "content_sha256": "ccbc68b71b3e56bcc0aa57990c29ffbac18e29984c55ebfc8673430aa5fbfd8e"
+  "content_sha256": "1712047f4221b885441ccbc706a36fa725921e99b6f90f7868b2965f0131bb34"
  },
  "anomaly-bench-003": {
   "split": "bench",
+  "case": "anomaly-bench-003",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -54,10 +57,11 @@
   ],
   "fingerprint": "bcb9efbb0820",
   "gold_fingerprint": "e5742164a2ed",
-  "content_sha256": "4aed9c31d14435c42970f79c155fafa1bef2e66906255751b9cd06c0f4c5564f"
+  "content_sha256": "85349df679e874f55f98a2acc1ad0973dc9cef14b09324ecd7317a629461759e"
  },
  "anomaly-bench-004": {
   "split": "bench",
+  "case": "anomaly-bench-004",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -73,10 +77,11 @@
   ],
   "fingerprint": "9e2dcb4875d0",
   "gold_fingerprint": "f1eee4177002",
-  "content_sha256": "7fe3f33ecbd645f7b4274c94db4eaf4511d493afae087fb182e9bdb733528032"
+  "content_sha256": "df7e8a628970f5ed627aeb6c1053ad1d565ca98123fdefc54b2dc9039d28dfe2"
  },
  "anomaly-bench-005": {
   "split": "bench",
+  "case": "anomaly-bench-005",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -92,10 +97,11 @@
   ],
   "fingerprint": "c0bd90f4549d",
   "gold_fingerprint": "f1710845845e",
-  "content_sha256": "127b81a0c1eba3727dda81f45f33a15ebe63d5cc75343c1dd995f5913bb2ac4d"
+  "content_sha256": "29e95b8417ab89fc488a8527159b0cdc88f9bc4cd798e208961a2567ff51c011"
  },
  "anomaly-bench-006": {
   "split": "bench",
+  "case": "anomaly-bench-006",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -111,10 +117,11 @@
   ],
   "fingerprint": "7d12a4ec9826",
   "gold_fingerprint": "8689cc51af3c",
-  "content_sha256": "e5be3c03caeaebc993d8198f6d9415b0ff83ef78680325abe95291be12062650"
+  "content_sha256": "932d89a71f872ae8fb51c8a9c981e7a729104ef258a38f9db95047c7cdc76578"
  },
  "anomaly-bench-007": {
   "split": "bench",
+  "case": "anomaly-bench-007",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -130,10 +137,11 @@
   ],
   "fingerprint": "bd9260bcd040",
   "gold_fingerprint": "219c714c2f02",
-  "content_sha256": "594df07437cc8bded51e4b6f697756501a782e4257dce16161fc2a50afcdbfc8"
+  "content_sha256": "34e8debd28da881a4cc8f62d6503024b2b15d023e6480ce41f6445fe531d4877"
  },
  "anomaly-bench-008": {
   "split": "bench",
+  "case": "anomaly-bench-008",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -149,10 +157,11 @@
   ],
   "fingerprint": "f4d14fe673ed",
   "gold_fingerprint": "a47b0d2b49d7",
-  "content_sha256": "7b089f328f0f784837bce95ba77d913fd6de115b8e8662c4ce9345fe3a8a8808"
+  "content_sha256": "ca95648a29062c60f9ab9a3c6499f173b8b662cb9038ea69df62b96bbf2e831f"
  },
  "anomaly-bench-009": {
   "split": "bench",
+  "case": "anomaly-bench-009",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -168,10 +177,11 @@
   ],
   "fingerprint": "179783e369a2",
   "gold_fingerprint": "757934edde23",
-  "content_sha256": "d65a72162852a4d97ee6bfbb4cc43a7b8a06b5cc99e99afb50512ffa3b75273f"
+  "content_sha256": "7319a1d7804ddb9771e3dcaa1b5c62adb69e8d5d2ad30c2b9fd85460517e8e4d"
  },
  "anomaly-bench-010": {
   "split": "bench",
+  "case": "anomaly-bench-010",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -187,10 +197,11 @@
   ],
   "fingerprint": "68ec66097582",
   "gold_fingerprint": "a4a7ce78f79b",
-  "content_sha256": "587aeaca68f2a59c74ffe8b594989e27ab1aba0c85af782253f0ebf53d5cc0ac"
+  "content_sha256": "d501297e2b3ab52fce3de547688b05582d04a1c6e84f9c3599ac9d19093aca6c"
  },
  "anomaly-bench-control-01": {
   "split": "bench",
+  "case": "anomaly-bench-control-01",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -206,10 +217,11 @@
   ],
   "fingerprint": "024d2b7d21b7",
   "gold_fingerprint": "c4479437b8d6",
-  "content_sha256": "124ff75e8fe4d970755480ab6751c2206d99422241b7c1c07ede0d12dc582163"
+  "content_sha256": "acd4252ceac4661814cd1c4bc7fb914cefbacac76d2621b45a45016de50e18b3"
  },
  "anomaly-bench-control-02": {
   "split": "bench",
+  "case": "anomaly-bench-control-02",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -225,10 +237,11 @@
   ],
   "fingerprint": "4b5c6e135079",
   "gold_fingerprint": "b6f63748f709",
-  "content_sha256": "2e0fd231ec737c1d30dbaf88e2244fe9f9071cb125f0e9fe8dd9f9a8a55996d6"
+  "content_sha256": "7330dae7ea8791e816ad6135a1b4496a328449fbf8d13ce4e7e80ef4487a7049"
  },
  "anomaly-heldout-001": {
   "split": "heldout",
+  "case": "anomaly-heldout-001",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -243,10 +256,11 @@
   ],
   "fingerprint": "0e117d20c48d",
   "gold_fingerprint": "136272743777",
-  "content_sha256": "2a5cfaf5e5e4f82e501e5fe82f07d52aa70dabb8a5663dab87f46d51cdbc7158"
+  "content_sha256": "a252f099f072be4f1003255fc9879caac333f48049ee26d185c1e654af0938ca"
  },
  "anomaly-heldout-002": {
   "split": "heldout",
+  "case": "anomaly-heldout-002",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -261,10 +275,11 @@
   ],
   "fingerprint": "a00c5a96ee55",
   "gold_fingerprint": "7bf8fa3c85e7",
-  "content_sha256": "91283021e925dfe53d3e4d90ca3c8484070ed7e911f89218e581565458714b74"
+  "content_sha256": "a08572a0babc57e4fecee8064ca58c29846d8f29cd33a69253c27318e443fc9f"
  },
  "anomaly-heldout-003": {
   "split": "heldout",
+  "case": "anomaly-heldout-003",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -279,10 +294,11 @@
   ],
   "fingerprint": "95658cae4bdb",
   "gold_fingerprint": "fb1e4568a6c9",
-  "content_sha256": "10ed200b1f0a764f1b115f7d518c0c849990c6de7dffb83e0a38ccbd06f83572"
+  "content_sha256": "1cd481f2d0fbdd4583da9e686b548169d4dd3d7bd90a9af56104c2e499259131"
  },
  "anomaly-heldout-004": {
   "split": "heldout",
+  "case": "anomaly-heldout-004",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -297,10 +313,11 @@
   ],
   "fingerprint": "166fd6795c5e",
   "gold_fingerprint": "965a04102d19",
-  "content_sha256": "fc6836d218542d6458793fcc685fb4e9601e15fc8ad8af36f06b750a7a095080"
+  "content_sha256": "262c53b9d0ecf23de311bd0944421f35b44cec9a14c33368f9aef7f1761e30bb"
  },
  "anomaly-heldout-005": {
   "split": "heldout",
+  "case": "anomaly-heldout-005",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -315,10 +332,11 @@
   ],
   "fingerprint": "8bd0b529766f",
   "gold_fingerprint": "802c1427e935",
-  "content_sha256": "4803bb8d2bda780fc0071438623d8ab808c26c67e57b22372fa6ecb506b35a23"
+  "content_sha256": "02fc8f34f388bba9a0147949ade6fc03894a16a3998887c81f5ec19b2f91e31c"
  },
  "anomaly-heldout-006": {
   "split": "heldout",
+  "case": "anomaly-heldout-006",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -333,10 +351,11 @@
   ],
   "fingerprint": "804ace3ae795",
   "gold_fingerprint": "55dcb1ba70f7",
-  "content_sha256": "aef27c9ec83d2a461e1ace9ca40c99e5e6e03eba926bc968e1f50295d434df6e"
+  "content_sha256": "94ae15189784284e7aa4d7f37f85c79480e8b6a6e4137d05b324c3918ab32414"
  },
  "anomaly-heldout-007": {
   "split": "heldout",
+  "case": "anomaly-heldout-007",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -351,10 +370,11 @@
   ],
   "fingerprint": "d91eb9e3f404",
   "gold_fingerprint": "e3a3d1c7d499",
-  "content_sha256": "c136a6b18e125693cf13ee9acfcdc4403036edd2138fe3b15d6ae1a26a8d6a61"
+  "content_sha256": "3d13ade2b24e49e066d87a31b342bf623c4bd89173de21d0eac86c1d8419fc45"
  },
  "anomaly-heldout-008": {
   "split": "heldout",
+  "case": "anomaly-heldout-008",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -369,10 +389,11 @@
   ],
   "fingerprint": "b29aaeb51a16",
   "gold_fingerprint": "590dfcf3ec46",
-  "content_sha256": "e65612ccdad554c844d5c0722386dcfbb6a3252cb78fadc09fe3e407c6c20587"
+  "content_sha256": "43ab022358f3d49db44723c5860b2475054aeb12f054e73d8e0d49e0e9386029"
  },
  "anomaly-heldout-009": {
   "split": "heldout",
+  "case": "anomaly-heldout-009",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -387,10 +408,11 @@
   ],
   "fingerprint": "a710fac9c8aa",
   "gold_fingerprint": "fa7be4d54a44",
-  "content_sha256": "687eb477e555e9b2787bca2919c3cf8524e0be7a1c891b29cc3d922178d3ed71"
+  "content_sha256": "ddf57d2b7c2e6cd4e242929e9f87090d4254c5e670bd71c4b91b3160d102ee4a"
  },
  "anomaly-heldout-010": {
   "split": "heldout",
+  "case": "anomaly-heldout-010",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -405,10 +427,11 @@
   ],
   "fingerprint": "f6adf4080576",
   "gold_fingerprint": "771963430903",
-  "content_sha256": "7b235816a1380294d2a7bce8d13b5a3eea05e82bf6ee66cc5e8f4b968f275caf"
+  "content_sha256": "218a7253c3c65642d19ae444bad43dc3c95e45444a006cdb8adf010502254f56"
  },
  "anomaly-heldout-control-01": {
   "split": "heldout",
+  "case": "anomaly-heldout-control-01",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -423,10 +446,11 @@
   ],
   "fingerprint": "427ecd0cbe3d",
   "gold_fingerprint": "45afd36725b6",
-  "content_sha256": "de72aeb74eb767a47070c1b160dbf5c0b5526c741d87092c861903569e6cff11"
+  "content_sha256": "e58108d2359ef7a0c4ea2ba2f4f1f96682a70fbbcd075464b8c28e09c95bf276"
  },
  "anomaly-heldout-control-02": {
   "split": "heldout",
+  "case": "anomaly-heldout-control-02",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -441,10 +465,11 @@
   ],
   "fingerprint": "5f7c7d7ff5e4",
   "gold_fingerprint": "fa52d2f145ff",
-  "content_sha256": "fb0f41aa25750315c49de935a07f42eed75bd138f45da5319a1dab7466b9700d"
+  "content_sha256": "fb9c66cc2a889554ff7a4858e6ef8a740a82da1df1c274fef607b758bb03106a"
  },
  "anomaly-train-001": {
   "split": "train",
+  "case": "anomaly-train-001",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -464,10 +489,11 @@
   ],
   "fingerprint": "39f70d6789f2",
   "gold_fingerprint": "145e0392edeb",
-  "content_sha256": "97fac5bffe6ea3fe85d3fe3ab7864c0a192b667da728a1a0ed98308aa09e6826"
+  "content_sha256": "64eb2ff9fab8f7923c420ac264b3e29bbd0f7063e9f438cd184a267cd1df81fc"
  },
  "anomaly-train-002": {
   "split": "train",
+  "case": "anomaly-train-002",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -487,10 +513,11 @@
   ],
   "fingerprint": "7307e6cd8a23",
   "gold_fingerprint": "535edb4deffc",
-  "content_sha256": "62d44e7c2585a7417bb8de239f3ae42c7d7a24ae28b5ab1574360e30c8349d2c"
+  "content_sha256": "4d1130ca4a4752a7a428457b828461b9fdca19679f593778c32f75f75fa5af33"
  },
  "anomaly-train-003": {
   "split": "train",
+  "case": "anomaly-train-003",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -510,10 +537,11 @@
   ],
   "fingerprint": "e0f0aaec4c68",
   "gold_fingerprint": "54cec69adc10",
-  "content_sha256": "aba997a4cc6a1319165875b6ff84ffba6339a261eee07c05246f51504739afb2"
+  "content_sha256": "0ac9924bc28e7d1b4605a6a3b97b8dd400e7fc76e128fc576f1b1b790fb5763c"
  },
  "anomaly-train-control-01": {
   "split": "train",
+  "case": "anomaly-train-control-01",
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
@@ -533,6 +561,6 @@
   ],
   "fingerprint": "120efa055149",
   "gold_fingerprint": "d63cf8c3d6a0",
-  "content_sha256": "6eb7171e3b788616e491ca49449ac6833a7544b5e7dbea061eaf4d55b653d100"
+  "content_sha256": "2fb00d1bb5364fc6d5e289bee81537734f49d9e4b374b42bd957fbbcccbf54ec"
  }
 }

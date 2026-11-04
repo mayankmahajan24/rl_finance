@@ -1,6 +1,7 @@
 """Verifier for the online anomaly-scoring task.
 
-Runs the agent's /app/solution/score.py on the full data and on copies truncated at hidden cutoff dates:
+Runs the agent's /app/solution/score.py on a hidden panel (tests/eval_panel.csv.gz) the agent never saw,
+truncated at hidden cutoff dates and then whole:
     python score.py --input IN.csv --output OUT.csv
 OUT.csv must have columns date, ticker, source_id, anomaly_score (0..1, higher = more anomalous),
 one row per input row (duplicate keys are not expected in this task).
@@ -12,8 +13,13 @@ Positives: planted one-day anomalies, and the first 60 days of each planted leve
 Ignored:   days 61+ of a planted shift (and 60 days after it ends), low-volume series, windows around
            known natural artifacts, and the warm-up period.
 Control variants (nothing planted): reward = 1 - (share of evaluated rows flagged) / 5%, floored at 0.
+
+score.py is agent code. Before it runs, the gold and the hidden panel leave the disk and it runs as
+`nobody` when the verifier is root. Truncated runs come first, earliest cutoff first, and every run
+gets its own folder, so no run can find or remember rows dated after its cutoff.
 """
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -22,19 +28,31 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from common import APP, f1, load_gold, write_reward
+from common import APP, TESTS, f1, load_gold, write_reward
 
 TIMEOUT = int(os.environ.get('SCORE_TIMEOUT_SEC', '1200'))
 KEYS = ['date', 'ticker', 'source_id']
 
 
-def run_scorer(inp: Path, out: Path):
+def run_scorer(panel: pd.DataFrame):
     script = APP / 'solution' / 'score.py'
-    r = subprocess.run([sys.executable, str(script), '--input', str(inp), '--output', str(out)],
-                       capture_output=True, text=True, timeout=TIMEOUT, cwd=str(APP))
-    if r.returncode != 0:
-        raise RuntimeError(f'score.py failed ({r.returncode}): {r.stderr[-1500:]}')
-    s = pd.read_csv(out, parse_dates=['date'])
+    root = os.geteuid() == 0
+    if root:
+        subprocess.run(['chmod', '-R', 'a+rX', str(APP / 'solution')], check=True)
+    work = Path(tempfile.mkdtemp())
+    work.chmod(0o777)
+    inp, out = work / 'in.csv', work / 'out.csv'
+    panel.to_csv(inp, index=False)
+    inp.chmod(0o644)
+    try:
+        r = subprocess.run([sys.executable, str(script), '--input', str(inp), '--output', str(out)],
+                           capture_output=True, text=True, timeout=TIMEOUT, cwd=str(APP),
+                           user='nobody' if root else None, env={'PATH': os.environ['PATH'], 'HOME': str(work)})
+        if r.returncode != 0:
+            raise RuntimeError(f'score.py failed ({r.returncode}): {r.stderr[-1500:]}')
+        s = pd.read_csv(out, parse_dates=['date'])
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
     missing = {'date', 'ticker', 'source_id', 'anomaly_score'} - set(s.columns)
     if missing:
         raise RuntimeError(f'output missing columns {missing}')
@@ -44,24 +62,26 @@ def run_scorer(inp: Path, out: Path):
 
 def main():
     truth = load_gold()
-    data_path = APP / 'data' / 'transactions.csv'
-    data = pd.read_csv(data_path, parse_dates=['date'])
-    tmp = Path(tempfile.mkdtemp())
+    data = pd.read_csv(TESTS / 'eval_panel.csv.gz', parse_dates=['date'])
+    for f in ('gold.json', 'eval_panel.csv.gz'):
+        (TESTS / f).unlink(missing_ok=True)
+
+    # ---- no-foresight gate: the truncated runs come first, so nothing later is on disk to reuse
+    cutoffs = sorted(truth['truncation_cutoffs'])
+    truncated = {}
+    for c in cutoffs:
+        try:
+            truncated[c] = run_scorer(data[data.date <= pd.Timestamp(c)])
+        except Exception as e:  # noqa: BLE001
+            return write_reward(0.0, dict(error=f'truncated run failed: {e}'))
     try:
-        full = run_scorer(data_path, tmp / 'full.csv')
+        full = run_scorer(data)
     except Exception as e:  # noqa: BLE001
         return write_reward(0.0, dict(error=str(e)))
 
-    # ---- no-foresight gate
     leaks = []
-    for c in truth['truncation_cutoffs']:
-        cut = pd.Timestamp(c)
-        part = data[data.date <= cut]
-        p_in = tmp / f'in_{c}.csv'; part.to_csv(p_in, index=False)
-        try:
-            trunc = run_scorer(p_in, tmp / f'out_{c}.csv')
-        except Exception as e:  # noqa: BLE001
-            return write_reward(0.0, dict(error=f'truncated run failed: {e}'))
+    for c in cutoffs:
+        part, trunc = data[data.date <= pd.Timestamp(c)], truncated[c]
         # every truncated row must be scored, and as on the full data: a missing or NaN truncated
         # score counts as changed, so a scorer can't hide lookahead by dropping or blanking rows
         cmp = (part[KEYS].drop_duplicates().merge(trunc, on=KEYS, how='left')

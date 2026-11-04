@@ -7,7 +7,7 @@ authors:
 role: [quant_researcher]
 workflow: [data_audit]
 mode: [review]             # find what is wrong with given material
-world: [ls_altdata]
+world: [systematic_consumer]
 source: txn_panel
 format: harbor
 tools: [code_execution]
@@ -30,6 +30,7 @@ instrument:              # what decides what the model sees and how it is scored
   - families/_shared/panel_perturb.py
   - families/_shared/panel_schema.md
   - families/_shared/firm.md
+  - families/_shared/panel_copy_note.md
   - sources/txn_panel/panel.py
 calibration:             # scored metric and pass threshold for rl/harness/calibrate.py; proposed, Mayank to confirm
   metric: reward

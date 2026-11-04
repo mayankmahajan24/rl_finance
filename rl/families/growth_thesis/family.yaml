@@ -7,7 +7,7 @@ authors:
 role: [quant_researcher]
 workflow: [growth_thesis]
 mode: [produce]            # answer.json + memo.md
-world: [ls_altdata]
+world: [systematic_consumer]
 source: txn_panel
 format: harbor
 tools: [code_execution]

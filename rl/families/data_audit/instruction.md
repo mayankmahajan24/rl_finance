@@ -2,10 +2,12 @@
 
 {firm}
 
-Before this licensed dataset is used for research, audit it for
+Before this dataset is used for research, audit it for
 data-quality problems that would make any series misleading.
 
 {schema}
+
+{copy_note}
 
 ## What to deliver
 

@@ -129,7 +129,7 @@ anything else there and clears `PYTHONPATH` before running the verifier.
 | `role` | Who does this work at a fund: `fundamental_analyst`, `quant_researcher`, `pm`, `risk` |
 | `workflow` | The job within the role, e.g. `research_design`, `kpi_nowcast`, `data_audit` |
 | `mode` | `produce` (do the work), `review` (find what is wrong with given work), `compare` (choose between two pieces of work), `revise` (fix work given a critique) |
-| `world` | The kind of fund the task is set in (research_design: the firm brief from `sources/research_design_case/contexts.json`; kpi_nowcast: `families/_shared/firm.md`) |
+| `world` | The kind of fund the task is set in (research_design: the firm brief from `sources/research_design_case/contexts.json`; the txn_panel families: `families/_shared/firm.md`) |
 | `status` | `graded`: gold exists and the grader runs (every task built today) |
 | `split` | `train`, `bench`, `heldout`; `eval` for a source with no split assignment; `retired` for a retired case (`splits/README.md`). Always the folder the task is in |
 | `companies` | Companies whose data the task contains (sources with a company split) |

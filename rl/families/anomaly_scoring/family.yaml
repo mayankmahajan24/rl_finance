@@ -1,13 +1,13 @@
 id: anomaly_scoring
 task_prefix: anomaly
 description: Online (no-foresight) anomaly scoring of sensor data
-version: 2.1.0          # bump when the family's tasks change in a way results can't be compared across
+version: 3.0.0          # bump when the family's tasks change in a way results can't be compared across
 authors:
   - name: Mayank Mahajan
 role: [quant_researcher]
 workflow: [anomaly_scoring]
 mode: [produce]            # the deliverable is code: /app/solution/score.py
-world: [ls_altdata]
+world: [systematic_consumer]
 source: txn_panel
 format: harbor
 tools: [code_execution]
@@ -15,7 +15,7 @@ builder: families._shared.build_panel   # generator: generate.py
 verifier: verifier/anomaly_verify.py
 verifier_timeout_sec: 3600
 gold_file: gold.json
-reward: F1 on planted spikes, drops and level shifts x coverage, zeroed if the no-foresight check fails
+reward: F1 on a hidden panel's planted spikes, drops and level shifts x coverage, zeroed if the no-foresight check fails
 gold_inputs:             # files its gold comes from; each has a provenance entry (rl/provenance.py)
   - sources/txn_panel/annotations/data_artifacts.yaml
   - sources/txn_panel/annotations/entities.yaml
@@ -30,6 +30,7 @@ instrument:              # what decides what the model sees and how it is scored
   - families/_shared/panel_perturb.py
   - families/_shared/panel_schema.md
   - families/_shared/firm.md
+  - families/_shared/panel_copy_note.md
   - sources/txn_panel/panel.py
 calibration:             # scored metric and pass threshold for rl/harness/calibrate.py; proposed, Mayank to confirm
   metric: reward

@@ -40,6 +40,7 @@ from sources.txn_panel import panel  # noqa: E402
 
 SCHEMA = (RL / "families" / "_shared" / "panel_schema.md").read_text().rstrip("\n")
 FIRM = (RL / "families" / "_shared" / "firm.md").read_text().rstrip("\n")
+COPY_NOTE = (RL / "families" / "_shared" / "panel_copy_note.md").read_text().rstrip("\n")
 DEFAULT_SPLITS = ["bench", "heldout"]      # train has no fixed size: it needs n
 
 
@@ -82,7 +83,7 @@ def write_task(dest: pathlib.Path, fam: dict, instruction: str, data: dict[str, 
     return harbor.write(dest, family=fam, builder="rl/families/_shared/build_panel.py", instruction=instruction,
                         metadata=dict(meta, fingerprint=fp), description=fam["description"],
                         keywords=["alt-data", "data-science", fam["task_prefix"]], verifier=verifier,
-                        tests={verifier: fam_dir / fam["verifier"]}, gold=json.dumps(truth, indent=1, default=str),
+                        tests={verifier: fam_dir / fam["verifier"], **truth.pop("hidden_files", {})}, gold=json.dumps(truth, indent=1, default=str),
                         judged="judge" in fam, data=data, solution=solution)
 
 
@@ -100,7 +101,7 @@ def build_split(fam_id: str, split: str, n: int | None, controls: int | None) ->
         else:
             i_task += 1
         tid = task_id(fam["task_prefix"], split, seed, control, i_ctrl if control else i_task)
-        instruction = harbor.render(instruction_t, schema=SCHEMA, firm=FIRM, **render_kw)
+        instruction = harbor.render(instruction_t, schema=SCHEMA, firm=FIRM, copy_note=COPY_NOTE, **render_kw)
         data = {"transactions.csv": df.to_csv(index=False, date_format="%Y-%m-%d")}
         meta = {"id": tid, "family": fam_id, "case": tid, "role": role, "workflow": workflow, "mode": mode,
                 "world": world, "status": "graded", "source": fam["source"], "split": split,

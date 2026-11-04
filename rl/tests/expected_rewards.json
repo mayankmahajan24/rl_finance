@@ -1,10 +1,10 @@
 {
  "anomaly-bench-001": {
-  "reference": 0.645,
+  "reference": 0.557,
   "naive": 0.0
  },
  "anomaly-bench-control-01": {
-  "reference": 0.851,
+  "reference": 0.8731,
   "naive": 0.0
  },
  "audit-bench-001": {

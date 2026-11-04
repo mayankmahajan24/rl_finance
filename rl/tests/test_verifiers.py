@@ -217,3 +217,37 @@ def test_every_built_task_is_graded():
     for d in sorted((RL / "tasks").glob("*/*")):
         if (d / "task.toml").exists():
             assert (d / "tests" / "gold.json").exists() and lib.task_meta(d)["status"] == "graded", d.name
+
+
+ANOMALY_CHEAT = """import argparse, json, pathlib
+import pandas as pd
+a = argparse.ArgumentParser(); a.add_argument('--input'); a.add_argument('--output'); x = a.parse_args()
+df = pd.read_csv(x.input)[['date', 'ticker', 'source_id']]
+gold = pathlib.Path.cwd().parent / 'tests' / 'gold.json'
+df['anomaly_score'] = 0.0
+if gold.exists():
+    t = json.loads(gold.read_text())
+    for p in t['points']:
+        df.loc[(df.ticker == p['ticker']) & (df.source_id == p['source_id']) & (df.date == p['date']), 'anomaly_score'] = 1.0
+df.to_csv(x.output, index=False)
+"""
+ANOMALY_REPLAY = """import argparse, pathlib
+import pandas as pd
+a = argparse.ArgumentParser(); a.add_argument('--input'); a.add_argument('--output'); x = a.parse_args()
+df = pd.read_csv(x.input)
+seen = pathlib.Path.cwd().parent / 'seen.csv'
+if seen.exists() and len(pd.read_csv(seen)) > len(df):
+    df = pd.read_csv(seen)
+df.to_csv(seen, index=False)
+df['anomaly_score'] = float(df.ct.mean() > 100) * 0.0 + len(df) % 97 / 97
+df[['date', 'ticker', 'source_id', 'anomaly_score']].to_csv(x.output, index=False)
+"""
+
+
+def test_anomaly_scorer_cannot_read_the_gold_or_replay_the_future():
+    task = built("bench", "anomaly-bench-001")
+    assert not (task / "environment" / "data" / "eval_panel.csv.gz").exists()
+    rewards, details = run_verifier(task, solution={"score.py": ANOMALY_CHEAT})
+    assert rewards["reward"] == 0 and details["tp"] == 0
+    rewards, details = run_verifier(task, solution={"score.py": ANOMALY_REPLAY})
+    assert details["no_foresight"] is False and rewards["reward"] == 0

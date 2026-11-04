@@ -53,7 +53,7 @@ def main() -> None:
 
         # ---- instrument identity ------------------------------------------
         for run, prefix in ((pw, "rd-funding-"), (pt, "rd-review-")):
-            fps = {t["prompt"]["fingerprint"] for tid, (_, t) in tasks.items() if tid.startswith(prefix)}
+            fps = {t["fingerprint"] for tid, (_, t) in tasks.items() if tid.startswith(prefix)}
             if fps != {run["prompt_fingerprint"]}:
                 failures.append(f"{model}: {prefix} fingerprint {fps} != run {run['prompt_fingerprint']}")
 
@@ -64,9 +64,9 @@ def main() -> None:
                 by_item.setdefault(r["id"], {})[r["tag"]] = r["result"]
         strong_hits = strong_n = 0
         for sid, resp in by_item.items():
-            d, t = tasks[f"rd-funding-{sid}"]
-            if t["status"] != "graded":
+            if f"rd-funding-{sid}" not in tasks:   # only graded items are built
                 continue
+            d, t = tasks[f"rd-funding-{sid}"]
             gold = json.loads((d / "tests" / "gold.json").read_text())
             g = pairwise_pick.grade(gold, resp)
             records.append({"task": t["id"], "model": model, "responses": resp, **g})
@@ -81,9 +81,9 @@ def main() -> None:
             if r["status"] != "ok":
                 continue
             tid = f"rd-review-{r['id']}-{r['tag']}"
-            d, t = tasks[tid]
-            if t["status"] != "graded":
+            if tid not in tasks:
                 continue
+            d, t = tasks[tid]
             key = (r["id"], r["tag"])
             cached = {
                 "gold_recall": [{"gold_ref": f"blocking#{x['n']}", "surfaced": x["surfaced"]}

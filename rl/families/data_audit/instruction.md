@@ -3,7 +3,7 @@
 You are a data scientist at an investment firm. Before this licensed dataset is used for research, audit it for
 data-quality problems that would make any series misleading.
 
-{{schema}}
+{schema}
 
 ## What to deliver
 

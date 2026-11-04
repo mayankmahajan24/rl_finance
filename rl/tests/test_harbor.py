@@ -11,17 +11,22 @@ import lib
 from families._shared import harbor
 from splits import check
 
-FAMILY = {"authors": [{"name": "Test", "email": "t@example.com"}], "version": "1.0.0"}
+FAMILY = {"authors": [{"name": "Test", "email": "t@example.com"}], "version": "1.0.0", "verifier_timeout_sec": 600,
+          "gold_file": "gold.json", "judge": {"model": "m", "effort": None, "votes": 1, "max_tokens": 100}}
+
+
+def meta(name, **over):
+    return {"id": name, "family": "test", "source": "txn_panel", "split": "bench", "case": name, "fingerprint": "f",
+            **over}
 
 
 def write(dest, **over):
-    kw = dict(family=FAMILY, builder="rl/tests", instruction="Do the work.\n",
-              metadata={"id": dest.name, "family": "test", "source": "txn_panel", "split": "bench"},
+    kw = dict(family=FAMILY, builder="rl/tests", instruction="Do the work.\n", metadata=meta(dest.name),
               description="test task", keywords=["test"], verifier="verify.py",
-              tests={"verify.py": "print('ok')\n", "gold.json": "{}"},
-              data={"a.csv": "x\n1\n"}, solution={"solve.sh": "true\n"})
+              tests={"verify.py": "print('ok')\n"}, gold="{}", data={"a.csv": "x\n1\n"},
+              solution={"solve.sh": "true\n"})
     kw.update(over)
-    return harbor.write(dest, **kw)
+    return harbor.write(dest, **kw)["content_sha256"]
 
 
 def test_layout(tmp_path):
@@ -31,8 +36,21 @@ def test_layout(tmp_path):
               "tests/common.py", "tests/verify.py", "tests/gold.json", "solution/solve.sh", "checksums.sha256"):
         assert (d / f).is_file(), f
     assert (d / "tests" / "test.sh").stat().st_mode & 0o111
-    assert "python /tests/verify.py" in (d / "tests" / "test.sh").read_text()
+    assert "python /tests/verify.py\n" in (d / "tests" / "test.sh").read_text()   # a crash is an error, never a 0
     assert not (d / "prompt").exists()
+
+
+def test_manifest_entry(tmp_path):
+    e = harbor.write(tmp_path / "t1", family=FAMILY, builder="rl/tests", instruction="x", description="d",
+                     keywords=[], verifier="verify.py", tests={}, gold="{}",
+                     metadata=meta("t1", role="r", seed=3, other="not recorded"))
+    assert set(e) == {"split", "case", "role", "seed", "fingerprint", "gold_fingerprint", "content_sha256"}
+    assert e["fingerprint"] == "f" and e["gold_fingerprint"] == lib.fingerprint("{}")
+
+
+def test_authors_carry_no_email(tmp_path):
+    write(tmp_path / "t1")
+    assert "@" not in (tmp_path / "t1" / "task.toml").read_text().split("[metadata]")[0]
 
 
 def test_checksums_cover_every_file(tmp_path):
@@ -57,9 +75,9 @@ def test_content_hash_ignores_only_the_build_record(tmp_path):
     assert write(tmp_path / "t1") == a                              # rebuilt later: new built_at, same hash
     assert write(tmp_path / "t1", data={"a.csv": "x\n2\n"}) != a      # data changed
     assert write(tmp_path / "t1", instruction="Other.\n") != a
-    assert write(tmp_path / "t1", tests={"verify.py": "print(1)\n", "gold.json": "{}"}) != a
-    assert write(tmp_path / "t1", metadata={"id": "t1", "family": "test", "source": "txn_panel",
-                                            "split": "train"}) != a
+    assert write(tmp_path / "t1", tests={"verify.py": "print(1)\n"}) != a
+    assert write(tmp_path / "t1", gold='{"a": 1}') != a
+    assert write(tmp_path / "t1", metadata=meta("t1", split="train")) != a
 
 
 def test_rewrite_removes_stale_files(tmp_path):
@@ -77,11 +95,15 @@ def test_gz_data_is_unpacked_in_the_image(tmp_path, gz):
     assert ("RUN gunzip /app/data/*.gz" in (d / "environment" / "Dockerfile").read_text()) == gz
 
 
-def test_verifier_packages_stay_out_of_the_agent_image(tmp_path):
+def test_judged_task_ships_the_judge(tmp_path):
     d = tmp_path / "t1"
-    write(d, test_pip=harbor.JUDGE_PIP)
+    write(d, judged=True)
     assert harbor.JUDGE_PIP in (d / "tests" / "test.sh").read_text()
-    assert "anthropic" not in (d / "environment" / "Dockerfile").read_text()
+    assert "anthropic" not in (d / "environment" / "Dockerfile").read_text()   # verifier-only package
+    assert (d / "tests" / "judge.py").exists() and '"model": "m"' in (d / "tests" / "judge.json").read_text()
+    assert "ANTHROPIC_API_KEY" in (d / "task.toml").read_text()
+    write(d)
+    assert not (d / "tests" / "judge.py").exists() and "ANTHROPIC_API_KEY" not in (d / "task.toml").read_text()
 
 
 def test_environment_is_pinned():
@@ -95,7 +117,7 @@ def test_environment_is_pinned():
 def test_every_phase_has_an_explicit_network_policy(tmp_path, judged):
     import tomllib
     d = tmp_path / "t1"
-    write(d, test_pip=harbor.JUDGE_PIP if judged else "")
+    write(d, judged=judged)
     cfg = tomllib.loads((d / "task.toml").read_text())
     assert cfg["agent"]["network_mode"] == cfg["environment"]["network_mode"] == "no-network"
     hosts = harbor.VERIFIER_HOSTS if judged else []
@@ -107,7 +129,7 @@ def test_every_phase_has_an_explicit_network_policy(tmp_path, judged):
 
 def test_as_of_pins_the_clock_for_the_agent_only(tmp_path):
     d = tmp_path / "t1"
-    write(d, metadata={"id": "t1", "family": "test", "source": "txn_panel", "split": "bench", "as_of": "2018-06-30"})
+    write(d, metadata=meta("t1", as_of="2018-06-30"))
     docker = (d / "environment" / "Dockerfile").read_text()
     assert 'FAKETIME="@2018-06-30 12:00:00"' in docker and "TASK_AS_OF=2018-06-30 " in docker
     assert re.search(r"libfaketime=[\w.+~-]+ ", docker)                 # pinned apt package
@@ -115,3 +137,10 @@ def test_as_of_pins_the_clock_for_the_agent_only(tmp_path):
     assert "unset LD_PRELOAD FAKETIME" in (d / "tests" / "test.sh").read_text()
     write(d)
     assert "FAKETIME" not in (d / "environment" / "Dockerfile").read_text()
+
+
+def test_render():
+    assert harbor.render('{"a": 1} {x} {x}', x=2) == '{"a": 1} 2 2'     # JSON needs no escaping
+    assert harbor.render("{x}", x="{y}") == "{y}"                         # one pass: values are not re-read
+    with pytest.raises(AssertionError):
+        harbor.render("{x} {y}", x=1)

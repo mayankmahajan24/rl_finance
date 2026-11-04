@@ -1,20 +1,19 @@
 id: anomaly_scoring
 task_prefix: anomaly
 description: Online (no-foresight) anomaly scoring of sensor data
-version: 1.1.0          # bump when the family's tasks change in a way results can't be compared across
+version: 2.0.0          # bump when the family's tasks change in a way results can't be compared across
 authors:
   - name: Mayank Mahajan
-    email: mayank.mahajan@gmail.com
-role: quant_researcher
-workflow: anomaly_scoring
-mode: produce            # the deliverable is code: /app/solution/score.py
-world: ls_altdata
+role: [quant_researcher]
+workflow: [anomaly_scoring]
+mode: [produce]            # the deliverable is code: /app/solution/score.py
+world: [ls_altdata]
 source: txn_panel
 format: harbor
-companies: panel         # up to 8 of the split's sensor tickers, real (disguised) data
-generator: generate.py
+builder: families._shared.build_panel   # generator: generate.py
 verifier: verifier/anomaly_verify.py
 verifier_timeout_sec: 3600
+gold_file: gold.json
 reward: F1 on planted spikes, drops and level shifts x coverage, zeroed if the no-foresight check fails
 gold_inputs:             # files its gold comes from; each has a provenance entry (rl/provenance.py)
   - sources/txn_panel/annotations/data_artifacts.yaml

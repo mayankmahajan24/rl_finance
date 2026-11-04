@@ -1,20 +1,22 @@
 """growth_thesis generator: a semi-synthetic airline panel with known true growth and traps.
 
-Ported from make_thesis_variant in ~/altdata_evals/generator.py; identical with the default template.
-The airlines and their activity are synthetic. The only real data used is the seasonality template,
-taken from `template_tickers`; a split passes its own clean airlines so no other split's company
-shapes its tasks. `raw` is the full panel: it only supplies airline names to disguise and the date
-shift, never values.
+Ported from make_thesis_variant in ~/altdata_evals/generator.py. The airlines and their activity
+are synthetic. The only real data used is the seasonality template, taken from the split's own clean
+airlines, so no other split's company shapes its tasks.
 """
 from __future__ import annotations
+
+import string
 
 import numpy as np
 import pandas as pd
 
-from families._shared.panel_perturb import Frame, _fmt
-
+from families._shared.panel_perturb import _fmt
+from sources.txn_panel import panel
 
 TEMPLATE_TICKERS = ['DAL', 'UAL', 'LUV', 'JBLU', 'SAVE', 'ALK']   # clean real airline series
+N_AIRLINES = 9
+CODES = [a + b for a in string.ascii_uppercase for b in string.ascii_uppercase]
 
 
 def _seasonal_template(raw, tickers=TEMPLATE_TICKERS):
@@ -28,14 +30,17 @@ def _seasonal_template(raw, tickers=TEMPLATE_TICKERS):
     return x.median(axis=1).interpolate().fillna(0.0)
 
 
-def make_variant(seed: int, control: bool, raw: pd.DataFrame, template_tickers=TEMPLATE_TICKERS):
+def make_variant(seed: int, control: bool, ctx):
+    template = [t for t in TEMPLATE_TICKERS if t in ctx.sensors]
+    if not template:
+        raise SystemExit('no clean airline in this split for the seasonality template')
     rng = np.random.default_rng(seed)
-    F = Frame(raw[raw.industry == 'airlines'], rng)            # only used for names / date shift
-    seas = _seasonal_template(raw, template_tickers)
-    dates = seas.index + F.shift
+    tickers = sorted(f'T{c}' for c in rng.choice(CODES, N_AIRLINES, replace=False))
+    shift = pd.Timedelta(days=364 * int(rng.choice([-3, -2, -1, 1, 2, 3, 4])))   # disguises dates, as Frame does
+    seas = _seasonal_template(ctx.raw, template)
+    dates = seas.index + shift
     T = len(dates); tt = np.arange(T) / 365.0
-    tickers = sorted(F.tmap.values())
-    y1, y2 = F.year(2015), F.year(2017)
+    y1, y2 = ((pd.Timestamp(f'{y}-07-01') + shift).year for y in (2015, 2017))
 
     def yearly_mean(series, y):
         return series[dates.year == y].mean()
@@ -109,4 +114,5 @@ def make_variant(seed: int, control: bool, raw: pd.DataFrame, template_tickers=T
                  unreliable=unreliable, optional_unreliable=optional_unreliable, traps=traps,
                  growth_tolerance=0.15)
     df = df.sort_values(['date', 'ticker', 'source_id']).reset_index(drop=True)
-    return df, truth
+    years = {'year_start': y1, 'year_end': y2}
+    return df, truth, {'y1': y1, 'y2': y2}, years, sorted({panel.company_of_sensor(t) for t in template})

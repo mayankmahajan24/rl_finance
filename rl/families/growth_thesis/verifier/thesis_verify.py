@@ -18,7 +18,7 @@ import os
 import re
 
 import judge
-from common import APP, f1, load_truth, write_reward, write_rewards
+from common import APP, f1, load_gold, write_reward, write_rewards
 
 W_FASTEST, W_GROWTH, W_UNREL, W_RUBRIC = 0.35, 0.25, 0.15, 0.25
 NEG = ('not ', 'no ', "isn't", 'exclud', 'unreliable', 'artifact', 'spurious', 'ignore', 'rather than')
@@ -108,18 +108,20 @@ def llm_judge(memo, truth, items):
 
 
 def main():
-    truth = load_truth()
+    truth = load_gold()
     try:
         ans = json.loads((APP / 'output' / 'answer.json').read_text())
     except Exception as e:  # noqa: BLE001
         return write_reward(0.0, dict(error=f'could not read output/answer.json: {e}'))
+    if not isinstance(ans, dict):
+        return write_reward(0.0, dict(error=f'output/answer.json is a {type(ans).__name__}, not an object'))
     memo_path = APP / 'output' / 'memo.md'
     memo = memo_path.read_text() if memo_path.exists() else ''
 
     # 1. fastest
     s_fast = 1.0 if str(ans.get('fastest', '')).strip() == truth['fastest'] else 0.0
     # 2. growth accuracy on trustworthy airlines
-    growth = {str(k): v for k, v in (ans.get('growth') or {}).items()}
+    growth = ans.get('growth') if isinstance(ans.get('growth'), dict) else {}
     tol = truth['growth_tolerance']; per = {}
     for t, g in truth['true_growth'].items():
         if t in truth['unreliable']:
@@ -131,7 +133,7 @@ def main():
     s_growth = sum(per.values()) / len(per)
     # 3. unreliable list
     U = set(truth['unreliable']); O = set(truth['optional_unreliable'])
-    R = {str(x) for x in (ans.get('unreliable') or [])} - O
+    R = {str(x) for x in ans.get('unreliable') if isinstance(ans.get('unreliable'), list)} - O
     if not U and not R:
         s_unrel = 1.0
     else:

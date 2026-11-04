@@ -12,11 +12,11 @@ import pandas as pd
 from families._shared.panel_perturb import D, Frame, _fmt, inj_level_shift
 
 
-def make_variant(seed: int, control: bool, raw: pd.DataFrame, artifacts=((), ()), panel_end='2018-12-31',
-                 n_tickers=8):
+def make_variant(seed: int, control: bool, ctx, n_tickers=8):
     rng = np.random.default_rng(seed)
+    raw = ctx.raw
     tks = list(rng.choice(sorted(raw.ticker.unique()), min(n_tickers, raw.ticker.nunique()), replace=False))
-    F = Frame(raw, rng, tickers=tks, artifacts=artifacts)
+    F = Frame(raw, rng, tickers=tks, artifacts=ctx.artifacts)
     points, shifts = [], []
     if not control:
         cands = F.candidates()
@@ -35,7 +35,7 @@ def make_variant(seed: int, control: bool, raw: pd.DataFrame, artifacts=((), ())
             shifts.append(dict(ticker=t, source_id=s, start=it['start'], end=it['end'], mult=it['mult']))
     req, opt = F.natural()
     excl = [dict(ticker=i['ticker'], source_id=i['source_id'], lo=i['start'],
-                 hi=i['end'] or F.d(panel_end)) for i in req] + \
+                 hi=i['end'] or F.d(ctx.panel_end)) for i in req] + \
            [dict(ticker=i['ticker'], source_id=i['source_id'], lo=i['lo'], hi=i['hi']) for i in opt]
     d0, d1 = F.df.date.min(), F.df.date.max()
     cutoffs = [_fmt(d0 + (d1 - d0) * f) for f in (0.45, 0.7)]
@@ -44,4 +44,4 @@ def make_variant(seed: int, control: bool, raw: pd.DataFrame, artifacts=((), ())
                  eval_start=_fmt(d0 + pd.Timedelta(days=545)), shift_positive_days=60, shift_ignore_after_days=60,
                  threshold=0.5, truncation_cutoffs=cutoffs)
     df = F.df.sort_values(['date', 'ticker', 'source_id']).reset_index(drop=True)
-    return df, truth
+    return df, truth, {}, None, ctx.companies

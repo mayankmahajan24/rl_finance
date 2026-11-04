@@ -4,7 +4,7 @@ You are a data scientist at an investment firm. Build a model that scores every 
 *bad data*: a one-day spike or drop from a malfunctioning sensor, or a period in which a sensor's level has shifted
 up or down relative to what it should read.
 
-{{schema}}
+{schema}
 
 ## What to deliver
 

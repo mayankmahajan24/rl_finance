@@ -38,3 +38,8 @@ grader_only:
 
 families: [kpi_nowcast, data_audit, anomaly_scoring, growth_thesis]
 splits: ../../splits/txn_panel.yaml
+
+# Phrases agent-visible files may contain although rl/leakcheck.py would flag them as identifying.
+identity_allowlist:
+  - phrase: Anomaly Detection Exercise
+    reason: title of the data brief that came with the panel (kpi_nowcast's data_brief.md); judged acceptable to keep (issue #21)

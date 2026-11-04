@@ -9,6 +9,7 @@
       tests/test.sh, tests/<verifier>, tests/common.py, gold   copied in only after the agent finishes
       tests/judge.py, tests/judge.json   the shared model judge and the family's pinned judge config (judged verifiers)
       tests/provenance.json              who produced each of the family's gold inputs and its review state
+      tests/CANARY                       the release's contamination canary (rl/canary.txt), never agent-visible
       solution/solve.sh (+ files)        reference solution for Harbor's oracle agent, where one exists
       checksums.sha256                   sha256 of every other file in the task (`sha256sum -c checksums.sha256`)
 
@@ -93,6 +94,7 @@ JUDGE_ENV = ('\n[verifier.env]\n# LLM judge for the memo rubric (tests/judge.jso
 COMMON = HERE / "verify_common.py"
 JUDGE = HERE / "judge.py"
 RL = HERE.parents[1]
+CANARY = RL / "canary.txt"            # contamination canary: grader-side only (leakcheck.py)
 BUILD_PACKAGES = ["pandas", "numpy", "scipy", "PyYAML", "toml"]
 
 
@@ -204,6 +206,7 @@ def write(dest: pathlib.Path, *, family: dict, builder: str, instruction: str, m
     if family.get("judge") and test_pip.strip():      # a verifier that installs the judge client calls the judge
         _put(dest / "tests" / "judge.py", JUDGE)
         _put(dest / "tests" / "judge.json", json.dumps(family["judge"], indent=1) + "\n")
+    _put(dest / "tests" / "CANARY", CANARY)
     for name, c in tests.items():
         _put(dest / "tests" / name, c)
     (dest / "solution").mkdir()

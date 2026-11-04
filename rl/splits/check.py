@@ -14,6 +14,8 @@
   7. provenance: every family's gold inputs have well-formed provenance entries (rl/provenance.py),
      every task of such a family carries them (tests/provenance.json, [metadata.provenance]), and
      no task claims approved gold that is no longer approved
+  8. leaks: nothing the agent sees gives away gold, the benchmark's identity, a disguised company or
+     the release canary (rl/leakcheck.py, configured per family under `leak_check` in family.yaml)
 
 With --release (before handing tasks to anyone): every task was also built from one clean commit,
 with no uncommitted changes to tracked files, every family with bench or held-out tasks has its
@@ -40,6 +42,7 @@ sys.path.insert(0, str(RL))
 import splits  # noqa: E402
 import instrument  # noqa: E402
 import provenance  # noqa: E402
+import leakcheck  # noqa: E402
 from families._shared import harbor  # noqa: E402
 from lib import fingerprint, iter_tasks  # noqa: E402
 from sources.txn_panel import panel  # noqa: E402
@@ -194,6 +197,7 @@ def check(release: bool = False) -> list[str]:
         problems += checksum_problems(d)
         problems += sandbox_problems(d, m)
         problems += provenance_problems(d, m, release)
+        problems += leakcheck.task_problems(d, m)
         b = m.get("build")
         if not b:
             problems.append(f"{tid}: no [metadata.build] record")

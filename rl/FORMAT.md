@@ -107,6 +107,17 @@ gold-derived answer lowers the reward (pytest runs this on a task per generated 
 turning off a reference step loses reward wherever that step's trap is planted (data_audit's six
 checks).
 
+## Reward hacking
+
+`python rl/harness/attacks.py --split <split>` attacks every verifier the way a gaming agent would:
+empty, malformed, placeholder, copied-input, random, extreme, over-long and prompt-injection
+outputs, edits to `/app/data`, modules planted in `/tests` before the grader is uploaded, and, for
+prose graded by a judge or keyword grader, padding, hedging, restating the brief and keyword
+stuffing. Each family's mean must stay a margin below good answers (reference solution, gold
+forecast, gold pick); pytest runs it on one bench task per family. Because Harbor uploads `tests/`
+by merging into whatever is at `/tests`, every task ships `tests/FILES`, and `test.sh` deletes
+anything else there and clears `PYTHONPATH` before running the verifier.
+
 ## [metadata]
 
 | Field | Meaning |

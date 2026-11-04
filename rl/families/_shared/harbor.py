@@ -10,6 +10,7 @@
       tests/judge.py, tests/judge.json   the shared model judge and the family's pinned judge config (judged verifiers)
       tests/provenance.json              who produced each of the family's gold inputs and its review state
       tests/CANARY                       the release's contamination canary (rl/canary.txt), never agent-visible
+      tests/FILES                        every file tests/ ships; test.sh deletes anything else found in /tests
       solution/solve.sh (+ files)        reference solution for Harbor's oracle agent, where one exists
       checksums.sha256                   sha256 of every other file in the task (`sha256sum -c checksums.sha256`)
 
@@ -77,11 +78,16 @@ ENV TZ=UTC TASK_AS_OF={as_of} FAKETIME="@{as_of} 12:00:00" FAKETIME_ONLY_CMDS=py
     LD_PRELOAD=/usr/local/lib/libfaketime.so.1
 """
 
+# Harbor uploads tests/ by merging it into whatever the agent left at /tests: remove every file the
+# task didn't ship (tests/FILES), so nothing planted there is imported by the verifier.
+TEST_CLEANUP = "cd /tests && find . -type f | sed 's|^\\./||' | grep -vxF -f FILES | tr '\\n' '\\0' | xargs -0 rm -f --"
 TEST_SH = """#!/bin/bash
 # Harbor copies this directory to /tests after the agent finishes; the reward goes to /logs/verifier/reward.txt.
 mkdir -p /logs/verifier
+""" + TEST_CLEANUP + """
 cd /tests
 unset LD_PRELOAD FAKETIME   # the verifier runs on the real clock (a dated task fakes it for the agent)
+unset PYTHONPATH PYTHONSTARTUP PYTHONHOME; export PYTHONNOUSERSITE=1
 {install}python /tests/{verifier} || echo 0 > /logs/verifier/reward.txt
 """
 TEST_PIP = ("pip install --no-cache-dir --quiet {pkgs} "
@@ -215,6 +221,8 @@ def write(dest: pathlib.Path, *, family: dict, builder: str, instruction: str, m
     prov = provenance.for_family(metadata.get("family", ""))
     if prov:
         _put(dest / "tests" / "provenance.json", json.dumps(prov, indent=1, ensure_ascii=False) + "\n")
+    shipped = {str(p.relative_to(dest / "tests")) for p in (dest / "tests").rglob("*") if p.is_file()} | {"FILES"}
+    _put(dest / "tests" / "FILES", "".join(f"{f}\n" for f in sorted(shipped)))   # after every other tests/ file
     env = dict(metadata.get("environment", {}), internet=False,
                verifier_hosts=VERIFIER_HOSTS if test_pip.strip() else [])
     meta = dict(metadata, environment=env, **({"provenance": provenance.summary(prov)} if prov else {}),

@@ -3,8 +3,8 @@
 Every step here is a human decision; the code refuses to release until each is recorded. Run from the
 repo root, in this order. Gold review comes before instrument approval: several files are both gold
 inputs and instrument files (kpi_nowcast's `judge.md`, growth_thesis's verifier, the generators,
-`panel_perturb.py`), so an edit during review would reopen the approval. Steps 3 and 6 need the
-instrument-freeze (#16) and shared-judge (#17) PRs merged.
+`panel_perturb.py`), so an edit during review would reopen the approval. Every split that can be
+exported (train, bench, and research_design's eval) needs both approvals.
 
 1. **Gold review** (`rl/provenance.py`). Approve, edit or reject every open item, then commit:
 
@@ -38,13 +38,19 @@ instrument-freeze (#16) and shared-judge (#17) PRs merged.
    `licensed_for_training` or `public` (or `internal_only`) for `txn_panel` and `research_design_case`,
    with the reason in `licence.note`, and commit.
 
-5. **Release build and export**, stamped with the commit so the archive is reproducible:
+5. **Release build and export**, stamped with the commit so the archive is reproducible. Run it on
+   the machine that holds `rl/splits/secrets/` (the held-out seeds), so the build rebuilds the
+   held-out tasks too; the `git diff` then fails if any task, held-out included, no longer matches
+   the manifests committed in step 2. Held-out tasks are never exported, so this is the only check
+   that they still reproduce.
 
    ```sh
    SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) python rl/build.py
    SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) python rl/build.py panel --split train --n 3 --controls 1
+   git diff --exit-code -- rl/splits/manifests
    python rl/splits/check.py --release
    python rl/export.py --split bench --out dist/rl_finance-bench.tar.gz
+   python rl/export.py --split eval --out dist/rl_finance-eval.tar.gz
    ```
 
 6. **Model runs** (spend API credit; each is capped). `export ANTHROPIC_API_KEY=...` first.
@@ -56,5 +62,5 @@ instrument-freeze (#16) and shared-judge (#17) PRs merged.
    ```
 
    Then, with answers saved from those runs, the judge stability report (one call per answer per time):
-   `python rl/harness/judge_stability.py --times 3 <task_dir>=<output_dir> ...`. Once the leak-check
-   PR (#21) lands, the contamination probe: `python rl/harness/canary_probe.py --model claude-opus-5-5 --tries 5`.
+   `python rl/harness/judge_stability.py --times 3 <task_dir>=<output_dir> ...`, and the contamination
+   probe: `python rl/harness/canary_probe.py --model claude-opus-5-5 --tries 5`.

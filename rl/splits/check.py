@@ -16,6 +16,9 @@
      no task claims approved gold that is no longer approved
   8. leaks: nothing the agent sees gives away gold, the benchmark's identity, a disguised company or
      the release canary (rl/leakcheck.py, configured per family under `leak_check` in family.yaml)
+  9. environment and clean room: every /app path the instruction names exists in the image or is read
+     by the verifier; the reference solution imports only what the agent's image has, reads no
+     grader-side file, and its params give nothing the instruction doesn't
 
 With --release (before handing tasks to anyone): every task was also built from one clean commit,
 with no uncommitted changes to tracked files, every family with bench or held-out tasks has its
@@ -32,6 +35,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import pathlib
+import re
 import sys
 import tomllib
 
@@ -119,6 +123,43 @@ def provenance_problems(d: pathlib.Path, m: dict, release: bool) -> list[str]:
     return out
 
 
+# import name -> pip name, for the packages the agent image installs under another name
+PIP_NAMES = {"sklearn": "scikit-learn", "yaml": "PyYAML"}
+GRADER_SIDE = re.compile(r"/tests\b|ground_truth|gold\.json|draft_rubric|seeds?\.ya?ml|heldout_seeds|\bgenerate\b")
+
+
+def environment_problems(d: pathlib.Path, m: dict) -> list[str]:
+    """Check 9: what the instruction names is there, and the reference works from what the agent has."""
+    tid, out = d.name, []
+    instruction = (d / "instruction.md").read_text()
+    data = {p.name.removesuffix(".gz") for p in (d / "environment" / "data").iterdir()}
+    verifier = "".join(p.read_text() for p in (d / "tests").glob("*.py"))
+    for kind, name in sorted(set(re.findall(r"/app/(data|output|solution)/([\w.-]+\.\w+)", instruction))):
+        if kind == "data" and name not in data:
+            out.append(f"{tid}: instruction names /app/data/{name}, which the image doesn't have")
+        graded = m.get("status") not in ("ungraded", "needs_rubric")    # an ungraded task's verifier reads nothing yet
+        if kind != "data" and graded and f"'{name}'" not in verifier and f'"{name}"' not in verifier:
+            out.append(f"{tid}: instruction names /app/{kind}/{name}, which the verifier never reads")
+    image = (d / "environment" / "Dockerfile").read_text().lower()
+    for f in sorted((d / "solution").glob("*")):
+        if not f.is_file():
+            continue
+        text = f.read_text(errors="replace")
+        if GRADER_SIDE.search(text):
+            out.append(f"{tid}: solution/{f.name} refers to grader-side files ({GRADER_SIDE.search(text).group(0)!r})")
+        if f.suffix == ".py":
+            mods = {m.split(".")[0] for m in re.findall(r"^\s*(?:import|from)\s+([\w.]+)", text, re.M)}
+            local = {p.stem for p in (d / "solution").glob("*.py")}
+            for m in sorted(mods - set(sys.stdlib_module_names) - local):
+                if f"{PIP_NAMES.get(m, m).lower()}==" not in image:
+                    out.append(f"{tid}: solution/{f.name} imports {m}, which the agent's image doesn't install")
+        if f.name == "params.json":
+            import json
+            out += [f"{tid}: solution/params.json gives {k}={v!r}, which the instruction doesn't state"
+                    for k, v in json.loads(text).items() if str(v) not in instruction]
+    return out
+
+
 def check(release: bool = False) -> list[str]:
     problems: list[str] = provenance.problems()
     commits: set[str] = set()
@@ -198,6 +239,7 @@ def check(release: bool = False) -> list[str]:
         problems += sandbox_problems(d, m)
         problems += provenance_problems(d, m, release)
         problems += leakcheck.task_problems(d, m)
+        problems += environment_problems(d, m)
         b = m.get("build")
         if not b:
             problems.append(f"{tid}: no [metadata.build] record")

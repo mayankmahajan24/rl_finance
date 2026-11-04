@@ -179,3 +179,27 @@ def test_dated_task_with_the_real_clock(tree, tmp_path):
     shutil.copytree(built("bench", DATED), d)
     edit(d, "environment/Dockerfile", "TASK_AS_OF=2017-12-31 ", "TASK_AS_OF=2018-12-31 ")
     assert f"{DATED}: as_of 2017-12-31 but its image does not pin the clock to it" in problems()
+
+
+def test_instruction_names_a_missing_file(tree):
+    d = tree()
+    edit(d, "instruction.md", "issues.json", "issues.json` from `/app/data/lookup.csv")
+    assert f"{TASK}: instruction names /app/data/lookup.csv, which the image doesn't have" in problems()
+
+
+def test_instruction_output_the_verifier_never_reads(tree):
+    d = tree()
+    edit(d, "instruction.md", "/app/output/issues.json", "/app/output/findings.json")
+    assert f"{TASK}: instruction names /app/output/findings.json, which the verifier never reads" in problems()
+
+
+def test_reference_reads_grader_files(tree):
+    d = tree()
+    edit(d, "solution/audit.py", "import json", "import json  # cheat: json.load(open('/tests/ground_truth.json'))")
+    assert f"{TASK}: solution/audit.py refers to grader-side files ('/tests')" in problems()
+
+
+def test_reference_imports_what_the_image_lacks(tree):
+    d = tree()
+    edit(d, "solution/audit.py", "import json", "import json\nimport sklearn")
+    assert f"{TASK}: solution/audit.py imports sklearn, which the agent's image doesn't install" in problems()

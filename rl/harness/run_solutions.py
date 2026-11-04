@@ -41,7 +41,8 @@ def run_one(task_dir: str, solver: str):
     shutil.copytree(src, sol)
     if (task / 'solution' / 'params.json').exists():
         shutil.copy(task / 'solution' / 'params.json', sol)
-    env = dict(os.environ, APP_DIR=str(app), TESTS_DIR=str(task / 'tests'), LOGS_DIR=str(logs),
+    # PYTHONDONTWRITEBYTECODE: the verifier runs inside the built task's tests/, and __pycache__ there changes its hash
+    env = dict(os.environ, APP_DIR=str(app), TESTS_DIR=str(task / 'tests'), LOGS_DIR=str(logs), PYTHONDONTWRITEBYTECODE='1',
                PATH=str(Path(sys.executable).parent) + os.pathsep + os.environ['PATH'])
     r = subprocess.run(['bash', str(sol / 'solve.sh')], env=env, capture_output=True, text=True, cwd=app)
     if r.returncode != 0:

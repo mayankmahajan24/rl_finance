@@ -365,6 +365,8 @@ def good(task: pathlib.Path, meta: dict) -> dict:
 
 
 def run(tasks: list[tuple[pathlib.Path, dict]], only: list[str] | None = None) -> tuple[list[dict], list[str]]:
+    os.environ.pop("ANTHROPIC_API_KEY", None)      # the suite grades offline: good answers too
+    os.environ["JUDGE"] = "keyword"
     rows = []
     for task, meta in tasks:
         fam = meta["family"]

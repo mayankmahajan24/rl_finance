@@ -170,7 +170,7 @@ class KpiNowcast(Format):
     prose = "output/answer.md"
     metric = "skill_vs_naive"
 
-    def forecast(self, app, meta, point, low, high, level=0.9, text="Estimate below."):
+    def forecast(self, app, meta, point, low, high, level=0.95, text="Estimate below."):
         fc = {"target_period": meta["meta"]["target_period"].replace(" ", ""), "unit": "USD millions",
               "point": point, "low": low, "high": high, "interval_level": level, "in_sample": [],
               "vs_consensus": "no_consensus"}
@@ -329,7 +329,7 @@ def good(task: pathlib.Path, meta: dict) -> dict:
     if fam == "kpi_nowcast":
         a = gold["actual"]
         fc = {"target_period": gold["target_period"].replace(" ", ""), "unit": gold["unit"], "point": a,
-              "low": a * 0.98, "high": a * 1.02, "interval_level": 0.9, "in_sample": [], "vs_consensus": "no_consensus"}
+              "low": a * 0.98, "high": a * 1.02, "interval_level": 0.95, "in_sample": [], "vs_consensus": "no_consensus"}
         return grade(task, lambda app, tests: put(app / "output/answer.md", kpi_answer(fc)))
     flip = {"A": "B", "B": "A"}[gold["preference"]]
     return grade(task, lambda app, tests: put(app / "output/response.json", Compare().answer(gold["preference"], flip)))

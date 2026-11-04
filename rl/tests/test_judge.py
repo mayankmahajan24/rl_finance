@@ -125,3 +125,14 @@ def test_stability_report_flags_flaky_items():
     r = judge_stability.report({"a": [{"C1": "pass", "C2": "pass"}, {"C1": "pass", "C2": "fail"}],
                                 "b": [{"C1": "fail", "C2": "pass"}, {"C1": "fail", "C2": "fail"}]})
     assert r["item_agreement"] == {"C1": 1.0, "C2": 0.5} and r["flaky_items"] == ["C2"]
+
+
+def test_figure_blocks_keep_valid_pngs_up_to_the_cap(tmp_path):
+    from families.kpi_nowcast import grader
+    assert grader.figure_blocks(tmp_path / "none") == []
+    (tmp_path / "fake.png").write_bytes(b"not an image")
+    for i in range(grader.MAX_FIGURES):
+        (tmp_path / f"fig{i}.png").write_bytes(grader.PNG)
+    blocks = grader.figure_blocks(tmp_path)
+    assert [b["text"] for b in blocks[::2]] == ["figures/fig0.png", "figures/fig1.png", "figures/fig2.png"]
+    assert all(b["type"] == "image" for b in blocks[1::2])

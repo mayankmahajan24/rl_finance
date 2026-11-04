@@ -1,5 +1,5 @@
 id: txn_panel
-name: Daily card-transaction panel, 16 US airlines and department stores, 4 sensors
+name: Daily transaction panel, 16 US airlines and department stores, 4 sensors
 kind: dataset + assignment
 
 data:

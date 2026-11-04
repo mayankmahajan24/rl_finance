@@ -23,15 +23,22 @@ def main():
     if why:
         details['judge'] = why
     else:
+        import client
         ctx = json.loads((TESTS / 'judge_context.json').read_text())
-        try:
-            votes, meta = judge.judge(*G.judge_prompt(ctx['user'], ctx['as_of'], writeup, fc, gold), G.JUDGE_SCHEMA)
-        except judge.JudgeError as e:
-            details['judge'] = f'not graded: write-up judge failed: {e}'
-        else:
-            verdicts = judge.majority(votes, 'verdict')
-            rewards.update({k: v for k, v in G.grade_writeup(verdicts).items() if v is not None})
-            details['judge'] = {**meta, **{i: f"{v['verdict']}: {v['reason']}" for i, v in verdicts.items()}}
+        system, user = G.judge_prompt(ctx['user'], ctx['as_of'], writeup, fc, gold)
+        figures = G.figure_blocks(APP / 'output' / 'figures')
+        # a chart the API rejects must not cost the run its write-up score: judge the text alone
+        for content in ([{'type': 'text', 'text': user}] + figures, user) if figures else (user,):
+            try:
+                votes, meta = judge.judge(system, content, G.JUDGE_SCHEMA)
+            except (judge.JudgeError, client.anthropic.BadRequestError) as e:
+                details['judge'] = f'not graded: write-up judge failed: {e}'
+            else:
+                verdicts = judge.majority(votes, 'verdict')
+                rewards.update({k: v for k, v in G.grade_writeup(verdicts).items() if v is not None})
+                details['judge'] = {**meta, 'figures_judged': content is not user,
+                                    **{i: f"{v['verdict']}: {v['reason']}" for i, v in verdicts.items()}}
+                break
     write_rewards(rewards, details)
 
 

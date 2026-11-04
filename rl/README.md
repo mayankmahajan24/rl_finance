@@ -6,7 +6,7 @@ folder in Harbor's layout; [`FORMAT.md`](FORMAT.md) is the spec. This file owns 
 
 | Folder | What it holds |
 |---|---|
-| [`sources/`](sources/) | `txn_panel` (card-transaction panel + anomaly-detection brief) and `research_design_case` (the research-design case study) |
+| [`sources/`](sources/) | `txn_panel` (transaction panel + description of its known data issues) and `research_design_case` (the research-design case study) |
 | [`families/`](families/) | one folder per kind of task: builder or generator, instruction, verifier and graders, baseline solutions |
 | [`splits/`](splits/) | company and seed assignment per split, retired cases, `manifests/<family>.json` (the committed index of every task), `check.py` |
 | `tasks/` | every built task at `tasks/<split>/<task_id>/`. Gitignored; `build.py` rebuilds it |

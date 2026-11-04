@@ -11,6 +11,7 @@ verifier's judge calls go through it too.
 
 from __future__ import annotations
 
+import pathlib
 import random
 import time
 
@@ -52,6 +53,21 @@ def delete(api, file_ids: list[str]) -> None:
             api.beta.files.delete(f)
         except anthropic.APIError:
             pass
+
+
+def generated_pngs(api, content: list) -> dict[str, bytes]:
+    """{file name: bytes} of the PNGs the code-execution sandbox produced during a turn."""
+    out = {}
+    for block in content:
+        if block.type != "bash_code_execution_tool_result" or block.content.type != "bash_code_execution_result":
+            continue
+        for ref in block.content.content or []:
+            if ref.type != "bash_code_execution_output":
+                continue
+            name = pathlib.PurePosixPath(api.beta.files.retrieve_metadata(ref.file_id).filename).name
+            if name.endswith(".png"):
+                out[name] = api.beta.files.download(ref.file_id).read()
+    return out
 
 
 def request(*, model: str, content: list[dict], max_tokens: int, system: str | None = None, effort: str | None = None,

@@ -8,7 +8,7 @@
     "point": {"type": "number"},
     "low": {"type": "number"},
     "high": {"type": "number"},
-    "interval_level": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1},
+    "interval_level": {"type": "number", "const": 0.95},
     "in_sample": {
       "type": "array",
       "items": {

@@ -125,7 +125,7 @@ KN = "kn-produce-SAVE-2018Q2"
 
 def kn_answer(gold: dict, point: float, width: float = 0.1) -> str:
     fc = {"target_period": gold["target_period"], "point": point, "low": point * (1 - width),
-          "high": point * (1 + width), "interval_level": 0.8, "in_sample": []}
+          "high": point * (1 + width), "interval_level": 0.95, "in_sample": []}
     return f"Write-up.\n\n```json\n{json.dumps(fc)}\n```\n"
 
 
@@ -155,6 +155,8 @@ def test_kpi_naive_forecast_earns_nothing(offline):
 
 @pytest.mark.parametrize("answer", [None, "no json here", "```json\n{\"point\": 1}\n```",
                                     '```json\n{"target_period": "x", "point": 5, "low": 6, "high": 7, '
+                                    '"interval_level": 0.95, "in_sample": []}\n```',
+                                    '```json\n{"target_period": "x", "point": 5, "low": 4, "high": 6, '
                                     '"interval_level": 0.8, "in_sample": []}\n```'])
 def test_kpi_invalid_forecast(answer, offline):
     task = built("bench", KN)

@@ -15,7 +15,7 @@ What the agent sees: instruction.md, prompt/ and environment/ (text files; .gz d
   identity   no repo, source or upstream identifiers, URLs, SEC accession numbers, task ids, or
              benchmark framing ("you are being evaluated"). A source can allow a phrase in
              `identity_allowlist` in its source.yaml, with the reason
-  disguise   for anonymised tasks (`leak_check.anonymised`: `all`, or a tag such as `anon`), none of
+  disguise   for anonymised tasks (`leak_check.anonymised`: `all`, or tags such as `coded` and `anon`), none of
              the real names, tickers or series ids of the task's companies (word-bounded), except in
              the `exempt` files
   canary     the release canary (canary.txt) sits in every task's tests/ and nowhere the agent sees
@@ -107,7 +107,7 @@ def task_problems(d: pathlib.Path, meta: dict) -> list[str]:
         out += [f"{tid}: identifying text {h!r} in {k}" for h in sorted(hits)
                 if not any(h.lower() in a for a in allowed)]
     anon = cfg.get("anonymised")
-    if anon and (anon == "all" or anon.get("tag") in meta.get("tags", [])):
+    if anon and (anon == "all" or set(anon["tags"]) & set(meta.get("tags", []))):
         skip = set(anon.get("exempt", [])) if isinstance(anon, dict) else set()
         names = real_names(meta["source"], meta.get("companies", []))
         names_re = re.compile(r"\b(?:" + "|".join(map(re.escape, names)) + r")\b") if names else None

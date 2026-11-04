@@ -30,7 +30,7 @@ def main():
 
     point = latest[ends[-1]] * first[year_ago(p['target_end'])] / first[year_ago(ends[-1])]
     fc = {'target_period': p['target_period'], 'unit': 'USD millions', 'point': round(point, 3),
-          'low': round(point * 0.9, 3), 'high': round(point * 1.1, 3), 'interval_level': 0.8,
+          'low': round(point * 0.9, 3), 'high': round(point * 1.1, 3), 'interval_level': 0.95,
           'in_sample': [], 'vs_consensus': 'no_consensus'}
     (APP / 'output').mkdir(parents=True, exist_ok=True)
     (APP / 'output' / 'answer.md').write_text(f'Same quarter last year, scaled.\n\n```json\n{json.dumps(fc)}\n```\n')

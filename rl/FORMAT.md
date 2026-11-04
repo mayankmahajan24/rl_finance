@@ -93,6 +93,20 @@ checks that a judged verifier still reaches its API). Harbor's Docker egress con
 from the container's resolver even with no network, so a name still resolves; nothing beyond it
 connects.
 
+## Every part counts
+
+`splits/check.py` (check 7) fails a task when:
+- a `/app/data` file the instruction names isn't in the image
+- an output the instruction asks for is never read by the verifier
+- the reference solution imports a package the agent's image lacks
+- the reference refers to grader-side files (`/tests`, ground truth, gold, seeds, the generator)
+- its `params.json` gives a value the instruction doesn't state
+
+`python rl/harness/ablation.py` checks two things. First, dropping any one planted item from a
+gold-derived answer lowers the reward (pytest runs this on a task per generated family). Second,
+turning off a reference step loses reward wherever that step's trap is planted (data_audit's six
+checks).
+
 ## [metadata]
 
 | Field | Meaning |

@@ -11,12 +11,16 @@
   6. point in time: every built task sets an explicit network policy for the container, the agent
      phase (none) and the verifier phase, matching what [metadata.environment] records; a task of a
      dated family records an as_of, and a dated task's image pins its clock to it
-  7. leaks: nothing the agent sees gives away gold, the benchmark's identity, a disguised company or
+  7. provenance: every family's gold inputs have well-formed provenance entries (rl/provenance.py),
+     every task of such a family carries them (tests/provenance.json, [metadata.provenance]), and
+     no task claims approved gold that is no longer approved
+  8. leaks: nothing the agent sees gives away gold, the benchmark's identity, a disguised company or
      the release canary (rl/leakcheck.py, configured per family under `leak_check` in family.yaml)
 
 With --release (before handing tasks to anyone): every task was also built from one clean commit,
-with no uncommitted changes to tracked files, and every family with bench or held-out tasks has its
-current instrument approved (rl/instrument.py).
+with no uncommitted changes to tracked files, every family with bench or held-out tasks has its
+current instrument approved (rl/instrument.py), and every bench and held-out task's gold is
+approved, unchanged since review, and recorded so in the task.
 
 Usage:
     python rl/splits/check.py
@@ -37,6 +41,7 @@ RL = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RL))
 import splits  # noqa: E402
 import instrument  # noqa: E402
+import provenance  # noqa: E402
 import leakcheck  # noqa: E402
 from families._shared import harbor  # noqa: E402
 from lib import fingerprint, iter_tasks  # noqa: E402
@@ -95,8 +100,27 @@ def sandbox_problems(d: pathlib.Path, m: dict) -> list[str]:
     return out
 
 
+def provenance_problems(d: pathlib.Path, m: dict, release: bool) -> list[str]:
+    """Check 7 for one task: its gold's provenance is recorded, current, and (for release) approved."""
+    tid, current = d.name, provenance.for_family(m["family"])
+    if not current:
+        return []
+    out, recorded = [], m.get("provenance")
+    if recorded is None or not (d / "tests" / "provenance.json").exists():
+        return [f"{tid}: no gold provenance recorded (rebuild)"]
+    now = provenance.summary(current)
+    if recorded["status"] == "approved" and now["status"] != "approved":
+        out.append(f"{tid}: built as approved, but {', '.join(now['unapproved'])} no longer is (rebuild)")
+    if release and d.parent.name in ("bench", "heldout"):
+        if now["status"] != "approved":
+            out.append(f"{tid}: gold not approved: {', '.join(now['unapproved'])} (rl/review/review.py)")
+        elif recorded != now:
+            out.append(f"{tid}: gold approved since it was built (rebuild)")
+    return out
+
+
 def check(release: bool = False) -> list[str]:
-    problems: list[str] = []
+    problems: list[str] = provenance.problems()
     commits: set[str] = set()
 
     # 1. companies
@@ -172,6 +196,7 @@ def check(release: bool = False) -> list[str]:
 
         problems += checksum_problems(d)
         problems += sandbox_problems(d, m)
+        problems += provenance_problems(d, m, release)
         problems += leakcheck.task_problems(d, m)
         b = m.get("build")
         if not b:

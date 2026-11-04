@@ -81,10 +81,11 @@ def format_issues(issues: list[dict]) -> str:
     )
 
 
-def run_scorer(client, model: str, gold: dict, inp: dict, response: dict,
-               max_tokens: int = 48000) -> dict:
-    """Call the scorer model on one response. The scorer sees the same context, seed
-    and plan the model saw (the task's inputs.json) plus the gold issues."""
+def run_scorer(call, gold: dict, inp: dict, response: dict) -> tuple[dict, dict]:
+    """Score one response with the scorer model: `call(system, user, schema)` is the shared judge
+    (families/_shared/judge.py `judge`, configured with the scorer model). The scorer sees the same
+    context, seed and plan the model saw (the task's inputs.json) plus the gold issues. Returns
+    (scorer decisions, the judge's meta)."""
     import re
     text = (HERE / "review_scorer.md").read_text()
     m = re.search(r"^## SYSTEM\s*$(.*?)^## USER\s*$(.*)", text, re.S | re.M)
@@ -94,10 +95,7 @@ def run_scorer(client, model: str, gold: dict, inp: dict, response: dict,
                            gold=format_gold(gold["issues"]),
                            issues=format_issues(issues), n=len(issues))
     schema = json.loads((HERE / "review_scorer_schema.json").read_text())
-    with client.messages.stream(
-        model=model, max_tokens=max_tokens, system=system,
-        messages=[{"role": "user", "content": user}],
-        output_config={"format": {"type": "json_schema", "schema": schema}},
-    ) as stream:
-        msg = stream.get_final_message()
-    return json.loads(next(b.text for b in msg.content if b.type == "text"))
+    outs, meta = call(system, user, schema)
+    if len(outs) != 1:
+        raise ValueError("the review scorer takes one vote: its decisions are matches, not verdicts to average")
+    return outs[0], meta

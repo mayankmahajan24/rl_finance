@@ -15,8 +15,18 @@ companies: template      # synthetic airlines; only the seasonality template com
 generator: generate.py
 verifier: verifier/thesis_verify.py
 verifier_timeout_sec: 600
-llm_judge: true          # memo rubric; falls back to keywords without ANTHROPIC_API_KEY
+llm_judge: true          # memo rubric (judge, below); without ANTHROPIC_API_KEY not graded unless JUDGE=keyword
 reward: 0.35 right answer + 0.25 growth accuracy + 0.15 unreliable-list F1 + 0.25 memo rubric
+judge:                   # the memo rubric judge; pinned, part of the instrument (families/_shared/judge.py)
+  model: claude-opus-5-5
+  effort: medium
+  votes: 1
+  max_tokens: 16000
+gold_inputs:             # files its gold comes from; each has a provenance entry (rl/provenance.py)
+  - sources/txn_panel/annotations/entities.yaml
+  - families/growth_thesis/generate.py
+  - families/growth_thesis/verifier/thesis_verify.py
+  - families/_shared/panel_perturb.py
 instrument:              # what decides what the model sees and how it is scored; live use needs its hash
                          # approved (rl/instrument.py, rl/harness/approve.py)
   - families/growth_thesis/instruction.md
@@ -27,7 +37,12 @@ instrument:              # what decides what the model sees and how it is scored
   - families/_shared/panel_schema.md
   - sources/txn_panel/panel.py
   - families/_shared/harbor.py
+  - families/_shared/judge.py
+  - families/growth_thesis/family.yaml       # pins the judge
   - families/_shared/verify_common.py
+calibration:             # scored metric and pass threshold for rl/harness/calibrate.py; proposed, Mayank to confirm
+  metric: reward
+  pass: 0.8
 leak_check:              # ground truth is structural: planted problems are tickers and dates that are in the data by
                          # construction, so there is no gold text or number to search for (rl/leakcheck.py)
   anonymised: all          # every task is disguised: no real company name, ticker or series id

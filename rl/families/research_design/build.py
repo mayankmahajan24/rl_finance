@@ -53,8 +53,8 @@ SCHEMA_NOTE = ("---\nWrite your answer as one JSON object matching the schema in
                "to /app/output/response.json.")
 PLAN_NOTE = "---\nWrite your plan, in markdown, to /app/output/plan.md."
 FAMILY = yaml.safe_load((HERE / "family.yaml").read_text())
-SCORER_ENV = ('\n[verifier.env]\n# scorer model for review tasks (matches issues to gold); compare tasks need no key\n'
-              'ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY:-}"\nSCORER_MODEL = "${SCORER_MODEL:-claude-opus-5}"\n')
+SCORER_ENV = ('\n[verifier.env]\n# scorer model for review tasks (matches issues to gold, tests/judge.json); compare tasks need no key\n'
+              'ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY:-}"\n')
 
 WORLD_NAMES = {
     "systematic": "Systematic trading firm",

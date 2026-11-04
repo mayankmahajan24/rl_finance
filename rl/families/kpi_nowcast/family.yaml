@@ -24,6 +24,17 @@ rubric_visibility: partial  # the instruction states the fund's write-up convent
                             # and units first; in-sample accuracy next to a simple benchmark; low <= point <= high)
                             # but not the judgment items (C2-C5, C7, C9, C11, C12): models are graded on whether
                             # they do what a careful analyst would, unprompted. Deliberate.
+judge:                   # the write-up judge (judge.md); pinned, part of the instrument (families/_shared/judge.py)
+  model: claude-sonnet-5-5
+  effort: medium
+  votes: 1
+  max_tokens: 8000
+gold_inputs:             # files its gold comes from; each has a provenance entry (rl/provenance.py)
+  - sources/txn_panel/grader_only/kpi_facts.csv
+  - sources/txn_panel/grader_only/kpi_quarterly.csv
+  - sources/txn_panel/annotations/company_facts.yaml
+  - sources/txn_panel/annotations/entities.yaml
+  - families/kpi_nowcast/judge.md
 instrument:              # what decides what the model sees and how it is scored; live use needs its hash
                          # approved (rl/instrument.py, rl/harness/approve.py)
   - families/kpi_nowcast/build.py
@@ -35,7 +46,12 @@ instrument:              # what decides what the model sees and how it is scored
   - families/kpi_nowcast/verifier/verify.py
   - sources/txn_panel/panel.py
   - families/_shared/harbor.py
+  - families/_shared/judge.py
+  - families/kpi_nowcast/family.yaml       # pins the judge
   - families/_shared/verify_common.py
+calibration:             # scored metric and pass threshold for rl/harness/calibrate.py; proposed, Mayank to confirm
+  metric: skill_vs_naive   # 1 - error / naive error: passing means beating last year's same quarter
+  pass: 0.0
 leak_check:              # gold fields that must never appear where the agent can see them (rl/leakcheck.py)
   gold_numbers:
     gold.json: [actual]

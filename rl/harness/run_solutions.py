@@ -48,11 +48,14 @@ def run_one(task_dir: str, solver: str):
         return dict(task=task.name, solver=solver, reward=0.0, note=f'solve failed: {r.stderr[-300:]}')
     v = subprocess.run([sys.executable, str(task / 'tests' / Path(fam['verifier']).name)], env=env, capture_output=True,
                        text=True, cwd=task / 'tests')
+    import json
+    if (logs / 'verifier' / 'reward.json').exists() and not json.loads((logs / 'verifier' / 'reward.json').read_text()):
+        note = json.loads((logs / 'verifier' / 'details.json').read_text()).get('note', 'not graded')
+        return dict(task=task.name, solver=solver, reward=None, note=note)
     try:
         reward = float((logs / 'verifier' / 'reward.txt').read_text())
     except FileNotFoundError:
         return dict(task=task.name, solver=solver, reward=0.0, note=f'verifier failed: {v.stderr[-300:]}')
-    import json
     det = json.loads((logs / 'verifier' / 'details.json').read_text())
     keep = {k: det[k] for k in ('precision', 'recall', 'f1', 'no_foresight', 'fastest_correct', 'growth_score',
                                 'unreliable_f1', 'rubric_score', 'judge', 'flagged_share', 'error') if k in det}

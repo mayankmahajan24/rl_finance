@@ -69,8 +69,8 @@ HARBOR_NOTE = ("---\nThe attached files are in /app/data/. When you are done, wr
                "(`python`, `date`) reads the as-of date, {as_of}, which is also in $TASK_AS_OF.")
 PIP = " statsmodels==0.14.4 scikit-learn==1.5.2"   # agent tooling close to code execution's
 FAMILY = yaml.safe_load((HERE / "family.yaml").read_text())
-JUDGE_ENV = ('\n[verifier.env]\n# LLM judge for the write-up (C1-C12); without a key only accuracy is scored\n'
-             'ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY:-}"\nJUDGE_MODEL = "${JUDGE_MODEL:-claude-sonnet-5-5}"\n')
+JUDGE_ENV = ('\n[verifier.env]\n# LLM judge for the write-up (C1-C12, tests/judge.json); without a key only accuracy is scored\n'
+             'ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY:-}"\n')
 
 # Target quarters. Calendar series end on the given dates; fiscal (Jan year-end) series use the
 # fiscal quarter that ends nearest each anchor.

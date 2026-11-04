@@ -11,6 +11,7 @@ import hashlib
 import json
 import pathlib
 import re
+import subprocess
 import tomllib
 
 import yaml
@@ -18,7 +19,25 @@ import yaml
 RL = pathlib.Path(__file__).resolve().parent
 ROOT = RL.parent
 TASKS = RL / "tasks"
+FAMILIES = RL / "families"
 WORLDS = RL / "worlds"
+
+
+def families() -> list[str]:
+    """Every family id: a folder under families/ with a family.yaml."""
+    return sorted(d.name for d in FAMILIES.iterdir() if (d / "family.yaml").exists())
+
+
+def family(family_id: str) -> dict:
+    """A family's family.yaml. Raises if the family doesn't exist."""
+    f = FAMILIES / family_id / "family.yaml"
+    if not f.exists():
+        raise SystemExit(f"unknown family {family_id!r} (no {f.relative_to(ROOT)})")
+    return yaml.safe_load(f.read_text()) or {}
+
+
+def git(*args: str) -> str:
+    return subprocess.run(["git", *args], cwd=RL, capture_output=True, text=True).stdout.strip()
 
 
 def fingerprint(*parts: str) -> str:

@@ -32,3 +32,7 @@ instrument:              # what decides what the model sees and how it is scored
   - sources/txn_panel/panel.py
   - families/_shared/harbor.py
   - families/_shared/verify_common.py
+calibration:             # scored metric and pass threshold for rl/harness/calibrate.py; proposed, Mayank to confirm
+  metric: reward
+  pass: 0.5
+  ceiling_note: real but unlabelled anomalies in the panel count as false positives, so the best achievable F1 is below 1

@@ -9,7 +9,7 @@ kind of task each), and assigned to **splits** (train, bench, heldout) by compan
 | [`families/`](families/) | one folder per kind of task: builder or generator, instruction, verifier and graders, runner, baseline solutions |
 | [`splits/`](splits/) | company and seed assignment per split, retired cases, `manifests/<family>.json` (the committed index of every task), `check.py` |
 | `tasks/` | every built task, in Harbor layout, at `tasks/<split>/<task_id>/` ([`FORMAT.md`](FORMAT.md)). Gitignored; `build.py` rebuilds it |
-| [`harness/`](harness/) | `run_solutions.py` (reference vs naive, no Docker), `oracle_check.py` (Harbor's oracle in Docker vs the local reference), `calibrate.py` (pass@k, pass^k), `sandbox_probe.py` (an agent that tries to get out of the sandbox; Docker), `records.py` and `report.py` (one run-record schema for every run; leaderboards that never mix instruments) |
+| [`harness/`](harness/) | `run_solutions.py` (reference vs naive, no Docker), `oracle_check.py` (Harbor's oracle in Docker vs the local reference), `calibrate.py` (calibration jobs and reports: pass@k, noise floor, ceiling, keep/drop per task), `sandbox_probe.py` (an agent that tries to get out of the sandbox; Docker), `records.py` and `report.py` (one run-record schema for every run; leaderboards that never mix instruments) |
 | `worlds/`, `skills/`, [`runs/`](runs/) | fund briefs, financial-services skills, run records |
 
 | Family | Tasks | Splits |
@@ -27,6 +27,7 @@ python rl/review/review.py review --reviewer "<name>" --batch 10   # review gold
 python rl/build.py data_audit --split train --n 200 --controls 20
 python rl/families/research_design/replay.py           # case-study baselines must reproduce
 python rl/harness/run_solutions.py --split bench       # reference should beat naive on every generated family
+python rl/harness/calibrate.py run --split bench --model <m1> --model <m2> --k 5   # Harbor; resumes; needs approved instruments
 python rl/families/research_design/run.py --model claude-opus-5-5 --dry-run
 python rl/families/kpi_nowcast/run.py --variant baseline --dry-run
 JUDGE=keyword python rl/harness/oracle_check.py         # oracle in Docker on a bench sample = local reference rewards

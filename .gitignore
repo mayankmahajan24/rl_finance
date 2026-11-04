@@ -20,3 +20,9 @@ rl/runs/**/errors.jsonl
 
 # Claude subscription token for Harbor runs (setup_oauth.sh)
 .oauth.env
+
+# packaging and tool caches
+*.egg-info/
+dist/
+.pytest_cache/
+.ruff_cache/

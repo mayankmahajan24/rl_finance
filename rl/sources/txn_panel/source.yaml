@@ -17,15 +17,13 @@ data:
 assignment:
   file: assignment/brief.txt
   what: >-
-    "Anomaly Detection Exercise": score every datapoint for how far it can be trusted (one-day
-    anomalies, level shifts), with no foresight. Received with the data as a hiring exercise.
-  worked_solution: ~/anomaly_detection_exercise (notebook, figures, Summary_Report.md); not in the repo
+    A description of the panel and its known data issues (one-day anomalies, level shifts),
+    rewritten from the note that came with the data.
 
 licence:
   status: unknown
   note: >-
-    The panel came from another firm with a hiring exercise. Redistribution has not been
-    confirmed. Nothing built on this source goes into a published bench until it is.
+    The panel was received from a third party. Redistribution has not been confirmed. Nothing built on this source goes into a published bench until it is.
 
 annotations:
   entities.yaml: companies, their sensor tickers and KPI series (the split unit)
@@ -40,7 +38,3 @@ families: [kpi_nowcast, data_audit, anomaly_scoring, growth_thesis]
 company_split: ../../splits/txn_panel.yaml   # which split each company is in (rl/splits/)
 entities: annotations/entities.yaml           # the companies, and the names, tickers and series ids of each
 
-# Phrases agent-visible files may contain although rl/leakcheck.py would flag them as identifying.
-identity_allowlist:
-  - phrase: Anomaly Detection Exercise
-    reason: title of the data brief that came with the panel (kpi_nowcast's data_brief.md); judged acceptable to keep (issue #21)

@@ -5,8 +5,8 @@ a source by a family (`../families/`), and split by the source's companies (`../
 
 | Source | What it is | Families |
 |---|---|---|
-| [`txn_panel/`](txn_panel/) | Daily card-transaction panel, 16 US airlines and department stores × 4 sensors, 2014–2018, with the "Anomaly Detection Exercise" brief. KPI actuals from SEC XBRL added as grader-only data | kpi_nowcast, data_audit, anomaly_scoring, growth_thesis |
-| [`research_design_case/`](research_design_case/) | The Finance Domain Research Lead take-home: seeds, firm briefs, plan pairs, human gold, four models' saved runs | research_design (review, produce), research_funding (compare) |
+| [`txn_panel/`](txn_panel/) | Daily card-transaction panel, 16 US airlines and department stores × 4 sensors, 2014–2018, with a description of its known data issues. KPI actuals from SEC XBRL added as grader-only data | kpi_nowcast, data_audit, anomaly_scoring, growth_thesis |
+| [`research_design_case/`](research_design_case/) | A research-design case study: seeds, firm briefs, plan pairs, human gold, four models' saved runs | research_design (review, produce), research_funding (compare) |
 
 ## Layout of a source
 

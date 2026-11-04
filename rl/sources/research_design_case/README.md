@@ -4,14 +4,7 @@ Raw inputs for the `research_design` and `research_funding` tasks. `rl/families/
 renders them into `rl/worlds/` and `rl/tasks/eval/rd-*`; `rl/families/research_design/replay.py`
 re-grades the baseline runs against the built tree.
 
-All of it comes from the Finance Domain Research Lead take-home (August 2026). The full
-take-home (report, Parts 0–3, generation and scoring scripts, every raw model call) is in
-git history at commit `a75441c`, under `case_study/`:
-
-```sh
-git show a75441c:case_study/REPORT.md
-git archive a75441c case_study | tar -x -C /tmp    # the whole thing
-```
+All of it comes from a research-design case study written in August 2026.
 
 ## Layout
 

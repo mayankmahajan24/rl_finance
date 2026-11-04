@@ -58,8 +58,8 @@ def test_identity_and_allowlist(task):
     assert any("'https://'" in x for x in p) and any("'rl_finance'" in x for x in p)
     assert any("'benchmark task'" in x for x in p)
     d, m = task("bench", "kn-produce-AIR02-2017Q4-anon")
-    assert "Anomaly Detection Exercise" in (d / "environment" / "data" / "data_brief.md").read_text()
-    assert not any("Anomaly Detection" in x for x in leakcheck.task_problems(d, m))    # allowlisted for txn_panel
+    assert "Card-transaction sensor panel" in (d / "environment" / "data" / "data_brief.md").read_text()
+    assert leakcheck.task_problems(d, m) == []
 
 
 def test_disguise(task):

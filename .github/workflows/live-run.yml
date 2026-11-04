@@ -1,0 +1,65 @@
+# On demand: run Claude Code on a family's bench tasks on a Claude subscription, in Harbor's Docker
+# sandbox. It runs here because Harbor's network control needs a kernel feature GitHub's Ubuntu
+# runners have and Docker Desktop's VM lacks (see sandbox.yml). Needs the CLAUDE_CODE_OAUTH_TOKEN
+# secret (./setup_oauth.sh prints the token). With no ANTHROPIC_API_KEY, judged metrics aren't graded.
+# Results are in the run's artifact. Not citable calibration: this skips the instrument approval gate.
+name: Live run
+
+on:
+  workflow_dispatch:
+    inputs:
+      family:
+        description: Family to build
+        default: kpi_nowcast
+      tasks:
+        description: Task name pattern
+        default: kn-*
+      model:
+        default: claude-opus-5-5
+      attempts:
+        description: Attempts per task
+        default: "1"
+      concurrent:
+        description: Tasks at once (each uses 2 CPUs)
+        default: "2"
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      CLAUDE_FORCE_OAUTH: "1"
+      FAMILY: ${{ inputs.family }}
+      TASKS: ${{ inputs.tasks }}
+      MODEL: ${{ inputs.model }}
+      ATTEMPTS: ${{ inputs.attempts }}
+      CONCURRENT: ${{ inputs.concurrent }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install
+        run: pip install -r requirements.txt
+
+      - name: Build tasks
+        run: python rl/build.py "$FAMILY" --split bench
+
+      - name: Run
+        run: >-
+          harbor run -p rl/tasks/bench -i "$TASKS" -a claude-code -m "$MODEL"
+          -k "$ATTEMPTS" -n "$CONCURRENT" -o jobs --job-name live -y
+          --ak disable_web_search=true --allow-agent-host api.anthropic.com
+          --allow-environment-host deb.debian.org --allow-environment-host downloads.claude.ai
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-run
+          path: jobs/
+          retention-days: 14

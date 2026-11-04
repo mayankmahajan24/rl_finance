@@ -133,7 +133,8 @@ def main():
     s_growth = sum(per.values()) / len(per)
     # 3. unreliable list
     U = set(truth['unreliable']); O = set(truth['optional_unreliable'])
-    R = {str(x) for x in ans.get('unreliable') if isinstance(ans.get('unreliable'), list)} - O
+    reported = ans.get('unreliable') if isinstance(ans.get('unreliable'), list) else []
+    R = {str(x) for x in reported} - O
     if not U and not R:
         s_unrel = 1.0
     else:

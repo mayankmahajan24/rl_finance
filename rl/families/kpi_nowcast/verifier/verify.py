@@ -1,4 +1,4 @@
-"""Harbor verifier for kpi_nowcast: grade /app/output/answer.md the way run.py grades a final message.
+"""Harbor verifier for kpi_nowcast: grade /app/output/answer.md as the API runner grades a final message.
 
 Writes reward.json: `reward`, skill_vs_naive clamped to [0, 1] (grader.py), and diagnostics never
 blended into it: schema_ok, abs_pct_error, signed_pct_error, skill_vs_naive, covered,

@@ -23,7 +23,7 @@ Each task's split is its company's split (splits/txn_panel.yaml); named and anon
 "retired".
 
 Tasks are written in Harbor layout to rl/tasks/<split>/<task_id>/ (families/_shared/harbor.py):
-prompt/ holds the exact system and user messages run.py sends (the fingerprinted instrument), and
+prompt/ holds the exact system and user messages the API runner (rl/harness/run_api.py) sends (the fingerprinted instrument), and
 instruction.md the same text plus a note on where a Harbor agent finds the files and writes its
 answer. solution/ holds the reference (the gold forecast, for Harbor's oracle) and the target the
 naive solution (solutions/naive: last year's seasonal step) needs. What was built is recorded in

@@ -14,10 +14,10 @@ grader_only/gold/HOW-TO-FILL.md) and produce tasks (seed + firm -> plan; no expe
 All are split `eval`: one eval set until whole worlds can be held out (FORMAT.md). A task's `case`
 is its research question (the seed): an item and its context flip share it.
 
-prompt/ holds the exact messages run.py sends (system.md, user.md or user.AB.md + user.BA.md,
+prompt/ holds the exact messages the API runner (rl/harness/run_api.py) sends (system.md, user.md or user.AB.md + user.BA.md,
 inputs.json); their template is what the fingerprint covers. instruction.md is the same text for a
 Harbor agent, plus where to write the answer. A compare task's Harbor copy shows the pair in both
-orders and asks for both answers, as run.py does with two calls, so position bias earns nothing.
+orders and asks for both answers, as the API runner does with two calls, so position bias earns nothing.
 tests/ holds gold, the graders and verifier/verify.py; solution/ the reference answer (gold's).
 
 The source data, and what was deliberately left out of it, is described in
@@ -205,7 +205,7 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
 
     def write(t: dict, instruction: str, prompt: dict[str, str], inputs: dict, schema: str, gold: dict,
               reference: dict, tests: dict) -> None:
-        """One task in Harbor layout. `prompt` holds the messages run.py sends."""
+        """One task in Harbor layout. `prompt` holds the messages the API runner sends."""
         grader = {"mode": t["mode"], "params": t["grader"].get("params", {})}
         built[t["id"]] = harbor.write(
             OUT / t["id"], family=fam, builder="rl/families/research_design/build.py", instruction=instruction,

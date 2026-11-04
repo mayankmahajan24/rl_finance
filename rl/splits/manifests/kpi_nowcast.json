@@ -1,6 +1,7 @@
 {
  "kn-produce-AAL-2017Q4": {
   "split": "train",
+  "case": "AAL-2017Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -11,10 +12,11 @@
   ],
   "fingerprint": "e8152ae5f7d4",
   "gold_fingerprint": "f3f851ee584f",
-  "content_sha256": "325bf4f5413672d6b7ec219ac8e83e4b7f06a45abe993194fd82d38214c46f10"
+  "content_sha256": "9a1d09af7b4ddac15dbcecb57e6ad6bceb5b853baa84fca4f508d090e307221c"
  },
  "kn-produce-AAL-2018Q2": {
   "split": "train",
+  "case": "AAL-2018Q2",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -25,10 +27,11 @@
   ],
   "fingerprint": "f4533d7fe56e",
   "gold_fingerprint": "7611cdbd2a84",
-  "content_sha256": "4d6da1c52d07b0bb676c3299930c68b22c16c6a795f958f224c1af061bc25130"
+  "content_sha256": "8049c21abc2b82597c99a6f4feecd96d8c755002a9af7e901c9187852e38cbba"
  },
  "kn-produce-AAL-2018Q4": {
   "split": "train",
+  "case": "AAL-2018Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -39,10 +42,11 @@
   ],
   "fingerprint": "2b7a6ffc036b",
   "gold_fingerprint": "bd8187956720",
-  "content_sha256": "83fe714b6d750f370d9f806c4811e77b31252f497d14dd6ff28f7863b782ef5f"
+  "content_sha256": "a87ffe6c8f200a7a6053ee7d7fddc3f1f56043bd06978f4b475e0d245503d58a"
  },
  "kn-produce-AIR01-2017Q4-anon": {
   "split": "train",
+  "case": "HA-2017Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -53,10 +57,11 @@
   ],
   "fingerprint": "b598e75d48ae",
   "gold_fingerprint": "0d87ea0df9b6",
-  "content_sha256": "9ebd879cf373efd24cf8fcfbfa472e0a4e403054a82f98eae9811e23760bb928"
+  "content_sha256": "0daf1bd011a4384201774bd3644e43e7ddd44836a12073c1ecacf21e7fbd5977"
  },
  "kn-produce-AIR01-2018Q2-anon": {
   "split": "train",
+  "case": "HA-2018Q2",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -67,10 +72,11 @@
   ],
   "fingerprint": "d6b3d120143a",
   "gold_fingerprint": "173201f8d757",
-  "content_sha256": "adae35c271ed5a717a0ac77701dcda716a70ece5cb8fa41749765d3dfcc61038"
+  "content_sha256": "691f07adb04046bcc50bd22e2a5a927c9f58910a62fa3fc27195011aac890d24"
  },
  "kn-produce-AIR01-2018Q4-anon": {
   "split": "train",
+  "case": "HA-2018Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -81,10 +87,11 @@
   ],
   "fingerprint": "9774a4851fa8",
   "gold_fingerprint": "a33cb43ebf8f",
-  "content_sha256": "d65784444fbc51e00e953153fe31ff1dc0ea0d8f1a820973fe68c4d534132360"
+  "content_sha256": "070413592d37e4ec41c4da52cbbe5566a0da34f0043447bff34f7e966a08517d"
  },
  "kn-produce-AIR02-2017Q4-anon": {
   "split": "bench",
+  "case": "SAVE-2017Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -95,10 +102,11 @@
   ],
   "fingerprint": "aad41343f934",
   "gold_fingerprint": "9789ba6f66dc",
-  "content_sha256": "57f0b6a77d6a95a76a5793486f0ce1ce2ec711a8f4722c597a9c7b05c5c0925d"
+  "content_sha256": "8f637776685fe071145659c76e104a4cc857052e5ebf1708ca2eb9fd0f150dca"
  },
  "kn-produce-AIR02-2018Q2-anon": {
   "split": "bench",
+  "case": "SAVE-2018Q2",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -109,10 +117,11 @@
   ],
   "fingerprint": "04fc8e9e9f84",
   "gold_fingerprint": "1317bec6561e",
-  "content_sha256": "3d7cef1f909f47070480c67964c5ee9b3b8b88987661c5ed4472638e28e2757a"
+  "content_sha256": "ff630ff752e1b2b31447a2a6a0a7e0350a8ea59fe8d6a2d485383d540b0094db"
  },
  "kn-produce-AIR02-2018Q4-anon": {
   "split": "bench",
+  "case": "SAVE-2018Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -123,10 +132,11 @@
   ],
   "fingerprint": "d2128030e710",
   "gold_fingerprint": "226d3a7092fb",
-  "content_sha256": "915d291cefd0d7410caa5c3942b8e1a92709648652cd02dca5ffbc6047a253d1"
+  "content_sha256": "84371bb250c7ee991bbcd75739b5dfe6d290979f7b59597c389d871949b21338"
  },
  "kn-produce-AIR03-2017Q4-anon": {
   "split": "train",
+  "case": "UAL-2017Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -137,10 +147,11 @@
   ],
   "fingerprint": "b2d5da9af29d",
   "gold_fingerprint": "98841d9a4e49",
-  "content_sha256": "4b262ada1c3088d93d5e26f7b2db4de7762c555c5179b53e220694b8c1775b21"
+  "content_sha256": "dccbe0daf81eda5b5723be52b595fe47d3d0ca9ce3deafcfed2168f952c038a0"
  },
  "kn-produce-AIR03-2018Q2-anon": {
   "split": "train",
+  "case": "UAL-2018Q2",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -151,10 +162,11 @@
   ],
   "fingerprint": "d0e250da2cbd",
   "gold_fingerprint": "0a0054c2b6e7",
-  "content_sha256": "41b12acd20c49f5ff78b4562d2e7ba4a6051356025562df972ef71a9ad785e38"
+  "content_sha256": "ee533882ff78bd6853bae3a97ec4590c435acfe64e8a0b73ab4a7e9d13aad609"
  },
  "kn-produce-AIR03-2018Q4-anon": {
   "split": "train",
+  "case": "UAL-2018Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -165,10 +177,11 @@
   ],
   "fingerprint": "c59f1212036a",
   "gold_fingerprint": "a0d8da48f577",
-  "content_sha256": "82259538bc11cf8bfca07468a9ef8f6d76fc64a9dc7489a52e3696aa266702e8"
+  "content_sha256": "e1f6d603f8197e069a01ae77783fea785d7577a2949b59a8a0ffa550e370523f"
  },
  "kn-produce-AIR04-2017Q4-anon": {
   "split": "train",
+  "case": "LUV-2017Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -179,10 +192,11 @@
   ],
   "fingerprint": "d09bc42396d0",
   "gold_fingerprint": "dc14cb10c986",
-  "content_sha256": "adae6bb70a362b4a48a21e71854997c049122ba8debf6b12cf4a9b865c63c1d8"
+  "content_sha256": "f3daf96fd15121a65f5ff98e931c8b100ec7fff23c501ce0be0d9bd12b57865d"
  },
  "kn-produce-AIR04-2018Q2-anon": {
   "split": "train",
+  "case": "LUV-2018Q2",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -193,10 +207,11 @@
   ],
   "fingerprint": "849ddb98a103",
   "gold_fingerprint": "7ce578bed6bc",
-  "content_sha256": "23b20b6e07beb398df5382685b0f3ce7267034f058a68565a6b7bc053d81e941"
+  "content_sha256": "4cc5676b2ce8aae549c8a679ecf1db27c6ef46e85b6a84c01fe7311a955d7836"
  },
  "kn-produce-AIR04-2018Q4-anon": {
   "split": "train",
+  "case": "LUV-2018Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -207,10 +222,11 @@
   ],
   "fingerprint": "fab0b315a4c8",
   "gold_fingerprint": "e0d2f02ad482",
-  "content_sha256": "4a9b34a64c156ae4a7b96a68246415024f0f9c4f61c3fe6cb871cda4ae1fdcc3"
+  "content_sha256": "403625303b603c5879418d51f4206230662c02c6c605c19b0029634724f46d23"
  },
  "kn-produce-AIR05-2017Q4-anon": {
   "split": "train",
+  "case": "AAL-2017Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -221,10 +237,11 @@
   ],
   "fingerprint": "56e1327a74df",
   "gold_fingerprint": "0ac3b4c2d396",
-  "content_sha256": "77c130d327220348db6694512a038cecbf07a1b63948cc3e4d6edcc18da54ceb"
+  "content_sha256": "cddea68db1db426f28e113e7651b221cc5cd1717c0edd96f137804eced293512"
  },
  "kn-produce-AIR05-2018Q2-anon": {
   "split": "train",
+  "case": "AAL-2018Q2",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -235,10 +252,11 @@
   ],
   "fingerprint": "1749cd9a2344",
   "gold_fingerprint": "e27c81b4c1bc",
-  "content_sha256": "efc2066ada159981b5e6a858159472a092be68c29682e2d66bb9944f439400fb"
+  "content_sha256": "00d888a1a90b2ebe04abed0bfb6d41422fc84eb67bf89a7d511b2d1a9c01bf90"
  },
  "kn-produce-AIR05-2018Q4-anon": {
   "split": "train",
+  "case": "AAL-2018Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -249,10 +267,11 @@
   ],
   "fingerprint": "687fe06b72a5",
   "gold_fingerprint": "c821e64f7071",
-  "content_sha256": "fe9d64786d6adc5c85f8a743d9bd6d2a14ae0ae1a984a361df1d235a82ac0a05"
+  "content_sha256": "3a49347d8801ab88efdbb2d9206fdbbb01e5229c4d0a6e424fced4e947f7caba"
  },
  "kn-produce-AIR06-2017Q4-anon": {
   "split": "bench",
+  "case": "DAL-2017Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -263,10 +282,11 @@
   ],
   "fingerprint": "4ec53f8f0f81",
   "gold_fingerprint": "6bed269bbebe",
-  "content_sha256": "a34ae1ceb330a678c22acffa7b25237706888053ddc10fd8dd44deb51d819554"
+  "content_sha256": "d5de07493932fd0dc9926036c4cc15f51feaeaf3b835de4c53ac6a3ad65eedfb"
  },
  "kn-produce-AIR06-2018Q2-anon": {
   "split": "bench",
+  "case": "DAL-2018Q2",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -277,10 +297,11 @@
   ],
   "fingerprint": "c809ef6c9ab6",
   "gold_fingerprint": "f98d24d9b2e6",
-  "content_sha256": "0c2b05b065111e122715b0e9bca05f3226c5fa66195418fac9c2ddba073f315f"
+  "content_sha256": "1c4702a929b9e21a0d9bd8bc1489c99a053532164acd12b4ac2ca2aed88be036"
  },
  "kn-produce-AIR06-2018Q4-anon": {
   "split": "bench",
+  "case": "DAL-2018Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -291,10 +312,11 @@
   ],
   "fingerprint": "2f650b4757ae",
   "gold_fingerprint": "6e5d11fe1cdb",
-  "content_sha256": "fc6dbdc4c07dee159a96989ef18fa95f21034ff272317062c4784f32cea618f5"
+  "content_sha256": "8dd34a5bf73b77ca315325979c4575636968a8199fb39a35121dc9a1ad978fc9"
  },
  "kn-produce-AIR07-2017Q4-anon": {
   "split": "train",
+  "case": "ALGT-2017Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -305,10 +327,11 @@
   ],
   "fingerprint": "7dddbb15b90e",
   "gold_fingerprint": "a1a345fb815e",
-  "content_sha256": "a58d1899fbb2fae47c34fff8173ed86e43b179f7159aac051d59ba99bd013778"
+  "content_sha256": "74b8569a46382c70d70d9dfa34e0de848668d4b074a0b8a5ca6e9a9275f2901c"
  },
  "kn-produce-AIR07-2018Q2-anon": {
   "split": "train",
+  "case": "ALGT-2018Q2",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -319,10 +342,11 @@
   ],
   "fingerprint": "133a49954fbb",
   "gold_fingerprint": "c81e33fcab4c",
-  "content_sha256": "71320626218ca5c498a846748ab93e20e280f506f7b8984984efdb1d6a1167c3"
+  "content_sha256": "c63345ea7dd78fca7db2f333b7bab164073b9cb539c241f783922feb2a7b76c5"
  },
  "kn-produce-AIR07-2018Q4-anon": {
   "split": "train",
+  "case": "ALGT-2018Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -333,10 +357,11 @@
   ],
   "fingerprint": "04882b79be10",
   "gold_fingerprint": "81dc74324cce",
-  "content_sha256": "afca9f7e972026954961f0621ad65432456837ed9fef565a962d3de904bf435a"
+  "content_sha256": "a8bd5d040dc4126e00994a85e6738013430bc866900452199207cbd1275b7b63"
  },
  "kn-produce-AIR08-2017Q4-anon": {
   "split": "retired",
+  "case": "ALK-2017Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -347,10 +372,11 @@
   ],
   "fingerprint": "f4b91c971639",
   "gold_fingerprint": "1cba5626423d",
-  "content_sha256": "cb468ce0cc30287138fe38daec915bad88234700b0c12841f6b65145425de662"
+  "content_sha256": "20d4c8608d582c0491d115bb1ba55c27f00b3d5098a17ca3d4b4932379db6bce"
  },
  "kn-produce-AIR08-2018Q2-anon": {
   "split": "heldout",
+  "case": "ALK-2018Q2",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -361,10 +387,11 @@
   ],
   "fingerprint": "8aa03229da27",
   "gold_fingerprint": "cdff1bfd1abd",
-  "content_sha256": "f527c83f6daf1198167731ab9655dbc6770a6c13a8cd41bda41739bcb716ef59"
+  "content_sha256": "8efe84fa412b871638fb651c3435fa6e8dc232dba1aa87fd50e7fe4b57652be4"
  },
  "kn-produce-AIR08-2018Q4-anon": {
   "split": "heldout",
+  "case": "ALK-2018Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -375,10 +402,11 @@
   ],
   "fingerprint": "fe8752555cfa",
   "gold_fingerprint": "3e4b72444b95",
-  "content_sha256": "2643429b378ea46e77dc5a0dea95b00586a5bd4d561adba3f14d4e8948eaa38a"
+  "content_sha256": "1463034cbbc5f3db754b08bee8bc42a8e2328e65624f92719e9325638939a5e7"
  },
  "kn-produce-AIR09-2017Q4-anon": {
   "split": "heldout",
+  "case": "JBLU-2017Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -389,10 +417,11 @@
   ],
   "fingerprint": "bee834e2c16f",
   "gold_fingerprint": "477487dc5729",
-  "content_sha256": "533714d31cabd8719be30cbbf3226595bb3feb3b42eb831ff40445948467e218"
+  "content_sha256": "33714a223f095d6b821c328f186b22ad39cd67d81185a605523a7742c7fe9463"
  },
  "kn-produce-AIR09-2018Q2-anon": {
   "split": "heldout",
+  "case": "JBLU-2018Q2",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -403,10 +432,11 @@
   ],
   "fingerprint": "013e671e61d6",
   "gold_fingerprint": "e254dd33a4c9",
-  "content_sha256": "39223fb1dd7f3839dd4c6f85394c47a5cb5f5903efdadc2354d30094cc89dbed"
+  "content_sha256": "951388b50bfebeeb9e2afa181e9240f452fe07fad6fa4269c2eec072ba48b111"
  },
  "kn-produce-AIR09-2018Q4-anon": {
   "split": "heldout",
+  "case": "JBLU-2018Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -417,10 +447,11 @@
   ],
   "fingerprint": "8b38791048a3",
   "gold_fingerprint": "79543fb5286b",
-  "content_sha256": "19f4b41bb38b46bdf76d0b2b64f4c3e2a66ccbe0d3da871f942bcd6fe7997979"
+  "content_sha256": "9a2c7ceebe4c1af36043de8b85c60074f752d455e38cf03c9da3e88b1532a2b7"
  },
  "kn-produce-ALGT-2017Q4": {
   "split": "train",
+  "case": "ALGT-2017Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -431,10 +462,11 @@
   ],
   "fingerprint": "4cd51a51a78b",
   "gold_fingerprint": "0976d0a3d771",
-  "content_sha256": "d8f92d313ea21d7d0e561d5b7ba76130721e5c83c0d563e8edbce0bdee55e43b"
+  "content_sha256": "0ce1c96c375ddeeb74c8f24f5c01f468df0093cca3dcc9d756b056fcad9c7344"
  },
  "kn-produce-ALGT-2018Q2": {
   "split": "train",
+  "case": "ALGT-2018Q2",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -445,10 +477,11 @@
   ],
   "fingerprint": "51b4a9062c36",
   "gold_fingerprint": "df5dec8e75dd",
-  "content_sha256": "b3652c03aed6b275c7c8839e7dfe997a19a49eb354b1af228c26bdf996e9a7c9"
+  "content_sha256": "aeee24c3ab6d9958cf31e8b088e27fc5bde0fc52f7158781920cd4778a00dd8c"
  },
  "kn-produce-ALGT-2018Q4": {
   "split": "train",
+  "case": "ALGT-2018Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -459,10 +492,11 @@
   ],
   "fingerprint": "f25a0d0f34b4",
   "gold_fingerprint": "1ec7e78440b4",
-  "content_sha256": "d5505d7ba56bf97c8ee1ca3560e7cbef50dba4de99060150da80d05fd2325db5"
+  "content_sha256": "51ceceb51c892603581ace88f080dbd8f195166f556bd11a4c430d9ad1c80020"
  },
  "kn-produce-ALK-2017Q4": {
   "split": "retired",
+  "case": "ALK-2017Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -473,10 +507,11 @@
   ],
   "fingerprint": "bbb35e316dcb",
   "gold_fingerprint": "db997eb306be",
-  "content_sha256": "88b04982ecbe57d243384414338f7e3f4836bc2fa6aa1c7719e3601c91f9fa16"
+  "content_sha256": "a9fdd62cbcb8d00c72078059236890b1d3049789d9483f977e283b3e9c485d21"
  },
  "kn-produce-ALK-2018Q2": {
   "split": "heldout",
+  "case": "ALK-2018Q2",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -487,10 +522,11 @@
   ],
   "fingerprint": "5d77aca738b2",
   "gold_fingerprint": "d35fa343dd69",
-  "content_sha256": "f345506944caaaae8a9585de48938a8285fbf162b41435122522a858698f8962"
+  "content_sha256": "c67eeba0c5e86c9561029eef6bb3e5e7b04c4f37d29337183e3085f5dfd2d9dd"
  },
  "kn-produce-ALK-2018Q4": {
   "split": "heldout",
+  "case": "ALK-2018Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -501,10 +537,11 @@
   ],
   "fingerprint": "66c98b2ecd3c",
   "gold_fingerprint": "a999c9cd1c75",
-  "content_sha256": "7c427acfda0d5b03a271a730c182bbd874a01daefd09460133a88abed83d8270"
+  "content_sha256": "fba53b6ea0249cf4b0337eb9c65a5ee8c05ce2e40c9803b7ab16bcef4a654610"
  },
  "kn-produce-DAL-2017Q4": {
   "split": "bench",
+  "case": "DAL-2017Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -515,10 +552,11 @@
   ],
   "fingerprint": "d163dd7ed74b",
   "gold_fingerprint": "ccf476ee9c9a",
-  "content_sha256": "f57e7c62b22f57cb9d7b7677372ca3f34d81faff032925863d4b4363ad1de417"
+  "content_sha256": "76d535d7bd83eb02d8d76f8d7597e9feb6e04733c60f0441554482ea5c8d5533"
  },
  "kn-produce-DAL-2018Q2": {
   "split": "bench",
+  "case": "DAL-2018Q2",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -529,10 +567,11 @@
   ],
   "fingerprint": "2bbc3c5a8393",
   "gold_fingerprint": "f6eb37a4782b",
-  "content_sha256": "41c2dd4a7005b51ea8de0ba47090d5037d140ebfd48c67130a29ad0fa2b7d431"
+  "content_sha256": "f6d7fb4ee71d722cf645c9544a7f142e8a1bfb1962a3c4174aebef39df95def5"
  },
  "kn-produce-DAL-2018Q4": {
   "split": "bench",
+  "case": "DAL-2018Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -543,10 +582,11 @@
   ],
   "fingerprint": "e8b3530cea18",
   "gold_fingerprint": "c85514758d85",
-  "content_sha256": "a3b5a166393e584378c52ba080e79266f3eefb60109104e137b8d4c595b04e19"
+  "content_sha256": "531a3244dfa7dcf573aa57bb63ef51b469875b9830f8d3056080191c1b2ef00b"
  },
  "kn-produce-DDS-FY2017Q3": {
   "split": "bench",
+  "case": "DDS-FY2017Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -557,10 +597,11 @@
   ],
   "fingerprint": "50964cee5b36",
   "gold_fingerprint": "5b8ad606f6e4",
-  "content_sha256": "b2e43e3b5cf2aac9751787a1551fcbd4d5bbb5a2e890f02af8b71ddd1c6b3f2d"
+  "content_sha256": "87e5caea0f31e80d49928d3d960183b09dab72363efe1866846624199e3bc878"
  },
  "kn-produce-DDS-FY2018Q1": {
   "split": "bench",
+  "case": "DDS-FY2018Q1",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -571,10 +612,11 @@
   ],
   "fingerprint": "227d504dddce",
   "gold_fingerprint": "d55188949a48",
-  "content_sha256": "908ad7b9443cb76043bf518765284ec2519596d0c26200fcf2677733643c8450"
+  "content_sha256": "d5177a3de10443bdc8c6b90f25e53ecb16fe441e75ef7d07cb1658ae0f132126"
  },
  "kn-produce-DDS-FY2018Q3": {
   "split": "bench",
+  "case": "DDS-FY2018Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -585,10 +627,11 @@
   ],
   "fingerprint": "e665985ad54f",
   "gold_fingerprint": "3a073a00535e",
-  "content_sha256": "79651c682532f870eaa64ca377c447eb7c9256154c3083537365f99999ad6a24"
+  "content_sha256": "90b1d049ca975b17c0ac3077c62bd4d37d68cf4b582ff254ca8931217abc64ee"
  },
  "kn-produce-HA-2017Q4": {
   "split": "train",
+  "case": "HA-2017Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -599,10 +642,11 @@
   ],
   "fingerprint": "df4448802e52",
   "gold_fingerprint": "d4dc24feae68",
-  "content_sha256": "7c34b1149bb7e2c97de8fcb4a70f666c20f2bc119b77f9ef9c18565c592cbe5f"
+  "content_sha256": "6d13cc2c893a43092ed3469e9f040c355ea7d85283acbf2be3d760b35e0285f3"
  },
  "kn-produce-HA-2018Q2": {
   "split": "train",
+  "case": "HA-2018Q2",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -613,10 +657,11 @@
   ],
   "fingerprint": "44d5fb2987a2",
   "gold_fingerprint": "6453a7ebb850",
-  "content_sha256": "c7f98e1026c2c7aa341a0e1bcee6d3c6ba9d8796bfd84bb690727d7bbb53402f"
+  "content_sha256": "eaefe777a25df1dcdaeabccd9e70ce02484f218a210e7b06134f7f529a0fbf90"
  },
  "kn-produce-HA-2018Q4": {
   "split": "train",
+  "case": "HA-2018Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -627,10 +672,11 @@
   ],
   "fingerprint": "56ff11afbc92",
   "gold_fingerprint": "785431331851",
-  "content_sha256": "588393aa36e2d93dc864703a5be2ed4d432e28e0458e151554eb7fec4e1d1483"
+  "content_sha256": "447df3619477215f26af1612fc83060286581e2f5df1eefb93a668c6b99933d4"
  },
  "kn-produce-JBLU-2017Q4": {
   "split": "heldout",
+  "case": "JBLU-2017Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -641,10 +687,11 @@
   ],
   "fingerprint": "a591611fbc13",
   "gold_fingerprint": "1a30461e770a",
-  "content_sha256": "bd43033ed36d063f7e0fb474ecfe07e96effb52dae4215a3d97e2fb83637b68e"
+  "content_sha256": "442b1627101268087b9a500bf8d146da55c176b5144625ce883e9791d8b00f98"
  },
  "kn-produce-JBLU-2018Q2": {
   "split": "heldout",
+  "case": "JBLU-2018Q2",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -655,10 +702,11 @@
   ],
   "fingerprint": "714774597878",
   "gold_fingerprint": "a99dc2dca769",
-  "content_sha256": "8d3a38e78ea02cd0a78b4a71f3b110f0d7771094ef095011d27180c245bcdfc4"
+  "content_sha256": "492fa8243ccd03bc9f8f7b3a2bef6683da76acf9891ea481efb3e7fe38932b78"
  },
  "kn-produce-JBLU-2018Q4": {
   "split": "heldout",
+  "case": "JBLU-2018Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -669,10 +717,11 @@
   ],
   "fingerprint": "59ca9b5926a8",
   "gold_fingerprint": "a60ec069ea79",
-  "content_sha256": "174e6a10d1439be94c98fe764685c75a7a5eb8f0d7fe8cccfb7589d0ce8dc0bf"
+  "content_sha256": "4c23285f9b7d725b911842d45e223fb08d7d1232368a726408f0bcc11f6f4bf4"
  },
  "kn-produce-JCP-FY2017Q3": {
   "split": "heldout",
+  "case": "JCP-FY2017Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -683,10 +732,11 @@
   ],
   "fingerprint": "0b91c0129342",
   "gold_fingerprint": "3c046a195810",
-  "content_sha256": "c82aca92d767e829b93dee0a750a7ded563f16a551fc37583093a94064df42cd"
+  "content_sha256": "775b68003df71bcd748b2225257a83f9c43acacd25b42be4fc95435a47ccbf89"
  },
  "kn-produce-JCP-FY2018Q1": {
   "split": "heldout",
+  "case": "JCP-FY2018Q1",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -697,10 +747,11 @@
   ],
   "fingerprint": "3dad90c48678",
   "gold_fingerprint": "9fea8759ea1c",
-  "content_sha256": "f18a340b24df6e8bb70be3be09499ec2d82c00d0455f9daae3b0301210dc23ae"
+  "content_sha256": "df2feb1fef2eb471b21c1cb1b22d9e3059b634535b0d3eced7d1e5d9b3474013"
  },
  "kn-produce-JCP-FY2018Q3": {
   "split": "heldout",
+  "case": "JCP-FY2018Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -711,10 +762,11 @@
   ],
   "fingerprint": "20754ecd95da",
   "gold_fingerprint": "710081273ab4",
-  "content_sha256": "350db464a5057571d12142f409d032bd06246e8475e0b815a2c4fb0b8fbc28a4"
+  "content_sha256": "74057e4bc76fdde23ba7084a26ee2db95af365b23f5814f87f11fbd90f2f4584"
  },
  "kn-produce-JWN_FP-FY2017Q3": {
   "split": "train",
+  "case": "JWN_FP-FY2017Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -725,10 +777,11 @@
   ],
   "fingerprint": "8307efcfd1c3",
   "gold_fingerprint": "e4e18819aca6",
-  "content_sha256": "ab087269b05562e94d7906513d3d3f871cdacadc603693d5e0677d0986938901"
+  "content_sha256": "b745f117e8bb58a39f8051ba4a946ac4b15d3c6a6e4e3c1de87f704b39e1aed9"
  },
  "kn-produce-JWN_FP-FY2018Q1": {
   "split": "train",
+  "case": "JWN_FP-FY2018Q1",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -739,10 +792,11 @@
   ],
   "fingerprint": "2e45a0806c74",
   "gold_fingerprint": "c53ff3192768",
-  "content_sha256": "1369d21c6207e208c1292bd4cd02a5c910bf0df0c937ee41990cf879395d572d"
+  "content_sha256": "21a76fec188faaa026572265b286a8ef96db998015340e30e7e8c66315273a2b"
  },
  "kn-produce-JWN_FP-FY2018Q3": {
   "split": "train",
+  "case": "JWN_FP-FY2018Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -753,10 +807,11 @@
   ],
   "fingerprint": "3cddd2e1228e",
   "gold_fingerprint": "f4b181017121",
-  "content_sha256": "201bddfd484225dbbf1d86061ec2002995038a7bdd76bbe15517ac4718057c70"
+  "content_sha256": "8ff704a39b3f7aa40f506b26aabd49f7601f3f9f72160687a6469dc542765e80"
  },
  "kn-produce-JWN_OP-FY2017Q3": {
   "split": "train",
+  "case": "JWN_OP-FY2017Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -767,10 +822,11 @@
   ],
   "fingerprint": "8fc4dbd4edb3",
   "gold_fingerprint": "4ca49415b348",
-  "content_sha256": "cc5753f956a65128135ec90b439825194c9908dc1d1c08c3e6c6c75c0a5a5756"
+  "content_sha256": "c868db2ed7eb57f3c3b39cdc70d8cbbcbd5f958926c86787a2908295b7f27e78"
  },
  "kn-produce-JWN_OP-FY2018Q1": {
   "split": "train",
+  "case": "JWN_OP-FY2018Q1",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -781,10 +837,11 @@
   ],
   "fingerprint": "e0efa971b716",
   "gold_fingerprint": "1f0f805156d2",
-  "content_sha256": "b99018dc2762c412894b374c0e9887b3c8abe4388df20e416d010b01690e7d96"
+  "content_sha256": "cee832fa27ae299062977d05bf6b755c03473d8e0a519cb308b9e23220f32427"
  },
  "kn-produce-JWN_OP-FY2018Q3": {
   "split": "train",
+  "case": "JWN_OP-FY2018Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -795,10 +852,11 @@
   ],
   "fingerprint": "3c0e981d5118",
   "gold_fingerprint": "e813fbc2a879",
-  "content_sha256": "ef12a5508a9f81309b70e8c2f0a49878118714c08c3aa4406496228778d8b412"
+  "content_sha256": "f495cd558377d3dbd18aa15baf9a059868e8e1f6f3c2bd6349b70701059cc789"
  },
  "kn-produce-KSS-FY2017Q3": {
   "split": "heldout",
+  "case": "KSS-FY2017Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -809,10 +867,11 @@
   ],
   "fingerprint": "5b46dde439dc",
   "gold_fingerprint": "593ee9c1c6ce",
-  "content_sha256": "7dbec6959817a9aa1061b9134ad6d7f8474a54a9a9353098ff7f2d66eab46867"
+  "content_sha256": "8c30ac10078542b3a38a248d6b2da3250c39447bd5834f62141812d8a694fa36"
  },
  "kn-produce-KSS-FY2018Q1": {
   "split": "heldout",
+  "case": "KSS-FY2018Q1",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -823,10 +882,11 @@
   ],
   "fingerprint": "a62505f386fe",
   "gold_fingerprint": "3a3b72a94b71",
-  "content_sha256": "1c35331c2b89bf019f5440b907b5b264b9043f900950152e9f253cafa836fd31"
+  "content_sha256": "e59694eddcafa8b4cafcf9ff30915f503c774a07182d8b3057cc23310bf321bc"
  },
  "kn-produce-KSS-FY2018Q3": {
   "split": "heldout",
+  "case": "KSS-FY2018Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -837,10 +897,11 @@
   ],
   "fingerprint": "83245a87c514",
   "gold_fingerprint": "081f1be1cb36",
-  "content_sha256": "9c6a8e8bb41bcbbab6649bc191a76ef090ac62a3faf9f3829baa6e2b1c8199f5"
+  "content_sha256": "b24587de67aee3f06bbcc302c2c23789596133cbd2a1e7e709027902a118fb6a"
  },
  "kn-produce-LUV-2017Q4": {
   "split": "train",
+  "case": "LUV-2017Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -851,10 +912,11 @@
   ],
   "fingerprint": "9dfe4ff6c745",
   "gold_fingerprint": "f1cf15bd237f",
-  "content_sha256": "6d00aa783317ca25476030f53058789320b3044b9aac6c37f6d3433697c2a96d"
+  "content_sha256": "503fbb539ac0f8982c2a34dbf63159644e1199bcfe289e366eecfa02405169b8"
  },
  "kn-produce-LUV-2018Q2": {
   "split": "train",
+  "case": "LUV-2018Q2",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -865,10 +927,11 @@
   ],
   "fingerprint": "68388dd38ff8",
   "gold_fingerprint": "6f9cac54090c",
-  "content_sha256": "c3bedf84ee37f26e102650c08f2c3dd4c4709a17484baaa1d4b31ab5075cfba4"
+  "content_sha256": "bd652a0ac4c697580d5b3ce0065ab2a39046ecb7eef2de1bc9a40218ff179206"
  },
  "kn-produce-LUV-2018Q4": {
   "split": "train",
+  "case": "LUV-2018Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -879,10 +942,11 @@
   ],
   "fingerprint": "03dcd51cdde0",
   "gold_fingerprint": "a8ceeeeef6a2",
-  "content_sha256": "c15774697a19918817ada2aa9647c70778dc55914634ed9480ec2f6a4763e243"
+  "content_sha256": "32724ce90ec99796fa29a570ac1dd513172a7e25d311a42a31f8915c5d339834"
  },
  "kn-produce-M-FY2017Q3": {
   "split": "bench",
+  "case": "M-FY2017Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -893,10 +957,11 @@
   ],
   "fingerprint": "d14d64e7100a",
   "gold_fingerprint": "7363c425b071",
-  "content_sha256": "0c01283eaade0017fbf24f1f4faae9e100a51074f4466b6db713e4723549cbe1"
+  "content_sha256": "eda1828f7a3816e1216cf3a14aa2fd4b607ad9bb1ece88d976f9715b0722d76a"
  },
  "kn-produce-M-FY2018Q1": {
   "split": "bench",
+  "case": "M-FY2018Q1",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -907,10 +972,11 @@
   ],
   "fingerprint": "a746d4c5e0e3",
   "gold_fingerprint": "0e5b41386c61",
-  "content_sha256": "5d1e961fc783dffdd5d41ad6a2e4fb320fa9b75cc53465383be5e2f96aa041a8"
+  "content_sha256": "af894a8d96c1b42ed4d13c1f92d25a6fe52a49a816a02ce9c3a31904acba89dc"
  },
  "kn-produce-M-FY2018Q3": {
   "split": "bench",
+  "case": "M-FY2018Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -921,10 +987,11 @@
   ],
   "fingerprint": "cd8a7322c5b1",
   "gold_fingerprint": "7483c1877ccb",
-  "content_sha256": "231b7e1c7693395364438d6acb15b61c6909c5a977c566a78b57c2bc0cc2edd5"
+  "content_sha256": "354b411aad44cb634999dba2ea44ac6de6d9e49e0d9e885310154588fca62280"
  },
  "kn-produce-RET01-FY2017Q3-anon": {
   "split": "train",
+  "case": "TJX_MARMAXX-FY2017Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -935,10 +1002,11 @@
   ],
   "fingerprint": "6a3e16c339e2",
   "gold_fingerprint": "e20591774490",
-  "content_sha256": "c6c4e61d0b04dfb0929de477f2456c503559a06b6e57b225a386747cc08f5b26"
+  "content_sha256": "fd1254dfa7d3deab79dafd436406db3d1b3e40b547387059ec925f21167a75ce"
  },
  "kn-produce-RET01-FY2018Q1-anon": {
   "split": "train",
+  "case": "TJX_MARMAXX-FY2018Q1",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -949,10 +1017,11 @@
   ],
   "fingerprint": "c14397e21048",
   "gold_fingerprint": "cc6cb06d8508",
-  "content_sha256": "96c77ba7ee0655ce75d28f56a2c163d03b78902c6e60fec4c622afd49cff642a"
+  "content_sha256": "a283631b726c9cee64dcf58a22d67451ef120713829ca772eea95b78ee8454f9"
  },
  "kn-produce-RET01-FY2018Q3-anon": {
   "split": "train",
+  "case": "TJX_MARMAXX-FY2018Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -963,10 +1032,11 @@
   ],
   "fingerprint": "0bb620980e2b",
   "gold_fingerprint": "9bc5a3c29a13",
-  "content_sha256": "1750d640c0c46ece34c85963d8f6063722ac3805e2f3a5d6e102a71149c868c3"
+  "content_sha256": "1ed84a26050d3af323277ec516380dc187f3772a1c92ad26c0be9e5dfcca4014"
  },
  "kn-produce-RET02-FY2017Q3-anon": {
   "split": "train",
+  "case": "JWN_OP-FY2017Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -977,10 +1047,11 @@
   ],
   "fingerprint": "4d694e305f1b",
   "gold_fingerprint": "7921b20645f6",
-  "content_sha256": "e6104f716e5f2893f314b519af8eb442110e8f53d21e0ac6439e83690093f805"
+  "content_sha256": "eacae400d4087a5b1f96be766d7e0d4ceedf7d17ce0e178e6f3d404de48cf52c"
  },
  "kn-produce-RET02-FY2018Q1-anon": {
   "split": "train",
+  "case": "JWN_OP-FY2018Q1",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -991,10 +1062,11 @@
   ],
   "fingerprint": "8b2d36ae4a76",
   "gold_fingerprint": "3c7eaac2fe78",
-  "content_sha256": "77b699e985e83bca12a2c94ae2d9b4033ab5968d5e73cfba51adf723bf5339ad"
+  "content_sha256": "34069a706160bf61e0304f97060a73c2c1ab6e7aa0cb46803cdae5c566d10c5c"
  },
  "kn-produce-RET02-FY2018Q3-anon": {
   "split": "train",
+  "case": "JWN_OP-FY2018Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1005,10 +1077,11 @@
   ],
   "fingerprint": "e4aa8cd6e90d",
   "gold_fingerprint": "34665abde1f8",
-  "content_sha256": "ac8545ef85e45fc61c902882650713202b5f69015bcc309cd5973f3d7397a817"
+  "content_sha256": "b60fbf195db9b4377be462b6312db14386ebfeac4f9c4c157dca6788995c8d70"
  },
  "kn-produce-RET03-FY2017Q3-anon": {
   "split": "heldout",
+  "case": "JCP-FY2017Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1019,10 +1092,11 @@
   ],
   "fingerprint": "ed367ed1ed0a",
   "gold_fingerprint": "f8227c83e87f",
-  "content_sha256": "3bb981ed83e66391858bfef91bdeb5c58ed7a1a9f4c6b8f4d631cb1ca7d77a1f"
+  "content_sha256": "a2c459e9cda44655dad2bef9f8609c2aa01d5815651cea605dd9fc13950d8e3c"
  },
  "kn-produce-RET03-FY2018Q1-anon": {
   "split": "heldout",
+  "case": "JCP-FY2018Q1",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1033,10 +1107,11 @@
   ],
   "fingerprint": "c1980534b751",
   "gold_fingerprint": "e78bbd4b3bb8",
-  "content_sha256": "08103a66225b9d3b383ce64f053107831a7b28253a979867abe31581d3fad979"
+  "content_sha256": "7029a44cd41720634be955c9864bef69a5cacc9f1f84af41e2e272a90320d986"
  },
  "kn-produce-RET03-FY2018Q3-anon": {
   "split": "heldout",
+  "case": "JCP-FY2018Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1047,10 +1122,11 @@
   ],
   "fingerprint": "6a027d3d59e0",
   "gold_fingerprint": "25ef465bbe8c",
-  "content_sha256": "0cad95dcca7ecefffc736676b54fb568a57dfa0e9d0c3921bad2ea0fc4b0cf04"
+  "content_sha256": "7e210f7359a88f6cf60d7eec644508d212d598b51af45ecabeec91b2d8e39c26"
  },
  "kn-produce-RET04-FY2017Q3-anon": {
   "split": "bench",
+  "case": "M-FY2017Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1061,10 +1137,11 @@
   ],
   "fingerprint": "7798eb408e88",
   "gold_fingerprint": "fc5ce0853f4d",
-  "content_sha256": "b8ca65e8ebd9a399afcbc9b48c78f2364b915de47fc55d71ac4882edc463889c"
+  "content_sha256": "ecda4f35d4bef565f39ad73ddd66860937cb49079ebea5ec2ca50437030d8cb2"
  },
  "kn-produce-RET04-FY2018Q1-anon": {
   "split": "bench",
+  "case": "M-FY2018Q1",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1075,10 +1152,11 @@
   ],
   "fingerprint": "256cfff75369",
   "gold_fingerprint": "771463820e5c",
-  "content_sha256": "143b7dbea23939592d64118b036c5c664a761b6de203150afd48f37d97f932b0"
+  "content_sha256": "0358fbbd59128986741a226b54f3609cdcd838a0cdee0aa5cccaf3a5ab06c10a"
  },
  "kn-produce-RET04-FY2018Q3-anon": {
   "split": "bench",
+  "case": "M-FY2018Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1089,10 +1167,11 @@
   ],
   "fingerprint": "06ca9e1da02b",
   "gold_fingerprint": "2a9450a8b027",
-  "content_sha256": "d5fe4255243b7b69c6abc714c87717ae0c5756bfc206c1cc67e82f195953a5f6"
+  "content_sha256": "da7039e3a63ab86fe199876aa4c0c9604042ed8b6e3990b43c93aa0c8df56be3"
  },
  "kn-produce-RET05-FY2017Q3-anon": {
   "split": "bench",
+  "case": "DDS-FY2017Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1103,10 +1182,11 @@
   ],
   "fingerprint": "caae387df57a",
   "gold_fingerprint": "923e0fc246ca",
-  "content_sha256": "6acbd463d3080e20fe7897d8e186c618d74e4c855a1adadf5e2a50987975efae"
+  "content_sha256": "f015b9f5ad8d3d30ee565106a5762f57ea9a3fcc1ae018adc73b7bec8b6000b3"
  },
  "kn-produce-RET05-FY2018Q1-anon": {
   "split": "bench",
+  "case": "DDS-FY2018Q1",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1117,10 +1197,11 @@
   ],
   "fingerprint": "3be8007566d1",
   "gold_fingerprint": "e7f4e09eae98",
-  "content_sha256": "7448747d4cc07ce3a889d26bc627ba8146235b5281385ffef3bb9a12386077cb"
+  "content_sha256": "7ce7b4ee3184606edfb4a4d5f5cb75ef47bc7dd8d261e1e46e387e0bfc6236db"
  },
  "kn-produce-RET05-FY2018Q3-anon": {
   "split": "bench",
+  "case": "DDS-FY2018Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1131,10 +1212,11 @@
   ],
   "fingerprint": "918af7bbde84",
   "gold_fingerprint": "925677426b68",
-  "content_sha256": "8105eecd2b57144a761dce6e3f8544f856cc699a5f6747f38c85ac977407917d"
+  "content_sha256": "9d723cef7f7cbcb67683bda91750ac107638587c73aa61b00a2395cffea6d02e"
  },
  "kn-produce-RET07-FY2017Q3-anon": {
   "split": "train",
+  "case": "ROST-FY2017Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1145,10 +1227,11 @@
   ],
   "fingerprint": "0ebd7c7f7f1f",
   "gold_fingerprint": "80ce54748f63",
-  "content_sha256": "00562d10624afd7c5a169927baa1bc67e3130d460a39de9bfc000a435fc57e3e"
+  "content_sha256": "10b2a03dd269cb72192c48761626400074cbd5b628f95235d15fc2a08829c93d"
  },
  "kn-produce-RET07-FY2018Q1-anon": {
   "split": "train",
+  "case": "ROST-FY2018Q1",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1159,10 +1242,11 @@
   ],
   "fingerprint": "2e17aa82a6e0",
   "gold_fingerprint": "0d527e627399",
-  "content_sha256": "0a70b96e20c086265a7907005815f124f285cbcc2dfd20ddf05f1f3111c94115"
+  "content_sha256": "db193ccd3e2a4e27bedf30707dfd988b98092a8bc67aba9d541c28b840384f32"
  },
  "kn-produce-RET07-FY2018Q3-anon": {
   "split": "train",
+  "case": "ROST-FY2018Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1173,10 +1257,11 @@
   ],
   "fingerprint": "a1f61e947723",
   "gold_fingerprint": "faebdcdf3077",
-  "content_sha256": "aa3c5df41c9787ccf1446ad4f875522d085c73ab6626c60883ca212a06f81481"
+  "content_sha256": "4afd636eae0d9fc9448de1dea9c175c0a41e9d7684ffd8be88e0defc2d3554ed"
  },
  "kn-produce-RET08-FY2017Q3-anon": {
   "split": "train",
+  "case": "JWN_FP-FY2017Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1187,10 +1272,11 @@
   ],
   "fingerprint": "d6c46b6eb97b",
   "gold_fingerprint": "89873ef086fa",
-  "content_sha256": "86f425b29cc5a414d3fc0eeb8cef751fbd640c732595f14da081e1fd553aa80d"
+  "content_sha256": "d2609bdfe5d75ee5e115f1aa038357c5739d89d6d31f27da92c35f352d6f1ccd"
  },
  "kn-produce-RET08-FY2018Q1-anon": {
   "split": "train",
+  "case": "JWN_FP-FY2018Q1",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1201,10 +1287,11 @@
   ],
   "fingerprint": "ff3188df738d",
   "gold_fingerprint": "0336788f560d",
-  "content_sha256": "b08f22432d97448ad184f40b3f94150b05af161ab14f628c09214838ea017222"
+  "content_sha256": "c465cfec1d90341c021987026cbb371c66e84f100873c27333ae0014917ec7ad"
  },
  "kn-produce-RET08-FY2018Q3-anon": {
   "split": "train",
+  "case": "JWN_FP-FY2018Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1215,10 +1302,11 @@
   ],
   "fingerprint": "f2db29167ca2",
   "gold_fingerprint": "af2e46f24f12",
-  "content_sha256": "d813dfc47ff08067d3d2b234949de689f9c6d79f689a4aeee2fa08540adb3757"
+  "content_sha256": "1570a3c3b336c7b1c7e3e936ce3e5109aa6bd2b1cfdaa9540b19d5d31ec7ad1a"
  },
  "kn-produce-RET10-FY2017Q3-anon": {
   "split": "heldout",
+  "case": "KSS-FY2017Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1229,10 +1317,11 @@
   ],
   "fingerprint": "b890660c2459",
   "gold_fingerprint": "1f5b123fd6a1",
-  "content_sha256": "717d4d74a0926b405134d95ca0472ec03b4a90fcca83507b6b2713d07f681e76"
+  "content_sha256": "18d867b70922f57d647ac2ec6da9d5a662c60aa63ba3f5197fa641537ddcc34f"
  },
  "kn-produce-RET10-FY2018Q1-anon": {
   "split": "heldout",
+  "case": "KSS-FY2018Q1",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1243,10 +1332,11 @@
   ],
   "fingerprint": "388bb57eecac",
   "gold_fingerprint": "a53f7d1f530f",
-  "content_sha256": "fb5d7c2ebbd5bc033a03d09fa24b9f96a1d6a18ecb6ee592a58a74fa3550f3e2"
+  "content_sha256": "2a3e1537ae59cf7f5a23b9c5a186d40141bb08914eaa89ad7b0fcf3b07b8bf7c"
  },
  "kn-produce-RET10-FY2018Q3-anon": {
   "split": "heldout",
+  "case": "KSS-FY2018Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1257,10 +1347,11 @@
   ],
   "fingerprint": "bfe2b3fb9348",
   "gold_fingerprint": "c8c6989b02ac",
-  "content_sha256": "e30e71e23a696a939219db0cafea3537cc30884373fd3e5e54fea0f314973d4b"
+  "content_sha256": "c3b684c1582e60f8fc32ba592fbdcb1c928f3caa0626ef5c42acb6afdffe50cb"
  },
  "kn-produce-ROST-FY2017Q3": {
   "split": "train",
+  "case": "ROST-FY2017Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1271,10 +1362,11 @@
   ],
   "fingerprint": "aa291ca1ef48",
   "gold_fingerprint": "f8d516e97308",
-  "content_sha256": "4bbab4f3c0a68546805307b92aeedb935e61f35ba948a13dff78ae02edbd78a6"
+  "content_sha256": "db0b9c167fa270c01ecc3857e4190ded8f990c21a3e3af5bd755de9e39e89f83"
  },
  "kn-produce-ROST-FY2018Q1": {
   "split": "train",
+  "case": "ROST-FY2018Q1",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1285,10 +1377,11 @@
   ],
   "fingerprint": "608cf7cb5ffb",
   "gold_fingerprint": "570dc25ed97e",
-  "content_sha256": "fcb7ef498ff2054d20188b6f447f6d444106e9d82c7ff1d8b18754c96ed06a64"
+  "content_sha256": "4fbfe44db1939b74c51d6ac84288a0c72c939d6c067365d038e250d465cf0fe1"
  },
  "kn-produce-ROST-FY2018Q3": {
   "split": "train",
+  "case": "ROST-FY2018Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1299,10 +1392,11 @@
   ],
   "fingerprint": "a36b458bf858",
   "gold_fingerprint": "679d49a12148",
-  "content_sha256": "b011dad8c8622bae3d8b9b6ce72eb5a4818cd4a3ade73479b00bab2f1ed78b84"
+  "content_sha256": "be29239aa5cbfef78786df397e24ebb9d47a119d6566d112e616143310d6a70a"
  },
  "kn-produce-SAVE-2017Q4": {
   "split": "bench",
+  "case": "SAVE-2017Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1313,10 +1407,11 @@
   ],
   "fingerprint": "215b9e9a82a8",
   "gold_fingerprint": "f3a798a54e84",
-  "content_sha256": "addd8adec96225cb64e0cd351a427d831eb8549f9f8c8a33b08d2632c6448e83"
+  "content_sha256": "931d69350d2fea4496cb54c00ae103630edbd59fce1adc616c06781887f713c4"
  },
  "kn-produce-SAVE-2018Q2": {
   "split": "bench",
+  "case": "SAVE-2018Q2",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1327,10 +1422,11 @@
   ],
   "fingerprint": "37fe0513955f",
   "gold_fingerprint": "966c3c07fdb1",
-  "content_sha256": "62d88932b6fcadd2b838d47f851084f68093d01ea461f1a905dc6ccb03760249"
+  "content_sha256": "0079fb5a8e7e2cadecc01dd5560f4aa548b2ec5a309ef8d27669fb549389709e"
  },
  "kn-produce-SAVE-2018Q4": {
   "split": "bench",
+  "case": "SAVE-2018Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1341,10 +1437,11 @@
   ],
   "fingerprint": "d1b734ac93cd",
   "gold_fingerprint": "be471a3da444",
-  "content_sha256": "40a5d5f80b76b1c80e5ca3b65dd91459a9675eec3c26df4920551be2b4190546"
+  "content_sha256": "f2378f864b5631ec5b8ffb017d2b10fc7fb272a30bdeb8780e14466582dc7a53"
  },
  "kn-produce-TJX_MARMAXX-FY2017Q3": {
   "split": "train",
+  "case": "TJX_MARMAXX-FY2017Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1355,10 +1452,11 @@
   ],
   "fingerprint": "1e561144ece3",
   "gold_fingerprint": "f607b23fc379",
-  "content_sha256": "c6793acd86eeb715ce2873931a99b8ffd38002ee6c9f723a6131cd75e3f56770"
+  "content_sha256": "6eb40b75c84de32a64ae060451b9ed3b63e8fe5a3dfd0686e4f73c4d6e7607f4"
  },
  "kn-produce-TJX_MARMAXX-FY2018Q1": {
   "split": "train",
+  "case": "TJX_MARMAXX-FY2018Q1",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1369,10 +1467,11 @@
   ],
   "fingerprint": "e7c677d3ac4d",
   "gold_fingerprint": "d82640c094c8",
-  "content_sha256": "d5c9605cd8ac5872fd64335661e0686c2a2510b11079c734e48378f0af18c323"
+  "content_sha256": "131801d17bc7a3ec8b64fe2185772b3d0df008e9ba75883699b88d37744960f9"
  },
  "kn-produce-TJX_MARMAXX-FY2018Q3": {
   "split": "train",
+  "case": "TJX_MARMAXX-FY2018Q3",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1383,10 +1482,11 @@
   ],
   "fingerprint": "7ab80a1657ed",
   "gold_fingerprint": "865bebfb8b2e",
-  "content_sha256": "2abd99a5ec3e8cf8bc9d67b794d1bb82ac532e636aee5d5654585439898e14fc"
+  "content_sha256": "952bb92bb8dd1245a28880d7fc89dde935380ebcbd844e29f61f7219fcbe8080"
  },
  "kn-produce-UAL-2017Q4": {
   "split": "train",
+  "case": "UAL-2017Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1397,10 +1497,11 @@
   ],
   "fingerprint": "3068dc980132",
   "gold_fingerprint": "0c30f38fc621",
-  "content_sha256": "2da77feb5d898a6eda5d976acd68338930743ee71e53fd665d499aa4d2965115"
+  "content_sha256": "a5f055d9aacc2e62097fa9f2b32a46e85652759696217df33dfa5abda0c8d344"
  },
  "kn-produce-UAL-2018Q2": {
   "split": "train",
+  "case": "UAL-2018Q2",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1411,10 +1512,11 @@
   ],
   "fingerprint": "da168f7abb68",
   "gold_fingerprint": "5bbf0fd495d0",
-  "content_sha256": "c0f8f8277c3feee319421140d1cb6f0ea56793510111e2a8acfcf7d7a6702597"
+  "content_sha256": "5ac450f104be0105d48b32b20364ee69b99d1c62227d715fb43bdbb33f486b96"
  },
  "kn-produce-UAL-2018Q4": {
   "split": "train",
+  "case": "UAL-2018Q4",
   "role": "quant_researcher",
   "workflow": "kpi_nowcast",
   "mode": "produce",
@@ -1425,6 +1527,6 @@
   ],
   "fingerprint": "507186d98d54",
   "gold_fingerprint": "ce150521d602",
-  "content_sha256": "c816f6716db3e1cbca4e6c967be184342d49ce2e40d7e73905ebdb8735be78d9"
+  "content_sha256": "8d58e515d6a96245f836a6203f08dceaf3310e59736fc0f260e5fa01aacf358b"
  }
 }

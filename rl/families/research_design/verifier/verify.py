@@ -8,8 +8,8 @@ tests/grader.json says how this task is graded:
   compare  the agent answers the pair in both orders ({"AB": ..., "BA": ...}); pairwise_pick maps each
            pick back to its plan. The reward is 1 only when both picks name gold's plan: a correct,
            order-consistent pick. Always answering "A" scores 0, and answering at random 0.25 in
-           expectation, below a consistent coin flip's 0.5. The mean over the two orders (what run.py
-           reports) is a diagnostic.
+           expectation, below a consistent coin flip's 0.5. The mean over the two orders is a
+           diagnostic.
 
 A missing or malformed response scores 0, with details saying what was wrong.
 """

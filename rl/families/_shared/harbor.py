@@ -7,7 +7,8 @@
       prompt/                            exact messages for the repo's API runners (model-visible;
                                          only families with an API runner have it)
       tests/test.sh, tests/<verifier>, tests/common.py, tests/<gold_file>   copied in only after the agent finishes
-      tests/judge.py, tests/judge.json   the shared model judge and the family's pinned judge config (judged tasks)
+      tests/judge.py, tests/client.py, tests/judge.json   the shared model judge, its API client and the
+                                         family's pinned judge config (judged tasks)
       tests/provenance.json              who produced each of the family's gold inputs and its review state
       tests/CANARY                       the release's contamination canary (rl/canary.txt), never agent-visible
       tests/FILES                        every file tests/ ships; test.sh deletes anything else found in /tests
@@ -99,15 +100,15 @@ JUDGE_ENV = ('\n[verifier.env]\n# the pinned model judge (tests/judge.json); wit
              '# graded (JUDGE=keyword opts growth_thesis into its keyword grader)\n'
              'ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY:-}"\nJUDGE = "${JUDGE:-auto}"\n')
 
-# name prefixes of the files under tests/ that only the grader may see: the gold (every family's
-# `gold_file` starts with "gold") and the canary
-GRADER_ONLY = ("gold", "CANARY")
+# file names under tests/ that only the grader may see: the gold (every family's `gold_file`) and the canary
+GRADER_ONLY = ("gold.json", "CANARY")
 # task metadata recorded in the family's manifest, where the task has it
 MANIFEST = ("split", "case", "role", "workflow", "mode", "world", "status", "seed", "control", "companies", "fingerprint")
 
 COMMON = HERE / "verify_common.py"
 JUDGE = HERE / "judge.py"
 RL = HERE.parents[1]
+CLIENT = RL / "harness" / "client.py"   # the model client judge.py calls
 CANARY = RL / "canary.txt"            # contamination canary: grader-side only (leakcheck.py)
 BUILD_PACKAGES = ["pandas", "numpy", "scipy", "PyYAML", "toml"]
 
@@ -208,7 +209,7 @@ tests/<family["gold_file"]>; `tests`,
     image. Data files ending in .gz are unpacked when the image is built, so the agent sees them
     uncompressed. A `metadata["as_of"]` date pins the container's clock to it."""
     gold_file = family["gold_file"]
-    assert gold_file.startswith(GRADER_ONLY) and gold_file not in tests, gold_file
+    assert gold_file in GRADER_ONLY and gold_file not in tests, gold_file
     assert {"fingerprint", "case"} <= set(metadata), "metadata needs the task's fingerprint and case"
     if dest.exists():
         shutil.rmtree(dest)
@@ -229,6 +230,7 @@ tests/<family["gold_file"]>; `tests`,
     _put(dest / "tests" / "common.py", COMMON)
     if judged:
         _put(dest / "tests" / "judge.py", JUDGE)
+        _put(dest / "tests" / "client.py", CLIENT)
         _put(dest / "tests" / "judge.json", json.dumps(family["judge"], indent=1) + "\n")
     _put(dest / "tests" / "CANARY", CANARY)
     for name, c in {**tests, gold_file: gold}.items():
@@ -236,7 +238,7 @@ tests/<family["gold_file"]>; `tests`,
     (dest / "solution").mkdir()
     for name, c in (solution or {}).items():
         _put(dest / "solution" / name, c)
-    prov = provenance.for_family(metadata["family"])
+    prov = provenance.for_family(metadata["family"]) if family.get("gold_inputs") else []
     if prov:
         _put(dest / "tests" / "provenance.json", json.dumps(prov, indent=1, ensure_ascii=False) + "\n")
     shipped = {str(p.relative_to(dest / "tests")) for p in (dest / "tests").rglob("*") if p.is_file()} | {"FILES"}

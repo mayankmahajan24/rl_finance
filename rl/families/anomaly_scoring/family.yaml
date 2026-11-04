@@ -10,6 +10,7 @@ mode: [produce]            # the deliverable is code: /app/solution/score.py
 world: [ls_altdata]
 source: txn_panel
 format: harbor
+tools: [code_execution]
 builder: families._shared.build_panel   # generator: generate.py
 verifier: verifier/anomaly_verify.py
 verifier_timeout_sec: 3600
@@ -29,8 +30,6 @@ instrument:              # what decides what the model sees and how it is scored
   - families/_shared/panel_perturb.py
   - families/_shared/panel_schema.md
   - sources/txn_panel/panel.py
-  - families/_shared/harbor.py
-  - families/_shared/verify_common.py
 calibration:             # scored metric and pass threshold for rl/harness/calibrate.py; proposed, Mayank to confirm
   metric: reward
   pass: 0.5

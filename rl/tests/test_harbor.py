@@ -100,7 +100,7 @@ def test_judged_task_ships_the_judge(tmp_path):
     write(d, judged=True)
     assert harbor.JUDGE_PIP in (d / "tests" / "test.sh").read_text()
     assert "anthropic" not in (d / "environment" / "Dockerfile").read_text()   # verifier-only package
-    assert (d / "tests" / "judge.py").exists() and '"model": "m"' in (d / "tests" / "judge.json").read_text()
+    assert (d / "tests" / "judge.py").exists() and (d / "tests" / "client.py").exists() and '"model": "m"' in (d / "tests" / "judge.json").read_text()
     assert "ANTHROPIC_API_KEY" in (d / "task.toml").read_text()
     write(d)
     assert not (d / "tests" / "judge.py").exists() and "ANTHROPIC_API_KEY" not in (d / "task.toml").read_text()

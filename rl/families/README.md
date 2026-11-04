@@ -13,8 +13,8 @@ records as an error, never a zero.
 
 | Family | Source | Agent's job | Reward | Runner |
 |---|---|---|---|---|
-| [`research_design`](research_design/) | research_design_case | Review or compare (as PM) research plans for a named fund | Issue recall − penalties; pairwise pick, correct in both orders | `run.py` (API, skills on/off); `replay.py` |
-| [`kpi_nowcast`](kpi_nowcast/) | txn_panel | Nowcast a company's quarterly KPI from the sensor panel and filed actuals; forecast JSON + write-up | Skill vs the naive forecast, clamped to [0, 1]; accuracy and the C1–C12 write-up rubric (LLM judge) as diagnostics | `run.py` (API, code execution, harness-gated) |
+| [`research_design`](research_design/) | research_design_case | Review or compare (as PM) research plans for a named fund | Issue recall − penalties; pairwise pick, correct in both orders | `harness/run_api.py` (API, skills on/off); `replay.py` |
+| [`kpi_nowcast`](kpi_nowcast/) | txn_panel | Nowcast a company's quarterly KPI from the sensor panel and filed actuals; forecast JSON + write-up | Skill vs the naive forecast, clamped to [0, 1]; accuracy and the C1–C12 write-up rubric (LLM judge) as diagnostics | `harness/run_api.py` (API, code execution) |
 | [`data_audit`](data_audit/) | txn_panel | Find planted data-quality problems in a disguised panel | F1 against planted + natural problems | Harbor |
 | [`anomaly_scoring`](anomaly_scoring/) | txn_panel | Write an online anomaly scorer with no foresight | F1 × coverage, zeroed by a foresight check | Harbor |
 | [`growth_thesis`](growth_thesis/) | txn_panel | Which airline grew fastest? Answer + memo, on semi-synthetic data with traps | 0.35 answer + 0.25 growth + 0.15 unreliable list + 0.25 memo rubric | Harbor |
@@ -39,7 +39,6 @@ companies, so it was then removed; its seeds are retired (`splits/seeds.yaml`).
   instruction.md / prompts/   templates; placeholders filled at build time
   verifier/            runs in Harbor's tests/ (copied in only after the agent finishes)
   graders/, grader.py  graders shared by the verifier and the API runner
-  run.py               API runner, where the family has one
   solutions/reference  strong solution, or the oracle (gold) answer; the task's solution/ for Harbor's oracle agent
   solutions/naive      deliberately naive; proves the verifier separates quality
 _shared/               harbor.py (the one task writer), build_panel.py (builds the generated families

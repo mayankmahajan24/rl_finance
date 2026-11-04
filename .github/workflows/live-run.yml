@@ -63,3 +63,6 @@ jobs:
           name: live-run
           path: jobs/
           retention-days: 14
+
+      - name: Fail if a trial errored
+        run: jq -e '.stats.n_errored_trials == 0' jobs/live/result.json

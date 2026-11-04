@@ -29,7 +29,7 @@ Code, Codex) or an agent install adds those hosts from the run config (`harbor r
 --allow-agent-host`, `--allow-environment-host`), never from the task. The verifier reaches only
 VERIFIER_HOSTS, and only when it calls a judge (a `judged` task). A dated task (`as_of`) pins the clock: libfaketime
 makes `python` and `date` start at the as-of date, and data files carry it as their mtime. The
-agent's own process (node, a CLI) keeps the real clock so its TLS still works; test.sh drops the
+agent's own process (node, a CLI) never loads it, so it runs and its TLS works; test.sh drops the
 fake clock before the verifier runs. [metadata.environment] records the policy and
 splits/check.py fails when it and task.toml disagree.
 
@@ -72,12 +72,17 @@ WORKDIR /app
 COPY data /app/data
 {gunzip}{clock}RUN mkdir -p /app/output /app/solution
 """
-# libfaketime for the commands the agent analyses with; the agent's own process keeps the real clock
+# libfaketime for the commands the agent analyses with, loaded by wrappers first on PATH: preloaded
+# into every process it freezes the agent's own CLI. Its shared memory deadlocks forked children.
 CLOCK = """RUN touch -d "{as_of} 12:00:00" /app/data/*
 RUN apt-get update && apt-get install -y --no-install-recommends {deb} && rm -rf /var/lib/apt/lists/* \\
     && ln -s /usr/lib/*/faketime/libfaketime.so.1 /usr/local/lib/libfaketime.so.1
+RUN mkdir /usr/local/faketime && for c in python python3 python3.12 date; do \\
+        printf '#!/bin/sh\\nLD_PRELOAD=${{FAKETIME:+/usr/local/lib/libfaketime.so.1}} exec %s "$@"\\n' \\
+            "$(command -v $c)" > /usr/local/faketime/$c && chmod +x /usr/local/faketime/$c; \\
+    done
 ENV TZ=UTC TASK_AS_OF={as_of} FAKETIME="@{as_of} 12:00:00" FAKETIME_ONLY_CMDS=python,python3,python3.12,date \\
-    LD_PRELOAD=/usr/local/lib/libfaketime.so.1
+    FAKETIME_DISABLE_SHM=1 PATH=/usr/local/faketime:$PATH
 """
 
 # Harbor uploads tests/ by merging it into whatever the agent left at /tests: remove every file the

@@ -5,17 +5,14 @@ from __future__ import annotations
 
 import json
 import shutil
-import sys
 
 import pytest
 
+import canary_probe
 import leakcheck
 import lib
-from conftest import RL, built
-
-sys.path.insert(0, str(RL / "harness"))
-import canary_probe  # noqa: E402
-import memorisation  # noqa: E402
+import memorisation
+from conftest import built
 
 
 @pytest.fixture
@@ -58,15 +55,20 @@ def test_identity_and_allowlist(task):
     assert any("'https://'" in x for x in p) and any("'rl_finance'" in x for x in p)
     assert any("'benchmark task'" in x for x in p)
     d, m = task("bench", "kn-produce-AIR02-2017Q4-anon")
-    assert "Anomaly Detection Exercise" in (d / "environment" / "data" / "data_brief.md").read_text()
-    assert not any("Anomaly Detection" in x for x in leakcheck.task_problems(d, m))    # allowlisted for txn_panel
+    assert "Card-transaction sensor panel" in (d / "environment" / "data" / "data_brief.md").read_text()
+    assert leakcheck.task_problems(d, m) == []
 
 
 def test_disguise(task):
     d, m = task("bench", "kn-produce-AIR02-2017Q4-anon")
-    real = leakcheck.real_names(m["companies"])[0]
+    real = leakcheck.real_names(m["source"], m["companies"])[0]
     plant(d, "prompt/user.md", f"(This is {real}.)")
     assert any(f"real name {real!r}" in x for x in leakcheck.task_problems(d, m))
+
+
+def test_disguise_of_an_unknown_company_raises():
+    with pytest.raises(SystemExit, match=r"txn_panel: unknown companies \['XYZ'\], not in its entities file"):
+        leakcheck.real_names("txn_panel", ["DAL", "XYZ"])
 
 
 def test_canary(task):
@@ -86,9 +88,10 @@ def test_canary_probe_scoring():
 
 
 def test_memorisation_gap():
-    row = lambda variant, err: {"status": "ok", "model": "m", "grade": {"abs_pct_error": err, "covered": 1.0},  # noqa: E731
-                                "meta": {"series": "UAL", "target_period": "2018Q4", "variant": variant}}
-    paired = memorisation.pairs([row("named", 0.01), row("anon", 0.05), row("named", 0.5)])
+    rec = lambda task, err, attempt=0: {"status": "ok", "model": "m", "task_id": task, "attempt": attempt,  # noqa: E731
+                                        "rewards": {"abs_pct_error": err, "covered": 1.0}}
+    case_of = {"kn-UAL": ("UAL-2018Q4", "named"), "kn-AIR03-anon": ("UAL-2018Q4", "anon")}
+    paired = memorisation.pairs([rec("kn-UAL", 0.5, 1), rec("kn-AIR03-anon", 0.05), rec("kn-UAL", 0.01)], case_of)
     assert paired["m"] == [({"abs_pct_error": 0.01, "covered": 1.0}, {"abs_pct_error": 0.05, "covered": 1.0})]
     g = memorisation.gaps(paired["m"])
     assert g["abs_pct_error"]["named_advantage"] == pytest.approx(0.04) and g["covered"]["named_advantage"] == 0

@@ -2,24 +2,28 @@
 
 `run` drives a calibration job through Harbor: every task of a split, k attempts per model, one job
 folder per model under rl/runs/calibration/<split>/<run_id>/jobs/. Re-running resumes a job instead
-of restarting it, and live runs need each family's instrument approved (rl/harness/approve.py). It
-then imports the trials as run records (records.py) and writes the report.
+of restarting it; the run's arguments are pinned in its folder (args.json), and resuming with
+different ones is refused. Live runs need each family's instrument approved (rl/harness/approve.py)
+and a --budget: after each model's job its trials are imported as run records (records.py), and no
+further job starts once their cost reaches the budget. A Harbor failure stops the run.
 
 `report` reads run records (Harbor imports, API runners, solvers) and writes stats.json and report.md:
 
-  per task and model  attempts, errored share (errored trials are reported, never scored), mean
-                      score, noise (std across attempts), pass rate at the family's threshold, and
-                      pass@k / pass^k with 95% bootstrap intervals
-  per split           model separation (paired bootstrap over tasks of the mean score difference)
-                      and the difficulty distribution
-  per task            keep / too_easy / too_hard / noisy / broken (the reference fails): a
-                      recommendation only; dropping a task is an expert's call
-  per family          noise floor, and the ceiling: the reference solution's score and the best
-                      trial, with the family's note where its gold is known to be incomplete
+  per task and model  attempts, errored share (infrastructure errors and ungraded attempts are
+                      reported, never scored; refusals, truncations, timeouts and unparseable
+                      answers score 0), mean score, noise (std across attempts), pass rate at the
+                      family's threshold, and pass@k / pass^k with 95% bootstrap intervals
+  per family          model separation (paired bootstrap over the family's tasks of the mean score
+                      difference), noise floor (mean noise), the difficulty distribution, and the
+                      ceiling: the reference solution's score, the best model's mean and the best
+                      single trial, with the family's note where its gold is known to be incomplete
+  per task            keep / too_easy / too_hard / noisy (noise above NOISY times its family's
+                      floor) / broken (the reference fails): a recommendation only; dropping a
+                      task is an expert's call
 
 Each family's scored metric and pass threshold are `calibration` in family.yaml.
 
-    python rl/harness/calibrate.py run --split bench --model claude-opus-5-5 --model claude-sonnet-5-5 --k 5 \\
+    python rl/harness/calibrate.py run --split bench --model claude-opus-5-5 --model claude-sonnet-5-5 --k 5 --budget 200 \\
         -- --allow-agent-host api.anthropic.com --allow-environment-host deb.debian.org
     python rl/harness/calibrate.py report rl/runs/calibration/bench/<run_id>/records.jsonl rl/runs/solutions/bench.records.jsonl
 """
@@ -34,20 +38,19 @@ import random
 import subprocess
 import sys
 import time
-import tomllib
 from collections import Counter, defaultdict
 from math import comb
-
-import yaml
 
 RL = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RL))
 sys.path.insert(0, str(RL / "harness"))
 import instrument  # noqa: E402
+import local  # noqa: E402
 import records  # noqa: E402
+from lib import family  # noqa: E402
 
 BOOT = 1000
-NOISY = 0.25            # std across attempts above this: the task can't tell attempts apart
+NOISY = 2.0             # a task whose noise is above this many times its family's noise floor is flagged
 SOLVERS = ("reference", "oracle")
 
 
@@ -59,15 +62,13 @@ def pass_hat_k(n, c, k):
     return float('nan') if n < k else comb(c, k) / comb(n, k)
 
 
-def family_config(family: str) -> dict:
-    f = RL / "families" / family / "family.yaml"
-    cfg = (yaml.safe_load(f.read_text()) or {}).get("calibration", {}) if f.exists() else {}
+def family_config(family_id: str) -> dict:
+    cfg = family(family_id).get("calibration", {})
     return {"metric": cfg.get("metric", "reward"), "pass": cfg.get("pass", 0.8), "note": cfg.get("ceiling_note")}
 
 
 def score(r: dict, cfg: dict) -> float | None:
-    v = r["rewards"].get(cfg["metric"])
-    return None if v is None else float(v)
+    return records.score(r, cfg["metric"])
 
 
 def interval(passes: list[bool], k: int, stat, rng: random.Random) -> list[float] | None:
@@ -80,13 +81,14 @@ def interval(passes: list[bool], k: int, stat, rng: random.Random) -> list[float
 
 
 def task_stats(rs: list[dict], cfg: dict, k: int, rng: random.Random) -> dict:
-    scored = [s for s in (score(r, cfg) for r in rs if r["status"] == "ok") if s is not None]
+    scored = [s for s in (score(r, cfg) for r in rs) if s is not None]
     passes = [s >= cfg["pass"] for s in scored]
     n, c = len(scored), sum(passes)
     mean = sum(scored) / n if n else None
     std = (sum((s - mean) ** 2 for s in scored) / (n - 1)) ** 0.5 if n > 1 else None
     return {"attempts": len(rs), "errored": round(1 - n / len(rs), 3), "n": n,
-            "mean": None if mean is None else round(mean, 4), "noise": None if std is None else round(std, 4),
+            "mean": None if mean is None else round(mean, 4), "best": max(scored) if scored else None,
+            "noise": None if std is None else round(std, 4),
             "pass_rate": round(c / n, 3) if n else None,
             f"pass@{k}": round(pass_at_k(n, c, k), 3) if n >= k else None,
             f"pass@{k}_ci": interval(passes, k, pass_at_k, rng),
@@ -94,7 +96,7 @@ def task_stats(rs: list[dict], cfg: dict, k: int, rng: random.Random) -> dict:
             f"pass^{k}_ci": interval(passes, k, pass_hat_k, rng)}
 
 
-def recommend(per_model: dict[str, dict], reference: float | None, cfg: dict) -> str:
+def recommend(per_model: dict[str, dict], reference: float | None, cfg: dict, floor: float | None) -> str:
     rates = [s["pass_rate"] for s in per_model.values() if s["pass_rate"] is not None]
     if reference is not None and reference < cfg["pass"]:
         return "broken"
@@ -104,7 +106,7 @@ def recommend(per_model: dict[str, dict], reference: float | None, cfg: dict) ->
         return "too_easy"
     if all(r == 0 for r in rates):
         return "too_hard"
-    if any(s["noise"] is not None and s["noise"] > NOISY for s in per_model.values()):
+    if floor and any(s["noise"] is not None and s["noise"] > NOISY * floor for s in per_model.values()):
         return "noisy"
     return "keep"
 
@@ -136,59 +138,66 @@ def report(recs: list[dict], k: int, seed: int = 0) -> dict:
     rng = random.Random(seed)
     trials, refs = defaultdict(list), {}
     for r in recs:
+        key = (r["family"], r["task_id"])
         if (r.get("runner") or {}).get("agent") in SOLVERS:
             s = score(r, family_config(r["family"]))
             if s is not None and r["status"] == "ok":
-                refs[r["task_id"]] = max(s, refs.get(r["task_id"], s))
+                refs[key] = max(s, refs.get(key, s))
         elif r.get("model"):
-            trials[(r["family"], r["task_id"], r["model"])].append(r)
-    tasks, means = {}, defaultdict(dict)
+            trials[(*key, r["model"])].append(r)
+    tasks, means = {}, defaultdict(lambda: defaultdict(dict))
     for (fam, tid, model), rs in sorted(trials.items()):
         st = task_stats(rs, family_config(fam), k, rng)
-        tasks.setdefault(tid, {"family": fam, "models": {}})["models"][model] = st
+        tasks.setdefault((fam, tid), {"family": fam, "task_id": tid, "models": {}})["models"][model] = st
         if st["mean"] is not None:
-            means[model][tid] = st["mean"]
-    for tid, t in tasks.items():
-        t["reference"] = refs.get(tid)
-        t["recommendation"] = recommend(t["models"], t["reference"], family_config(t["family"]))
+            means[fam][model][tid] = st["mean"]
     families = {}
-    for fam in sorted({t["family"] for t in tasks.values()}):
-        cfg, ts = family_config(fam), [t for t in tasks.values() if t["family"] == fam]
+    for fam in sorted({f for f, _ in tasks}):
+        cfg, ts = family_config(fam), [t for (f, _), t in tasks.items() if f == fam]
         stats = [s for t in ts for s in t["models"].values()]
-        ref = [t["reference"] for t in ts if t["reference"] is not None]
-        best = [max(s["mean"] for s in t["models"].values() if s["mean"] is not None)
-                for t in ts if any(s["mean"] is not None for s in t["models"].values())]
         noise = [s["noise"] for s in stats if s["noise"] is not None]
+        floor = sum(noise) / len(noise) if noise else None
+        for t in ts:
+            t["reference"] = refs.get((fam, t["task_id"]))
+            t["recommendation"] = recommend(t["models"], t["reference"], cfg, floor)
+        ref = [t["reference"] for t in ts if t["reference"] is not None]
+        scored = [[s for s in t["models"].values() if s["mean"] is not None] for t in ts]
+        best_model = [max(s["mean"] for s in ss) for ss in scored if ss]
+        best_trial = [max(s["best"] for s in ss) for ss in scored if ss]
         families[fam] = {"metric": cfg["metric"], "pass": cfg["pass"], "tasks": len(ts),
-                         "noise_floor": round(sum(noise) / len(noise), 4) if noise else None,
+                         "noise_floor": round(floor, 4) if floor is not None else None,
                          "ceiling_reference": round(sum(ref) / len(ref), 4) if ref else None,
-                         "ceiling_best_trial": round(sum(best) / len(best), 4) if best else None,
+                         "ceiling_best_model": round(sum(best_model) / len(best_model), 4) if best_model else None,
+                         "ceiling_best_trial": round(sum(best_trial) / len(best_trial), 4) if best_trial else None,
                          "ceiling_note": cfg["note"],
                          "recommendations": dict(sorted(Counter(t["recommendation"] for t in ts).items())),
-                         "difficulty": dict(sorted(Counter(bucket(s["pass_rate"]) for s in stats).items()))}
-    return {"k": k, "families": families, "separation": separation(means, rng), "tasks": tasks}
+                         "difficulty": dict(sorted(Counter(bucket(s["pass_rate"]) for s in stats).items())),
+                         "separation": separation(means[fam], rng)}
+    return {"k": k, "families": families, "tasks": {f"{f}/{t}": v for (f, t), v in sorted(tasks.items())}}
 
 
 def markdown(rep: dict, title: str) -> str:
     k = rep["k"]
     out = [f"# Calibration: {title}", "", f"k = {k}; scores are each family's `calibration.metric`.", "",
-           "| Family | Metric (pass at) | Tasks | Noise floor | Ceiling: reference | Ceiling: best trial | Recommendations |",
-           "|---|---|---|---|---|---|---|"]
+           "| Family | Metric (pass at) | Tasks | Noise floor | Ceiling: reference | Ceiling: best model | "
+           "Ceiling: best trial | Recommendations |",
+           "|---|---|---|---|---|---|---|---|"]
     for fam, f in rep["families"].items():
         recs = ", ".join(f"{name} {n}" for name, n in f["recommendations"].items())
         out.append(f"| {fam} | {f['metric']} (≥ {f['pass']}) | {f['tasks']} | {f['noise_floor']} | "
-                   f"{f['ceiling_reference']} | {f['ceiling_best_trial']} | {recs} |")
+                   f"{f['ceiling_reference']} | {f['ceiling_best_model']} | {f['ceiling_best_trial']} | {recs} |")
     notes = [f"- {fam}: {f['ceiling_note']}" for fam, f in rep["families"].items() if f["ceiling_note"]]
     out += (["", "Ceiling notes:", *notes] if notes else [])
-    out += ["", "## Model separation", "", "| A | B | Tasks | Mean A − B | 95% CI | Separated |", "|---|---|---|---|---|---|"]
-    out += [f"| {s['a']} | {s['b']} | {s['tasks']} | {s['mean_diff']} | {s['ci']} | {'yes' if s['separated'] else 'no'} |"
-            for s in rep["separation"]]
+    out += ["", "## Model separation", "", "| Family | A | B | Tasks | Mean A − B | 95% CI | Separated |",
+            "|---|---|---|---|---|---|---|"]
+    out += [f"| {fam} | {s['a']} | {s['b']} | {s['tasks']} | {s['mean_diff']} | {s['ci']} | {'yes' if s['separated'] else 'no'} |"
+            for fam, f in rep["families"].items() for s in f["separation"]]
     out += ["", "## Tasks", "",
             f"| Task | Family | Model | n | Errored | Mean | Noise | Pass rate | pass@{k} (95% CI) | pass^{k} | Recommendation |",
             "|---|---|---|---|---|---|---|---|---|---|---|"]
-    for tid, t in sorted(rep["tasks"].items()):
+    for t in rep["tasks"].values():
         for model, s in sorted(t["models"].items()):
-            out.append(f"| {tid} | {t['family']} | {model} | {s['n']} | {s['errored']} | {s['mean']} | {s['noise']} | "
+            out.append(f"| {t['task_id']} | {t['family']} | {model} | {s['n']} | {s['errored']} | {s['mean']} | {s['noise']} | "
                        f"{s['pass_rate']} | {s[f'pass@{k}']} {s[f'pass@{k}_ci'] or ''} | {s[f'pass^{k}']} | {t['recommendation']} |")
     return "\n".join(out) + "\n"
 
@@ -200,22 +209,29 @@ def write_report(files: list[pathlib.Path], k: int, out: pathlib.Path, title: st
     (out / "report.md").write_text(markdown(rep, title))
 
 
-def run(split: str, models: list[str], k: int, agent: str, run_id: str, harbor_args: list[str]) -> pathlib.Path:
-    """Run, or resume, one Harbor job per model over the split; then import its trials as records."""
-    tasks = RL / "tasks" / split
-    for fam in sorted({tomllib.loads(p.read_text())["metadata"]["family"] for p in tasks.glob("*/task.toml")}):
+def run(split: str, models: list[str], k: int, agent: str, run_id: str, budget: float,
+        harbor_args: list[str]) -> pathlib.Path:
+    """Run, or resume, one Harbor job per model over the split, importing its trials as records after
+    each; stops before the next model once the records' cost reaches `budget`."""
+    for fam in sorted({m["family"] for _, m in local.tasks(split)}):
         instrument.require_approved(fam)
     root = RL / "runs" / "calibration" / split / run_id
+    records.pin_args(root, {"split": split, "models": models, "k": k, "agent": agent, "harbor_args": harbor_args})
     for model in models:
+        recs = records.import_harbor(root / "jobs", run_id)
+        records.write(root / "records.jsonl", recs)
+        spent = sum((r.get("cost_usd") or 0) + (r.get("judge_cost_usd") or 0) for r in recs)
+        if spent >= budget:
+            raise SystemExit(f"budget ${budget} reached (${spent:.2f} spent): not starting {model}")
         jobs = root / "jobs" / model
         started = sorted(jobs.iterdir()) if jobs.exists() else []
         cmd = ([sys.executable, "-m", "harbor.cli.main", "job", "resume", "-p", str(started[-1])] if started else
-               [sys.executable, "-m", "harbor.cli.main", "run", "-p", str(tasks), "-a", agent, "-m", model,
+               [sys.executable, "-m", "harbor.cli.main", "run", "-p", str(RL / "tasks" / split), "-a", agent, "-m", model,
                 "-k", str(k), "-o", str(jobs), "-y", *harbor_args])
         print(" ".join(cmd), flush=True)
-        subprocess.run(cmd)
-    trials = sorted({p.parent for p in (root / "jobs").rglob("result.json") if (p.parent / "verifier").is_dir()})
-    records.write(root / "records.jsonl", [records.from_harbor_trial(t) for t in trials])
+        if subprocess.run(cmd).returncode:
+            raise SystemExit(f"harbor failed on {model}; fix it and re-run the same command to resume")
+    records.write(root / "records.jsonl", records.import_harbor(root / "jobs", run_id))
     return root
 
 
@@ -227,6 +243,9 @@ def main(argv: list[str] | None = None) -> None:
     r.add_argument("--model", action="append", required=True)
     r.add_argument("--k", type=int, default=5)
     r.add_argument("--agent", default="claude-code")
+    r.add_argument("--budget", type=float, required=True,
+                   help="USD; no further model's job starts once recorded cost reaches it (Harbor agents that "
+                        "report no token usage count as free)")
     r.add_argument("--run-id", default=time.strftime("%Y%m%d"))
     r.add_argument("harbor_args", nargs=argparse.REMAINDER, help="after --: passed on to harbor run")
     p = sub.add_parser("report", help="report over run-record files")
@@ -235,7 +254,7 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--out", type=pathlib.Path, help="default: the first file's folder")
     a = ap.parse_args(argv)
     if a.cmd == "run":
-        root = run(a.split, a.model, a.k, a.agent, a.run_id, [x for x in a.harbor_args if x != "--"])
+        root = run(a.split, a.model, a.k, a.agent, a.run_id, a.budget, [x for x in a.harbor_args if x != "--"])
         files = [root / "records.jsonl", *(RL / "runs" / "solutions").glob(f"{a.split}.records.jsonl")]
         write_report(files, a.k, root, f"{a.split} / {a.run_id}")
         out = root

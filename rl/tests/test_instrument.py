@@ -4,7 +4,6 @@ shows up in the reviewer's diff."""
 
 from __future__ import annotations
 
-import shutil
 import subprocess
 
 import pytest
@@ -12,12 +11,11 @@ import yaml
 
 import instrument
 import lib
-from conftest import built
 from splits import check
 
 
 def test_every_family_declares_its_instrument_and_has_an_approval_record():
-    for fam in instrument.families():
+    for fam in lib.families():
         assert instrument.files(fam), fam                       # every pattern matches a file
         assert "families/_shared/harbor.py" in instrument.files(fam), fam
         assert (instrument.RL / "families" / fam / "approval.yaml").exists(), fam
@@ -26,17 +24,23 @@ def test_every_family_declares_its_instrument_and_has_an_approval_record():
 
 @pytest.fixture
 def repo(tmp_path, monkeypatch):
-    """A scratch git repo laid out like rl/, with one family whose instrument is two files."""
+    """A scratch git repo laid out like rl/, with one family whose instrument is two files plus the shared ones."""
     fam = tmp_path / "families" / "fam"
     fam.mkdir(parents=True)
-    (fam / "family.yaml").write_text(yaml.safe_dump({"instrument": ["families/fam/prompt.md", "families/fam/grader.py"]}))
+    (fam / "family.yaml").write_text(yaml.safe_dump({"instrument": ["families/fam/prompt.md", "families/fam/grader.py",
+                                                                    "families/_shared/harbor.py"]}))
     (fam / "prompt.md").write_text("Answer the question.\n")
     (fam / "grader.py").write_text("W = 0.1\n")
+    for f in instrument.SHARED:
+        (tmp_path / f).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / f).write_text("# shared\n")
     git = lambda *a: subprocess.run(["git", *a], cwd=tmp_path, check=True, capture_output=True)  # noqa: E731
     git("init", "-q")
     git("add", ".")
     git("-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-qm", "init")
     monkeypatch.setattr(instrument, "RL", tmp_path)
+    monkeypatch.setattr(lib, "RL", tmp_path)
+    monkeypatch.setattr(lib, "FAMILIES", tmp_path / "families")
     return fam
 
 
@@ -46,7 +50,8 @@ def test_approval_covers_exactly_the_current_instrument(repo):
     with pytest.raises(SystemExit):
         instrument.require_approved("fam")
     e = instrument.approve("fam", "Reviewer", "first look")
-    assert instrument.status("fam")[0] and set(e["files"]) == {"families/fam/prompt.md", "families/fam/grader.py"}
+    assert instrument.status("fam")[0] and set(e["files"]) == {"families/fam/prompt.md", "families/fam/grader.py",
+                                                              *instrument.SHARED}   # shared ones added, listed once
     instrument.require_approved("fam")
     assert instrument.diff("fam").startswith("unchanged since")
 
@@ -72,8 +77,8 @@ def test_reapproval_keeps_history(repo):
     assert a["approved"]["approved_by"] == "B" and a["history"] == [first]
 
 
-def test_release_check_refuses_unapproved_instruments(tmp_path, monkeypatch):
-    monkeypatch.setattr(lib, "TASKS", tmp_path)
-    shutil.copytree(built("bench", "audit-bench-001"), tmp_path / "bench" / "audit-bench-001")
+def test_release_check_refuses_unapproved_instruments(tree):
+    tree()
     assert not any("instrument" in p for p in check.check())
-    assert any(p.startswith("data_audit: instrument never approved") for p in check.check(release=True))
+    assert any(p.startswith("data_audit: instrument never approved")
+               for p in check.release_problems(list(lib.iter_tasks())))

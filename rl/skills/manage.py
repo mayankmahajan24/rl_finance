@@ -174,7 +174,7 @@ def status(cfg: dict) -> None:
 
 
 def resolve(profile: str) -> list[dict]:
-    """Container skill entries for a profile, pinned to the locked versions. Used by the runner."""
+    """Container skill entries for a profile, pinned to the locked versions. Used by rl/harness/run_api.py."""
     cfg, state = config(), lock()
     refs = cfg["profiles"][profile]
     missing = [r for r in refs if r not in state["skills"]]

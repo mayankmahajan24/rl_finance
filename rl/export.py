@@ -6,8 +6,9 @@
 
 Before writing anything it refuses:
   - held-out and retired tasks, always
-  - a failing `splits/check.py --release` (a dirty build, mixed commits, a task that differs from its
-    manifest, a broken sandbox policy)
+  - --use training for anything but the train split
+  - a failing `splits/check.py`, or a failing `--release` rule for the exported tasks (a dirty build,
+    mixed commits, an unapproved instrument or gold)
   - a task whose source's licence (`licence.status` in sources/<source>/source.yaml) doesn't clear
     the use (--use eval or training), or whose company split is still `proposed`
   - a release version with no entry in release/CHANGELOG.md
@@ -54,6 +55,7 @@ RL = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(RL))
 import splits  # noqa: E402
 import leakcheck  # noqa: E402
+import lib  # noqa: E402
 from lib import iter_tasks  # noqa: E402
 from splits import check  # noqa: E402
 
@@ -61,20 +63,11 @@ RELEASE = RL / "release"
 LICENCES = ("unknown", "internal_only", "licensed_for_eval", "licensed_for_training", "public")
 CLEARS = {"eval": {"licensed_for_eval", "licensed_for_training", "public"},
           "training": {"licensed_for_training", "public"}}
-NEVER = {"heldout", splits.RETIRED}
 PREVIEW = "PREVIEW: the licence gate was off for this export. Not for distribution."
 
 
 class Refused(SystemExit):
     pass
-
-
-def source_yaml(source: str) -> dict:
-    return yaml.safe_load((RL / "sources" / source / "source.yaml").read_text())
-
-
-def family_yaml(family: str) -> dict:
-    return yaml.safe_load((RL / "families" / family / "family.yaml").read_text())
 
 
 def release_config() -> dict:
@@ -91,26 +84,33 @@ def select(split: str, families: list[str] | None) -> list[tuple[pathlib.Path, d
     return [(d, m) for d, m in iter_tasks() if d.parent.name == split and (not families or m["family"] in families)]
 
 
-def refusals(split: str, use: str, tasks, version: str, preview: bool, run_check=check.check) -> list[str]:
+def split_check(tasks) -> list[str]:
+    """splits/check.py --release, its release rules scoped to the tasks being exported."""
+    return check.check() + check.release_problems(tasks)
+
+
+def refusals(split: str, use: str, tasks, version: str, preview: bool) -> list[str]:
     """Every reason this export must not happen; empty when it may."""
     out = []
-    if split in NEVER:
+    if split in splits.NEVER:
         return [f"{split} tasks are never exported"]
+    if use == "training" and split != "train":
+        return [f"{split} tasks are for evaluation: only train tasks may be exported for training use"]
     if not tasks:
         return [f"no built tasks under tasks/{split}/ (build them first)"]
-    out += [f"split check --release: {p}" for p in run_check(release=True)]
+    out += [f"split check --release: {p}" for p in split_check(tasks)]
     if not re.fullmatch(r"\d+\.\d+\.\d+", version):
         out.append(f"release version {version!r} is not semver (release/release.yaml)")
     elif changelog_entry(version) is None:
         out.append(f"release/CHANGELOG.md has no '## {version}' entry")
     for source in sorted({m["source"] for _, m in tasks}):
-        lic = (source_yaml(source).get("licence") or {}).get("status")
+        lic = (lib.source(source).get("licence") or {}).get("status")
         if lic not in LICENCES:
             out.append(f"source {source}: licence.status {lic!r} is not one of {', '.join(LICENCES)}")
         elif lic not in CLEARS[use] and not preview:
             out.append(f"source {source}: licence.status {lic} does not clear {use} use "
                        f"(needs {' or '.join(sorted(CLEARS[use]))})")
-        if source in check.SOURCES and splits.assignment(source).get("status") != "approved":
+        if source in splits.split_sources() and splits.assignment(source).get("status") != "approved":
             out.append(f"source {source}: its company split is {splits.assignment(source).get('status')}, not approved")
     stamps = {m["build"]["built_at"] for _, m in tasks}
     commit_time = commit_timestamp(next(iter({m["build"]["repo_commit"] for _, m in tasks})))
@@ -121,9 +121,8 @@ def refusals(split: str, use: str, tasks, version: str, preview: bool, run_check
 
 
 def commit_timestamp(commit: str) -> str:
-    import subprocess
-    t = subprocess.run(["git", "show", "-s", "--format=%ct", commit], cwd=RL, capture_output=True, text=True).stdout
-    if not t.strip():
+    t = lib.git("show", "-s", "--format=%ct", commit)
+    if not t:
         return f"(commit {commit} not found)"
     return datetime.fromtimestamp(int(t), timezone.utc).isoformat(timespec="seconds")
 
@@ -148,7 +147,7 @@ def baselines(family: str, split: str) -> list[str]:
 
 
 def card(family: str, tasks, split: str) -> str:
-    fam = family_yaml(family)
+    fam = lib.family(family)
     example = min(tasks, key=lambda t: t[0].name)
     rows = baselines(family, split)
     modes = ", ".join(sorted({m.get("mode", "?") for _, m in tasks}))
@@ -181,12 +180,12 @@ def datasheet(manifest: dict, tasks) -> str:
            "that can complete it has trained on this release:", "", f"    {manifest['canary']}", "",
            "## Sources", ""]
     for s, v in manifest["sources"].items():
-        y = source_yaml(s)
+        y = lib.source(s)
         out += [f"### {s}", "", f"{y.get('name', s)} ({y.get('kind', '')}).", "",
                 f"- Licence: **{v['licence']}**. {' '.join(str(v['licence_note']).split())}",
                 f"- Provenance: {' '.join(str((y.get('data') or {}).get('original') or y.get('provenance', '')).split())}",
                 f"- Content hash of the source folder: `{v['source_sha256']}`"]
-        if s in check.SOURCES:
+        if s in splits.split_sources():
             a = splits.assignment(s)
             out.append(f"- Company split: {a.get('status')} on {a.get('approved', '?')}; this release's companies: "
                        f"{', '.join(sorted({c for _, m in tasks if m['source'] == s for c in m.get('companies', [])}))}")
@@ -204,7 +203,7 @@ def datasheet(manifest: dict, tasks) -> str:
             "range. Held-out seeds are secret and held-out tasks are never exported. Sources without a company "
             "split are one `eval` set.", "",
             "| Family | Version | Tasks | Reward |", "|---|---|---|---|"]
-    out += [f"| {f} | {v['version']} | {v['tasks']} | {' '.join(str(family_yaml(f)['reward']).split())} |"
+    out += [f"| {f} | {v['version']} | {v['tasks']} | {' '.join(str(lib.family(f)['reward']).split())} |"
             for f, v in fams.items()]
     out += ["", "## Known limitations and validation status", "",
             "- Grader–expert agreement: not yet measured; one expert labelled all gold.",
@@ -229,13 +228,13 @@ def bundle(split: str, families: list[str] | None, use: str, preview: bool = Fal
         "name": "rl_finance", "version": cfg["version"], "split": split, "use": use, "commit": b["repo_commit"],
         "canary": leakcheck.CANARY,
         "built_at": b["built_at"], **({"preview": PREVIEW} if preview else {}),
-        "families": {f: {"version": family_yaml(f)["version"], "tasks": len(v)} for f, v in sorted(by_fam.items())},
-        "sources": {s: {"licence": (source_yaml(s).get("licence") or {}).get("status"),
-                        "licence_note": (source_yaml(s).get("licence") or {}).get("note", ""),
+        "families": {f: {"version": lib.family(f)["version"], "tasks": len(v)} for f, v in sorted(by_fam.items())},
+        "sources": {s: {"licence": (lib.source(s).get("licence") or {}).get("status"),
+                        "licence_note": (lib.source(s).get("licence") or {}).get("note", ""),
                         "source_sha256": next(m["build"]["source_sha256"] for _, m in tasks if m["source"] == s)}
                     for s in sorted({m["source"] for _, m in tasks})},
         "tasks": {d.name: {"family": m["family"], "content_sha256": splits.manifest(m["family"])[d.name]["content_sha256"],
-                           "fingerprint": m.get("fingerprint") or m.get("prompt", {}).get("fingerprint"),
+                           "fingerprint": m["fingerprint"],
                            "gold_fingerprint": splits.manifest(m["family"])[d.name]["gold_fingerprint"]}
                   for d, m in sorted(tasks, key=lambda t: t[0].name)},
     }
@@ -289,7 +288,8 @@ def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--split", required=True, help="bench, train or eval (held-out and retired are refused)")
     ap.add_argument("--family", action="append", help="only these families (default: every family built in the split)")
-    ap.add_argument("--use", choices=sorted(CLEARS), default="eval", help="what the lab may do with it (licence gate)")
+    ap.add_argument("--use", choices=sorted(CLEARS), default="eval",
+                    help="what the lab may do with it (licence gate); training is for the train split only")
     ap.add_argument("--out", required=True, type=pathlib.Path, help="a .tar.gz path, or a folder")
     ap.add_argument("--preview", action="store_true",
                     help="skip the licence gate only, to review a bundle; folder output only, every document stamped")

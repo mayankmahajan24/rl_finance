@@ -4,8 +4,9 @@ Two parts from one agent response, kept as separate metrics:
   accuracy  programmatic: the forecast JSON block vs the task's tests/gold.json
   writeup   LLM judge: rubric C1-C12 (judge.md), pass/fail/na per item
 
-A response without a valid forecast JSON gets schema_ok = 0 and blank accuracy metrics (no answer
-is not the same as a wrong answer).
+The reward is skill_vs_naive clamped to [0, 1]: 0 for no better than last year's seasonal step, 1
+for a perfect forecast. Everything else is a diagnostic. A response without a valid forecast JSON
+gets schema_ok = 0, reward 0 and no other accuracy metrics (no answer is not a wrong number).
 """
 
 from __future__ import annotations
@@ -56,7 +57,7 @@ def winkler(low: float, high: float, actual: float, level: float) -> float:
 
 
 def grade_accuracy(fc: dict | None, gold: dict) -> dict:
-    out = {"schema_ok": 1.0 if fc else 0.0}
+    out = {"reward": 0.0, "schema_ok": 1.0 if fc else 0.0}
     if not fc:
         return out
     a = gold["actual"]
@@ -67,6 +68,7 @@ def grade_accuracy(fc: dict | None, gold: dict) -> dict:
         naive_err = abs(gold["naive_forecast"] - a) / a
         # bounded skill in [-1, 1]: +1 perfect, 0 same as naive, -1 infinitely worse (1 - err/naive_err is unbounded below)
         out["skill_vs_naive"] = round((naive_err - err) / (naive_err + err), 4) if naive_err + err > 0 else 0.0
+        out["reward"] = max(0.0, out["skill_vs_naive"])
     if gold.get("consensus"):
         cons_err = abs(gold["consensus"] - a) / a
         out["skill_vs_consensus"] = round((cons_err - err) / (cons_err + err), 4) if cons_err + err > 0 else 0.0
@@ -86,18 +88,16 @@ JUDGE_SCHEMA = {
 }
 
 
-def judge_request(model: str, task_user: str, as_of: str, writeup: str, fc: dict | None, gold: dict) -> dict:
+def judge_prompt(task_user: str, as_of: str, writeup: str, fc: dict | None, gold: dict) -> tuple[str, str]:
+    """(system, user) for the write-up judge; ask it with JUDGE_SCHEMA and the family's pinned judge
+    config (families/_shared/judge.py `judge`)."""
     facts = {"as_of_date": as_of, "target_period": gold["target_period"], "actual_reported_value": gold["actual"],
              "unit": gold["unit"], "consensus_provided_to_author": gold.get("consensus") is not None,
              **gold["facts"]}
     user = (f"<task>\n{task_user}\n</task>\n\n<grader_facts>\n{json.dumps(facts, indent=2)}\n</grader_facts>\n\n"
             f"<forecast_json>\n{json.dumps(fc, indent=2) if fc else '(missing or invalid)'}\n</forecast_json>\n\n"
             f"<writeup>\n{writeup or '(empty)'}\n</writeup>")
-    return {"model": model, "max_tokens": 8000,
-            "system": (HERE / "judge.md").read_text(),
-            "messages": [{"role": "user", "content": user}],
-            "extra_body": {"output_config": {"format": {"type": "json_schema", "schema": JUDGE_SCHEMA},
-                                             "effort": "medium"}}}
+    return (HERE / "judge.md").read_text(), user
 
 
 def grade_writeup(verdicts: dict) -> dict:

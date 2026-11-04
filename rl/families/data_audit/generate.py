@@ -7,15 +7,14 @@ of untouched companies (the pilot code would have crashed there instead).
 from __future__ import annotations
 
 import numpy as np
-import pandas as pd
 
 from families._shared import panel_perturb as P
 from families._shared.panel_perturb import Frame, inj_series_swap
 
 
-def make_variant(seed: int, control: bool, raw: pd.DataFrame, artifacts=((), ())):
+def make_variant(seed: int, control: bool, ctx):
     rng = np.random.default_rng(seed)
-    F = Frame(raw, rng, artifacts=artifacts)
+    F = Frame(ctx.raw, rng, artifacts=ctx.artifacts)
     planted, used_series, used_tickers = [], set(), set()
     if not control:
         n = int(rng.integers(3, 6))
@@ -38,4 +37,4 @@ def make_variant(seed: int, control: bool, raw: pd.DataFrame, artifacts=((), ())
     truth = dict(family='audit', seed=seed, control=control, required=planted + req, optional=opt,
                  ignore_series=F.low_volume_series(), date_tolerance_days=10)
     df = F.df.sort_values(['date', 'ticker', 'source_id']).reset_index(drop=True)
-    return df, truth
+    return df, truth, {}, None, ctx.companies

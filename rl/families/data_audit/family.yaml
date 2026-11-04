@@ -1,20 +1,20 @@
 id: data_audit
 task_prefix: audit
 description: Audit an alt-data panel for planted data-quality problems
-version: 1.1.0          # bump when the family's tasks change in a way results can't be compared across
+version: 2.0.0          # bump when the family's tasks change in a way results can't be compared across
 authors:
   - name: Mayank Mahajan
-    email: mayank.mahajan@gmail.com
-role: quant_researcher
-workflow: data_audit
-mode: review             # find what is wrong with given material
-world: ls_altdata
+role: [quant_researcher]
+workflow: [data_audit]
+mode: [review]             # find what is wrong with given material
+world: [ls_altdata]
 source: txn_panel
 format: harbor
-companies: panel         # the task's data is the split's companies' real (disguised) panel
-generator: generate.py
+tools: [code_execution]
+builder: families._shared.build_panel   # generator: generate.py
 verifier: verifier/audit_verify.py
 verifier_timeout_sec: 600
+gold_file: gold.json
 reward: F1 of precision and recall against planted problems plus required natural breaks
 gold_inputs:             # files its gold comes from; each has a provenance entry (rl/provenance.py)
   - sources/txn_panel/annotations/data_artifacts.yaml
@@ -30,8 +30,6 @@ instrument:              # what decides what the model sees and how it is scored
   - families/_shared/panel_perturb.py
   - families/_shared/panel_schema.md
   - sources/txn_panel/panel.py
-  - families/_shared/harbor.py
-  - families/_shared/verify_common.py
 calibration:             # scored metric and pass threshold for rl/harness/calibrate.py; proposed, Mayank to confirm
   metric: reward
   pass: 0.8

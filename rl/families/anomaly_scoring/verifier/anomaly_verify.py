@@ -7,7 +7,7 @@ one row per input row (duplicate keys are not expected in this task).
 
 Reward = F1 (threshold 0.5) on the hidden planted anomalies
        x coverage (share of input rows scored)
-       x no-foresight gate: 0 if any score dated <= a cutoff changes when later data is removed.
+       x no-foresight gate: 0 if any score dated <= a cutoff changes, or goes missing, when later data is removed.
 Positives: planted one-day anomalies, and the first 60 days of each planted level shift.
 Ignored:   days 61+ of a planted shift (and 60 days after it ends), low-volume series, windows around
            known natural artifacts, and the warm-up period.
@@ -22,7 +22,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from common import APP, f1, load_truth, write_reward
+from common import APP, f1, load_gold, write_reward
 
 TIMEOUT = int(os.environ.get('SCORE_TIMEOUT_SEC', '1200'))
 KEYS = ['date', 'ticker', 'source_id']
@@ -43,7 +43,7 @@ def run_scorer(inp: Path, out: Path):
 
 
 def main():
-    truth = load_truth()
+    truth = load_gold()
     data_path = APP / 'data' / 'transactions.csv'
     data = pd.read_csv(data_path, parse_dates=['date'])
     tmp = Path(tempfile.mkdtemp())
@@ -62,11 +62,14 @@ def main():
             trunc = run_scorer(p_in, tmp / f'out_{c}.csv')
         except Exception as e:  # noqa: BLE001
             return write_reward(0.0, dict(error=f'truncated run failed: {e}'))
-        cmp = trunc.merge(full, on=KEYS, suffixes=('_trunc', '_full'))
-        diff = (cmp.anomaly_score_trunc - cmp.anomaly_score_full).abs()
-        leaks.append(dict(cutoff=c, rows=len(cmp), max_abs_diff=float(diff.max()) if len(cmp) else None,
-                          share_changed=float((diff > 1e-6).mean()) if len(cmp) else None))
-    no_foresight = all(l['rows'] > 0 and l['max_abs_diff'] <= 1e-6 for l in leaks)
+        # every truncated row must be scored, and as on the full data: a missing or NaN truncated
+        # score counts as changed, so a scorer can't hide lookahead by dropping or blanking rows
+        cmp = (part[KEYS].drop_duplicates().merge(trunc, on=KEYS, how='left')
+               .merge(full, on=KEYS, how='left', suffixes=('_trunc', '_full')))
+        changed = ~((cmp.anomaly_score_trunc - cmp.anomaly_score_full).abs() <= 1e-6)
+        leaks.append(dict(cutoff=c, rows=len(cmp), unscored=int(cmp.anomaly_score_trunc.isna().sum()),
+                          changed=int(changed.sum())))
+    no_foresight = all(l['rows'] > 0 and l['changed'] == 0 for l in leaks)
 
     # ---- label rows
     ev = data[KEYS].drop_duplicates().merge(full, on=KEYS, how='left')

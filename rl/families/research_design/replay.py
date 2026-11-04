@@ -3,9 +3,10 @@ reproduce rl/sources/research_design_case/baseline_runs/GRADED.md.
 
 No API calls. Model responses come from baseline_runs/<model>/{pairwise,pointwise}.json;
 the scorer's semantic decisions come from the cached baseline_runs/_issue_scores.json.
-Writes one record per (model, task) to rl/runs/research_design/baseline/<model>.jsonl,
-which also gives every graded task a baseline reward from four models, and the same rows as run
-records (rl/harness/records.py) to <model>.records.jsonl.
+Writes one run record (rl/harness/records.py) per (model, task) to
+rl/runs/research_design/baseline/<model>.records.jsonl, which gives every built task a baseline
+reward from four models, scored as its verifier scores it (compare: 1 only for a correct pick in
+both orderings).
 
 Checks, and exits non-zero if any fail:
   - prompt fingerprints in the task tree match the fingerprints recorded on the runs
@@ -23,11 +24,13 @@ import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
-from lib import RL, iter_tasks, write_json  # noqa: E402
+from lib import RL, iter_tasks  # noqa: E402
 from families.research_design.graders import pairwise_pick, review_issues  # noqa: E402
 
 sys.path.insert(0, str(RL / "harness"))
 import records as run_records  # noqa: E402
+
+RUNNER = {"name": "rl/families/research_design/replay.py"}
 
 RUNS = RL / "sources" / "research_design_case" / "baseline_runs"
 OUT = RL / "runs" / "research_design" / "baseline"
@@ -43,6 +46,11 @@ EXPECTED = {
 
 def main() -> None:
     tasks = {t["id"]: (d, t) for d, t in iter_tasks("research_design")}
+
+    def record(d, model: str, rewards: dict, **fields) -> dict:
+        return run_records.make(**run_records.identity(d), attempt=0, runner=RUNNER, model=model, status="ok",
+                                rewards=rewards, **fields)
+
     scores = json.loads((RUNS / "_issue_scores.json").read_text())
     failures, summary = [], {}
 
@@ -53,7 +61,7 @@ def main() -> None:
 
         # ---- instrument identity ------------------------------------------
         for run, prefix in ((pw, "rd-funding-"), (pt, "rd-review-")):
-            fps = {t["prompt"]["fingerprint"] for tid, (_, t) in tasks.items() if tid.startswith(prefix)}
+            fps = {t["fingerprint"] for tid, (_, t) in tasks.items() if tid.startswith(prefix)}
             if fps != {run["prompt_fingerprint"]}:
                 failures.append(f"{model}: {prefix} fingerprint {fps} != run {run['prompt_fingerprint']}")
 
@@ -64,12 +72,13 @@ def main() -> None:
                 by_item.setdefault(r["id"], {})[r["tag"]] = r["result"]
         strong_hits = strong_n = 0
         for sid, resp in by_item.items():
-            d, t = tasks[f"rd-funding-{sid}"]
-            if t["status"] != "graded":
+            if f"rd-funding-{sid}" not in tasks:   # only graded items are built
                 continue
+            d, t = tasks[f"rd-funding-{sid}"]
             gold = json.loads((d / "tests" / "gold.json").read_text())
             g = pairwise_pick.grade(gold, resp)
-            records.append({"task": t["id"], "model": model, "responses": resp, **g})
+            records.append(record(d, model, {"reward": float(g["breakdown"]["both_orderings_correct"]),
+                                             "mean_over_orderings": g["reward"]}))
             if gold["preference_strength"] == "strong":
                 strong_hits += sum(g["breakdown"]["correct"].values())
                 strong_n += len(resp)
@@ -77,13 +86,14 @@ def main() -> None:
         # ---- review mode --------------------------------------------------
         s = scores[model]
         surfaced = blocking = bad = reviews = 0
+        review_rewards = []
         for r in pt["results"]:
             if r["status"] != "ok":
                 continue
             tid = f"rd-review-{r['id']}-{r['tag']}"
-            d, t = tasks[tid]
-            if t["status"] != "graded":
+            if tid not in tasks:
                 continue
+            d, t = tasks[tid]
             key = (r["id"], r["tag"])
             cached = {
                 "gold_recall": [{"gold_ref": f"blocking#{x['n']}", "surfaced": x["surfaced"]}
@@ -92,33 +102,28 @@ def main() -> None:
             }
             gold = json.loads((d / "tests" / "gold.json").read_text())
             g = review_issues.grade(gold, cached, **t["grader"]["params"])
-            records.append({"task": tid, "model": model, "response": r["result"],
-                            "scorer": {"model": s["scorer"], "cached": True, **cached}, **g})
             b = g["breakdown"]
+            records.append(record(d, model, {"reward": g["reward"], "recall": b["recall"]},
+                                  judge_model=s["scorer"], note="scorer decisions from the case study's cache"))
+            review_rewards.append(g["reward"])
             surfaced += b["blocking_surfaced"]
             blocking += b["blocking_total"]
             bad += b["manufactured"] + b["contradicts_gold"]
             reviews += 1
 
         OUT.mkdir(parents=True, exist_ok=True)
-        (OUT / f"{model}.jsonl").write_text("".join(json.dumps(x, ensure_ascii=False) + "\n"
-                                                    for x in records))
-        run_records.write(OUT / f"{model}.records.jsonl", [run_records.from_replay(x) for x in records])
+        run_records.write(OUT / f"{model}.records.jsonl", records)
         got = (strong_hits / strong_n, surfaced / blocking, bad / reviews)
         summary[model] = {"strong_pairwise_accuracy": round(got[0], 3),
                           "review_recall": round(got[1], 3),
                           "manufactured_per_review": round(got[2], 2),
-                          "mean_review_reward": round(sum(x["reward"] for x in records
-                                                          if x["task"].startswith("rd-review"))
-                                                      / reviews, 3),
-                          "n_records": len(records)}
+                          "mean_review_reward": round(sum(review_rewards) / reviews, 3)}
         for name, g_, e in zip(("strong accuracy", "recall", "manufactured/review"), got,
                                (exp_strong, exp_recall, exp_manuf)):
             # GRADED.md rounds half-up to its printed precision (0.15 -> 0.2)
             if abs(g_ - e) > (0.051 if name == "manufactured/review" else 0.005):
                 failures.append(f"{model}: {name} {g_:.3f} != GRADED.md {e}")
 
-    write_json(OUT / "summary.json", summary)
     print(f"{'model':<20}{'strong acc':>12}{'recall':>9}{'manuf/rev':>11}{'review reward':>15}")
     for m, v in summary.items():
         print(f"{m:<20}{v['strong_pairwise_accuracy']:>12.0%}{v['review_recall']:>9.0%}"

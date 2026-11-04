@@ -7,25 +7,10 @@ import hashlib
 import pathlib
 import shutil
 
-import pytest
-
 import lib
-from conftest import built
 from splits import check
 
 TASK = "audit-bench-001"
-
-
-@pytest.fixture
-def tree(tmp_path, monkeypatch):
-    src = built("bench", TASK)
-    monkeypatch.setattr(lib, "TASKS", tmp_path)
-
-    def put(folder: str = "bench", name: str = TASK) -> pathlib.Path:
-        d = tmp_path / folder / name
-        shutil.copytree(src, d)
-        return d
-    return put
 
 
 def edit(d: pathlib.Path, rel: str, old: str, new: str, rehash: bool = True) -> None:
@@ -41,7 +26,7 @@ def edit(d: pathlib.Path, rel: str, old: str, new: str, rehash: bool = True) -> 
 
 
 def problems(release: bool = False) -> list[str]:
-    return check.check(release)
+    return check.check() + (check.release_problems(list(lib.iter_tasks())) if release else [])
 
 
 def test_clean_task_passes(tree):
@@ -66,7 +51,7 @@ def test_unlisted_and_missing_files(tree):
 
 def test_grader_file_where_the_agent_can_see_it(tree):
     d = tree()
-    shutil.copy(d / "tests" / "ground_truth.json", d / "environment" / "data" / "ground_truth.json")
+    shutil.copy(d / "tests" / "gold.json", d / "environment" / "data" / "gold.json")
     assert f"{TASK}: grader-only file under environment/" in problems()
 
 
@@ -81,7 +66,7 @@ def test_not_a_split_folder(tree):
 
 
 def test_same_task_in_two_splits(tree):
-    tree("bench")
+    tree()
     tree("train")
     assert any(p.startswith(f"{TASK}: built in both") for p in problems())
 
@@ -135,9 +120,7 @@ def test_release_rejects_dirty_builds(tree):
 
 def test_release_rejects_mixed_commits(tree):
     tree()
-    d = tree(name="audit-bench-002")
-    shutil.rmtree(d)
-    shutil.copytree(built("bench", "audit-bench-002"), d)
+    d = tree(task="audit-bench-002")
     commit = lib.task_meta(d)["build"]["repo_commit"]
     edit(d, "task.toml", commit, "0" * 40)
     assert problems() == []
@@ -167,16 +150,14 @@ def test_verifier_policy_disagrees_with_metadata(tree):
 DATED = "kn-produce-AIR02-2017Q4-anon"
 
 
-def test_dated_task_without_as_of(tree, tmp_path):
-    d = tmp_path / "bench" / DATED
-    shutil.copytree(built("bench", DATED), d)
+def test_dated_task_without_as_of(tree):
+    d = tree(task=DATED)
     edit(d, "task.toml", 'as_of = "2017-12-31"\n', "")
     assert f"{DATED}: kpi_nowcast is dated but the task records no as_of" in problems()
 
 
-def test_dated_task_with_the_real_clock(tree, tmp_path):
-    d = tmp_path / "bench" / DATED
-    shutil.copytree(built("bench", DATED), d)
+def test_dated_task_with_the_real_clock(tree):
+    d = tree(task=DATED)
     edit(d, "environment/Dockerfile", "TASK_AS_OF=2017-12-31 ", "TASK_AS_OF=2018-12-31 ")
     assert f"{DATED}: as_of 2017-12-31 but its image does not pin the clock to it" in problems()
 
@@ -195,7 +176,7 @@ def test_instruction_output_the_verifier_never_reads(tree):
 
 def test_reference_reads_grader_files(tree):
     d = tree()
-    edit(d, "solution/audit.py", "import json", "import json  # cheat: json.load(open('/tests/ground_truth.json'))")
+    edit(d, "solution/audit.py", "import json", "import json  # cheat: json.load(open('/tests/gold.json'))")
     assert f"{TASK}: solution/audit.py refers to grader-side files ('/tests')" in problems()
 
 

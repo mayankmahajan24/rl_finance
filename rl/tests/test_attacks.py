@@ -1,25 +1,26 @@
 """Reward-hacking suite (rl/harness/attacks.py) on a sample: every attack scores well below a good
-answer on one bench task per family, and nothing planted in /tests before the grader's upload
-survives test.sh."""
+answer on one bench task per family and every research_design compare task (eval), and nothing
+planted in /tests before the grader's upload survives test.sh."""
 
 from __future__ import annotations
 
 import subprocess
-import sys
 
 import pytest
 
-from conftest import RL, built
-
-sys.path.insert(0, str(RL / "harness"))
-import attacks  # noqa: E402
+import attacks
+from conftest import built
+from local import harbor
 
 
 @pytest.mark.slow
 def test_attacks_score_well_below_good_answers():
     built("bench", "audit-bench-001")
-    rows, problems = attacks.run(attacks.select("bench", None, 1))
-    assert {r["family"] for r in rows} == {"data_audit", "anomaly_scoring", "growth_thesis", "kpi_nowcast"}
+    built("eval", "rd-funding-S1")
+    # every compare task: one random pick scores 0 or 1, so its expected 0.25 needs the whole set
+    rows, problems = attacks.run(attacks.select("bench", None, 1) + attacks.select("eval", ["research_design"], None))
+    assert {r["family"] for r in rows} == {"data_audit", "anomaly_scoring", "growth_thesis", "kpi_nowcast",
+                                           "research_design"}
     assert problems == [], "\n".join(problems)
 
 
@@ -35,6 +36,6 @@ def test_test_sh_removes_planted_files(tmp_path):
     for f in shipped:
         (t / f).parent.mkdir(parents=True, exist_ok=True)
         (t / f).write_bytes((task / "tests" / f).read_bytes())
-    assert attacks.harbor.TEST_CLEANUP in (task / "tests" / "test.sh").read_text()
-    subprocess.run(["bash", "-c", attacks.harbor.TEST_CLEANUP.replace("/tests", str(t))], check=True)
+    assert harbor.TEST_CLEANUP in (task / "tests" / "test.sh").read_text()
+    subprocess.run(["bash", "-c", harbor.TEST_CLEANUP.replace("/tests", str(t))], check=True)
     assert sorted(str(p.relative_to(t)) for p in t.rglob("*") if p.is_file()) == sorted(shipped)

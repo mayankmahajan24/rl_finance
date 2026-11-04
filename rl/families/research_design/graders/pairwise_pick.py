@@ -32,8 +32,8 @@ def grade(gold: dict, responses: dict[str, dict]) -> dict:
             "picks": picks,
             "correct": hits,
             "both_orderings_correct": len(hits) == 2 and all(hits.values()),
-            "goal_type_correct": {o: r["goal_type"] == gold["goal_type"] for o, r in responses.items()},
-            "error_asymmetry_correct": {o: r["error_asymmetry"] == gold["error_asymmetry"]
+            "goal_type_correct": {o: r.get("goal_type") == gold["goal_type"] for o, r in responses.items()},
+            "error_asymmetry_correct": {o: r.get("error_asymmetry") == gold["error_asymmetry"]
                                         for o, r in responses.items()},
         },
     }

@@ -5,50 +5,61 @@ tests/grader.json says how this task is graded:
            /app/output/response.json to gold through the shared judge (judge.py), then
            review_issues.grade turns that into recall minus penalties. Needs ANTHROPIC_API_KEY;
            without it, or if the scorer fails, nothing is graded and details say why.
-  compare  pairwise_pick on the one ordering a Harbor agent sees (AB). run.py shows both orderings
-           and averages them, which also cancels position bias; a Harbor score does not.
-  none     no gold yet (context-flip items) or no rubric yet (produce): empty reward.json, and
-           details say why.
+  compare  the agent answers the pair in both orders ({"AB": ..., "BA": ...}); pairwise_pick maps each
+           pick back to its plan. The reward is 1 only when both picks name gold's plan: a correct,
+           order-consistent pick. Always answering "A" scores 0, and answering at random 0.25 in
+           expectation, below a consistent coin flip's 0.5. The mean over the two orders is a
+           diagnostic.
+
+A missing or malformed response scores 0, with details saying what was wrong.
 """
 import json
 
-from common import APP, TESTS, write_reward, write_rewards
+from common import APP, TESTS, load_gold, write_reward, write_rewards
+
+ORDERINGS = ('AB', 'BA')
+
+
+def malformed(cfg, response):
+    """Why the response can't be graded, or None."""
+    if not isinstance(response, dict):
+        return 'response.json is not an object'
+    if cfg['mode'] == 'compare':
+        bad = [o for o in ORDERINGS if not isinstance(response.get(o), dict) or response[o].get('winner') not in ('A', 'B')]
+        return f'no winner "A" or "B" for ordering {", ".join(bad)}' if bad else None
+    issues = response.get('issues')
+    if not isinstance(issues, list) or not all(isinstance(i, dict) for i in issues):
+        return 'response.json has no list of issue objects under "issues"'
+    return None
 
 
 def main():
     cfg = json.loads((TESTS / 'grader.json').read_text())
-    if cfg['mode'] is None:
-        write_rewards({}, {'status': cfg['status'], 'note': 'no grader for this task yet'})
-        return
-    gold = json.loads((TESTS / 'gold.json').read_text())
-    out = APP / 'output' / 'response.json'
+    gold = load_gold()
     try:
-        response = json.loads(out.read_text())
+        response = json.loads((APP / 'output' / 'response.json').read_text())
     except (FileNotFoundError, json.JSONDecodeError) as e:
-        write_reward(0.0, {'error': f'no valid /app/output/response.json: {e}'})
-        return
+        return write_reward(0.0, {'error': f'no valid /app/output/response.json: {e}'})
+    why = malformed(cfg, response)
+    if why:
+        return write_reward(0.0, {'error': why})
     if cfg['mode'] == 'compare':
-        if not isinstance(response, dict) or response.get('winner') not in ('A', 'B'):
-            write_reward(0.0, {'error': 'response.json has no winner "A" or "B"'})
-            return
         import pairwise_pick
-        g = pairwise_pick.grade(gold, {cfg['ordering']: response})
-        write_reward(g['reward'], g['breakdown'])
-        return
+        g = pairwise_pick.grade(gold, {o: response[o] for o in ORDERINGS})
+        return write_reward(float(g['breakdown']['both_orderings_correct']),
+                            dict(g['breakdown'], mean_over_orderings=g['reward']))
     import judge
     import review_issues
     why = judge.unavailable()
     if why:
-        write_rewards({}, {'status': 'not graded', 'note': f'review grading needs the scorer: {why}'})
-        return
+        return write_rewards({}, {'status': 'not graded', 'note': f'review grading needs the scorer: {why}'})
     inputs = json.loads((TESTS / 'inputs.json').read_text())
     try:
         scored, meta = review_issues.run_scorer(judge.judge, gold, inputs, response)
     except judge.JudgeError as e:
-        write_rewards({}, {'status': 'not graded', 'note': f'scorer failed: {e}'})
-        return
+        return write_rewards({}, {'status': 'not graded', 'note': f'scorer failed: {e}'})
     g = review_issues.grade(gold, scored, **cfg['params'])
-    write_reward(g['reward'], dict(g['breakdown'], scorer=meta, scorer_result=scored))
+    return write_reward(g['reward'], dict(g['breakdown'], scorer=meta, scorer_result=scored))
 
 
 if __name__ == '__main__':

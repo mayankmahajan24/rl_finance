@@ -1,6 +1,7 @@
 {
  "rd-funding-S1": {
   "split": "eval",
+  "case": "S1",
   "role": "pm",
   "workflow": "research_funding",
   "mode": "compare",
@@ -8,10 +9,11 @@
   "status": "graded",
   "fingerprint": "3a2276335156",
   "gold_fingerprint": "8cd411a11063",
-  "content_sha256": "7cdf9ed44da381efa8b47c98dba1e53027e778bbf690514ce814212437fb9604"
+  "content_sha256": "a97a90535524560d0fe89df318087bf4ef066e8860979f6119abd2cdc2fd5bd2"
  },
  "rd-funding-S10": {
   "split": "eval",
+  "case": "S10",
   "role": "pm",
   "workflow": "research_funding",
   "mode": "compare",
@@ -19,10 +21,11 @@
   "status": "graded",
   "fingerprint": "3a2276335156",
   "gold_fingerprint": "5052577e7978",
-  "content_sha256": "ccf32763639a559838fabf466500ccb8d26de91909e21aa273a373298f41b835"
+  "content_sha256": "89df82683872d60dd49b20c4e133e29edfb06251d0587c0479fa3abdfc0ed859"
  },
  "rd-funding-S2": {
   "split": "eval",
+  "case": "S2",
   "role": "pm",
   "workflow": "research_funding",
   "mode": "compare",
@@ -30,21 +33,11 @@
   "status": "graded",
   "fingerprint": "3a2276335156",
   "gold_fingerprint": "59369c3fd546",
-  "content_sha256": "6b6e0631aedbb6f3ce2032b3b71562d41b2d3c662d2c881dd39b05b8a02d7a4f"
- },
- "rd-funding-S2F": {
-  "split": "eval",
-  "role": "pm",
-  "workflow": "research_funding",
-  "mode": "compare",
-  "world": "small_lo",
-  "status": "ungraded",
-  "fingerprint": "3a2276335156",
-  "gold_fingerprint": null,
-  "content_sha256": "1440aea7b11a1bccaf820c603695c38008218393eaf89e7967b93a720c9a9771"
+  "content_sha256": "c6ac0c96d15a339dae57672536ab5d8f08553f2a2f5f40dd32040484157f9a7c"
  },
  "rd-funding-S3": {
   "split": "eval",
+  "case": "S3",
   "role": "pm",
   "workflow": "research_funding",
   "mode": "compare",
@@ -52,10 +45,11 @@
   "status": "graded",
   "fingerprint": "3a2276335156",
   "gold_fingerprint": "96dda2fbe9e4",
-  "content_sha256": "102365d2cbf314d482506d1b0e53e1d77c6b6874bb983bf9c1d9f096bf77f1b4"
+  "content_sha256": "7f5662b024caa3db6b1ff08824c161f2d23dfa12b83bfb62f5ce96cb23069f12"
  },
  "rd-funding-S4": {
   "split": "eval",
+  "case": "S4",
   "role": "pm",
   "workflow": "research_funding",
   "mode": "compare",
@@ -63,10 +57,11 @@
   "status": "graded",
   "fingerprint": "3a2276335156",
   "gold_fingerprint": "45d1de279f33",
-  "content_sha256": "52b667785e94508edfffbe1c6e61066fd194dc0c556916631d80bf74b4241433"
+  "content_sha256": "4789efc86e54effc1e4d881a55925bba7d77e1b3b5a4396895dd54b347cb4d09"
  },
  "rd-funding-S5": {
   "split": "eval",
+  "case": "S5",
   "role": "pm",
   "workflow": "research_funding",
   "mode": "compare",
@@ -74,21 +69,11 @@
   "status": "graded",
   "fingerprint": "3a2276335156",
   "gold_fingerprint": "fa09ea7ef494",
-  "content_sha256": "92670f9943ba1c756698754daafb9fab31c0c36148fefdeb3f8728b0d7b65288"
- },
- "rd-funding-S5F": {
-  "split": "eval",
-  "role": "pm",
-  "workflow": "research_funding",
-  "mode": "compare",
-  "world": "small_lo",
-  "status": "ungraded",
-  "fingerprint": "3a2276335156",
-  "gold_fingerprint": null,
-  "content_sha256": "1af9ee00e233435653592a65579a2862b08c437363947265d541aecaaff42884"
+  "content_sha256": "29623aee4bd0d8734b43c09cd8e2d675392bdeb67b3df336f4cc3b98ecf1d127"
  },
  "rd-funding-S6": {
   "split": "eval",
+  "case": "S6",
   "role": "pm",
   "workflow": "research_funding",
   "mode": "compare",
@@ -96,10 +81,11 @@
   "status": "graded",
   "fingerprint": "3a2276335156",
   "gold_fingerprint": "ccc0fcf66cea",
-  "content_sha256": "0210a563540cb5ac634a4446db23f8fff156171b748f23e6da16a25e350ad077"
+  "content_sha256": "056b69e92607138e760e9bdb466ad8b7b01c08edd2bc1cd8f865d16a1e620156"
  },
  "rd-funding-S7": {
   "split": "eval",
+  "case": "S7",
   "role": "pm",
   "workflow": "research_funding",
   "mode": "compare",
@@ -107,10 +93,11 @@
   "status": "graded",
   "fingerprint": "3a2276335156",
   "gold_fingerprint": "5a4d6473daee",
-  "content_sha256": "3b271cee6e79f909791ad3295381c7c59cf1bae3235e4e626cd18d8a289be1f3"
+  "content_sha256": "11a43db72f63fa69358d473946af79389127a578d16579724e05e68cb6b3a278"
  },
  "rd-funding-S8": {
   "split": "eval",
+  "case": "S8",
   "role": "pm",
   "workflow": "research_funding",
   "mode": "compare",
@@ -118,21 +105,11 @@
   "status": "graded",
   "fingerprint": "3a2276335156",
   "gold_fingerprint": "20b65de3ffeb",
-  "content_sha256": "0e14d0581b6514ce5fc3b7dad73095d13ba430f2aa6dfe253b593e917ca3fb1e"
- },
- "rd-funding-S8F": {
-  "split": "eval",
-  "role": "pm",
-  "workflow": "research_funding",
-  "mode": "compare",
-  "world": "small_lo",
-  "status": "ungraded",
-  "fingerprint": "3a2276335156",
-  "gold_fingerprint": null,
-  "content_sha256": "19bfcaa725a06d2205e14e16e19a57b4a24189f2328a10979a72800753008b63"
+  "content_sha256": "77c0b4d7caf27883da267f061376f11c76c9161962a05b4d0901e72e523597b9"
  },
  "rd-funding-S9": {
   "split": "eval",
+  "case": "S9",
   "role": "pm",
   "workflow": "research_funding",
   "mode": "compare",
@@ -140,131 +117,11 @@
   "status": "graded",
   "fingerprint": "3a2276335156",
   "gold_fingerprint": "b146713285bb",
-  "content_sha256": "b2384364121f2dfa85dcfb0b216d4bc9dd844c6616de8f553682ade1bc85a769"
- },
- "rd-funding-S9F": {
-  "split": "eval",
-  "role": "pm",
-  "workflow": "research_funding",
-  "mode": "compare",
-  "world": "systematic",
-  "status": "ungraded",
-  "fingerprint": "3a2276335156",
-  "gold_fingerprint": null,
-  "content_sha256": "4554212249639bc4432b9a6246f681cd9deb36896646af05bcf62c0f861db68b"
- },
- "rd-produce-S1": {
-  "split": "eval",
-  "role": "fundamental_analyst",
-  "workflow": "research_design",
-  "mode": "produce",
-  "world": "midsize_ls",
-  "status": "needs_rubric",
-  "fingerprint": "a193b3949f47",
-  "gold_fingerprint": "151c10fed19e",
-  "content_sha256": "b0e48fde7d9ebb826e5dedbe885b5d2f02da9eee691d56c22054a8d2d501abd2"
- },
- "rd-produce-S10": {
-  "split": "eval",
-  "role": "fundamental_analyst",
-  "workflow": "research_design",
-  "mode": "produce",
-  "world": "small_lo",
-  "status": "needs_rubric",
-  "fingerprint": "a193b3949f47",
-  "gold_fingerprint": "75338e59b64f",
-  "content_sha256": "598e629c8a8de885ab057aa6a9974f6145d31219c3913afb2b1275123757ab11"
- },
- "rd-produce-S2": {
-  "split": "eval",
-  "role": "quant_researcher",
-  "workflow": "research_design",
-  "mode": "produce",
-  "world": "midsize_ls",
-  "status": "needs_rubric",
-  "fingerprint": "a193b3949f47",
-  "gold_fingerprint": "9b9f9d3a30fa",
-  "content_sha256": "98dad8afebd98bd67a0030127880a0c7490da581b17aba3afe83ae8000c2e4b6"
- },
- "rd-produce-S3": {
-  "split": "eval",
-  "role": "quant_researcher",
-  "workflow": "research_design",
-  "mode": "produce",
-  "world": "ls_altdata",
-  "status": "needs_rubric",
-  "fingerprint": "a193b3949f47",
-  "gold_fingerprint": "958c900e04c6",
-  "content_sha256": "cf512958ad5b6f9ba33a8a3a6fae0d1c89e9fc235b7c5c337427cdca9961c830"
- },
- "rd-produce-S4": {
-  "split": "eval",
-  "role": "fundamental_analyst",
-  "workflow": "research_design",
-  "mode": "produce",
-  "world": "event_desk",
-  "status": "needs_rubric",
-  "fingerprint": "a193b3949f47",
-  "gold_fingerprint": "d1e97e3b5e8f",
-  "content_sha256": "2f86a544481974ea633a47cd008344a0ee5da393c71c7d85ac66756bc8d3e685"
- },
- "rd-produce-S5": {
-  "split": "eval",
-  "role": "quant_researcher",
-  "workflow": "research_design",
-  "mode": "produce",
-  "world": "systematic",
-  "status": "needs_rubric",
-  "fingerprint": "a193b3949f47",
-  "gold_fingerprint": "75ff92647200",
-  "content_sha256": "85560d0b7af73fb03fb622baecac0be6a1c9f99e1b833d6347bd8ebe0cbc33d0"
- },
- "rd-produce-S6": {
-  "split": "eval",
-  "role": "quant_researcher",
-  "workflow": "research_design",
-  "mode": "produce",
-  "world": "midsize_ls",
-  "status": "needs_rubric",
-  "fingerprint": "a193b3949f47",
-  "gold_fingerprint": "dbdfc71d1060",
-  "content_sha256": "afca14d9a31c894808a282d6b3ad58be653bac0c171ad2991e3f706380804cff"
- },
- "rd-produce-S7": {
-  "split": "eval",
-  "role": "fundamental_analyst",
-  "workflow": "research_design",
-  "mode": "produce",
-  "world": "event_desk",
-  "status": "needs_rubric",
-  "fingerprint": "a193b3949f47",
-  "gold_fingerprint": "0fce538b2ab9",
-  "content_sha256": "37a775eece55dfbb0b7507b79afceba198a1ab2656f5e4f2dcb934d4e45021c8"
- },
- "rd-produce-S8": {
-  "split": "eval",
-  "role": "quant_researcher",
-  "workflow": "research_design",
-  "mode": "produce",
-  "world": "market_maker",
-  "status": "needs_rubric",
-  "fingerprint": "a193b3949f47",
-  "gold_fingerprint": "1fe15c9e75d0",
-  "content_sha256": "974919645879e2b83bcc1c35c821be3144a99b404c256bef54dac63cdb2a6043"
- },
- "rd-produce-S9": {
-  "split": "eval",
-  "role": "fundamental_analyst",
-  "workflow": "research_design",
-  "mode": "produce",
-  "world": "small_lo",
-  "status": "needs_rubric",
-  "fingerprint": "a193b3949f47",
-  "gold_fingerprint": "29de1f56149c",
-  "content_sha256": "a9a021c158d4148187c355f0cf1f52233c883c956d29496082d631ea93b86c72"
+  "content_sha256": "36a84fdad48dee68f09306ed02c22c8c3c8dd0f84840a879d53eb74379886262"
  },
  "rd-review-S1-A": {
   "split": "eval",
+  "case": "S1",
   "role": "fundamental_analyst",
   "workflow": "research_design",
   "mode": "review",
@@ -272,10 +129,11 @@
   "status": "graded",
   "fingerprint": "ee6dd1a4f99e",
   "gold_fingerprint": "4f7ee8b13189",
-  "content_sha256": "5122b20d85f23a1809354784f3cb8da90708ac2cd82ad54c57d57d78958fd68b"
+  "content_sha256": "1e58fce319f0d4bea0e52c1edd7fe6d2272c062554d27484df70167b3336fc13"
  },
  "rd-review-S1-B": {
   "split": "eval",
+  "case": "S1",
   "role": "fundamental_analyst",
   "workflow": "research_design",
   "mode": "review",
@@ -283,10 +141,11 @@
   "status": "graded",
   "fingerprint": "ee6dd1a4f99e",
   "gold_fingerprint": "4989ec9fe728",
-  "content_sha256": "969f1fea8bfd11acac1384acd6bbb4c1425310507d7aa7127d7d1555863cd57c"
+  "content_sha256": "81498406c6fcc1e5a532d9866c1ad00b82c3919e5272fce32e85f818eed3bd09"
  },
  "rd-review-S10-A": {
   "split": "eval",
+  "case": "S10",
   "role": "fundamental_analyst",
   "workflow": "research_design",
   "mode": "review",
@@ -294,10 +153,11 @@
   "status": "graded",
   "fingerprint": "ee6dd1a4f99e",
   "gold_fingerprint": "880ca62fb935",
-  "content_sha256": "a7b6936ad02e8886635a2ef409b5ce134570c7cd60f302a7a2d30e2e633a3495"
+  "content_sha256": "446f7c731888bb2a1189e11b1b9f7ce783539c32a63144e6577982ee1f255c29"
  },
  "rd-review-S10-B": {
   "split": "eval",
+  "case": "S10",
   "role": "fundamental_analyst",
   "workflow": "research_design",
   "mode": "review",
@@ -305,10 +165,11 @@
   "status": "graded",
   "fingerprint": "ee6dd1a4f99e",
   "gold_fingerprint": "21211aafb3a9",
-  "content_sha256": "fc5e49839b0e949ab9c60b1e077e3dc6c0c71c3dd22cb25c192029bbb64a4882"
+  "content_sha256": "5d81591224b827f1fa3c4290379c08ff4527408f3c788a309bfc940cb8240c3a"
  },
  "rd-review-S2-A": {
   "split": "eval",
+  "case": "S2",
   "role": "quant_researcher",
   "workflow": "research_design",
   "mode": "review",
@@ -316,10 +177,11 @@
   "status": "graded",
   "fingerprint": "ee6dd1a4f99e",
   "gold_fingerprint": "162d78d58340",
-  "content_sha256": "7fd4691175e39c46cdfc4a8d72c28fd4e2537dbdad19dfae0924d742769e0902"
+  "content_sha256": "044d14268de13413eafd705ab07aa3031c0234299ab2d5eb064d3557c39ba509"
  },
  "rd-review-S2-B": {
   "split": "eval",
+  "case": "S2",
   "role": "quant_researcher",
   "workflow": "research_design",
   "mode": "review",
@@ -327,32 +189,11 @@
   "status": "graded",
   "fingerprint": "ee6dd1a4f99e",
   "gold_fingerprint": "dc867bf4c26b",
-  "content_sha256": "34b174a11374403e7b4d1b5716070ba7fcbe10487587e3b66c30c4de9883687f"
- },
- "rd-review-S2F-A": {
-  "split": "eval",
-  "role": "quant_researcher",
-  "workflow": "research_design",
-  "mode": "review",
-  "world": "small_lo",
-  "status": "ungraded",
-  "fingerprint": "ee6dd1a4f99e",
-  "gold_fingerprint": null,
-  "content_sha256": "8ca6b275960722bcea142be65900c5fe0657f6fe85904354ce7cdfea11a17010"
- },
- "rd-review-S2F-B": {
-  "split": "eval",
-  "role": "quant_researcher",
-  "workflow": "research_design",
-  "mode": "review",
-  "world": "small_lo",
-  "status": "ungraded",
-  "fingerprint": "ee6dd1a4f99e",
-  "gold_fingerprint": null,
-  "content_sha256": "3795db7304cd60db89323c8336657f608295a965b9d3a7fa4f351b21c78f7f63"
+  "content_sha256": "be53326fe015cb898526dc845e454d7201d6c4d021930b69588bf6776f2e3098"
  },
  "rd-review-S3-A": {
   "split": "eval",
+  "case": "S3",
   "role": "quant_researcher",
   "workflow": "research_design",
   "mode": "review",
@@ -360,10 +201,11 @@
   "status": "graded",
   "fingerprint": "ee6dd1a4f99e",
   "gold_fingerprint": "b508594cb7fa",
-  "content_sha256": "edf30162d8b2c1c0b17ae78d1cdaab10992562424d33d127c503e9dd7248c9f4"
+  "content_sha256": "9b92df9f35487e82504a5a4aab69049b15ee27f2f7a9a878d5dfee16551d114c"
  },
  "rd-review-S3-B": {
   "split": "eval",
+  "case": "S3",
   "role": "quant_researcher",
   "workflow": "research_design",
   "mode": "review",
@@ -371,10 +213,11 @@
   "status": "graded",
   "fingerprint": "ee6dd1a4f99e",
   "gold_fingerprint": "a4a573b2f81a",
-  "content_sha256": "0db28e59c8a60389ef69c35cd15436730a622c6383d8120b80c171ff2e228d0d"
+  "content_sha256": "464191cfbcc713b02691707d4612e60ec6f695efcf78ea77ec1971eac1411ed4"
  },
  "rd-review-S4-A": {
   "split": "eval",
+  "case": "S4",
   "role": "fundamental_analyst",
   "workflow": "research_design",
   "mode": "review",
@@ -382,10 +225,11 @@
   "status": "graded",
   "fingerprint": "ee6dd1a4f99e",
   "gold_fingerprint": "66ab61460e1c",
-  "content_sha256": "b62d9602ccfb8ccde7a590ab82b930068b67fd706f0899ae29fc15d681bae906"
+  "content_sha256": "5b6d12f8a6864a854d6ec175fcaee04e739a611f19ccc191f1f6b8a8ef10b8b9"
  },
  "rd-review-S4-B": {
   "split": "eval",
+  "case": "S4",
   "role": "fundamental_analyst",
   "workflow": "research_design",
   "mode": "review",
@@ -393,10 +237,11 @@
   "status": "graded",
   "fingerprint": "ee6dd1a4f99e",
   "gold_fingerprint": "f2e171e9405c",
-  "content_sha256": "6c8fe3383c2d8940d1fed6028a2f39999b30b6733dfe041e8b9b53f8278604be"
+  "content_sha256": "fe68ab34695b2016c50a82f3abe074b52c095acb03067ae714bb55b348ba8fba"
  },
  "rd-review-S5-A": {
   "split": "eval",
+  "case": "S5",
   "role": "quant_researcher",
   "workflow": "research_design",
   "mode": "review",
@@ -404,10 +249,11 @@
   "status": "graded",
   "fingerprint": "ee6dd1a4f99e",
   "gold_fingerprint": "0dff5ae67891",
-  "content_sha256": "ec731bbb2e728a06efd7bd9ac0b517c1775116b26daefe1645851cd3d7416450"
+  "content_sha256": "8830b7341dbbe607285b03bdad5b2b1d22f472e6d69e00863a76f248d9ef2726"
  },
  "rd-review-S5-B": {
   "split": "eval",
+  "case": "S5",
   "role": "quant_researcher",
   "workflow": "research_design",
   "mode": "review",
@@ -415,32 +261,11 @@
   "status": "graded",
   "fingerprint": "ee6dd1a4f99e",
   "gold_fingerprint": "d991b82f81d7",
-  "content_sha256": "d629746947569f972236aa498474c8df9b5cc096ba95861de5886dfb6725898f"
- },
- "rd-review-S5F-A": {
-  "split": "eval",
-  "role": "quant_researcher",
-  "workflow": "research_design",
-  "mode": "review",
-  "world": "small_lo",
-  "status": "ungraded",
-  "fingerprint": "ee6dd1a4f99e",
-  "gold_fingerprint": null,
-  "content_sha256": "d56e6d31f800675893ec3424c394e694bc8c3e96aaccca9f5bf2c1953987f0de"
- },
- "rd-review-S5F-B": {
-  "split": "eval",
-  "role": "quant_researcher",
-  "workflow": "research_design",
-  "mode": "review",
-  "world": "small_lo",
-  "status": "ungraded",
-  "fingerprint": "ee6dd1a4f99e",
-  "gold_fingerprint": null,
-  "content_sha256": "e318c031f616f0ca458e2eb0b44e0d46fb1ffac8b21b1b3d8f368ef329899382"
+  "content_sha256": "3b84a75987f72c7223263d3198415deb445952368bd937e85049988b6ce4f60c"
  },
  "rd-review-S6-A": {
   "split": "eval",
+  "case": "S6",
   "role": "quant_researcher",
   "workflow": "research_design",
   "mode": "review",
@@ -448,10 +273,11 @@
   "status": "graded",
   "fingerprint": "ee6dd1a4f99e",
   "gold_fingerprint": "27c0a170359d",
-  "content_sha256": "4993f421fffb3e598690a4fd42c40e08d0c611cb3f613c67630addd5f2706453"
+  "content_sha256": "50374e9e57f9ac954bdae619d2c20d54a57f95e88f377ed55f1cbdfaab35feb1"
  },
  "rd-review-S6-B": {
   "split": "eval",
+  "case": "S6",
   "role": "quant_researcher",
   "workflow": "research_design",
   "mode": "review",
@@ -459,10 +285,11 @@
   "status": "graded",
   "fingerprint": "ee6dd1a4f99e",
   "gold_fingerprint": "49f921ff1ffe",
-  "content_sha256": "f2e51f8650ed2d1670a95f8b3973a3181bc57655c526e1eb751cdf96c7bc6adc"
+  "content_sha256": "0541c01e8ab3f8fc68f5eaf8bdab5207b70b93d5fc9c798ec35b365405b0e639"
  },
  "rd-review-S7-A": {
   "split": "eval",
+  "case": "S7",
   "role": "fundamental_analyst",
   "workflow": "research_design",
   "mode": "review",
@@ -470,10 +297,11 @@
   "status": "graded",
   "fingerprint": "ee6dd1a4f99e",
   "gold_fingerprint": "cbe7b9790e6f",
-  "content_sha256": "4f1768ae2aa2e504b6cb07d4bcb752005b2985c9172ee25463fe56b2f3868d44"
+  "content_sha256": "331def5084521afc4518bdad82a8588be249ba9cf38933c6ab7b6387b0c608af"
  },
  "rd-review-S7-B": {
   "split": "eval",
+  "case": "S7",
   "role": "fundamental_analyst",
   "workflow": "research_design",
   "mode": "review",
@@ -481,10 +309,11 @@
   "status": "graded",
   "fingerprint": "ee6dd1a4f99e",
   "gold_fingerprint": "35e5d16116a8",
-  "content_sha256": "cd0980ed9278e8b94aa044ad5375aa33d2db51256d2265e633d54784e64d61d7"
+  "content_sha256": "987bbc91335d368867a8bf8a3223b11c840ca46e19dd8ae401d333c73e9116d9"
  },
  "rd-review-S8-A": {
   "split": "eval",
+  "case": "S8",
   "role": "quant_researcher",
   "workflow": "research_design",
   "mode": "review",
@@ -492,10 +321,11 @@
   "status": "graded",
   "fingerprint": "ee6dd1a4f99e",
   "gold_fingerprint": "1141eaf80fb0",
-  "content_sha256": "aee0141f883704e711d15929397a0315263982ad3c181ab69938c9ab0765090e"
+  "content_sha256": "8756d91b49504edb2e852c36e3146c19a46daecc5ddd37d0b42b1179b591327b"
  },
  "rd-review-S8-B": {
   "split": "eval",
+  "case": "S8",
   "role": "quant_researcher",
   "workflow": "research_design",
   "mode": "review",
@@ -503,32 +333,11 @@
   "status": "graded",
   "fingerprint": "ee6dd1a4f99e",
   "gold_fingerprint": "5f5710a4b42a",
-  "content_sha256": "14793b8cf34a9300993dc4ad2d1ad391fb8c0697ed8141ac10600d5d9d0ca6cd"
- },
- "rd-review-S8F-A": {
-  "split": "eval",
-  "role": "quant_researcher",
-  "workflow": "research_design",
-  "mode": "review",
-  "world": "small_lo",
-  "status": "ungraded",
-  "fingerprint": "ee6dd1a4f99e",
-  "gold_fingerprint": null,
-  "content_sha256": "66e4f23e74879903fdb91fbdc4c3aff0510d09acfad0edf661a8089d816da29a"
- },
- "rd-review-S8F-B": {
-  "split": "eval",
-  "role": "quant_researcher",
-  "workflow": "research_design",
-  "mode": "review",
-  "world": "small_lo",
-  "status": "ungraded",
-  "fingerprint": "ee6dd1a4f99e",
-  "gold_fingerprint": null,
-  "content_sha256": "16cc0f2535a4296ab0a55f80a27b090668b98622207ca2ce191db79342788e64"
+  "content_sha256": "d01c062ac2f5f1f9f8f65882ce769c42a78cf1fa3f290f2f8bec5d72e24c1e2f"
  },
  "rd-review-S9-A": {
   "split": "eval",
+  "case": "S9",
   "role": "fundamental_analyst",
   "workflow": "research_design",
   "mode": "review",
@@ -536,10 +345,11 @@
   "status": "graded",
   "fingerprint": "ee6dd1a4f99e",
   "gold_fingerprint": "872d8bf28bd2",
-  "content_sha256": "6406a78ae80ab353033b5eab598504bd1947e695471fed86519ac6e8ba1fcada"
+  "content_sha256": "0e258665f6e3379cf5e4ff10a7c75a9336cfa563aec7c1a46a0bab135fbe202b"
  },
  "rd-review-S9-B": {
   "split": "eval",
+  "case": "S9",
   "role": "fundamental_analyst",
   "workflow": "research_design",
   "mode": "review",
@@ -547,28 +357,6 @@
   "status": "graded",
   "fingerprint": "ee6dd1a4f99e",
   "gold_fingerprint": "03a0ac7dacf2",
-  "content_sha256": "a4efc70c6d7f2ada03606e0f8b797f90ce3c8e2e1dd20fbe20ab4b1927a6ccca"
- },
- "rd-review-S9F-A": {
-  "split": "eval",
-  "role": "fundamental_analyst",
-  "workflow": "research_design",
-  "mode": "review",
-  "world": "systematic",
-  "status": "ungraded",
-  "fingerprint": "ee6dd1a4f99e",
-  "gold_fingerprint": null,
-  "content_sha256": "a05987781db15d800ce164963144efa54ad90ff8a124dd0c0ecaf783bfa6b8c2"
- },
- "rd-review-S9F-B": {
-  "split": "eval",
-  "role": "fundamental_analyst",
-  "workflow": "research_design",
-  "mode": "review",
-  "world": "systematic",
-  "status": "ungraded",
-  "fingerprint": "ee6dd1a4f99e",
-  "gold_fingerprint": null,
-  "content_sha256": "161cecbd58de9d122377b7272a583195474e26a07343e6c69a3ae3f1dd10cc90"
+  "content_sha256": "8bb103df6b2ca5f42dfefe2561ea24a19838066502b96ba3126a6b166514a1a3"
  }
 }

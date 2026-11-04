@@ -1,25 +1,25 @@
 id: kpi_nowcast
 task_prefix: kn
 description: Nowcast a company's quarterly KPI from the transaction-sensor panel and its filed actuals
-version: 1.1.0          # bump when the family's tasks change in a way results can't be compared across
+version: 2.0.0          # bump when the family's tasks change in a way results can't be compared across
 authors:
   - name: Mayank Mahajan
-    email: mayank.mahajan@gmail.com
-role: quant_researcher
-workflow: kpi_nowcast
-mode: produce            # write-up + forecast JSON
-world: ls_altdata
+role: [quant_researcher]
+workflow: [kpi_nowcast]
+mode: [produce]          # write-up + forecast JSON
+world: [ls_altdata]
 source: txn_panel
 format: harbor
+tools: [code_execution]
 dated: true              # every task has an as_of; the container clock is pinned to it (splits/check.py)
-companies: one per task  # named and anonymised variants of a case share its company's split
-builder: build.py
-runner: run.py           # API runner with code execution; refuses live runs until the instrument is approved (approval.yaml)
+builder: families.kpi_nowcast.build   # case: series and quarter; its named and anonymised variants share a split
 verifier: verifier/verify.py
 verifier_timeout_sec: 600
+gold_file: gold.json
 reward: >-
-  separate metrics, never blended: forecast accuracy (abs % error, skill vs naive, coverage,
-  interval score; code) and the C1-C12 write-up rubric (LLM judge)
+  skill_vs_naive clamped to [0, 1] (0 = no better than last year's seasonal step, 1 = exact; code, no judge).
+  Diagnostics, never blended in: abs % error, coverage, interval score (code) and the C1-C12 write-up
+  rubric (LLM judge; left out when the judge can't run)
 rubric_visibility: partial  # the instruction states the fund's write-up conventions (headline estimate, range
                             # and units first; in-sample accuracy next to a simple benchmark; low <= point <= high)
                             # but not the judgment items (C2-C5, C7, C9, C11, C12): models are graded on whether
@@ -38,20 +38,16 @@ gold_inputs:             # files its gold comes from; each has a provenance entr
 instrument:              # what decides what the model sees and how it is scored; live use needs its hash
                          # approved (rl/instrument.py, rl/harness/approve.py)
   - families/kpi_nowcast/build.py
-  - families/kpi_nowcast/run.py
   - families/kpi_nowcast/grader.py
   - families/kpi_nowcast/judge.md
   - families/kpi_nowcast/prompts/*.md
   - families/kpi_nowcast/schema.json
   - families/kpi_nowcast/verifier/verify.py
   - sources/txn_panel/panel.py
-  - families/_shared/harbor.py
-  - families/_shared/judge.py
   - families/kpi_nowcast/family.yaml       # pins the judge
-  - families/_shared/verify_common.py
 calibration:             # scored metric and pass threshold for rl/harness/calibrate.py; proposed, Mayank to confirm
-  metric: skill_vs_naive   # 1 - error / naive error: passing means beating last year's same quarter
-  pass: 0.0
+  metric: reward
+  pass: 0.33               # skill 1/3: the forecast's error is at most half the naive forecast's
 leak_check:              # gold fields that must never appear where the agent can see them (rl/leakcheck.py)
   gold_numbers:
     gold.json: [actual]

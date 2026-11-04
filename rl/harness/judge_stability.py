@@ -2,10 +2,11 @@
 gets the same verdict. Items that flip often need rubric work, not more votes.
 
 Each answer is a built task plus the files the agent left in /app/output (a folder holding them).
-The task's own verifier runs `--times` times with the judge cache off, so every run is a fresh
-judge call; verdicts are read from its details.json.
+The task's own verifier runs `--k` times in a scratch layout (local.py) with the judge cache off, so
+every run is a fresh judge call; verdicts are read from its details.json. `--judge` swaps in another
+judge model for the run (the verifier records the override).
 
-    python rl/harness/judge_stability.py --times 3 \
+    python rl/harness/judge_stability.py --k 3 \
         rl/tasks/bench/kn-produce-DAL-2018Q2=runs/saved/kn-produce-DAL-2018Q2/output \
         rl/tasks/bench/thesis-bench-001=runs/saved/thesis-bench-001/output
 
@@ -20,11 +21,14 @@ import json
 import os
 import pathlib
 import shutil
-import subprocess
 import sys
-import tempfile
-import tomllib
 from collections import defaultdict
+
+RL = pathlib.Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(RL))
+sys.path.insert(0, str(RL / "harness"))
+import local  # noqa: E402
+from lib import task_meta  # noqa: E402
 
 FLAKY = 0.8    # items agreeing less often than this are flagged
 
@@ -41,19 +45,10 @@ def verdicts(family: str, details: dict) -> dict[str, str]:
     raise SystemExit(f"{family}: no model-graded items to read")
 
 
-def run_verifier(task: pathlib.Path, output: pathlib.Path) -> dict:
-    tmp = pathlib.Path(tempfile.mkdtemp(prefix="stability_"))
-    shutil.copytree(task / "environment" / "data", tmp / "app" / "data")
-    shutil.copytree(output, tmp / "app" / "output")
-    (tmp / "app" / "solution").mkdir()
-    verifier = next(line.split()[1].split("/")[-1] for line in (task / "tests" / "test.sh").read_text().splitlines()
-                    if line.startswith("python /tests/"))
-    env = dict(os.environ, APP_DIR=str(tmp / "app"), TESTS_DIR=str(task / "tests"), LOGS_DIR=str(tmp / "logs"))
-    env.pop("JUDGE_CACHE", None)
-    subprocess.run([sys.executable, verifier], cwd=task / "tests", env=env, capture_output=True, text=True)
-    details = json.loads((tmp / "logs" / "verifier" / "details.json").read_text())
-    shutil.rmtree(tmp, ignore_errors=True)
-    return details
+def run_verifier(task: pathlib.Path, output: pathlib.Path, judge: str | None = None) -> dict:
+    g = local.grade(task, lambda app, tests: shutil.copytree(output, app / "output", dirs_exist_ok=True),
+                    {"JUDGE_CACHE": None, **({"JUDGE_MODEL": judge} if judge else {})})
+    return g.details
 
 
 def agreement(runs: list[dict[str, str]]) -> dict[str, float]:
@@ -79,7 +74,8 @@ def report(per_answer: dict[str, list[dict[str, str]]]) -> dict:
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("answers", nargs="+", help="TASK_DIR=OUTPUT_DIR pairs")
-    ap.add_argument("--times", type=int, default=3)
+    ap.add_argument("--k", type=int, default=3, help="verifier runs per answer")
+    ap.add_argument("--judge", help="judge model in place of the family's pinned one")
     ap.add_argument("--out", type=pathlib.Path)
     a = ap.parse_args(argv)
     if not os.environ.get("ANTHROPIC_API_KEY"):
@@ -87,8 +83,8 @@ def main(argv: list[str] | None = None) -> None:
     by_family = defaultdict(dict)
     for pair in a.answers:
         task, output = map(pathlib.Path, pair.split("=", 1))
-        fam = tomllib.loads((task / "task.toml").read_text())["metadata"]["family"]
-        by_family[fam][task.name] = [verdicts(fam, run_verifier(task, output)) for _ in range(a.times)]
+        fam = task_meta(task)["family"]
+        by_family[fam][task.name] = [verdicts(fam, run_verifier(task, output, a.judge)) for _ in range(a.k)]
     out = {fam: report(per) for fam, per in sorted(by_family.items())}
     text = json.dumps(out, indent=1)
     print(text)

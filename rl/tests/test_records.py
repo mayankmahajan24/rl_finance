@@ -1,34 +1,47 @@
 """Run records (rl/harness/records.py) and the report over them (rl/harness/report.py): every record
-fits the schema, every run file in rl/runs/ has its records, and a report never averages
-results measured with different instruments."""
+fits the schema, rl/runs/ commits records only and none carries answers or gold, Harbor imports
+number their attempts, and a report never averages results measured with different instruments."""
 
 from __future__ import annotations
 
 import json
 import pathlib
-import sys
 
 import pytest
 
-from conftest import RL
+import records
+import report
+from conftest import RL, built
 
-sys.path.insert(0, str(RL / "harness"))
-import records  # noqa: E402
-import report  # noqa: E402
 
 RUNNER = {"name": "test"}
+IDENT = {"task_id": "audit-bench-001", "family": "data_audit", "split": "bench", "mode": "review",
+         "content_sha256": "c" * 64, "fingerprint": "f" * 12}
 
 
-def rec(task="audit-bench-001", family="data_audit", **kw):
-    return records.make(task_id=task, family=family, attempt=0, runner=RUNNER, status="ok",
-                        rewards={"reward": 0.5}, **kw)
+def rec(**kw):
+    return records.make(**{**IDENT, "attempt": 0, "runner": RUNNER, "status": "ok", "rewards": {"reward": 0.5}, **kw})
 
 
-def test_identity_comes_from_the_manifest():
-    r = rec()
-    m = records.splits.manifest("data_audit")["audit-bench-001"]
-    assert (r["split"], r["content_sha256"], r["fingerprint"], r["mode"]) == (
-        "bench", m["content_sha256"], m["fingerprint"], "review")
+def test_identity_is_hashed_from_the_task_folder(tmp_path):
+    import shutil
+    task = built("bench", "audit-bench-001")
+    ident = records.identity(task)
+    assert (ident["task_id"], ident["family"], ident["split"], ident["mode"]) == ("audit-bench-001", "data_audit",
+                                                                                  "bench", "review")
+    copy = tmp_path / task.name
+    shutil.copytree(task, copy)
+    (copy / "instruction.md").write_text("changed")
+    assert records.identity(copy)["content_sha256"] != ident["content_sha256"]   # the folder run, not the manifest
+    r = records.make(**ident, attempt=0, runner=RUNNER, status="ok")
+    assert r["instrument_sha256"] == records.instrument.sha256("data_audit")
+
+
+@pytest.mark.parametrize("status, score", [("ok", 0.5), ("refusal", 0.0), ("timeout", 0.0), ("error", None),
+                                           ("not_graded", None)])
+def test_score(status, score):
+    r = rec(status=status, rewards={"reward": 0.5} if status == "ok" else {})
+    assert records.score(r) == score
 
 
 @pytest.mark.parametrize("bad, problem", [
@@ -41,8 +54,7 @@ def test_invalid_records_are_rejected(bad, problem):
     r = dict(rec(), **bad)
     assert any(p.startswith(problem) for p in records.validate(r)), records.validate(r)
     with pytest.raises(ValueError):
-        records.make(**{"task_id": "audit-bench-001", "family": "data_audit", "attempt": 0, "runner": RUNNER,
-                        "status": "ok", **bad})
+        records.make(**{**IDENT, "attempt": 0, "runner": RUNNER, "status": "ok", **bad})
 
 
 def test_cost_and_budget():
@@ -60,30 +72,33 @@ def test_cost_and_budget():
     assert not records.Budget(None, "not-a-model").exhausted      # no budget, no price needed
 
 
-def test_kpi_errors_and_refusals_keep_their_class():
-    t = records.from_kpi({"prompt_id": "kn-produce-UAL-2018Q4", "rep": 0, "failure_class": "timeout", "error": "x"},
-                         runner=RUNNER, model="claude-opus-5-5")
-    assert t["status"] == "timeout" and t["rewards"] == {}
-    r = records.from_kpi({"prompt_id": "kn-produce-UAL-2018Q4", "rep": 1, "status": "refusal", "model": "m",
-                          "grade": {"refused": 1.0}, "usage": {}}, runner=RUNNER)
-    assert r["status"] == "refusal" and r["rewards"] == {}
-
-
-def test_every_run_file_has_valid_records():
-    committed = sorted((RL / "runs").rglob("*records.jsonl"))
-    assert committed, "no committed records"
-    for f in committed:
+def test_runs_commit_records_only():
+    """No raw outputs in rl/runs/: no transcripts, native result files, answers or gold."""
+    jsonl = [p for p in (RL / "runs").rglob("*.jsonl") if not {"traces", "jobs"} & set(p.parts)]
+    assert jsonl and all(p.name.endswith("records.jsonl") for p in jsonl), [str(p) for p in jsonl]
+    for f in jsonl:
         for i, r in enumerate(records.load([f])):
             assert records.validate(r) == [], f"{f.relative_to(RL)}:{i + 1}"
-    # every run file in rl/runs/ has its records (a re-import would stamp old runs with today's
-    # instruments, so the committed records are not regenerated here)
-    sources = ([f for f in (RL / "runs" / "research_design").glob("*/*.jsonl") if not f.name.endswith("records.jsonl")]
-               + [f.parent for f in (RL / "runs" / "kpi_nowcast").glob("*/results.jsonl")]
-               + list((RL / "runs" / "solutions").glob("*.csv")))
-    for s in sources:
-        target = (s / "records.jsonl" if s.is_dir() else
-                  s.with_suffix(".records.jsonl"))
-        assert target in committed, f"{s.relative_to(RL)} has no records"
+            assert "gold" not in json.dumps(r) and "trace" not in r, f"{f.relative_to(RL)}:{i + 1}"
+
+
+def harbor_trial(jobs: pathlib.Path, name: str, started: str, task: pathlib.Path, reward: float) -> None:
+    t = jobs / name
+    (t / "verifier").mkdir(parents=True)
+    (t / "verifier" / "reward.txt").write_text(f"{reward}\n")
+    (t / "verifier" / "judge_usage.json").write_text(json.dumps({"claude-opus-5-5": {"input_tokens": 1_000_000}}))
+    (t / "result.json").write_text(json.dumps({"started_at": started, "config": {
+        "task": {"path": str(task)}, "agent": {"name": "claude-code", "model_name": "claude-opus-5-5"}}}))
+
+
+def test_harbor_import_numbers_attempts(tmp_path):
+    task = built("bench", "audit-bench-001")
+    for name, started, reward in (("b", "2026-11-03T10:05", 0.2), ("a", "2026-11-03T10:00", 0.9), ("c", "2026-11-03T10:09", 0.4)):
+        harbor_trial(tmp_path, name, started, task, reward)
+    recs = records.import_harbor(tmp_path, "r1")
+    assert [(r["attempt"], r["rewards"]["reward"]) for r in recs] == [(0, 0.9), (1, 0.2), (2, 0.4)]
+    assert recs[0]["runner"]["run_id"] == "r1" and recs[0]["content_sha256"] == records.identity(task)["content_sha256"]
+    assert recs[0]["judge_cost_usd"] == records.PRICES["claude-opus-5-5"]["input"]
 
 
 def write(path: pathlib.Path, recs) -> pathlib.Path:

@@ -7,7 +7,7 @@ rejections are also appended to rl/review/examples.jsonl, as labelled examples f
 generation prompts. An entry with `blind: {question}` asks the reviewer for their own answer
 before showing the draft, and saves it first.
 
-Value: how many bench and held-out tasks use the item (from the families' manifests), then kind
+Value: how many bench, held-out and eval tasks use the item (from the families' manifests), then kind
 (gold before rubrics, grader facts, annotations, generators, reference outputs).
 
     python rl/review/review.py list                                  # open items, highest value first
@@ -30,6 +30,7 @@ from datetime import datetime, timezone
 
 RL = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RL))
+import lib  # noqa: E402
 import provenance  # noqa: E402
 import splits  # noqa: E402
 
@@ -50,9 +51,9 @@ def log(path: pathlib.Path, row: dict) -> None:
 
 
 def value(path: str) -> int:
-    """Bench and held-out tasks whose family's gold comes from this item."""
-    fams = [d.name for d in (RL / "families").iterdir() if path in provenance.gold_inputs(d.name)]
-    return sum(v["split"] in ("bench", "heldout") for f in fams for v in splits.manifest(f).values())
+    """Bench, held-out and eval tasks whose family's gold comes from this item."""
+    fams = [f for f in lib.families() if path in lib.family(f).get("gold_inputs", [])]
+    return sum(v["split"] in ("bench", "heldout", splits.UNSPLIT) for f in fams for v in splits.manifest(f).values())
 
 
 def items(include_closed: bool = False) -> list[dict]:
@@ -67,7 +68,7 @@ def show(e: dict) -> str:
     by = e["produced_by"]
     who = {"human": by.get("who"), "model": f"{by.get('model')} (prompt {by.get('prompt_fingerprint')})",
            "code": f"{by.get('ref')} at {by.get('commit')}"}.get(by["type"], by["type"])
-    lines = [f"== {e['path']}  [{e['kind']}, {e['state']}, used by {e['value']} bench/held-out tasks]",
+    lines = [f"== {e['path']}  [{e['kind']}, {e['state']}, used by {e['value']} bench/held-out/eval tasks]",
              f"   produced by {by['type']}: {who}, {e.get('produced_at')}"]
     if e.get("note"):
         lines.append(f"   note: {e['note']}")

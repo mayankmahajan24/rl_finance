@@ -55,52 +55,80 @@
   "reference": 0.667,
   "naive": 0.0
  },
+ "kn-produce-DAL-2018Q4": {
+  "reference": 1.0,
+  "naive": 0.0
+ },
+ "kn-produce-M-FY2017Q3": {
+  "reference": 1.0,
+  "naive": 0.0
+ },
+ "kn-produce-RET04-FY2018Q1-anon": {
+  "reference": 1.0,
+  "naive": 0.0
+ },
+ "kn-produce-SAVE-2018Q2": {
+  "reference": 1.0,
+  "naive": 0.0
+ },
+ "rd-funding-S1": {
+  "reference": 1.0,
+  "naive": 0.0
+ },
+ "rd-funding-S4": {
+  "reference": 1.0,
+  "naive": 0.0
+ },
+ "rd-funding-S7": {
+  "reference": 1.0,
+  "naive": 0.0
+ },
  "thesis-bench-001": {
-  "reference": 0.914,
+  "reference": 0.971,
   "naive": 0.0
  },
  "thesis-bench-002": {
-  "reference": 0.973,
-  "naive": 0.02
+  "reference": 0.977,
+  "naive": 0.016
  },
  "thesis-bench-003": {
-  "reference": 0.979,
-  "naive": 0.017
+  "reference": 0.978,
+  "naive": 0.0
  },
  "thesis-bench-004": {
-  "reference": 0.97,
+  "reference": 0.96,
   "naive": 0.0
  },
  "thesis-bench-005": {
-  "reference": 0.974,
-  "naive": 0.019
+  "reference": 0.927,
+  "naive": 0.0
  },
  "thesis-bench-006": {
-  "reference": 0.94,
-  "naive": 0.015
+  "reference": 0.98,
+  "naive": 0.022
  },
  "thesis-bench-007": {
-  "reference": 0.936,
-  "naive": 0.0
+  "reference": 0.98,
+  "naive": 0.006
  },
  "thesis-bench-008": {
-  "reference": 0.965,
-  "naive": 0.0
+  "reference": 0.967,
+  "naive": 0.008
  },
  "thesis-bench-009": {
-  "reference": 0.949,
-  "naive": 0.0
+  "reference": 0.96,
+  "naive": 0.001
  },
  "thesis-bench-010": {
-  "reference": 0.949,
-  "naive": 0.049
+  "reference": 0.941,
+  "naive": 0.005
  },
  "thesis-bench-control-01": {
-  "reference": 0.982,
-  "naive": 0.97
+  "reference": 0.989,
+  "naive": 0.973
  },
  "thesis-bench-control-02": {
-  "reference": 0.985,
-  "naive": 0.98
+  "reference": 0.966,
+  "naive": 0.972
  }
 }

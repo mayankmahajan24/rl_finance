@@ -28,13 +28,14 @@ from __future__ import annotations
 
 import json
 import pathlib
-import re
 import shutil
 import sys
 
 import yaml
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
+import leakcheck  # noqa: E402
+import lib  # noqa: E402
 import splits  # noqa: E402
 from families._shared import harbor  # noqa: E402
 from lib import RL, TASKS, WORLDS, fingerprint, load_prompt, write_yaml  # noqa: E402
@@ -52,8 +53,8 @@ SCHEMA_NOTE = ("---\nWrite your answer as one JSON object matching the schema in
                "to /app/output/response.json.")
 PLAN_NOTE = "---\nWrite your plan, in markdown, to /app/output/plan.md."
 FAMILY = yaml.safe_load((HERE / "family.yaml").read_text())
-SCORER_ENV = ('\n[verifier.env]\n# scorer model for review tasks (matches issues to gold); compare tasks need no key\n'
-              'ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY:-}"\nSCORER_MODEL = "${SCORER_MODEL:-claude-opus-5}"\n')
+SCORER_ENV = ('\n[verifier.env]\n# scorer model for review tasks (matches issues to gold, tests/judge.json); compare tasks need no key\n'
+              'ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY:-}"\n')
 
 WORLD_NAMES = {
     "systematic": "Systematic trading firm",
@@ -327,29 +328,6 @@ def write_task(t: dict, system: str, users: dict[str, str], inputs: dict, harbor
     built.append(dict(t, gold_fingerprint=fingerprint(gold) if gold else None, content_sha256=content))
 
 
-def leak_check(built: list) -> list[str]:
-    """No gold text may appear in anything the model sees."""
-    problems = []
-    for t in built:
-        d = OUT / t["id"]
-        visible = "\n".join(p.read_text() for p in [d / "instruction.md", *(d / "prompt").iterdir(),
-                                                      *(d / "environment" / "data").iterdir()])
-        needles = []
-        for f in (d / "tests" / "gold.json", d / "tests" / "draft_rubric.json"):
-            if not f.exists():
-                continue
-            g = json.loads(f.read_text())
-            needles += [i["text"] for i in g.get("issues", [])]
-            needles += [g.get(k) or "" for k in ("preference_rationale", "why_loser_was_defensible",
-                                                 "critique_prose")]
-            needles += [i["text"] for i in g.get("items", [])]
-        for n in needles:
-            frag = re.sub(r"\s+", " ", n).strip()[:80]
-            if len(frag) >= 40 and frag in re.sub(r"\s+", " ", visible):
-                problems.append(f"{t['id']}: gold text visible in prompt: {frag!r}")
-    return problems
-
-
 def main() -> None:
     d = load()
     if WORLDS.exists():
@@ -362,7 +340,7 @@ def main() -> None:
     build_funding(d, built)
     build_produce(d, built)
 
-    problems = leak_check(built)
+    problems = [x for t in built for x in leakcheck.task_problems(OUT / t["id"], lib.task_meta(OUT / t["id"]))]
     if problems:
         raise SystemExit("LEAK CHECK FAILED\n" + "\n".join(problems))
 

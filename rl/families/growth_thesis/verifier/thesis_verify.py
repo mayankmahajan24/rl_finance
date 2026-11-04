@@ -9,17 +9,18 @@ Reward (continuous, 0..1):
   0.25  growth estimates: mean over trustworthy airlines of max(0, 1 - |error| / tolerance)
   0.15  F1 of the "unreliable" list vs truth (airlines whose data cannot support the comparison);
         airlines in `optional_unreliable` are neither credited nor penalised
-  0.25  atomic rubric on memo.md, graded by an LLM judge (Claude) when credentials are available,
-        otherwise by a conservative keyword fallback. Set JUDGE=keyword to force the fallback.
+  0.25  atomic rubric on memo.md, graded by the family's pinned model judge (judge.py, judge.json).
+        Without credentials, or if the judge fails, the task is not graded (empty reward.json, details
+        say why). JUDGE=keyword opts into a conservative keyword grader instead.
 """
 import json
 import os
 import re
 
-from common import APP, f1, load_truth, write_reward
+import judge
+from common import APP, f1, load_truth, write_reward, write_rewards
 
 W_FASTEST, W_GROWTH, W_UNREL, W_RUBRIC = 0.35, 0.25, 0.15, 0.25
-JUDGE_MODEL = os.environ.get('JUDGE_MODEL', 'claude-opus-5-5')
 NEG = ('not ', 'no ', "isn't", 'exclud', 'unreliable', 'artifact', 'spurious', 'ignore', 'rather than')
 
 
@@ -85,9 +86,6 @@ def keyword_judge(memo, truth, items):
 
 
 def llm_judge(memo, truth, items):
-    import anthropic
-
-    client = anthropic.Anthropic()
     schema = {
         'type': 'object',
         'properties': {'items': {'type': 'array', 'items': {
@@ -97,24 +95,16 @@ def llm_judge(memo, truth, items):
         'required': ['items'], 'additionalProperties': False,
     }
     rubric = '\n'.join(f"- id={it['id']}: {it['text']}" for it in items)
-    prompt = (
-        'You are grading an analyst memo against a rubric. Judge each item independently and strictly: an item '
-        'passes only if the memo clearly states it (paraphrase is fine; vague hedging is not). Quote the sentence '
-        'you relied on as evidence, or write "none".\n\n'
-        f'<rubric>\n{rubric}\n</rubric>\n\n<memo>\n{memo[:30000]}\n</memo>'
-    )
-    kwargs = dict(model=JUDGE_MODEL, max_tokens=16000,
-                  output_config={'effort': 'medium', 'format': {'type': 'json_schema', 'schema': schema}},
-                  messages=[{'role': 'user', 'content': prompt}])
-    try:
-        resp = client.beta.messages.create(betas=['server-side-fallback-2026-07-01'], fallbacks='default', **kwargs)
-    except anthropic.BadRequestError:
-        resp = client.messages.create(**kwargs)
-    if resp.stop_reason == 'refusal':
-        raise RuntimeError('judge refused')
-    text = next(b.text for b in resp.content if b.type == 'text')
-    got = {x['id']: dict(passed=bool(x['passed']), evidence=x['evidence']) for x in json.loads(text)['items']}
-    return {it['id']: got.get(it['id'], dict(passed=False, evidence='item missing from judge output')) for it in items}
+    system = ('You are grading an analyst memo against a rubric. Judge each item independently and strictly: an item '
+              'passes only if the memo clearly states it (paraphrase is fine; vague hedging is not). Quote the sentence '
+              'you relied on as evidence, or write "none".')
+    outs, meta = judge.judge(system, f'<rubric>\n{rubric}\n</rubric>\n\n<memo>\n{memo[:30000]}\n</memo>', schema)
+    votes = []
+    for out in outs:
+        got = {x['id']: dict(passed=bool(x['passed']), evidence=x['evidence']) for x in out['items']}
+        votes.append({it['id']: got.get(it['id'], dict(passed=False, evidence='item missing from judge output'))
+                      for it in items})
+    return judge.majority(votes, 'passed'), meta
 
 
 def main():
@@ -149,30 +139,26 @@ def main():
         s_unrel = f1(p, r)
     # 4. rubric on the memo
     items = rubric_items(truth)
-    mode = os.environ.get('JUDGE', 'auto')
-    judge_used = 'keyword'
+    det = dict(fastest_correct=bool(s_fast), truth_fastest=truth['fastest'], reported_fastest=ans.get('fastest'),
+               growth_score=round(s_growth, 3), growth_per_ticker={k: round(v, 2) for k, v in per.items()},
+               unreliable_f1=round(s_unrel, 3))
     if not memo.strip():
-        graded = {it['id']: dict(passed=False, evidence='memo.md missing or empty') for it in items}
+        graded, det['judge'] = {it['id']: dict(passed=False, evidence='memo.md missing or empty') for it in items}, 'none'
+    elif os.environ.get('JUDGE', 'auto') == 'keyword':
+        graded, det['judge'] = keyword_judge(memo, truth, items), 'keyword'
     else:
-        graded = None
-        if mode in ('auto', 'llm'):
-            try:
-                graded = llm_judge(memo, truth, items); judge_used = f'llm:{JUDGE_MODEL}'
-            except Exception as e:  # noqa: BLE001
-                if mode == 'llm':
-                    return write_reward(0.0, dict(error=f'LLM judge failed: {e}'))
-                judge_error = str(e)[:300]
-        if graded is None:
-            graded = keyword_judge(memo, truth, items)
+        why = judge.unavailable()
+        if why:
+            return write_rewards({}, dict(det, status='not graded', note=f'{why}; JUDGE=keyword opts into the keyword grader'))
+        try:
+            graded, det['judge_meta'] = llm_judge(memo, truth, items)
+        except judge.JudgeError as e:
+            return write_rewards({}, dict(det, status='not graded', note=f'memo judge failed: {e}'))
+        det['judge'] = 'llm:' + ','.join(det['judge_meta']['served_model'])
     s_rubric = sum(v['passed'] for v in graded.values()) / len(graded)
 
     reward = W_FASTEST * s_fast + W_GROWTH * s_growth + W_UNREL * s_unrel + W_RUBRIC * s_rubric
-    det = dict(fastest_correct=bool(s_fast), truth_fastest=truth['fastest'], reported_fastest=ans.get('fastest'),
-               growth_score=round(s_growth, 3), growth_per_ticker={k: round(v, 2) for k, v in per.items()},
-               unreliable_f1=round(s_unrel, 3), rubric_score=round(s_rubric, 3), rubric=graded, judge=judge_used)
-    if judge_used == 'keyword' and mode == 'auto' and 'judge_error' in locals():
-        det['judge_fallback_reason'] = judge_error
-    return write_reward(reward, det)
+    return write_reward(reward, dict(det, rubric_score=round(s_rubric, 3), rubric=graded))
 
 
 if __name__ == '__main__':

@@ -31,6 +31,7 @@ def test_test_sh_removes_planted_files(tmp_path):
     for planted in ("json.py", "pandas.py", "reference/x.py", "name with space.py"):
         (t / planted).write_text("raise SystemExit(0)\n")
     shipped = (task / "tests" / "FILES").read_text().split()
+    assert sorted(shipped) == sorted(str(p.relative_to(task / "tests")) for p in (task / "tests").rglob("*") if p.is_file())
     for f in shipped:
         (t / f).parent.mkdir(parents=True, exist_ok=True)
         (t / f).write_bytes((task / "tests" / f).read_bytes())

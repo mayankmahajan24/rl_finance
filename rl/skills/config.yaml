@@ -13,8 +13,8 @@ source:
   commit: 574ed3624aebd0418c7e96cd101262f30210ab26
   license: Apache-2.0
 
-# Anthropic models (model id starting "claude-") get this profile unless a run says
-# --skills off. Other providers never get skills.
+# The profile `run_api.py --skills default` gives Anthropic models (model id starting
+# "claude-"); runs are skills-off unless they ask. Other providers never get skills.
 default_for_anthropic: buy_side_core
 
 # The Messages API accepts at most 20 skills per request, and the repo has 63
@@ -65,8 +65,4 @@ excluded:
                           funding-digest, tear-sheet]
   tooling: [skill-creator]
 
-# Request shape when skills are on. Skills run inside the code-execution container.
-request:
-  tool: {type: code_execution_20260521, name: code_execution}
-  betas: [code-execution-2025-08-25]
-  max_pause_turn_continuations: 10
+# Request shape (the code-execution tool, betas, continuation cap): rl/harness/client.py.

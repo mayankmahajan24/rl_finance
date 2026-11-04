@@ -18,15 +18,14 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import pathlib
-import shutil
-import subprocess
 import sys
-import tempfile
-import tomllib
 
 RL = pathlib.Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(RL / "harness"))
+import local  # noqa: E402
+import run_solutions  # noqa: E402
+
 # data_audit's reference checks (solutions/reference/audit.py) and the issue types each one reports
 AUDIT_STEPS = {"1 duplicates": {"duplicate_rows"}, "2 ticket size": {"swapped_columns", "unit_scale"},
                "3 outages": {"outage"}, "4 date shift": {"date_shift"}, "5 ticker-wide breaks": {"ticker_remap"},
@@ -47,52 +46,24 @@ df[['date', 'ticker', 'source_id', 'anomaly_score']].to_csv(a.output, index=Fals
 """
 
 
-def layout(task: pathlib.Path) -> pathlib.Path:
-    """A scratch /app with the task's data unpacked."""
-    import gzip
-    app = pathlib.Path(tempfile.mkdtemp(prefix=f"ablation-{task.name}-")) / "app"
-    shutil.copytree(task / "environment" / "data", app / "data")
-    for gz in (app / "data").glob("*.gz"):
-        gz.with_suffix("").write_bytes(gzip.decompress(gz.read_bytes()))
-        gz.unlink()
-    (app / "output").mkdir()
-    (app / "solution").mkdir()
-    return app
-
-
-def env(app: pathlib.Path, task: pathlib.Path) -> dict:
-    e = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
-    # PYTHONDONTWRITEBYTECODE: the verifier runs inside the built task's tests/, and __pycache__ there changes its hash
-    return dict(e, APP_DIR=str(app), TESTS_DIR=str(task / "tests"), LOGS_DIR=str(app.parent / "logs"), JUDGE="keyword",
-                PYTHONDONTWRITEBYTECODE="1",
-                PATH=str(pathlib.Path(sys.executable).parent) + os.pathsep + os.environ["PATH"])
-
-
 def grade(task: pathlib.Path, files: dict[str, str]) -> float:
-    """The task's verifier on these files (paths under /app)."""
-    app = layout(task)
-    for rel, text in files.items():
-        (app / rel).write_text(text)
-    verifier = next(line.split()[1].split("/")[-1] for line in (task / "tests" / "test.sh").read_text().splitlines()
-                    if line.startswith("python /tests/"))
-    r = subprocess.run([sys.executable, verifier], cwd=task / "tests", env=env(app, task), capture_output=True, text=True)
-    try:
-        return float((app.parent / "logs" / "verifier" / "reward.txt").read_text())
-    except FileNotFoundError:
-        raise SystemExit(f"{task.name}: verifier failed: {r.stderr[-500:]}")
-    finally:
-        shutil.rmtree(app.parent, ignore_errors=True)
+    """The task's verifier, offline, on these files (paths under /app)."""
+    def write(app, tests):
+        for rel, text in files.items():
+            (app / rel).write_text(text)
+    g = local.grade(task, write, local.OFFLINE)
+    if g.rewards is None:
+        raise SystemExit(f"{task.name}: verifier failed: {g.error}")
+    return g.rewards["reward"]
 
 
 def reference_output(task: pathlib.Path) -> dict[str, str]:
     """What the task's reference solution writes to /app/output."""
-    app = layout(task)
-    shutil.copytree(task / "solution", app.parent / "solver")
-    subprocess.run(["bash", str(app.parent / "solver" / "solve.sh")], cwd=app, env=env(app, task), check=True,
-                   capture_output=True)
-    out = {f"output/{p.name}": p.read_text() for p in (app / "output").iterdir()}
-    shutil.rmtree(app.parent, ignore_errors=True)
-    return out
+    with local.layout(task) as app:
+        failed = run_solutions.solve(task, "reference", app)
+        if failed:
+            raise SystemExit(f"{task.name}: {failed}")
+        return {f"output/{p.name}": p.read_text() for p in (app / "output").iterdir()}
 
 
 def leave_one_out(task, items, answer) -> list[str]:
@@ -153,16 +124,16 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--sample", type=int, help="tasks per family")
     a = ap.parse_args(argv)
     problems, done = [], {}
-    for p in sorted((RL / "tasks" / a.split).glob("*/task.toml")):
-        fam = tomllib.loads(p.read_text())["metadata"]["family"]
-        if fam not in CREDIT or (a.family and fam not in a.family) or done.get(fam, 0) == a.sample:
+    for d, m in local.tasks(a.split, a.family or sorted(CREDIT)):
+        fam = m["family"]
+        if done.get(fam, 0) == a.sample:
             continue
-        truth = json.loads((p.parent / "tests" / "ground_truth.json").read_text())
+        truth = json.loads((d / "tests" / "ground_truth.json").read_text())
         if truth.get("control"):
             continue                          # nothing planted
         done[fam] = done.get(fam, 0) + 1
-        found = CREDIT[fam](p.parent, truth) + (ABLATION[fam](p.parent, truth) if fam in ABLATION else [])
-        print(f"{'ok  ' if not found else 'FAIL'} {p.parent.name}" + "".join(f"\n       {x}" for x in found), flush=True)
+        found = CREDIT[fam](d, truth) + (ABLATION[fam](d, truth) if fam in ABLATION else [])
+        print(f"{'ok  ' if not found else 'FAIL'} {d.name}" + "".join(f"\n       {x}" for x in found), flush=True)
         problems += found
     if not done:
         raise SystemExit(f"no planted tasks of {sorted(CREDIT)} built under tasks/{a.split}/")

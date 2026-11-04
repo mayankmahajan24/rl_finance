@@ -16,6 +16,7 @@ dynamic = ["dependencies", "optional-dependencies"]
 rl-build = "rl_finance_cli:build"
 rl-check = "rl_finance_cli:check"
 rl-export = "rl_finance_cli:export"
+rl-run = "rl_finance_cli:run"
 
 [tool.setuptools]
 py-modules = ["rl_finance_cli"]

@@ -27,7 +27,7 @@ import yaml
 RL = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RL))
 sys.path.insert(0, str(RL / "harness"))
-import instrument as instrument_  # noqa: E402
+import instrument  # noqa: E402
 from client import USAGE_KEYS  # noqa: E402
 from families._shared import harbor  # noqa: E402
 from lib import task_meta  # noqa: E402
@@ -50,7 +50,7 @@ def identity(task_dir: pathlib.Path) -> dict:
 @functools.cache
 def instrument_sha256(family: str) -> str | None:
     """The family's instrument hash now (rl/instrument.py); None for a family not in the repo."""
-    return instrument_.sha256(family) if (RL / "families" / family / "family.yaml").exists() else None
+    return instrument.sha256(family) if (RL / "families" / family / "family.yaml").exists() else None
 
 
 def score(r: dict, metric: str = "reward") -> float | None:

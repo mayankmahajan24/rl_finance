@@ -54,12 +54,12 @@ def delete(api, file_ids: list[str]) -> None:
             pass
 
 
-def request(*, model: str, system: str, content: list[dict], max_tokens: int, effort: str | None = None,
+def request(*, model: str, content: list[dict], max_tokens: int, system: str | None = None, effort: str | None = None,
             code_execution: bool = False, skills: list[dict] | None = None) -> dict:
     """A Messages request. `content` is the user turn's blocks; uploaded files go in as
     `{"type": "container_upload", "file_id": ...}`. Skills run in the code-execution container."""
-    req = {"model": model, "max_tokens": max_tokens, "system": system,
-           "messages": [{"role": "user", "content": content}], "extra_body": {}}
+    req = {"model": model, "max_tokens": max_tokens, "messages": [{"role": "user", "content": content}],
+           "extra_body": {}, **({"system": system} if system else {})}
     if effort:
         req["extra_body"]["output_config"] = {"effort": effort}
     if code_execution or skills:

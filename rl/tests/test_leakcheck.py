@@ -86,9 +86,10 @@ def test_canary_probe_scoring():
 
 
 def test_memorisation_gap():
-    row = lambda variant, err: {"status": "ok", "model": "m", "grade": {"abs_pct_error": err, "covered": 1.0},  # noqa: E731
-                                "meta": {"series": "UAL", "target_period": "2018Q4", "variant": variant}}
-    paired = memorisation.pairs([row("named", 0.01), row("anon", 0.05), row("named", 0.5)])
+    rec = lambda task, err, attempt=0: {"status": "ok", "model": "m", "task_id": task, "attempt": attempt,  # noqa: E731
+                                        "rewards": {"abs_pct_error": err, "covered": 1.0}}
+    case_of = {"kn-UAL": ("UAL-2018Q4", "named"), "kn-AIR03-anon": ("UAL-2018Q4", "anon")}
+    paired = memorisation.pairs([rec("kn-UAL", 0.5, 1), rec("kn-AIR03-anon", 0.05), rec("kn-UAL", 0.01)], case_of)
     assert paired["m"] == [({"abs_pct_error": 0.01, "covered": 1.0}, {"abs_pct_error": 0.05, "covered": 1.0})]
     g = memorisation.gaps(paired["m"])
     assert g["abs_pct_error"]["named_advantage"] == pytest.approx(0.04) and g["covered"]["named_advantage"] == 0

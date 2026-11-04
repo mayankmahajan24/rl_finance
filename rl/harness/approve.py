@@ -17,11 +17,12 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 import instrument  # noqa: E402
+from lib import families  # noqa: E402
 
 
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--family", choices=instrument.families())
+    ap.add_argument("--family", choices=families())
     ap.add_argument("--show", action="store_true", help="print what changed since the approved commit")
     ap.add_argument("--approve", action="store_true", help="approve the current instrument")
     ap.add_argument("--by", help="who approves (required with --approve)")
@@ -39,7 +40,7 @@ def main(argv: list[str] | None = None) -> None:
         print(instrument.status(a.family)[1])
         print(instrument.diff(a.family))
     else:
-        for f in [a.family] if a.family else instrument.families():
+        for f in [a.family] if a.family else families():
             ok, why = instrument.status(f)
             print(f"{'ok  ' if ok else 'OPEN'} {why}")
 

@@ -1,7 +1,9 @@
 """Leaderboards over run records (records.py), refusing to mix instruments.
 
 A row is one condition: family, mode, runner and agent, model, skills, effort, max_tokens and judge. Its
-numbers are means over that condition's records with status ok. Before anything is averaged, every
+`reward` is the mean over the condition's scored records: a model's failures (refusal, truncated,
+timeout, parse_error) count 0, infrastructure errors and ungraded records are left out
+(records.score). Other metrics are diagnostics, averaged where the verifier reported them. Before anything is averaged, every
 task in a family must have been measured with one instrument (content_sha256 and prompt
 fingerprint) across every row of the report; a task run on two versions, or on an unrecorded one
 next to a recorded one, stops the report. --mix reports anyway, with each instrument as its own row.
@@ -31,7 +33,7 @@ def key(r: dict, by: tuple[str, ...]) -> tuple:
     def v(k):
         x = r.get(k)
         if k == "runner" and isinstance(x, dict):
-            return " ".join(str(x[f]) for f in ("name", "agent", "variant") if x.get(f))
+            return " ".join(str(x[f]) for f in ("name", "agent", "run_id") if x.get(f))
         if k == "skills" and isinstance(x, dict):
             return x.get("profile") if x.get("enabled") else "off"
         return json.dumps(x, sort_keys=True) if isinstance(x, (dict, list)) else x
@@ -61,12 +63,12 @@ def table(recs: list[dict], by: tuple[str, ...], metrics: list[str] | None, mix:
         groups[key(r, by)].append(r)
     rows = []
     for k, rs in sorted(groups.items(), key=lambda kv: [str(x) for x in kv[0]]):
-        ok = [r for r in rs if r["status"] == "ok"]
-        names = metrics or sorted({m for r in ok for m in r["rewards"]})
+        names = metrics or sorted({m for r in rs for m in r["rewards"]} | {"reward"})
         row = dict(zip(by, k), tasks=len({r["task_id"] for r in rs}), attempts=len(rs),
                    status=", ".join(f"{s} {n}" for s, n in sorted(Counter(r["status"] for r in rs).items())))
         for m in names:
-            vals = [r["rewards"][m] for r in ok if m in r["rewards"]]
+            vals = [v for v in (records.score(r, m) if m == "reward" else r["rewards"].get(m) for r in rs)
+                    if v is not None]
             row[m] = round(sum(vals) / len(vals), 4) if vals else None
         costs = [r.get("cost_usd") for r in rs]
         row["cost_usd"] = round(sum(c for c in costs if c is not None), 4) if any(c is not None for c in costs) else None

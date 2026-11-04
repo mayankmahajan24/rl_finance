@@ -11,6 +11,7 @@
   "split",
   "content_sha256",
   "fingerprint",
+  "instrument_sha256",
   "attempt",
   "runner",
   "model",
@@ -47,7 +48,7 @@
     "string",
     "null"
    ],
-   "description": "the task's content hash (FORMAT.md, Integrity); null when the run predates task bundles"
+   "description": "the content hash of the task folder that was run (FORMAT.md, Integrity); null when the task folder is unknown"
   },
   "fingerprint": {
    "type": [
@@ -56,13 +57,20 @@
    ],
    "description": "hash of exactly what the model sees; null when not recorded"
   },
+  "instrument_sha256": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "description": "the family's instrument hash (rl/instrument.py) when the record was made; null for a family not in the repo"
+  },
   "attempt": {
    "type": "integer",
    "description": "0-based repetition of the task under the same condition"
   },
   "runner": {
    "type": "object",
-   "description": "what produced the result: name (script or harbor), agent, version, variant"
+   "description": "what produced the result: name (script or harbor), agent (solver or Harbor agent), version, run_id"
   },
   "model": {
    "type": [
@@ -118,7 +126,8 @@
     "truncated",
     "parse_error",
     "not_graded"
-   ]
+   ],
+   "description": "ok; parse_error, refusal, truncated and timeout are the model's failures and score 0; error (infrastructure) and not_graded (no grader or judge) are never scored"
   },
   "rewards": {
    "type": "object",

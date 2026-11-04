@@ -33,13 +33,15 @@ import shlex
 import subprocess
 import sys
 import tempfile
-import tomllib
 
 from harbor.agents.base import BaseAgent
 from harbor.environments.base import BaseEnvironment
 from harbor.models.agent.context import AgentContext
 
 RL = pathlib.Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(RL))
+from lib import task_meta  # noqa: E402
+
 TARGETS = ["https://example.com/", "https://pypi.org/simple/", "https://api.anthropic.com/", "http://1.1.1.1/"]
 
 # runs in the container; network attempts drop the fake clock so a blocked host can't pass for a TLS failure
@@ -89,7 +91,7 @@ class SandboxProbe(BaseAgent):
 
 def verdict(task: pathlib.Path, trial: pathlib.Path, judge: bool) -> list[str]:
     """What went wrong in one trial; empty when the sandbox held."""
-    meta = tomllib.loads((task / "task.toml").read_text())["metadata"]
+    meta = task_meta(task)
     f = trial / "agent" / "probe.json"
     if not f.exists():
         return [f"no probe record under {trial}"]

@@ -1,6 +1,6 @@
 """Console entry points for the rl/ scripts (pyproject.toml [project.scripts]).
 
-`pip install -e .` from the checkout puts rl-build, rl-check and rl-export on PATH, bound to whichever Python
+`pip install -e .` from the checkout puts rl-build, rl-check, rl-export and rl-run on PATH, bound to whichever Python
 installed them, so they work from any directory and never depend on a venv's absolute paths. Each
 runs the script of the same checkout with its own arguments: `rl-build panel --split bench` is
 `python rl/build.py panel --split bench`.
@@ -33,3 +33,7 @@ def check() -> None:
 
 def export() -> None:
     _run("export.py")
+
+
+def run() -> None:
+    _run("harness/run_api.py")

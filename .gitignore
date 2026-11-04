@@ -12,6 +12,11 @@ rl/splits/secrets/
 # run scratch: console logs and applied patches (rl/runs/README.md)
 rl/runs/**/*.log
 rl/runs/**/*.patch
+# raw run outputs stay local; only run records (records.jsonl) are committed (rl/runs/README.md)
+rl/runs/**/traces/
+rl/runs/**/jobs/
+rl/runs/**/results.jsonl
+rl/runs/**/errors.jsonl
 
 # Claude subscription token for Harbor runs (setup_oauth.sh)
 .oauth.env

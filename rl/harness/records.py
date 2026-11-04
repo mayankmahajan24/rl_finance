@@ -1,45 +1,65 @@
 """Run records: one row per (task, attempt) for every run, API or Harbor, in one schema.
 
 The schema is run_record.schema.json (versioned by `schema`). A record ties a result to the exact
-instrument it was measured with: the task's content_sha256 and prompt fingerprint, the runner and its
-version, model and settings, the skills condition and the judge. report.py refuses to aggregate
-records whose instruments differ.
+instrument it was measured with: the built task's content_sha256 (hashed from the task folder that
+was run) and fingerprint, the family's instrument hash, the runner, model and settings, the skills
+condition and the judge. report.py refuses to aggregate records whose instruments differ.
 
-Runners write records as they go (`append`). Older result files are converted by the importers:
+Runners write records as they go (`append`): rl/harness/run_api.py, run_solutions.py, and Harbor
+jobs through `import-harbor` (calibrate.py runs it for its own jobs). Records carry rewards only:
+no answers, gold, breakdowns or task metadata, so they are safe to commit.
 
-    python rl/harness/records.py import                        # every known run file under rl/runs/
-    python rl/harness/records.py import-harbor <jobs_dir> --out rl/runs/harbor/<tag>/records.jsonl
+    python rl/harness/records.py import-harbor <jobs_dir> --out rl/runs/harbor/<run_id>/records.jsonl
     python rl/harness/records.py validate rl/runs/**/records.jsonl
-
-Records live beside the files they describe, as records.jsonl (or <name>.records.jsonl).
 """
 
 from __future__ import annotations
 
 import argparse
-import csv
+import functools
 import json
 import pathlib
 import sys
-import tomllib
+from collections import defaultdict
 
 import yaml
 
 RL = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RL))
-import splits  # noqa: E402
+sys.path.insert(0, str(RL / "harness"))
+import instrument  # noqa: E402
+from client import USAGE_KEYS  # noqa: E402
+from families._shared import harbor  # noqa: E402
+from lib import task_meta  # noqa: E402
 
 SCHEMA = json.loads(pathlib.Path(__file__).with_name("run_record.schema.json").read_text())
 VERSION = SCHEMA["properties"]["schema"]["const"]
 PRICES = yaml.safe_load(pathlib.Path(__file__).with_name("prices.yaml").read_text())["models"]
-USAGE_KEYS = ("input_tokens", "output_tokens", "cache_read_input_tokens", "cache_creation_input_tokens")
+FAILED = {"parse_error", "refusal", "truncated", "timeout"}   # the model failed: scored 0
+UNSCORED = {"error", "not_graded"}                            # infrastructure or no grader: never scored
 
 
-def instrument(family: str, task_id: str) -> dict:
-    """The task's identity from its family's committed manifest: split, mode, content_sha256, fingerprint."""
-    e = splits.manifest(family).get(task_id) or {}
-    return {"split": e.get("split"), "mode": e.get("mode"), "content_sha256": e.get("content_sha256"),
-            "fingerprint": e.get("fingerprint")}
+def identity(task_dir: pathlib.Path) -> dict:
+    """The task as it was run: id, family, split and mode from its metadata, content_sha256 hashed
+    from the folder itself, and the fingerprint of what the model sees."""
+    m = task_meta(task_dir)
+    return {"task_id": m["id"], "family": m["family"], "split": m.get("split"), "mode": m.get("mode"),
+            "content_sha256": harbor.content_sha256(task_dir), "fingerprint": m.get("fingerprint")}
+
+
+@functools.cache
+def instrument_sha256(family: str) -> str | None:
+    """The family's instrument hash now (rl/instrument.py); None for a family not in the repo."""
+    return instrument.sha256(family) if (RL / "families" / family / "family.yaml").exists() else None
+
+
+def score(r: dict, metric: str = "reward") -> float | None:
+    """A record's score on `metric`: the verifier's value; 0 for a failed attempt it gave none; None
+    when the record isn't scored (infrastructure error, no grader) or an ok answer has no such metric."""
+    if r["status"] in UNSCORED:
+        return None
+    v = r["rewards"].get(metric)
+    return float(v) if v is not None else (0.0 if r["status"] in FAILED else None)
 
 
 def repo_commit() -> str | None:
@@ -77,16 +97,25 @@ def cost(model: str | None, usage: dict | None) -> float | None:
 
 def make(*, task_id: str, family: str, attempt: int, runner: dict, status: str, rewards: dict | None = None,
          model: str | None = None, **fields) -> dict:
-    """A record, with the task's identity filled from the manifest unless given, validated."""
-    r = {"schema": VERSION, "task_id": task_id, "family": family, "attempt": attempt,
-         **{k: v for k, v in instrument(family, task_id).items() if k not in fields},
+    """A validated record. Pass the task's identity (`identity(task_dir)`); what isn't known stays null."""
+    r = {"schema": VERSION, "task_id": task_id, "family": family, "attempt": attempt, "split": None, "mode": None,
+         "content_sha256": None, "fingerprint": None, "instrument_sha256": instrument_sha256(family),
          "runner": runner, "model": model, "status": status, "rewards": rewards or {}, **fields}
     if "cost_usd" not in r:
-        r["cost_usd"] = cost(r.get("served_model") or model, r.get("usage"))
+        r["cost_usd"] = cost(model or r.get("served_model"), r.get("usage"))
     problems = validate(r)
     if problems:
         raise ValueError(f"{task_id}: invalid run record: {'; '.join(problems)}")
     return r
+
+
+def judge_fields(usage: dict[str, dict]) -> dict:
+    """judge_model and judge_cost_usd from a verifier's judge_usage.json ({model: usage})."""
+    if not usage:
+        return {}
+    costs = [cost(m, u) for m, u in usage.items()]
+    return {"judge_model": ",".join(sorted(usage)),
+            "judge_cost_usd": None if None in costs else round(sum(costs), 6)}
 
 
 def validate(r: dict) -> list[str]:
@@ -130,164 +159,77 @@ def numbers(d: dict | None) -> dict:
     return {k: float(v) for k, v in (d or {}).items() if isinstance(v, (int, float)) and not isinstance(v, bool)}
 
 
-def from_research_design(rec: dict, *, runner: dict, attempt: int = 0, **fields) -> dict:
-    """A research_design run.py or replay.py record."""
-    calls = rec.get("calls") or {}
-    errors = [c.get("error", "") for c in calls.values() if c.get("status") == "error"]
-    status = ("ok" if rec.get("status", "ok") == "ok" else
-              "refusal" if any(e.startswith("RuntimeError: refused") for e in errors) else
-              "truncated" if any("truncated" in e for e in errors) else "error")
-    if status == "ok" and rec.get("reward") is None:
-        status = "not_graded"
-    usage = {k: sum((c.get("usage") or {}).get(src, 0) for c in calls.values())
-             for k, src in (("input_tokens", "in"), ("output_tokens", "out"))} if calls else None
-    fp = rec.get("prompt_fingerprint")
-    return make(task_id=rec["task"], family="research_design", attempt=attempt, runner=runner, status=status,
-                model=rec["model"], rewards={"reward": rec["reward"]} if rec.get("reward") is not None else {},
-                **({"fingerprint": fp} if fp else {}),
-                **({"skills": rec["skills"]} if "skills" in rec else {}),
-                **({"judge_model": rec["scorer"]["model"]} if isinstance(rec.get("scorer"), dict) else {}),
-                **({"usage": usage} if usage else {}),
-                **({"error": "; ".join(errors)} if errors else {}), **fields)
-
-
-REPLAY = {"name": "rl/families/research_design/replay.py", "version": "case-study saved runs"}
-
-
-def from_replay(rec: dict) -> dict:
-    """A replay.py record: a case-study run re-graded. replay.py checks every fingerprint against the
-    case-study runs, so the record keeps the task's; the task bundles did not exist then, so no
-    content_sha256. The case-study runs were all skills-off."""
-    return from_research_design(rec, runner=REPLAY, content_sha256=None, skills={"enabled": False, "profile": None},
-                                note="case-study run re-graded by replay.py")
-
-
 def write(path: pathlib.Path, recs: list[dict]) -> None:
     """Replace `path` with these records (deterministic: sorted keys, no timestamps added)."""
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("".join(json.dumps(r, sort_keys=True, default=str) + "\n" for r in recs))
 
 
-def from_kpi(row: dict, *, runner: dict, trace: str | None = None, **fields) -> dict:
-    """A kpi_nowcast run.py results.jsonl or errors.jsonl row."""
-    if "failure_class" in row:
-        status = "timeout" if row["failure_class"] == "timeout" else "error"
-        return make(task_id=row["prompt_id"], family="kpi_nowcast", attempt=row["rep"], runner=runner,
-                    status=status, error=f"{row['failure_class']}: {row.get('error', '')}",
-                    **{k: row[k] for k in ("started_at",) if k in row},
-                    **({"latency_s": row["elapsed_s"]} if "elapsed_s" in row else {}), **fields)
-    status = {"ok": "ok", "refusal": "refusal", "truncated": "truncated"}.get(row.get("status"), "error")
-    if status == "ok" and row.get("parse_error"):
-        status = "parse_error"
-    usage = {k: (row.get("usage") or {}).get(k, 0) for k in USAGE_KEYS}
-    judge_cost = cost(row.get("judge_model"), row.get("judge_usage"))
-    return make(task_id=row["prompt_id"], family="kpi_nowcast", attempt=row["rep"], runner=runner, status=status,
-                model=fields.pop("model", row.get("model")), served_model=row.get("model"),
-                rewards=numbers(row.get("grade")) if status != "refusal" else {},
-                judge_model=row.get("judge_model"), usage=usage, latency_s=row.get("latency_s"),
-                **({"judge_cost_usd": judge_cost} if judge_cost is not None else {}),
-                **({"started_at": row["started_at"]} if "started_at" in row else {}),
-                **({"error": row["parse_error"]} if row.get("parse_error") else {}),
-                **({"trace": trace} if trace else {}), **fields)
+def pin_args(run_dir: pathlib.Path, args: dict) -> None:
+    """Record a run's arguments in its folder; refuse to resume it with different ones."""
+    f = run_dir / "args.json"
+    if f.exists() and json.loads(f.read_text()) != args:
+        raise SystemExit(f"{run_dir} was started with {f.read_text().strip()}; resume it with the same arguments "
+                         f"or use another --run-id")
+    run_dir.mkdir(parents=True, exist_ok=True)
+    f.write_text(json.dumps(args, indent=1) + "\n")
 
 
-def from_solutions(row: dict, *, runner: dict) -> dict:
-    """A runs/solutions/<split>.csv row (reference or naive solver, run locally)."""
-    rewards = numbers({k: float(v) for k, v in row.items()
-                       if k not in ("task", "solver", "family", "judge", "note", "no_foresight", "fastest_correct")
-                       and v not in ("", None)})
-    return make(task_id=row["task"], family=row["family"], attempt=0, runner=dict(runner, agent=row["solver"]),
-                status="ok" if not row.get("note") else "error", rewards=rewards,
-                **({"judge_model": row["judge"]} if row.get("judge") else {}))
-
-
-def from_harbor_trial(trial: pathlib.Path) -> dict:
-    """One Harbor trial directory (result.json, verifier/reward.txt or reward.json)."""
+def from_harbor_trial(trial: pathlib.Path, attempt: int, run_id: str | None = None) -> dict:
+    """One Harbor trial directory (result.json, verifier/reward.json or reward.txt, judge_usage.json)."""
     res = json.loads((trial / "result.json").read_text()) if (trial / "result.json").exists() else {}
     cfg = res.get("config") or {}
     agent = cfg.get("agent") or {}
     task_dir = pathlib.Path((cfg.get("task") or {}).get("path") or "")
-    meta = (tomllib.loads((task_dir / "task.toml").read_text()).get("metadata", {})
-            if (task_dir / "task.toml").exists() else {})
-    task_id = meta.get("id") or res.get("task_name") or trial.name.split("__")[0]
-    rewards = numbers((res.get("verifier_result") or {}).get("rewards"))
+    task_id = res.get("task_name") or trial.name.split("__")[0]
+    ident = identity(task_dir) if (task_dir / "task.toml").exists() else {"task_id": task_id, "family": "unknown"}
     v = trial / "verifier"
+    rewards = numbers((res.get("verifier_result") or {}).get("rewards"))
     if not rewards and (v / "reward.json").exists():
         rewards = numbers(json.loads((v / "reward.json").read_text()))
     elif not rewards and (v / "reward.txt").exists():
         rewards = {"reward": float((v / "reward.txt").read_text())}
     exc = res.get("exception_info")
-    status = "ok" if not exc else ("timeout" if "Timeout" in str(exc.get("exception_type", "")) else "error")
+    status = ("timeout" if exc and "Timeout" in str(exc.get("exception_type", "")) else "error" if exc else
+              "ok" if rewards else "not_graded")
     info = res.get("agent_info") or {}
     ar = res.get("agent_result") or {}
     usage = {k: x for k, x in {"input_tokens": ar.get("n_input_tokens"), "output_tokens": ar.get("n_output_tokens"),
                                "cache_read_input_tokens": ar.get("n_cache_tokens")}.items() if x is not None}
-    ident = {"content_sha256": None, "fingerprint": None}
-    if meta:
-        from families._shared import harbor
-        ident = {"content_sha256": harbor.content_sha256(task_dir),
-                 "fingerprint": meta.get("fingerprint") or (meta.get("prompt") or {}).get("fingerprint"),
-                 "split": meta.get("split"), "mode": meta.get("mode")}
+    judge = json.loads((v / "judge_usage.json").read_text()) if (v / "judge_usage.json").exists() else {}
     model = (info.get("model_info") or {}).get("name") or agent.get("model_name")
-    return make(task_id=task_id, family=meta.get("family") or "unknown", attempt=0,
+    return make(**ident, attempt=attempt, status=status, rewards=rewards, model=model, trace=str(trial),
                 runner={"name": "harbor", "agent": info.get("name") or agent.get("name") or agent.get("import_path"),
-                        "version": info.get("version")},
-                status=status, rewards=rewards, model=model, trace=str(trial),
-                **({"usage": usage} if usage else {}),
+                        "version": info.get("version"), "run_id": run_id},
+                **({"usage": usage} if usage else {}), **judge_fields(judge),
                 **({"error": f"{exc.get('exception_type')}: {str(exc.get('exception_message', ''))[:500]}"} if exc else {}),
-                **({"started_at": res["started_at"]} if res.get("started_at") else {}), **ident)
+                **({"started_at": res["started_at"]} if res.get("started_at") else {}))
 
 
-def import_all() -> list[pathlib.Path]:
-    """Convert every run file under rl/runs/ into records beside it; returns the files written."""
-    runs, written = RL / "runs", []
-
-    def out(path: pathlib.Path, recs: list[dict]) -> None:
-        write(path, recs)
-        written.append(path)
-
-    for f in sorted((runs / "research_design").glob("*/*.jsonl")):
-        if f.name.endswith(".records.jsonl"):
-            continue
-        native = [json.loads(line) for line in f.read_text().splitlines() if line.strip()]
-        convert = (from_replay if f.parent.name == "baseline" else
-                   lambda r: from_research_design(r, runner={"name": "rl/families/research_design/run.py"},
-                                                  note="imported"))
-        out(f.with_name(f.stem + ".records.jsonl"), [convert(r) for r in native])
-    for vdir in sorted(p for p in (runs / "kpi_nowcast").iterdir() if (p / "results.jsonl").exists()):
-        rows = [json.loads(line) for name in ("results.jsonl", "errors.jsonl") if (vdir / name).exists()
-                for line in (vdir / name).read_text().splitlines() if line.strip()]
-        # the pilot predates fingerprints, and its prompts have changed since: instrument unknown
-        unknown = {"fingerprint": None, "content_sha256": None,
-                   "note": f"imported from runs/kpi_nowcast/{vdir.name}; instrument not recorded"}
-        recs = []
-        for r in rows:
-            tr = vdir / "traces" / f"{r['prompt_id']}_rep{r['rep']}.json"
-            recs.append(from_kpi(r, runner={"name": "rl/families/kpi_nowcast/run.py", "variant": vdir.name},
-                                 trace=str(tr.relative_to(RL.parent)) if tr.exists() else None, **unknown))
-        out(vdir / "records.jsonl", recs)
-    for f in sorted((runs / "solutions").glob("*.csv")):
-        runner = {"name": "rl/harness/run_solutions.py"}
-        out(f.with_suffix(".records.jsonl"), [from_solutions(r, runner=runner) for r in csv.DictReader(f.open())])
-    return written
+def import_harbor(jobs: pathlib.Path, run_id: str | None = None) -> list[dict]:
+    """Every trial under a Harbor jobs folder; attempts are numbered per task and model in start order."""
+    trials = sorted({p.parent for p in jobs.rglob("result.json") if (p.parent / "verifier").is_dir()})
+    starts = {t: (json.loads((t / "result.json").read_text()).get("started_at") or "", str(t)) for t in trials}
+    out, seen = [], defaultdict(int)
+    for t in sorted(trials, key=starts.get):
+        r = from_harbor_trial(t, 0, run_id)
+        k = (r["task_id"], r["model"])
+        r["attempt"], seen[k] = seen[k], seen[k] + 1
+        out.append(r)
+    return out
 
 
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("import", help="convert the run files under rl/runs/")
     h = sub.add_parser("import-harbor", help="convert a Harbor jobs directory")
     h.add_argument("jobs", type=pathlib.Path)
     h.add_argument("--out", type=pathlib.Path, required=True)
     v = sub.add_parser("validate")
     v.add_argument("files", nargs="+", type=pathlib.Path)
     a = ap.parse_args(argv)
-    if a.cmd == "import":
-        for p in import_all():
-            print(f"{p.relative_to(RL.parent)}: {len(p.read_text().splitlines())} records")
-    elif a.cmd == "import-harbor":
-        trials = sorted({p.parent for p in a.jobs.rglob("result.json") if (p.parent / "verifier").is_dir()})
-        recs = [from_harbor_trial(t) for t in trials]
+    if a.cmd == "import-harbor":
+        recs = import_harbor(a.jobs, a.out.parent.name)
         append(a.out, recs)
         print(f"{a.out}: {len(recs)} records from {a.jobs}")
     else:

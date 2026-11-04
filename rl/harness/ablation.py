@@ -62,7 +62,9 @@ def layout(task: pathlib.Path) -> pathlib.Path:
 
 def env(app: pathlib.Path, task: pathlib.Path) -> dict:
     e = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
+    # PYTHONDONTWRITEBYTECODE: the verifier runs inside the built task's tests/, and __pycache__ there changes its hash
     return dict(e, APP_DIR=str(app), TESTS_DIR=str(task / "tests"), LOGS_DIR=str(app.parent / "logs"), JUDGE="keyword",
+                PYTHONDONTWRITEBYTECODE="1",
                 PATH=str(pathlib.Path(sys.executable).parent) + os.pathsep + os.environ["PATH"])
 
 

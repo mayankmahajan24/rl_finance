@@ -24,28 +24,24 @@ What the agent sees: instruction.md, prompt/ and environment/ (text files; .gz d
 from __future__ import annotations
 
 import gzip
+import json
 import pathlib
 import re
 
-import yaml
+import lib
 
 RL = pathlib.Path(__file__).resolve().parent
 CANARY = (RL / "canary.txt").read_text().strip()
 IDENTITY = [
     r"rl[_ -]finance", r"txn_panel", r"research_design_case", r"Finance Domain Research Lead", r"take-?home",
     r"https?://", r"(?<!\d)\d{10}-\d{2}-\d{6}(?!\d)",
-    r"(?:kn|rd|audit|anomaly|thesis)-(?:produce|review|funding|bench|heldout|train)-",
+    rf"(?:{'|'.join(lib.family(f)['task_prefix'] for f in lib.families())})-(?:produce|review|funding|bench|heldout|train)-",
     r"you are being (?:evaluated|tested|graded|benchmarked)\b",
     r"(?:this|the) (?:task|question|prompt) is (?:a|an|part of an?) (?:benchmark|eval|evaluation|test)\b",
     r"(?:benchmark|eval) (?:task|item|suite)\b", r"Anomaly Detection Exercise",
 ]
 # matched one by one against lowercased text: re.I, and one big alternation, are both slow on MBs of CSV
 IDENTITY_RES = [re.compile(p.lower()) for p in IDENTITY]
-
-
-def config(family: str) -> dict:
-    f = RL / "families" / family / "family.yaml"
-    return (yaml.safe_load(f.read_text()) or {}).get("leak_check", {}) if f.exists() else {}
 
 
 def visible(d: pathlib.Path) -> dict[str, str]:
@@ -69,7 +65,6 @@ def fields(obj, path: str) -> list:
 
 
 def gold(d: pathlib.Path, cfg: dict) -> tuple[list[str], list[str]]:
-    import json
     texts, numbers = [], []
     for kind, out in (("gold_text", texts), ("gold_numbers", numbers)):
         for name, paths in (cfg.get(kind) or {}).items():
@@ -83,21 +78,19 @@ def gold(d: pathlib.Path, cfg: dict) -> tuple[list[str], list[str]]:
     return sorted(f for f in frags if len(f) >= 40), sorted(nums)
 
 
-def allowlist(source: str) -> list[str]:
-    f = RL / "sources" / source / "source.yaml"
-    return [a["phrase"] for a in (yaml.safe_load(f.read_text()) or {}).get("identity_allowlist", [])] if f.exists() else []
-
-
-def real_names(companies: list[str]) -> list[str]:
-    from sources.txn_panel import panel
-    c = panel.companies()
-    names = [x for n in companies if n in c for x in (n, c[n]["name"], *c[n]["sensors"], *c[n]["series"])]
+def real_names(source: str, companies: list[str]) -> list[str]:
+    """Every real name, ticker and series id of the companies; raises on a company the source doesn't know."""
+    c = lib.entities(source)
+    unknown = sorted(set(companies) - set(c))
+    if unknown:
+        raise SystemExit(f"{source}: unknown companies {unknown}, not in its entities file")
+    names = [x for n in companies for x in (n, c[n]["name"], *c[n]["sensors"], *c[n]["series"])]
     return sorted({x for x in names if len(x) >= 2})
 
 
 def task_problems(d: pathlib.Path, meta: dict) -> list[str]:
     """Everything wrong with what this task's agent sees."""
-    cfg, tid, out = config(meta.get("family", "")), d.name, []
+    cfg, tid, out = lib.family(meta["family"]).get("leak_check") or {}, d.name, []
     vis = visible(d)
     flat = {k: re.sub(r"\s+", " ", v) for k, v in vis.items()}
     texts, nums = gold(d, cfg)
@@ -107,7 +100,7 @@ def task_problems(d: pathlib.Path, meta: dict) -> list[str]:
     for n in nums:
         out += [f"{tid}: gold value {n} visible in {k}" for k, v in vis.items()
                 if pathlib.Path(k).name not in exempt and re.search(rf"(?<![\d.,]){re.escape(n)}(?![\d,]|\.\d)", v)]
-    allowed = [a.lower() for a in allowlist(meta.get("source", ""))]
+    allowed = [a["phrase"].lower() for a in lib.source(meta["source"]).get("identity_allowlist", [])]
     for k, v in flat.items():
         low = v.lower()
         hits = {m.group(0) for r in IDENTITY_RES for m in r.finditer(low)}
@@ -116,7 +109,7 @@ def task_problems(d: pathlib.Path, meta: dict) -> list[str]:
     anon = cfg.get("anonymised")
     if anon and (anon == "all" or anon.get("tag") in meta.get("tags", [])):
         skip = set(anon.get("exempt", [])) if isinstance(anon, dict) else set()
-        names = real_names(meta.get("companies", []))
+        names = real_names(meta["source"], meta.get("companies", []))
         names_re = re.compile(r"\b(?:" + "|".join(map(re.escape, names)) + r")\b") if names else None
         for k, v in flat.items():
             if names_re and pathlib.Path(k).name not in skip:

@@ -37,7 +37,8 @@ grader_only:
   kpi_quarterly.csv: first-reported and restated value per quarter
 
 families: [kpi_nowcast, data_audit, anomaly_scoring, growth_thesis]
-splits: ../../splits/txn_panel.yaml
+company_split: ../../splits/txn_panel.yaml   # which split each company is in (rl/splits/)
+entities: annotations/entities.yaml           # the companies, and the names, tickers and series ids of each
 
 # Phrases agent-visible files may contain although rl/leakcheck.py would flag them as identifying.
 identity_allowlist:

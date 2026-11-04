@@ -41,7 +41,7 @@ def edit(d: pathlib.Path, rel: str, old: str, new: str, rehash: bool = True) -> 
 
 
 def problems(release: bool = False) -> list[str]:
-    return check.check(release)
+    return check.check() + (check.release_problems(list(lib.iter_tasks())) if release else [])
 
 
 def test_clean_task_passes(tree):

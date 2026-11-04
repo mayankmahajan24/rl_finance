@@ -18,7 +18,7 @@ tests/provenance.json and summarizes them in [metadata.provenance].
 
 An approval binds to `sha256`: a file that changed after review counts as unreviewed again.
 `rl/review/review.py` is where entries get reviewed; splits/check.py --release (and so export) refuses a
-bench or held-out task whose gold is not all approved and current.
+task in any exportable split (train, bench, eval) whose gold is not all approved and current.
 """
 
 from __future__ import annotations
@@ -29,6 +29,8 @@ import pathlib
 from datetime import datetime, timezone
 
 import yaml
+
+import lib
 
 RL = pathlib.Path(__file__).resolve().parent
 KINDS = ("gold", "rubric", "grader_facts", "annotation", "generator", "reference")
@@ -63,15 +65,7 @@ def sha256(path: str) -> str | None:
         return None
     if len(fs) == 1 and fs[0] == RL / path:
         return hashlib.sha256(fs[0].read_bytes()).hexdigest()
-    h = hashlib.sha256()
-    for p in fs:
-        h.update(str(p.relative_to(RL)).encode() + b"\0" + hashlib.sha256(p.read_bytes()).hexdigest().encode() + b"\n")
-    return h.hexdigest()
-
-
-def gold_inputs(family: str) -> list[str]:
-    f = RL / "families" / family / "family.yaml"
-    return list((yaml.safe_load(f.read_text()) or {}).get("gold_inputs", [])) if f.exists() else []
+    return lib.tree_sha256(RL, [str(p.relative_to(RL)) for p in fs])
 
 
 def state(entry: dict | None, path: str) -> str:
@@ -89,11 +83,11 @@ def _cached() -> dict[str, dict]:
     return load()
 
 
-def for_family(family: str, fresh: bool = False) -> list[dict]:
+def for_family(family: str) -> list[dict]:
     """The provenance entries of a family's gold inputs, with each one's current state."""
-    idx = load() if fresh else _cached()
+    idx = _cached()
     return [{**{k: v for k, v in (idx.get(p) or {"path": p}).items() if k != "index"}, "state": state(idx.get(p), p)}
-            for p in gold_inputs(family)]
+            for p in lib.family(family).get("gold_inputs", [])]
 
 
 def summary(entries: list[dict]) -> dict:
@@ -133,6 +127,7 @@ def problems() -> list[str]:
             out.append(f"{p}: produced_by.type must be human, model, code or unrecorded")
         if sha256(p) is None:
             out.append(f"{p}: in {e['index']} but no such file")
-    for fam in sorted(d.name for d in (RL / "families").iterdir() if (d / "family.yaml").exists()):
-        out += [f"{fam}: gold input {p} has no provenance entry" for p in gold_inputs(fam) if p not in idx]
+    for fam in lib.families():
+        out += [f"{fam}: gold input {p} has no provenance entry" for p in lib.family(fam).get("gold_inputs", [])
+                if p not in idx]
     return out

@@ -40,6 +40,12 @@ def test_train_needs_a_count():
     assert all(CFG["retired_below"] <= s < CFG["bench"]["seed_start"] for s, _ in got)
 
 
+def test_fixed_sets_refuse_a_count():
+    for split in ("bench", "heldout"):
+        with pytest.raises(ValueError, match=f"{split} is a fixed set: n and controls apply to train only"):
+            splits.seeds("data_audit", split, n=3)
+
+
 def test_task_ids_never_contain_the_seed():
     for split, seed, ctl, i in (("heldout", 123456789, False, 1), ("heldout", 987654321, True, 2),
                                 ("bench", 200000, False, 1)):

@@ -13,4 +13,4 @@ licence:
     built on this source is exported until it is.
 
 families: [research_design]
-splits: none (one eval set until whole worlds can be held out)
+company_split: null   # one eval set until whole worlds can be held out

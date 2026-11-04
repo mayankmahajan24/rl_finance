@@ -64,9 +64,14 @@ def test_identity_and_allowlist(task):
 
 def test_disguise(task):
     d, m = task("bench", "kn-produce-AIR02-2017Q4-anon")
-    real = leakcheck.real_names(m["companies"])[0]
+    real = leakcheck.real_names(m["source"], m["companies"])[0]
     plant(d, "prompt/user.md", f"(This is {real}.)")
     assert any(f"real name {real!r}" in x for x in leakcheck.task_problems(d, m))
+
+
+def test_disguise_of_an_unknown_company_raises():
+    with pytest.raises(SystemExit, match=r"txn_panel: unknown companies \['XYZ'\], not in its entities file"):
+        leakcheck.real_names("txn_panel", ["DAL", "XYZ"])
 
 
 def test_canary(task):

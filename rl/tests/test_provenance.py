@@ -35,6 +35,7 @@ def rl(tmp_path, monkeypatch):
         "review": {"status": "draft", "reviewer": None, "reviewed_at": None, "reason": None},
         "blind": {"question": "What is the answer?"}}]))
     monkeypatch.setattr(provenance, "RL", tmp_path)
+    monkeypatch.setattr(lib, "FAMILIES", tmp_path / "families")
     monkeypatch.setattr(review_queue, "RL", tmp_path)
     monkeypatch.setattr(review_queue, "DECISIONS", tmp_path / "decisions.jsonl")
     monkeypatch.setattr(review_queue, "EXAMPLES", tmp_path / "examples.jsonl")
@@ -45,12 +46,12 @@ def rl(tmp_path, monkeypatch):
 
 
 def test_approval_binds_to_the_content(rl):
-    assert provenance.summary(provenance.for_family("fam", fresh=True)) == {
+    assert provenance.summary(provenance.for_family("fam")) == {
         "status": "unapproved", "files": 1, "unapproved": [GOLD]}
     provenance.review(GOLD, "approved", "Reviewer")
-    assert provenance.summary(provenance.for_family("fam", fresh=True))["status"] == "approved"
+    assert provenance.summary(provenance.for_family("fam"))["status"] == "approved"
     (rl / GOLD).write_text('{"answer": 2}\n')
-    assert provenance.for_family("fam", fresh=True)[0]["state"] == "changed"
+    assert provenance.for_family("fam")[0]["state"] == "changed"
 
 
 def test_index_problems(rl):
@@ -77,7 +78,7 @@ def test_review_session(rl):
     assert log[1]["blind_label"] == "1" and log[2]["reason"] == "wrong field"
     assert [json.loads(x)["path"] for x in (rl / "examples.jsonl").read_text().splitlines()] == ["sources/s/z.json"]
     assert review_queue.items() == []
-    assert provenance.for_family("fam", fresh=True)[1]["state"] == "rejected"
+    assert provenance.for_family("fam")[1]["state"] == "rejected"
 
 
 def test_edit_and_reject_need_a_reason(rl):
@@ -97,18 +98,18 @@ def tree(tmp_path, monkeypatch):
 
 
 def test_release_refuses_unapproved_gold(tree):
-    assert check.provenance_problems(tree, lib.task_meta(tree), release=False) == []
-    p = check.provenance_problems(tree, lib.task_meta(tree), release=True)
+    assert check.provenance_problems(tree, lib.task_meta(tree)) == []
+    p = check.gold_approval_problems(tree, lib.task_meta(tree))
     assert p and p[0].startswith(f"{TASK}: gold not approved: ")
 
 
 def test_task_built_as_approved_after_approval_was_lost(tree):
     edit(tree, "task.toml", 'status = "unapproved"', 'status = "approved"')
-    assert check.provenance_problems(tree, lib.task_meta(tree), release=False)[0].startswith(
+    assert check.provenance_problems(tree, lib.task_meta(tree))[0].startswith(
         f"{TASK}: built as approved, but ")
 
 
 def test_task_without_provenance(tree):
     (tree / "tests" / "provenance.json").unlink()
-    assert check.provenance_problems(tree, lib.task_meta(tree), release=False) == [
+    assert check.provenance_problems(tree, lib.task_meta(tree)) == [
         f"{TASK}: no gold provenance recorded (rebuild)"]

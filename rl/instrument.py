@@ -3,8 +3,9 @@ that exact hash.
 
 The instrument is everything that decides what a model sees and how it is scored: prompts and
 instructions, schemas, graders, judge rubrics, verifier, builder or generator, and the shared task
-writer. Each family lists its files (globs allowed, relative to rl/) under `instrument` in
-family.yaml. `families/<family>/approval.yaml` records the approved hash, who approved it, when,
+writer. Each family lists its own files (globs allowed, relative to rl/) under `instrument` in
+family.yaml; the shared writer and verifier helpers (and the judge, for a family with a `judge`)
+are included without being listed. `families/<family>/approval.yaml` records the approved hash, who approved it, when,
 at which commit, and each file's hash, so a reviewer can see exactly what changed since:
 
     approved:   {sha256, approved_by, approved_at, commit, note, files: {path: sha256}} or null
@@ -19,27 +20,23 @@ from __future__ import annotations
 
 import hashlib
 import pathlib
-import subprocess
 from datetime import datetime, timezone
 
 import yaml
 
+import lib
+
 RL = pathlib.Path(__file__).resolve().parent
 HEADER = ("# Instrument approval (rl/instrument.py). Written by rl/harness/approve.py; don't hand-edit.\n")
-
-
-def family_yaml(family: str) -> dict:
-    return yaml.safe_load((RL / "families" / family / "family.yaml").read_text())
-
-
-def families() -> list[str]:
-    return sorted(d.name for d in (RL / "families").iterdir() if (d / "family.yaml").exists())
+SHARED = ["families/_shared/harbor.py", "families/_shared/verify_common.py"]   # every family's writer and verifier
+JUDGE = "families/_shared/judge.py"
 
 
 def files(family: str) -> list[str]:
     """The family's instrument files, relative to rl/, globs expanded; a pattern matching nothing is an error."""
+    fam = lib.family(family)
     out = []
-    for pat in family_yaml(family).get("instrument", []):
+    for pat in [*fam.get("instrument", []), *SHARED, *([JUDGE] if "judge" in fam else [])]:
         found = sorted(str(p.relative_to(RL)) for p in RL.glob(pat) if p.is_file())
         if not found:
             raise SystemExit(f"{family}: instrument entry {pat} matches no file")
@@ -52,10 +49,7 @@ def file_hashes(family: str) -> dict[str, str]:
 
 
 def sha256(family: str) -> str:
-    h = hashlib.sha256()
-    for f, s in file_hashes(family).items():
-        h.update(f.encode() + b"\0" + s.encode() + b"\n")
-    return h.hexdigest()
+    return lib.tree_sha256(RL, files(family))
 
 
 def approval(family: str) -> dict:
@@ -83,20 +77,16 @@ def require_approved(family: str) -> None:
         raise SystemExit(f"{why}.\nReview it (python rl/harness/approve.py --family {family} --show), then approve it.")
 
 
-def _git(*a) -> str:
-    return subprocess.run(["git", *a], cwd=RL, capture_output=True, text=True).stdout
-
-
 def approve(family: str, by: str, note: str = "") -> dict:
     """Record approval of the family's current instrument. Its files must be committed, so the approved
     content can always be recovered from the recorded commit."""
-    dirty = _git("status", "--porcelain", "--", *files(family)).strip()
+    dirty = lib.git("status", "--porcelain", "--", *files(family))
     if dirty:
         raise SystemExit(f"{family}: commit the instrument files first:\n{dirty}")
     a = approval(family)
     entry = {"sha256": sha256(family), "approved_by": by,
              "approved_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-             "commit": _git("rev-parse", "HEAD").strip(), "note": note or None, "files": file_hashes(family)}
+             "commit": lib.git("rev-parse", "HEAD"), "note": note or None, "files": file_hashes(family)}
     history = ([a["approved"]] if a["approved"] else []) + a.get("history", [])
     out = {"approved": entry, "history": history}
     (RL / "families" / family / "approval.yaml").write_text(HEADER + yaml.safe_dump(out, sort_keys=False, width=100))
@@ -113,7 +103,7 @@ def diff(family: str) -> str:
     if not changed and not gone:
         return f"unchanged since {a['commit'][:12]}"
     added = [f for f in changed if f not in a["files"]]
-    text = _git("diff", a["commit"], "--", *[f for f in changed if f not in added], *gone)
+    text = lib.git("diff", a["commit"], "--", *[f for f in changed if f not in added], *gone)
     text += "".join(f"\n+++ new instrument file {f}\n" + (RL / f).read_text() for f in added)
     # uncommitted edits show too: git diff <commit> compares with the working tree
     return text

@@ -20,6 +20,7 @@ RL = pathlib.Path(__file__).resolve().parent
 ROOT = RL.parent
 TASKS = RL / "tasks"
 FAMILIES = RL / "families"
+SOURCES = RL / "sources"
 WORLDS = RL / "worlds"
 
 
@@ -36,8 +37,34 @@ def family(family_id: str) -> dict:
     return yaml.safe_load(f.read_text()) or {}
 
 
+def sources() -> list[str]:
+    """Every source id: a folder under sources/ with a source.yaml."""
+    return sorted(d.name for d in SOURCES.iterdir() if (d / "source.yaml").exists())
+
+
+def source(source_id: str) -> dict:
+    """A source's source.yaml. Raises if the source doesn't exist."""
+    f = SOURCES / source_id / "source.yaml"
+    if not f.exists():
+        raise SystemExit(f"unknown source {source_id!r} (no {f.relative_to(ROOT)})")
+    return yaml.safe_load(f.read_text()) or {}
+
+
+def entities(source_id: str) -> dict[str, dict]:
+    """{company: {name, sensors, series, ...}} from the entities file the source declares."""
+    return yaml.safe_load((SOURCES / source_id / source(source_id)["entities"]).read_text())["companies"]
+
+
 def git(*args: str) -> str:
     return subprocess.run(["git", *args], cwd=RL, capture_output=True, text=True).stdout.strip()
+
+
+def tree_sha256(root: pathlib.Path, paths: list[str]) -> str:
+    """sha256 over files (path relative to root, and content), in the order given."""
+    h = hashlib.sha256()
+    for p in paths:
+        h.update(p.encode() + b"\0" + hashlib.sha256((root / p).read_bytes()).hexdigest().encode() + b"\n")
+    return h.hexdigest()
 
 
 def fingerprint(*parts: str) -> str:
@@ -83,9 +110,3 @@ def iter_tasks(family: str | None = None):
         if family is None or m.get("family") == family:
             yield p.parent, m
 
-
-def load_task(task_id: str) -> tuple[pathlib.Path, dict]:
-    for d, t in iter_tasks():
-        if t["id"] == task_id:
-            return d, t
-    raise KeyError(task_id)

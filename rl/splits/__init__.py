@@ -1,6 +1,6 @@
 """Split assignments: which companies and which seeds belong to train, bench and heldout.
 
-A split is decided per source by company (splits/<source>.yaml) and, for generated families, by
+A split is decided per source by company (the `company_split` file its source.yaml names) and, for generated families, by
 seed (splits/seeds.yaml; held-out seeds in splits/secrets/). Builders ask this module rather than
 reading the files, so the rules live in one place, and record what they built in
 splits/manifests/<family>.json. splits/check.py verifies built tasks obey the rules.
@@ -18,15 +18,26 @@ import random
 
 import yaml
 
+import lib
+
 HERE = pathlib.Path(__file__).resolve().parent
 SPLITS = ("train", "bench", "heldout")
 UNSPLIT, RETIRED = "eval", "retired"
+NEVER = {"heldout", RETIRED}        # never exported; every other split is release-gated
 SECRETS = HERE / "secrets"
 MANIFESTS = HERE / "manifests"
 
 
+def split_sources() -> list[str]:
+    """Sources whose companies are assigned to splits (source.yaml `company_split`)."""
+    return [s for s in lib.sources() if lib.source(s).get("company_split")]
+
+
 def assignment(source: str) -> dict:
-    return yaml.safe_load((HERE / f"{source}.yaml").read_text())
+    f = lib.source(source).get("company_split")
+    if not f:
+        raise SystemExit(f"source {source} has no company_split in its source.yaml")
+    return yaml.safe_load((lib.SOURCES / source / f).read_text())
 
 
 def companies(source: str, split: str) -> list[str]:
@@ -80,20 +91,20 @@ def _draw_heldout(family: str) -> dict[str, list[int]]:
 
 
 def seeds(family: str, split: str, n: int | None = None, controls: int | None = None) -> list[tuple[int, bool]]:
-    """[(seed, is_control)] for one family in one split. `n`/`controls` override the configured
-    counts (train has none configured; it takes whatever the caller asks for)."""
-    cfg = _seed_config()
+    """[(seed, is_control)] for one family in one split. Only train takes `n`/`controls` (it has no
+    configured size); bench and held-out are fixed sets."""
+    if split != "train" and (n, controls) != (None, None):
+        raise ValueError(f"{split} is a fixed set: n and controls apply to train only")
+    if split == "train" and n is None:
+        raise ValueError("train: pass n (how many seeds to build)")
     if split == "heldout":
         h = _draw_heldout(family)
-        ss, cc = h["seeds"], h["controls"]
-        return [(s, False) for s in ss[:n]] + [(s, True) for s in cc[:controls]]
-    c = cfg[split]
-    n = c.get("seeds_per_family") if n is None else n
-    controls = c.get("controls_per_family", 0) if controls is None else controls
-    if n is None:
-        raise ValueError(f"{split}: pass n (how many seeds to build)")
+        return [(s, False) for s in h["seeds"]] + [(s, True) for s in h["controls"]]
+    c = _seed_config()[split]
+    if split == "bench":
+        n, controls = c["seeds_per_family"], c["controls_per_family"]
     return ([(c["seed_start"] + i, False) for i in range(n)]
-            + [(c["control_start"] + i, True) for i in range(controls)])
+            + [(c["control_start"] + i, True) for i in range(controls or 0)])
 
 
 def manifest(family: str) -> dict[str, dict]:

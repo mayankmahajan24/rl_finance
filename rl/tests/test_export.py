@@ -27,8 +27,8 @@ def tree(tmp_path, monkeypatch):
 
 
 def licence(monkeypatch, status: str) -> None:
-    real = export.source_yaml
-    monkeypatch.setattr(export, "source_yaml", lambda s: dict(real(s), licence={"status": status, "note": "test"}))
+    real = lib.source
+    monkeypatch.setattr(lib, "source", lambda s: dict(real(s), licence={"status": status, "note": "test"}))
 
 
 def stamped(monkeypatch, tasks) -> None:
@@ -45,16 +45,29 @@ def test_heldout_and_retired_are_never_exported(tree):
 def test_uncleared_source_is_refused(tree, monkeypatch):
     tasks = export.select("bench", None)
     stamped(monkeypatch, tasks)
-    clean = dict(run_check=lambda release: [])
+    monkeypatch.setattr(export, "split_check", lambda tasks: [])
     licence(monkeypatch, "unknown")
-    assert export.refusals("bench", "eval", tasks, "0.1.0", False, **clean) == [
+    assert export.refusals("bench", "eval", tasks, "0.1.0", False) == [
         "source txn_panel: licence.status unknown does not clear eval use "
         "(needs licensed_for_eval or licensed_for_training or public)"]
-    assert export.refusals("bench", "eval", tasks, "0.1.0", True, **clean) == []       # --preview only
+    assert export.refusals("bench", "eval", tasks, "0.1.0", True) == []       # --preview only
     licence(monkeypatch, "licensed_for_eval")
-    assert export.refusals("bench", "eval", tasks, "0.1.0", False, **clean) == []
-    assert export.refusals("bench", "training", tasks, "0.1.0", False, **clean)[0].startswith(
-        "source txn_panel: licence.status licensed_for_eval does not clear training use")
+    assert export.refusals("bench", "eval", tasks, "0.1.0", False) == []
+
+
+def test_training_use_is_for_train_only(tree):
+    for split in ("bench", "eval"):
+        assert export.refusals(split, "training", export.select("bench", None), "0.1.0", False) == [
+            f"{split} tasks are for evaluation: only train tasks may be exported for training use"]
+
+
+def test_unapproved_eval_task_is_refused(tmp_path, monkeypatch):
+    monkeypatch.setattr(lib, "TASKS", tmp_path / "tasks")
+    tid = "rd-review-S1-A"
+    shutil.copytree(built("eval", tid), tmp_path / "tasks" / "eval" / tid)
+    p = export.refusals("eval", "eval", export.select("eval", None), "0.1.0", False)
+    assert any(x.startswith(f"split check --release: {tid}: gold not approved: ") for x in p)
+    assert any(x.startswith("split check --release: research_design: instrument never approved") for x in p)
 
 
 def test_dirty_build_is_refused(tree, monkeypatch):
@@ -70,7 +83,8 @@ def test_unstamped_build_and_missing_changelog_are_refused(tree, monkeypatch):
     tasks = export.select("bench", None)
     licence(monkeypatch, "public")
     monkeypatch.setattr(export, "commit_timestamp", lambda c: "2000-01-01T00:00:00+00:00")
-    p = export.refusals("bench", "eval", tasks, "9.9.9", False, run_check=lambda release: [])
+    monkeypatch.setattr(export, "split_check", lambda tasks: [])
+    p = export.refusals("bench", "eval", tasks, "9.9.9", False)
     assert p[0] == "release/CHANGELOG.md has no '## 9.9.9' entry"
     assert p[1].startswith("tasks are stamped") and "SOURCE_DATE_EPOCH" in p[1]
 

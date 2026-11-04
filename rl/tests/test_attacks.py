@@ -1,6 +1,6 @@
 """Reward-hacking suite (rl/harness/attacks.py) on a sample: every attack scores well below a good
-answer on one task per family (bench, and eval for research_design), and nothing planted in /tests before the grader's upload
-survives test.sh."""
+answer on one bench task per family and every research_design compare task (eval), and nothing
+planted in /tests before the grader's upload survives test.sh."""
 
 from __future__ import annotations
 
@@ -17,7 +17,8 @@ from local import harbor
 def test_attacks_score_well_below_good_answers():
     built("bench", "audit-bench-001")
     built("eval", "rd-funding-S1")
-    rows, problems = attacks.run(attacks.select("bench", None, 1) + attacks.select("eval", ["research_design"], 1))
+    # every compare task: one random pick scores 0 or 1, so its expected 0.25 needs the whole set
+    rows, problems = attacks.run(attacks.select("bench", None, 1) + attacks.select("eval", ["research_design"], None))
     assert {r["family"] for r in rows} == {"data_audit", "anomaly_scoring", "growth_thesis", "kpi_nowcast",
                                            "research_design"}
     assert problems == [], "\n".join(problems)

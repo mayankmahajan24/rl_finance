@@ -10,11 +10,12 @@ hashes, in `splits/manifests/<family>.json`.
   instruction.md        what a Harbor agent is given
   task.toml             Harbor config; [metadata] is the repo's task metadata (below). Never shown to the model
   environment/          MODEL-VISIBLE: Dockerfile + data/ (mounted at /app/data; .gz files unpacked in the image)
-  prompt/               MODEL-VISIBLE: the exact messages the repo's API runners send (system.md,
-                        user.md or user.AB.md + user.BA.md, inputs.json). Families with an API runner only
-  tests/                GRADER-ONLY: test.sh, the verifier and graders, gold (gold.json or ground_truth.json),
-                        reference outputs, provenance.json (who produced each gold input, and its
-                        review state). Harbor copies it in only after the agent finishes
+  prompt/               MODEL-VISIBLE, some families: the fingerprinted system and user messages
+                        instruction.md was rendered from (kpi_nowcast, research_design)
+  tests/                GRADER-ONLY: test.sh, the verifier and graders, gold.json, CANARY, reference
+                        outputs, provenance.json (who produced each gold input, and its review state);
+                        judged tasks also judge.py, judge.json and client.py. Harbor copies it in
+                        only after the agent finishes
   solution/             reference solution for Harbor's oracle agent, where one exists
   checksums.sha256      sha256 of every other file in the task; `sha256sum -c checksums.sha256` verifies it
 ```
@@ -25,7 +26,8 @@ build and in `splits/check.py`. It fails a task when anything the agent sees con
 gold fields (`leak_check` in `family.yaml`), identifying text (repo, source or upstream names, URLs,
 SEC accession numbers, task ids, benchmark framing; `identity_allowlist` in `source.yaml` allows a
 phrase, with the reason), a real company name, ticker or series id in an anonymised task, or the
-release canary. `splits/check.py` also fails if a grader-only file sits where the agent can see it.
+release canary. `splits/check.py` also fails if a grader-only file (`harbor.GRADER_ONLY`: gold.json,
+CANARY) sits where the agent can see it.
 
 **Contamination.** Every task's grader-only `tests/CANARY` holds the release's canary
 (`canary.txt`, replaced with each release), and the export's datasheet prints it.
@@ -34,13 +36,12 @@ release canary. `splits/check.py` also fails if a grader-only file sits where th
 anonymised variants of the same kpi_nowcast case: a named-variant advantage suggests memory of the
 real company.
 
-**Two ways to run a task.** Harbor runs the agent in the container from `instruction.md`; the
-verifier writes `reward.txt`, or `reward.json` when a family reports several named metrics
-(kpi_nowcast) or has no grader yet (empty). The repo's API runners (`families/<family>/run.py`)
-send `prompt/` through the Messages API and grade with the same graders. For research_design and
-kpi_nowcast, `instruction.md` is the system and user message plus a note on where the files are
-and where to write the answer; the fingerprint covers the API messages, so a Harbor run and an API
-run of the same task are comparable only up to that note.
+**Two ways to run a task.** Harbor runs the agent in the container from `instruction.md`.
+`harness/run_api.py` sends the same `instruction.md` and `/app/data` files through the Messages API
+(in a code-execution container for a family with `tools: [code_execution]` in `family.yaml`), writes
+the files the model returns into a local copy of the container layout, and runs the same verifier
+(`harness/local.py`). Either way the verifier writes `reward.txt`, or `reward.json` with `reward` in
+[0, 1] beside named diagnostics; an empty `reward.json` means not graded (the judge was unavailable).
 
 ## Integrity
 
@@ -58,8 +59,8 @@ Every task can be checked on its own, without the repo:
 
 `python rl/splits/check.py` checks all of this for every built task. Before handing tasks to
 anyone, run `python rl/splits/check.py --release`: it also requires every task to come from one
-commit with no uncommitted changes, and every bench and held-out task's gold to be approved (Gold
-provenance, below). Commit first, then rebuild, then check.
+commit with no uncommitted changes, and every task's family instrument and gold to be approved,
+every split but `retired` (Gold provenance, below). Commit first, then rebuild, then check.
 
 ## Point in time
 
@@ -88,14 +89,14 @@ families have no as-of date: their data carries no "today" for a model to exploi
 `splits/check.py` fails when a task's policy is missing, isn't `no-network` for the agent, or
 disagrees with that record, and when a dated task lacks `as_of` or its pinned clock.
 `python rl/harness/sandbox_probe.py <task>...` runs tasks in Docker with an agent that only tries
-to reach public hosts and read the clock; it fails if any request gets a response (`--judge` also
+to reach public hosts and read the clock; it fails if any request gets a response (`--with-judge` also
 checks that a judged verifier still reaches its API). Harbor's Docker egress control answers DNS
 from the container's resolver even with no network, so a name still resolves; nothing beyond it
 connects.
 
 ## Every part counts
 
-`splits/check.py` (check 7) fails a task when:
+`splits/check.py` (check 9) fails a task when:
 - a `/app/data` file the instruction names isn't in the image
 - an output the instruction asks for is never read by the verifier
 - the reference solution imports a package the agent's image lacks
@@ -114,7 +115,7 @@ empty, malformed, placeholder, copied-input, random, extreme, over-long and prom
 outputs, edits to `/app/data`, modules planted in `/tests` before the grader is uploaded, and, for
 prose graded by a judge or keyword grader, padding, hedging, restating the brief and keyword
 stuffing. Each family's mean must stay a margin below good answers (reference solution, gold
-forecast, gold pick); pytest runs it on one bench task per family. Because Harbor uploads `tests/`
+forecast, gold pick in both orders); pytest runs it on one bench task per family and every research_design compare task. Because Harbor uploads `tests/`
 by merging into whatever is at `/tests`, every task ships `tests/FILES`, and `test.sh` deletes
 anything else there and clears `PYTHONPATH` before running the verifier.
 
@@ -128,15 +129,15 @@ anything else there and clears `PYTHONPATH` before running the verifier.
 | `role` | Who does this work at a fund: `fundamental_analyst`, `quant_researcher`, `pm`, `risk` |
 | `workflow` | The job within the role, e.g. `research_design`, `kpi_nowcast`, `data_audit` |
 | `mode` | `produce` (do the work), `review` (find what is wrong with given work), `compare` (choose between two pieces of work), `revise` (fix work given a critique) |
-| `world` | The fund this task runs inside; see `worlds/<id>/world.yaml` |
-| `status` | `graded` (gold exists, grader runs), `ungraded` (gold missing), `needs_rubric` (no grader yet) |
+| `world` | The kind of fund the task is set in (research_design: the firm brief from `sources/research_design_case/contexts.json`) |
+| `status` | `graded`: gold exists and the grader runs (every task built today) |
 | `split` | `train`, `bench`, `heldout`; `eval` for a source with no split assignment; `retired` for a retired case (`splits/README.md`). Always the folder the task is in |
 | `companies` | Companies whose data the task contains (sources with a company split) |
 | `as_of` | The date the task is set on (dated families): nothing after it is in the data, and the container's clock reads it |
-| `environment` | `internet` (always false) and `verifier_hosts`, the network policy `task.toml` enforces (Point in time, above). kpi_nowcast adds the API runner's `tools` |
+| `environment` | `internet` (always false) and `verifier_hosts`, the network policy `task.toml` enforces (Point in time, above); kpi_nowcast also records its `tools` |
 | `seed`, `control` | Generator seed and whether nothing was planted (generated families; held-out tasks record no seed) |
-| `fingerprint` or `prompt.fingerprint` | Hash of exactly what the model sees. Two runs are comparable only if fingerprints match |
-| `prompt.template` | The template the prompt was rendered from |
+| `case` | The unit that never straddles splits: kpi_nowcast's series and quarter (`ALK-2017Q4`), research_design's base seed (`S2`), the task id for the generated families |
+| `fingerprint` | Hash of exactly what the model sees. Two runs are comparable only if fingerprints match |
 | `output_schema`, `grader`, `sources`, `meta` | Response schema, grader type and parameters, where every piece came from, grader-side facts about the task |
 | `provenance` | the review state of the family's gold inputs: `status` (`approved` only when every one is approved and unchanged since review), `files`, and the `unapproved` ones. Details per file in `tests/provenance.json` (Gold provenance, below) |
 | `build` | the build record (Integrity, above) |
@@ -148,14 +149,14 @@ TOML has no null: a field with no value is absent.
 | Family | Mode | Grader | Reward |
 |---|---|---|---|
 | research_design | review | `graders/review_issues.py` | blocking-issue recall − 0.1 × manufactured − 0.2 × contradicts-gold, clamped to [0, 1] |
-| research_design | compare | `graders/pairwise_pick.py` | 1 if the pick matches gold, averaged over both orderings (a Harbor run sees AB only) |
-| research_design | produce | none yet | an expert rubric is needed |
-| kpi_nowcast | produce | `grader.py` + `judge.md` | named metrics: forecast accuracy (code) and C1–C12 write-up rubric (LLM judge) |
+| research_design | compare | `graders/pairwise_pick.py` | the task shows both orderings and the agent answers `{"AB": {"winner": ...}, "BA": {...}}`; 1 only if both picks name gold's plan (always "A" scores 0) |
+| kpi_nowcast | produce | `grader.py` + `judge.md` | skill vs the naive forecast, clamped to [0, 1] (code); accuracy and the C1–C12 write-up rubric (LLM judge) as diagnostics |
 | data_audit, anomaly_scoring, growth_thesis | review / produce | `verifier/*.py` | see each `family.yaml` |
 
 Every model-graded verifier (growth_thesis memo, research_design review scorer, kpi_nowcast write-up)
-calls the shared judge, `families/_shared/judge.py`, copied into `tests/` with `tests/judge.json`:
-the family's pinned judge (`judge` in `family.yaml`: model, effort, votes, max tokens). It retries
+calls the shared judge, `families/_shared/judge.py`, copied into `tests/` with the API client
+(`harness/client.py`) and `tests/judge.json`: the family's pinned judge (`judge` in `family.yaml`:
+model, effort, votes, max tokens). It retries
 with backoff, never falls back to another model, and records the requested and served model and
 the judge prompt's fingerprint in `details.json`. With `JUDGE_CACHE=<dir>`, judgments are cached by
 the exact request, so re-grading a saved answer is free and returns the same reward. Without
@@ -176,14 +177,5 @@ beside each item, one key per decision, blind-first labels where an entry asks f
 go to `review/decisions.jsonl`; edits and rejections also to `review/examples.jsonl`.
 
 `splits/check.py` fails when a gold input has no entry or a task claims approved gold that no longer
-is; `--release` (and so the export) also fails every bench or held-out task whose gold is not all
+is; `--release` (and so the export) also fails every task outside `retired/` whose gold is not all
 approved. Rebuild after a review session so tasks record the new state.
-
-## Worlds
-
-A world is a simulated fund. Today each world is only a firm brief
-(`status: brief_only`). A full world adds mandate, holdings, theses, past memos and
-a point-in-time data snapshot, and many tasks across roles run inside it. The list
-of what is missing is in each `world.yaml`. research_design tasks stay one `eval` set until there
-are enough worlds to hold out whole worlds, never single tasks: tasks in one world share context
-and leak into each other.

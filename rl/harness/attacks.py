@@ -23,7 +23,7 @@ family's comparison metric (reward; kpi_nowcast: skill_vs_naive, -1 when missing
 the suite when it comes within MARGIN of the good mean, or crashes the verifier.
 
     python rl/harness/attacks.py --split bench                 # every attacked family, every task
-    python rl/harness/attacks.py --split bench --sample 2      # two tasks per family (what CI runs)
+    python rl/harness/attacks.py --split bench --sample 2      # two tasks per family
     python rl/harness/attacks.py --split bench --family growth_thesis --attack stuffing
     python rl/harness/attacks.py --split eval --family research_design
 

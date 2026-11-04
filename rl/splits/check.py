@@ -265,14 +265,14 @@ def check() -> list[str]:
 
 
 def release_problems(tasks: list[tuple[pathlib.Path, dict]]) -> list[str]:
-    """The --release rules over the given tasks: one clean commit, and for every task in an exportable
-    split, an approved instrument and approved gold."""
+    """The --release rules over the given tasks: one clean commit, and for every task models are scored
+    on (all but retired), an approved instrument and approved gold."""
     builds = {d.name: m["build"] for d, m in tasks if m.get("build")}     # a missing record fails check()
     problems = [f"{tid}: built with uncommitted changes to tracked files" for tid, b in builds.items() if b["repo_dirty"]]
     commits = {b["repo_commit"] for b in builds.values()}
     if len(commits) > 1:
         problems.append(f"tasks were built from {len(commits)} different commits; rebuild everything from one")
-    gated = [(d, m) for d, m in tasks if d.parent.name not in splits.NEVER]
+    gated = [(d, m) for d, m in tasks if d.parent.name != splits.RETIRED]
     for d, m in gated:
         problems += gold_approval_problems(d, m)
     problems += [why for ok, why in map(instrument.status, sorted({m["family"] for _, m in gated})) if not ok]

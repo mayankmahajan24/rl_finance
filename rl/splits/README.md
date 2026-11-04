@@ -60,7 +60,7 @@ builds into `eval`.
 exports):
 
 - every task was built from one commit, with no uncommitted changes to tracked files
-- every task in an exportable split (train, bench, eval: anything but held-out and retired) has its
+- every task models are scored on (train, bench, eval and held-out: anything but retired) has its
   family's current instrument approved (`../instrument.py`) and its gold approved, unchanged since
   review, and recorded so in the task (`../provenance.py`)
 

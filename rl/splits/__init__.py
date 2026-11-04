@@ -23,7 +23,7 @@ import lib
 HERE = pathlib.Path(__file__).resolve().parent
 SPLITS = ("train", "bench", "heldout")
 UNSPLIT, RETIRED = "eval", "retired"
-NEVER = {"heldout", RETIRED}        # never exported; every other split is release-gated
+NEVER = {"heldout", RETIRED}        # never exported
 SECRETS = HERE / "secrets"
 MANIFESTS = HERE / "manifests"
 

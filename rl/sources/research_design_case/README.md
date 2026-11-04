@@ -1,8 +1,8 @@
 # research_design_case: source data
 
-Raw inputs for the `research_design` and `research_funding` tasks. `rl/families/research_design/build.py`
-renders them into `rl/worlds/` and `rl/tasks/eval/rd-*`; `rl/families/research_design/replay.py`
-re-grades the baseline runs against the built tree.
+Raw inputs for the `research_design` (review) and `research_funding` (compare) tasks.
+`rl/families/research_design/build.py` renders the labelled items into `rl/tasks/eval/rd-*`;
+`rl/families/research_design/replay.py` re-grades the baseline runs against the built tree.
 
 All of it comes from a research-design case study written in August 2026.
 
@@ -10,14 +10,14 @@ All of it comes from a research-design case study written in August 2026.
 
 | Path | What it is | Was, in the case study |
 |---|---|---|
-| `seeds.json` | 10 seed ideas. `text` and `style` feed prompts; `discriminator` is grader-only (the produce tasks' must-hit item) | `seeds.json` |
-| `contexts.json` | 6 firm briefs (the worlds), the seed→firm assignment, and the 4 context flips | `part2/contexts.json` |
+| `seeds.json` | 10 seed ideas. `text` and `style` feed prompts; `discriminator` is grader-only (the must-hit item for produce tasks, not built until an expert rubric exists) | `seeds.json` |
+| `contexts.json` | 6 firm briefs, the seed→firm assignment, and the 4 context flips (unlabelled, so not built) | `part2/contexts.json` |
 | `items/<id>.json` | 14 items: context, seed, `plan_A`, `plan_B`. Everything here is model-visible | `part2/items/` |
 | `plan_manifest.json` | Opaque generation token → (seed, slot, methodology) | `part2/plans/_manifest.json` |
 | `ISOLATION.md` | What the generator, evaluator and scorer were each allowed to see when the items were built | `part2/ISOLATION.md` |
 | `grader_only/gold/` | Human labels per item (`S*.json`), the prose split into issues (`_issues.json`), and the labelling instructions | `part2/gold/` |
-| `grader_only/seed_catalog.md` | Per seed, what a good plan must do and how a capable analyst gets it wrong. Raw material for the produce rubrics | `ideas.md` |
-| `grader_only/seed_only_runs/` | Claude's plan and critique per seed with no firm context, and the human verdict on each (`findings-table.md`). Reference outputs for the produce tasks | `part1/plans/`, `part1/critiques/`, `part1/findings-table.md`, `part1/PROVENANCE.md` |
+| `grader_only/seed_catalog.md` | Per seed, what a good plan must do and how a capable analyst gets it wrong. Raw material for future produce rubrics | `ideas.md` |
+| `grader_only/seed_only_runs/` | Claude's plan and critique per seed with no firm context, and the human verdict on each (`findings-table.md`). Reference outputs for future produce tasks | `part1/plans/`, `part1/critiques/`, `part1/findings-table.md`, `part1/PROVENANCE.md` |
 | `baseline_runs/` | Four models' saved responses on every review and compare item, the scorer's cached decisions, and the headline numbers the replay must reproduce (`GRADED.md`) | `part2/runs/`, `part2/GRADED.md` |
 
 `grader_only/` follows the same rule as a task's `tests/` folder: nothing in it may reach a

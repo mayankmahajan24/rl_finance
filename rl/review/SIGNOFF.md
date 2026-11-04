@@ -3,8 +3,8 @@
 Every step here is a human decision; the code refuses to release until each is recorded. Run from the
 repo root, in this order. Gold review comes before instrument approval: several files are both gold
 inputs and instrument files (kpi_nowcast's `judge.md`, growth_thesis's verifier, the generators,
-`panel_perturb.py`), so an edit during review would reopen the approval. Every split that can be
-exported (train, bench, and research_design's eval) needs both approvals.
+`panel_perturb.py`), so an edit during review would reopen the approval. Every split but retired
+(held-out included) needs both approvals before `check.py --release` passes.
 
 1. **Gold review** (`rl/provenance.py`). Approve, edit or reject every open item, then commit:
 
@@ -56,11 +56,11 @@ exported (train, bench, and research_design's eval) needs both approvals.
 6. **Model runs** (spend API credit; each is capped). `export ANTHROPIC_API_KEY=...` first.
 
    ```sh
-   python rl/families/research_design/run.py --model claude-opus-5-5 --budget 25
-   python rl/families/kpi_nowcast/run.py --variant calib --model claude-opus-5-5 --reps 5 --budget 100
+   python rl/harness/run_api.py --split eval --family research_design --model claude-opus-5-5 --budget 25
+   python rl/harness/run_api.py --split bench --family kpi_nowcast --model claude-opus-5-5 --k 5 --budget 100
    python rl/harness/report.py --split bench                      # leaderboard over the run records
    ```
 
    Then, with answers saved from those runs, the judge stability report (one call per answer per time):
-   `python rl/harness/judge_stability.py --times 3 <task_dir>=<output_dir> ...`, and the contamination
-   probe: `python rl/harness/canary_probe.py --model claude-opus-5-5 --tries 5`.
+   `python rl/harness/judge_stability.py --k 3 <task_dir>=<output_dir> ...`, and the contamination
+   probe: `python rl/harness/canary_probe.py --model claude-opus-5-5 --k 5`.

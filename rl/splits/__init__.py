@@ -6,7 +6,7 @@ reading the files, so the rules live in one place, and record what they built in
 splits/manifests/<family>.json. splits/check.py verifies built tasks obey the rules.
 
 Besides the three splits, a task folder can be `eval` (a source with no split assignment yet:
-research_design_case, whose tasks are all one eval set until whole worlds can be held out) or
+research_design_case, whose tasks are all one eval set until whole firms can be held out) or
 `retired` (a case listed under `retired:` in its source's split file).
 """
 

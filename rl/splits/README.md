@@ -9,7 +9,7 @@ Which tasks are for training, which are the published bench, and which are held 
 | heldout | contamination-free measurement; never used for tuning | never | the split's companies; secret random seeds |
 
 Two more folders hold tasks outside these three. `eval`: a source with no split assignment yet
-(research_design_case, one eval set until whole worlds can be held out). `retired`: below.
+(research_design_case, one eval set until whole firms can be held out). `retired`: below.
 A task's folder under `rl/tasks/` is always its split.
 
 **The unit is the company, across every family.** A task is in a split only if every company

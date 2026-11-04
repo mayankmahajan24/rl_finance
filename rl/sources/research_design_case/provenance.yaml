@@ -15,7 +15,7 @@
   evidence:
   - sources/research_design_case/items/S1.json (the pair it labels)
   - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
-  note: human label written for the take-home; no sign-off recorded since
+  note: human label written for the case study; no sign-off recorded since
 - path: sources/research_design_case/grader_only/gold/S2.json
   kind: gold
   produced_by: *id001
@@ -29,7 +29,7 @@
   evidence:
   - sources/research_design_case/items/S2.json (the pair it labels)
   - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
-  note: human label written for the take-home; no sign-off recorded since
+  note: human label written for the case study; no sign-off recorded since
 - path: sources/research_design_case/grader_only/gold/S3.json
   kind: gold
   produced_by: *id001
@@ -43,7 +43,7 @@
   evidence:
   - sources/research_design_case/items/S3.json (the pair it labels)
   - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
-  note: human label written for the take-home; no sign-off recorded since
+  note: human label written for the case study; no sign-off recorded since
 - path: sources/research_design_case/grader_only/gold/S4.json
   kind: gold
   produced_by: *id001
@@ -57,7 +57,7 @@
   evidence:
   - sources/research_design_case/items/S4.json (the pair it labels)
   - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
-  note: human label written for the take-home; no sign-off recorded since
+  note: human label written for the case study; no sign-off recorded since
 - path: sources/research_design_case/grader_only/gold/S5.json
   kind: gold
   produced_by: *id001
@@ -71,7 +71,7 @@
   evidence:
   - sources/research_design_case/items/S5.json (the pair it labels)
   - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
-  note: human label written for the take-home; no sign-off recorded since
+  note: human label written for the case study; no sign-off recorded since
 - path: sources/research_design_case/grader_only/gold/S6.json
   kind: gold
   produced_by: *id001
@@ -85,7 +85,7 @@
   evidence:
   - sources/research_design_case/items/S6.json (the pair it labels)
   - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
-  note: human label written for the take-home; no sign-off recorded since
+  note: human label written for the case study; no sign-off recorded since
 - path: sources/research_design_case/grader_only/gold/S7.json
   kind: gold
   produced_by: *id001
@@ -99,7 +99,7 @@
   evidence:
   - sources/research_design_case/items/S7.json (the pair it labels)
   - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
-  note: human label written for the take-home; no sign-off recorded since
+  note: human label written for the case study; no sign-off recorded since
 - path: sources/research_design_case/grader_only/gold/S8.json
   kind: gold
   produced_by: *id001
@@ -113,7 +113,7 @@
   evidence:
   - sources/research_design_case/items/S8.json (the pair it labels)
   - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
-  note: human label written for the take-home; no sign-off recorded since
+  note: human label written for the case study; no sign-off recorded since
 - path: sources/research_design_case/grader_only/gold/S9.json
   kind: gold
   produced_by: *id001
@@ -127,7 +127,7 @@
   evidence:
   - sources/research_design_case/items/S9.json (the pair it labels)
   - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
-  note: human label written for the take-home; no sign-off recorded since
+  note: human label written for the case study; no sign-off recorded since
 - path: sources/research_design_case/grader_only/gold/S10.json
   kind: gold
   produced_by: *id001
@@ -141,7 +141,7 @@
   evidence:
   - sources/research_design_case/items/S10.json (the pair it labels)
   - sources/research_design_case/grader_only/gold/HOW-TO-FILL.md (labelling instructions)
-  note: human label written for the take-home; no sign-off recorded since
+  note: human label written for the case study; no sign-off recorded since
 - path: sources/research_design_case/grader_only/gold/S2F.json
   kind: gold
   produced_by: *id001

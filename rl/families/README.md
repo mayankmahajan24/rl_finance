@@ -5,23 +5,19 @@ the instruction the agent gets, the grader, and baseline solutions. Families are
 the agent does; the tasks they build carry the fund role and workflow in their metadata.
 
 Every family builds tasks in the same Harbor layout through `_shared/harbor.py` (`../FORMAT.md`),
-into `rl/tasks/<split>/`, and records them in `splits/manifests/<family>.json`. Build with
-`python rl/build.py <family>`. Every reward is in [0, 1]: a verifier writes it to reward.txt, or as
-`reward` in reward.json beside named diagnostics. A verifier that can't grade (its judge is
-unavailable) writes an empty reward.json and says why; one that crashes writes nothing, which Harbor
-records as an error, never a zero.
+into `rl/tasks/<split>/`, and records them in `splits/manifests/<family>.json`. Every reward is in
+[0, 1]: a verifier writes it to reward.txt, or as `reward` in reward.json beside named diagnostics.
+A verifier that can't grade (its judge is unavailable) writes an empty reward.json and says why; one
+that crashes writes nothing, which Harbor records as an error, never a zero. Every task runs under
+Harbor and through `harness/run_api.py`, graded by the same verifier (commands: `../README.md`).
 
-| Family | Source | Agent's job | Reward | Runner |
-|---|---|---|---|---|
-| [`research_design`](research_design/) | research_design_case | Review or compare (as PM) research plans for a named fund | Issue recall − penalties; pairwise pick, correct in both orders | `harness/run_api.py` (API, skills on/off); `replay.py` |
-| [`kpi_nowcast`](kpi_nowcast/) | txn_panel | Nowcast a company's quarterly KPI from the sensor panel and filed actuals; forecast JSON + write-up | Skill vs the naive forecast, clamped to [0, 1]; accuracy and the C1–C12 write-up rubric (LLM judge) as diagnostics | `harness/run_api.py` (API, code execution) |
-| [`data_audit`](data_audit/) | txn_panel | Find planted data-quality problems in a disguised panel | F1 against planted + natural problems | Harbor |
-| [`anomaly_scoring`](anomaly_scoring/) | txn_panel | Write an online anomaly scorer with no foresight | F1 × coverage, zeroed by a foresight check | Harbor |
-| [`growth_thesis`](growth_thesis/) | txn_panel | Which airline grew fastest? Answer + memo, on semi-synthetic data with traps | 0.35 answer + 0.25 growth + 0.15 unreliable list + 0.25 memo rubric | Harbor |
-
-Every task also runs under Harbor (`harbor run -p rl/tasks/<split>`). Families with an API runner
-keep the exact API messages in each task's `prompt/`; the Harbor instruction is the same text plus
-where to find files and write the answer.
+| Family | Source | Agent's job | Reward |
+|---|---|---|---|
+| [`research_design`](research_design/) | research_design_case | Review a research plan for a named fund, or compare two (as PM) in both orders | Issue recall − penalties; 1 only for the gold plan in both orders |
+| [`kpi_nowcast`](kpi_nowcast/) | txn_panel | Nowcast a company's quarterly KPI from the sensor panel and filed actuals; forecast JSON + write-up | Skill vs the naive forecast, clamped to [0, 1]; accuracy and the C1–C12 write-up rubric (LLM judge) as diagnostics |
+| [`data_audit`](data_audit/) | txn_panel | Find planted data-quality problems in a disguised panel | F1 against planted + natural problems |
+| [`anomaly_scoring`](anomaly_scoring/) | txn_panel | Write an online anomaly scorer with no foresight | F1 × coverage, zeroed by a foresight check |
+| [`growth_thesis`](growth_thesis/) | txn_panel | Which airline grew fastest? Answer + memo, on semi-synthetic data with traps | 0.35 answer + 0.25 growth + 0.15 unreliable list + 0.25 memo rubric |
 
 The three Harbor families came from `~/altdata_evals` (2026-10-21). Built on every company with
 its seeds, they reproduced its 18 pilot tasks byte for byte, and the reference and naive solutions
@@ -33,14 +29,17 @@ companies, so it was then removed; its seeds are retired (`splits/seeds.yaml`).
 ```
 <family>/
   family.yaml          id, task_prefix, version, authors (names), role/workflow/mode/world (lists), source,
-                       builder (module), verifier, gold_file, reward, judge, gold_inputs, instrument, ...
-  build.py             builds every task of the family (research_design, kpi_nowcast), or
+                       format, tools, builder (module), verifier, verifier_timeout_sec, gold_file (gold.json),
+                       reward, judge, gold_inputs, instrument, calibration, leak_check
+  build.py             build(family_id, splits, n, controls) (research_design, kpi_nowcast), or
   generate.py          make_variant(seed, control, ctx) for families built by _shared/build_panel.py
   instruction.md / prompts/   templates; placeholders filled at build time
   verifier/            runs in Harbor's tests/ (copied in only after the agent finishes)
-  graders/, grader.py  graders shared by the verifier and the API runner
+  graders/, grader.py  scoring code the verifier imports
   solutions/reference  strong solution, or the oracle (gold) answer; the task's solution/ for Harbor's oracle agent
   solutions/naive      deliberately naive; proves the verifier separates quality
+  provenance.yaml      who produced each gold input the family owns, and its review (../provenance.py)
+  approval.yaml        the approved instrument hash (../instrument.py; written by harness/approve.py)
 _shared/               harbor.py (the one task writer), build_panel.py (builds the generated families
                        per split), panel disguise and injection, verifier helpers, panel schema text
 ```
@@ -82,11 +81,29 @@ A release (`../release/release.yaml`) bumps by the largest family bump it contai
 
 ## Adding a family
 
-1. Copy the closest family folder; fill in `family.yaml`. `rl/build.py` finds it there.
-2. A generated panel family sets `builder: families._shared.build_panel` and writes `generate.py`
-   (`make_variant(seed, control, ctx)`, ctx holding only the split's panel); anything else writes a
-   `build.py` with `build(family_id, splits, n, controls)` and names it as its `builder`.
-3. Write the instruction, verifier, and both solutions.
-4. `python rl/build.py <family>` (it ends with the split check), then
-   `python rl/harness/run_solutions.py --split <split>` if it has baseline solutions. Commit the
-   manifest.
+A new family is a folder here; no shared code changes.
+
+1. **`family.yaml`.** Copy the closest family's and fill it in: `builder` (the module `rl/build.py`
+   imports), `verifier`, `verifier_timeout_sec`, `gold_file: gold.json`, `source`, `reward`,
+   `tools: [code_execution]` if the agent needs to run code, `judge` if the verifier calls a model,
+   `gold_inputs`, `instrument`, `calibration` and `leak_check`. `rl/build.py` finds it through
+   `lib.families()`.
+2. **Builder.** A generated panel family sets `builder: families._shared.build_panel` and writes
+   `generate.py` (`make_variant(seed, control, ctx)`, ctx holding only the split's panel). Any other
+   family writes a `build.py` exposing `build(family_id, splits, n, controls)` that writes each task
+   through `_shared/harbor.py` with `fingerprint` and `case` in its metadata, and records the
+   manifest (`splits.write_manifest`).
+3. **Instruction and verifier.** The verifier writes `reward.txt`, or `reward.json` with `reward` in
+   [0, 1]; a judged one calls `_shared/judge.py`.
+4. **Solutions.** `solutions/reference/solve.sh` and `solutions/naive/solve.sh`.
+5. **Provenance and approval.** A `provenance.yaml` entry for every gold input (`../FORMAT.md`, Gold
+   provenance) and an `approval.yaml` with `approved: null` and `history: []` until
+   `harness/approve.py` approves the instrument.
+6. **Build and check.** `python rl/build.py <family>` (it ends with the split check), then
+   `python rl/harness/run_solutions.py --split <split> --family <family>`: the reference must beat
+   naive. Commit the manifest.
+
+Optional per-family hooks in the harness, for families that want them: an output-format adapter in
+`harness/attacks.py` (`FORMATS`; families without one are not attacked), a per-trap credit check in
+`harness/ablation.py` (`CREDIT`), and pinned solver rewards in `tests/test_verifiers.py` (`SAMPLE`,
+recorded in `tests/expected_rewards.json`).

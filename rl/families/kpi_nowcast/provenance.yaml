@@ -1,0 +1,14 @@
+# Provenance index (rl/provenance.py): one entry per gold-bearing file. Review entries with
+# rl/review/review.py, which rewrites this file; don't hand-edit `review` or `sha256`.
+- path: families/kpi_nowcast/judge.md
+  kind: rubric
+  produced_by:
+    type: unrecorded
+  produced_at: 2026-10
+  sha256: 32b7fa9139d4208adf0628023b56fe92b5ce4ff806c3f1b59a1154385259011c
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  note: the C1-C12 write-up rubric the LLM judge applies

@@ -13,7 +13,8 @@ hashes, in `splits/manifests/<family>.json`.
   prompt/               MODEL-VISIBLE: the exact messages the repo's API runners send (system.md,
                         user.md or user.AB.md + user.BA.md, inputs.json). Families with an API runner only
   tests/                GRADER-ONLY: test.sh, the verifier and graders, gold (gold.json or ground_truth.json),
-                        reference outputs. Harbor copies it in only after the agent finishes
+                        reference outputs, provenance.json (who produced each gold input, and its
+                        review state). Harbor copies it in only after the agent finishes
   solution/             reference solution for Harbor's oracle agent, where one exists
   checksums.sha256      sha256 of every other file in the task; `sha256sum -c checksums.sha256` verifies it
 ```
@@ -46,7 +47,8 @@ Every task can be checked on its own, without the repo:
 
 `python rl/splits/check.py` checks all of this for every built task. Before handing tasks to
 anyone, run `python rl/splits/check.py --release`: it also requires every task to come from one
-commit with no uncommitted changes. Commit first, then rebuild, then check.
+commit with no uncommitted changes, and every bench and held-out task's gold to be approved (Gold
+provenance, below). Commit first, then rebuild, then check.
 
 ## Point in time
 
@@ -114,6 +116,7 @@ checks).
 | `fingerprint` or `prompt.fingerprint` | Hash of exactly what the model sees. Two runs are comparable only if fingerprints match |
 | `prompt.template` | The template the prompt was rendered from |
 | `output_schema`, `grader`, `sources`, `meta` | Response schema, grader type and parameters, where every piece came from, grader-side facts about the task |
+| `provenance` | the review state of the family's gold inputs: `status` (`approved` only when every one is approved and unchanged since review), `files`, and the `unapproved` ones. Details per file in `tests/provenance.json` (Gold provenance, below) |
 | `build` | the build record (Integrity, above) |
 
 TOML has no null: a field with no value is absent.
@@ -127,6 +130,32 @@ TOML has no null: a field with no value is absent.
 | research_design | produce | none yet | an expert rubric is needed |
 | kpi_nowcast | produce | `grader.py` + `judge.md` | named metrics: forecast accuracy (code) and C1–C12 write-up rubric (LLM judge) |
 | data_audit, anomaly_scoring, growth_thesis | review / produce | `verifier/*.py` | see each `family.yaml` |
+
+Every model-graded verifier (growth_thesis memo, research_design review scorer, kpi_nowcast write-up)
+calls the shared judge, `families/_shared/judge.py`, copied into `tests/` with `tests/judge.json`:
+the family's pinned judge (`judge` in `family.yaml`: model, effort, votes, max tokens). It retries
+with backoff, never falls back to another model, and records the requested and served model and
+the judge prompt's fingerprint in `details.json`. With `JUDGE_CACHE=<dir>`, judgments are cached by
+the exact request, so re-grading a saved answer is free and returns the same reward. Without
+`ANTHROPIC_API_KEY`, or when the judge fails, judged metrics are reported as not graded (kpi_nowcast
+keeps its accuracy metrics); `JUDGE=keyword` explicitly opts growth_thesis into its keyword grader.
+`python rl/harness/judge_stability.py` re-judges saved answers to measure per-item agreement.
+
+## Gold provenance
+
+Every file a family's gold comes from (gold labels, rubrics, grader facts, annotations, the
+generators whose output is ground truth) is listed in its `family.yaml` under `gold_inputs`, and
+has an entry in a provenance index, `provenance.yaml` in its source's or family's folder
+(`provenance.py`): who or what produced it (a person, a model and prompt fingerprint, or code and
+a commit), when, and its review (`draft`, `approved`, `rejected`, by whom, why). An approval binds
+to the file's content hash, so a file edited after review counts as unreviewed. Review entries with
+`python rl/review/review.py review --reviewer <name> --batch 10`: highest value first, evidence
+beside each item, one key per decision, blind-first labels where an entry asks for one. Decisions
+go to `review/decisions.jsonl`; edits and rejections also to `review/examples.jsonl`.
+
+`splits/check.py` fails when a gold input has no entry or a task claims approved gold that no longer
+is; `--release` (and so the export) also fails every bench or held-out task whose gold is not all
+approved. Rebuild after a review session so tasks record the new state.
 
 ## Worlds
 

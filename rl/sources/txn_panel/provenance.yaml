@@ -1,0 +1,73 @@
+# Provenance index (rl/provenance.py): one entry per gold-bearing file. Review entries with
+# rl/review/review.py, which rewrites this file; don't hand-edit `review` or `sha256`.
+- path: sources/txn_panel/grader_only/kpi_facts.csv
+  kind: grader_facts
+  produced_by: &id001
+    type: code
+    ref: sources/txn_panel/build/sec_xbrl/assemble_gold.py
+    commit: 0411bc4
+  produced_at: '2026-10-18'
+  sha256: 44ca834397539b698268fcaf4b6d67c5b842cdc3165790bf3718d7322276e18e
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  evidence:
+  - every row's accession and source (the XBRL instance document URL)
+  - sources/txn_panel/build/sec_xbrl/series.py (line-item mapping per series)
+  note: KPI actuals per filing from SEC XBRL; check_gold.py consistency checks pass
+- path: sources/txn_panel/grader_only/kpi_quarterly.csv
+  kind: grader_facts
+  produced_by: *id001
+  produced_at: '2026-10-18'
+  sha256: 698efeaffa513408d13760a0ce6239bbfb178915059e92cea717d37265af1d7e
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  evidence:
+  - first_source per row (the filing it came from)
+  - sources/txn_panel/grader_only/README.md
+  note: the gold target is first_value, as first reported
+- path: sources/txn_panel/annotations/company_facts.yaml
+  kind: annotation
+  produced_by:
+    type: human
+    who: unrecorded (authored by hand)
+  produced_at: 2026-10
+  sha256: 8c59ed7feff488095c47f835f04a4735e6afd411143de52ce0d20f108b053ee1
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  note: reporting-basis and structural facts the kpi_nowcast judge grades against; authored by hand
+- path: sources/txn_panel/annotations/data_artifacts.yaml
+  kind: annotation
+  produced_by:
+    type: human
+    who: unrecorded (authored by hand)
+  produced_at: 2026-10
+  sha256: 774f02ddefe61e0acb448fcf5ff6be61807ed2fd7266661c76f7fdb88f696872
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  note: real data breaks found while working the assignment and checked by eye; data_audit and anomaly_scoring
+    ground truth
+- path: sources/txn_panel/annotations/entities.yaml
+  kind: annotation
+  produced_by:
+    type: human
+    who: unrecorded (authored by hand)
+  produced_at: 2026-10
+  sha256: a76657c0550548fe3f193f99d2577279ca47e0b5195ec6d2ad13b19b03c1cdf0
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  note: 'companies, sensor tickers and KPI series: the split unit'

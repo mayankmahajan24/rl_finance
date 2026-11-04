@@ -11,13 +11,17 @@
   6. point in time: every built task sets an explicit network policy for the container, the agent
      phase (none) and the verifier phase, matching what [metadata.environment] records; a task of a
      dated family records an as_of, and a dated task's image pins its clock to it
-  7. environment and clean room: every /app path the instruction names exists in the image or is read
+  7. provenance: every family's gold inputs have well-formed provenance entries (rl/provenance.py),
+     every task of such a family carries them (tests/provenance.json, [metadata.provenance]), and
+     no task claims approved gold that is no longer approved
+  8. environment and clean room: every /app path the instruction names exists in the image or is read
      by the verifier; the reference solution imports only what the agent's image has, reads no
      grader-side file, and its params give nothing the instruction doesn't
 
 With --release (before handing tasks to anyone): every task was also built from one clean commit,
-with no uncommitted changes to tracked files, and every family with bench or held-out tasks has its
-current instrument approved (rl/instrument.py).
+with no uncommitted changes to tracked files, every family with bench or held-out tasks has its
+current instrument approved (rl/instrument.py), and every bench and held-out task's gold is
+approved, unchanged since review, and recorded so in the task.
 
 Usage:
     python rl/splits/check.py
@@ -39,6 +43,7 @@ RL = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RL))
 import splits  # noqa: E402
 import instrument  # noqa: E402
+import provenance  # noqa: E402
 from families._shared import harbor  # noqa: E402
 from lib import fingerprint, iter_tasks  # noqa: E402
 from sources.txn_panel import panel  # noqa: E402
@@ -96,13 +101,32 @@ def sandbox_problems(d: pathlib.Path, m: dict) -> list[str]:
     return out
 
 
+def provenance_problems(d: pathlib.Path, m: dict, release: bool) -> list[str]:
+    """Check 7 for one task: its gold's provenance is recorded, current, and (for release) approved."""
+    tid, current = d.name, provenance.for_family(m["family"])
+    if not current:
+        return []
+    out, recorded = [], m.get("provenance")
+    if recorded is None or not (d / "tests" / "provenance.json").exists():
+        return [f"{tid}: no gold provenance recorded (rebuild)"]
+    now = provenance.summary(current)
+    if recorded["status"] == "approved" and now["status"] != "approved":
+        out.append(f"{tid}: built as approved, but {', '.join(now['unapproved'])} no longer is (rebuild)")
+    if release and d.parent.name in ("bench", "heldout"):
+        if now["status"] != "approved":
+            out.append(f"{tid}: gold not approved: {', '.join(now['unapproved'])} (rl/review/review.py)")
+        elif recorded != now:
+            out.append(f"{tid}: gold approved since it was built (rebuild)")
+    return out
+
+
 # import name -> pip name, for the packages the agent image installs under another name
 PIP_NAMES = {"sklearn": "scikit-learn", "yaml": "PyYAML"}
 GRADER_SIDE = re.compile(r"/tests\b|ground_truth|gold\.json|draft_rubric|seeds?\.ya?ml|heldout_seeds|\bgenerate\b")
 
 
 def environment_problems(d: pathlib.Path, m: dict) -> list[str]:
-    """Check 7: what the instruction names is there, and the reference works from what the agent has."""
+    """Check 8: what the instruction names is there, and the reference works from what the agent has."""
     tid, out = d.name, []
     instruction = (d / "instruction.md").read_text()
     data = {p.name.removesuffix(".gz") for p in (d / "environment" / "data").iterdir()}
@@ -134,7 +158,7 @@ def environment_problems(d: pathlib.Path, m: dict) -> list[str]:
 
 
 def check(release: bool = False) -> list[str]:
-    problems: list[str] = []
+    problems: list[str] = provenance.problems()
     commits: set[str] = set()
 
     # 1. companies
@@ -210,6 +234,7 @@ def check(release: bool = False) -> list[str]:
 
         problems += checksum_problems(d)
         problems += sandbox_problems(d, m)
+        problems += provenance_problems(d, m, release)
         problems += environment_problems(d, m)
         b = m.get("build")
         if not b:

@@ -56,6 +56,8 @@ jobs:
           -k "$ATTEMPTS" -n "$CONCURRENT" -o jobs --job-name live -y
           --ak disable_web_search=true --allow-agent-host api.anthropic.com
           --allow-environment-host deb.debian.org --allow-environment-host downloads.claude.ai
+          --allow-environment-host storage.googleapis.com --allow-environment-host claude.ai
+          --agent-setup-timeout-multiplier 4
 
       - uses: actions/upload-artifact@v4
         if: always()

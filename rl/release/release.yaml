@@ -7,4 +7,7 @@
 #   patch  documentation or task metadata only (a family patch bump at most)
 #
 # A lab diffs two releases task by task with release.json's content_sha256 per task.
+#
+# Give every release its own contamination canary: replace rl/canary.txt (a fresh GUID) with the
+# version bump, then rebuild. Every task's tests/CANARY and the datasheet carry it (rl/leakcheck.py).
 version: 0.1.0

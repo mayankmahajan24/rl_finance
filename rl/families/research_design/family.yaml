@@ -61,3 +61,7 @@ instrument:              # what decides what the model sees and how it is scored
 calibration:             # scored metric and pass threshold for rl/harness/calibrate.py; proposed, Mayank to confirm
   metric: reward
   pass: 0.5
+leak_check:              # gold fields that must never appear where the agent can see them (rl/leakcheck.py)
+  gold_text:
+    gold.json: ["issues[].text", preference_rationale, why_loser_was_defensible, critique_prose]
+    draft_rubric.json: ["items[].text"]

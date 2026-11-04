@@ -14,7 +14,9 @@
   7. provenance: every family's gold inputs have well-formed provenance entries (rl/provenance.py),
      every task of such a family carries them (tests/provenance.json, [metadata.provenance]), and
      no task claims approved gold that is no longer approved
-  8. environment and clean room: every /app path the instruction names exists in the image or is read
+  8. leaks: nothing the agent sees gives away gold, the benchmark's identity, a disguised company or
+     the release canary (rl/leakcheck.py, configured per family under `leak_check` in family.yaml)
+  9. environment and clean room: every /app path the instruction names exists in the image or is read
      by the verifier; the reference solution imports only what the agent's image has, reads no
      grader-side file, and its params give nothing the instruction doesn't
 
@@ -44,6 +46,7 @@ sys.path.insert(0, str(RL))
 import splits  # noqa: E402
 import instrument  # noqa: E402
 import provenance  # noqa: E402
+import leakcheck  # noqa: E402
 from families._shared import harbor  # noqa: E402
 from lib import fingerprint, iter_tasks  # noqa: E402
 from sources.txn_panel import panel  # noqa: E402
@@ -126,7 +129,7 @@ GRADER_SIDE = re.compile(r"/tests\b|ground_truth|gold\.json|draft_rubric|seeds?\
 
 
 def environment_problems(d: pathlib.Path, m: dict) -> list[str]:
-    """Check 8: what the instruction names is there, and the reference works from what the agent has."""
+    """Check 9: what the instruction names is there, and the reference works from what the agent has."""
     tid, out = d.name, []
     instruction = (d / "instruction.md").read_text()
     data = {p.name.removesuffix(".gz") for p in (d / "environment" / "data").iterdir()}
@@ -235,6 +238,7 @@ def check(release: bool = False) -> list[str]:
         problems += checksum_problems(d)
         problems += sandbox_problems(d, m)
         problems += provenance_problems(d, m, release)
+        problems += leakcheck.task_problems(d, m)
         problems += environment_problems(d, m)
         b = m.get("build")
         if not b:

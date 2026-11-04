@@ -43,3 +43,6 @@ instrument:              # what decides what the model sees and how it is scored
 calibration:             # scored metric and pass threshold for rl/harness/calibrate.py; proposed, Mayank to confirm
   metric: reward
   pass: 0.8
+leak_check:              # ground truth is structural: planted problems are tickers and dates that are in the data by
+                         # construction, so there is no gold text or number to search for (rl/leakcheck.py)
+  anonymised: all          # every task is disguised: no real company name, ticker or series id

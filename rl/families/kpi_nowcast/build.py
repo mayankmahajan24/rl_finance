@@ -40,7 +40,6 @@ import json
 import math
 import pathlib
 import random
-import re
 import shutil
 import sys
 from collections import defaultdict
@@ -51,6 +50,8 @@ import yaml
 RL = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(RL))
 sys.path.insert(0, str(RL / "sources" / "txn_panel" / "build" / "sec_xbrl"))
+import leakcheck  # noqa: E402
+import lib  # noqa: E402
 import splits  # noqa: E402
 from families._shared import harbor  # noqa: E402
 from lib import TASKS, fingerprint  # noqa: E402
@@ -369,18 +370,7 @@ def main(argv: list[str] | None = None) -> None:
                                     "judge.md": HERE / "judge.md", "gold.json": gold_text,
                                     "judge_context.json": json.dumps({"user": user, "as_of": as_of}, indent=1)},
                              verifier_env=JUDGE_ENV, data=data, prompt=prompt, pip=PIP, test_pip=harbor.JUDGE_PIP)
-                # leak check: the target's value must not appear anywhere the model can see
-                needles = {f"{actual * f:.0f}", f"{actual * f:,.0f}", f"{actual * f:.1f}", f"{actual * f:.3f}"}
-                visible = [tdir / "instruction.md", *(tdir / "prompt").rglob("*"), *(tdir / "environment" / "data").rglob("*")]
-                for p in visible:
-                    if p.is_file() and p.suffix != ".gz":
-                        text = p.read_text()
-                        # values are long enough that a bare-number hit in the panel is coincidence; check the feed and prompts
-                        if p.name != "sensor_panel.csv" and any(n in text for n in needles if len(n) >= 4):
-                            problems.append(f"{task_id}: target value appears in {p.relative_to(tdir)}")
-                        if anon and p.name != "data_brief.md" and any(
-                                re.search(rf"\b{re.escape(t)}\b", text) for t in s["sensors"] + [s["id"]] if len(t) >= 2):
-                            problems.append(f"{task_id}: real ticker appears in {p.relative_to(tdir)}")
+                problems += leakcheck.task_problems(tdir, lib.task_meta(tdir))
                 built[task_id] = {"split": case_split, "role": meta["role"], "workflow": meta["workflow"],
                                   "mode": meta["mode"], "world": meta["world"], "status": meta["status"],
                                   "companies": meta["companies"], "fingerprint": fp,

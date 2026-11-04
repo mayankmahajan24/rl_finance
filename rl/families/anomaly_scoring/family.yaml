@@ -36,3 +36,6 @@ calibration:             # scored metric and pass threshold for rl/harness/calib
   metric: reward
   pass: 0.5
   ceiling_note: real but unlabelled anomalies in the panel count as false positives, so the best achievable F1 is below 1
+leak_check:              # ground truth is structural: planted problems are tickers and dates that are in the data by
+                         # construction, so there is no gold text or number to search for (rl/leakcheck.py)
+  anonymised: all          # every task is disguised: no real company name, ticker or series id

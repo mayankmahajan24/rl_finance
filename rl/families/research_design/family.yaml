@@ -19,6 +19,11 @@ verifier_timeout_sec: 600
 reward: >-
   review: blocking-issue recall - 0.1 x manufactured - 0.2 x contradicts-gold (scorer model matches issues);
   compare: 1 if the pick matches gold, averaged over both orderings (Harbor: AB only); produce: no grader yet
+judge:                   # the review scorer: matches a review's issues to gold (graders/review_scorer.md); the case study's scorer; pinned, part of the instrument (families/_shared/judge.py)
+  model: claude-opus-5
+  effort: null
+  votes: 1
+  max_tokens: 48000
 gold_inputs:             # files its gold comes from; each has a provenance entry (rl/provenance.py)
   - sources/research_design_case/grader_only/gold/S1.json
   - sources/research_design_case/grader_only/gold/S2.json
@@ -50,4 +55,6 @@ instrument:              # what decides what the model sees and how it is scored
   - families/research_design/verifier/verify.py
   - families/research_design/TENETS.md
   - families/_shared/harbor.py
+  - families/_shared/judge.py
+  - families/research_design/family.yaml       # pins the judge
   - families/_shared/verify_common.py

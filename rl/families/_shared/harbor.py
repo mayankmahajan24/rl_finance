@@ -7,6 +7,7 @@
       prompt/                            exact messages for the repo's API runners (model-visible;
                                          only families with an API runner have it)
       tests/test.sh, tests/<verifier>, tests/common.py, gold   copied in only after the agent finishes
+      tests/judge.py, tests/judge.json   the shared model judge and the family's pinned judge config (judged verifiers)
       tests/provenance.json              who produced each of the family's gold inputs and its review state
       solution/solve.sh (+ files)        reference solution for Harbor's oracle agent, where one exists
       checksums.sha256                   sha256 of every other file in the task (`sha256sum -c checksums.sha256`)
@@ -85,11 +86,12 @@ unset LD_PRELOAD FAKETIME   # the verifier runs on the real clock (a dated task 
 TEST_PIP = ("pip install --no-cache-dir --quiet {pkgs} "
             "|| echo 'verifier packages not installed; LLM grading will be skipped or fail' >&2\n")
 
-JUDGE_ENV = ('\n[verifier.env]\n# LLM judge for the memo rubric; falls back to keyword grading when no key is set\n'
-             'ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY:-}"\nJUDGE = "${JUDGE:-auto}"\n'
-             'JUDGE_MODEL = "${JUDGE_MODEL:-claude-opus-5-5}"\n')
+JUDGE_ENV = ('\n[verifier.env]\n# LLM judge for the memo rubric (tests/judge.json); without a key the memo is not graded,\n'
+             '# unless JUDGE=keyword opts into the keyword grader\n'
+             'ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY:-}"\nJUDGE = "${JUDGE:-auto}"\n')
 
 COMMON = HERE / "verify_common.py"
+JUDGE = HERE / "judge.py"
 RL = HERE.parents[1]
 BUILD_PACKAGES = ["pandas", "numpy", "scipy", "PyYAML", "toml"]
 
@@ -199,6 +201,9 @@ def write(dest: pathlib.Path, *, family: dict, builder: str, instruction: str, m
     (dest / "tests" / "test.sh").write_text(TEST_SH.format(verifier=verifier, install=install))
     (dest / "tests" / "test.sh").chmod(0o755)
     _put(dest / "tests" / "common.py", COMMON)
+    if family.get("judge") and test_pip.strip():      # a verifier that installs the judge client calls the judge
+        _put(dest / "tests" / "judge.py", JUDGE)
+        _put(dest / "tests" / "judge.json", json.dumps(family["judge"], indent=1) + "\n")
     for name, c in tests.items():
         _put(dest / "tests" / name, c)
     (dest / "solution").mkdir()

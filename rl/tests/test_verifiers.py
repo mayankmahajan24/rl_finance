@@ -112,7 +112,7 @@ def test_kpi_exact_forecast(tmp_path, offline):
     rewards, details = run_verifier(task, tmp_path, output={"answer.md": kn_answer(gold, gold["actual"])})
     assert rewards["schema_ok"] == 1 and rewards["abs_pct_error"] == 0 and rewards["covered"] == 1
     assert rewards["skill_vs_naive"] == 1
-    assert "writeup_score" not in rewards and details["judge"].startswith("skipped")
+    assert "writeup_score" not in rewards and details["judge"].startswith("not graded")
 
 
 def test_kpi_bad_forecast(tmp_path, offline):

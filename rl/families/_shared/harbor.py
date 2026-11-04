@@ -238,7 +238,7 @@ tests/<family["gold_file"]>; `tests`,
     (dest / "solution").mkdir()
     for name, c in (solution or {}).items():
         _put(dest / "solution" / name, c)
-    prov = provenance.for_family(metadata["family"]) if family.get("gold_inputs") else []
+    prov = provenance.for_paths(family.get("gold_inputs", []))
     if prov:
         _put(dest / "tests" / "provenance.json", json.dumps(prov, indent=1, ensure_ascii=False) + "\n")
     shipped = {str(p.relative_to(dest / "tests")) for p in (dest / "tests").rglob("*") if p.is_file()} | {"FILES"}

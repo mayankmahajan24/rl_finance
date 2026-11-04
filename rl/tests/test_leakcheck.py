@@ -5,17 +5,14 @@ from __future__ import annotations
 
 import json
 import shutil
-import sys
 
 import pytest
 
+import canary_probe
 import leakcheck
 import lib
-from conftest import RL, built
-
-sys.path.insert(0, str(RL / "harness"))
-import canary_probe  # noqa: E402
-import memorisation  # noqa: E402
+import memorisation
+from conftest import built
 
 
 @pytest.fixture

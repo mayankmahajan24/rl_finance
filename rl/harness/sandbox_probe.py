@@ -9,16 +9,17 @@ dated task, every clock reading is the task's as_of.
 Only a response counts as reaching a host. Harbor's Docker egress control is a transparent proxy:
 nftables sends every TCP connection to a local proxy, which drops hosts outside the policy, so a bare
 TCP connect always succeeds and proves nothing. DNS to the container's own resolver is allowed by
-Harbor's design; the probe records what resolved but does not fail on it. With --judge, a judged task's verifier must still reach its
-model API: the run passes a dummy key, so the judge call reaching api.anthropic.com shows up as an
-authentication error, and a blocked one as a connection error. No real key is ever sent. Only
-verifiers that call the judge on an empty answer can show this (kpi_nowcast's does).
+Harbor's design; the probe records what resolved but does not fail on it. With --with-judge, a
+judged task's verifier must still reach its model API: the run passes a dummy key, so the judge call
+reaching api.anthropic.com shows up as an authentication error, and a blocked one as a connection
+error. No real key is ever sent. Only verifiers that call the judge on an empty answer can show this
+(kpi_nowcast's does).
 
 Needs Docker and harbor, and a host kernel Harbor's egress control supports (Linux with nftables fib
 inet; not Docker Desktop's VM, where Harbor refuses the tasks). One trial per task:
 
-    python rl/harness/sandbox_probe.py rl/tasks/bench/kn-produce-ALK-2017Q4 rl/tasks/bench/audit-bench-001
-    python rl/harness/sandbox_probe.py --judge rl/tasks/bench/kn-produce-ALK-2017Q4
+    python rl/harness/sandbox_probe.py rl/tasks/bench/kn-produce-AIR02-2017Q4-anon rl/tasks/bench/audit-bench-001
+    python rl/harness/sandbox_probe.py --with-judge rl/tasks/bench/kn-produce-AIR02-2017Q4-anon
 
 Part of the reward-hacking suite: an agent that reaches the internet must fail here.
 """
@@ -120,7 +121,7 @@ def verdict(task: pathlib.Path, trial: pathlib.Path, judge: bool) -> list[str]:
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("tasks", nargs="+", type=pathlib.Path, help="built task folders")
-    ap.add_argument("--judge", action="store_true", help="also check that a judged verifier reaches its model API")
+    ap.add_argument("--with-judge", action="store_true", help="also check that a judged verifier reaches its model API")
     ap.add_argument("--jobs-dir", type=pathlib.Path, help="where Harbor writes the run (default: a temp folder)")
     a = ap.parse_args(argv)
     jobs = a.jobs_dir or pathlib.Path(tempfile.mkdtemp(prefix="sandbox_probe_"))
@@ -134,7 +135,7 @@ def main(argv: list[str] | None = None) -> None:
                "-a", "harness.sandbox_probe:SandboxProbe", "-o", str(out), "-n", "1", "-y"]
         r = subprocess.run(cmd, env=env, capture_output=True, text=True)
         trials = [p for p in out.glob("*/*") if (p / "agent").is_dir()]
-        problems = (verdict(task, trials[0], a.judge) if len(trials) == 1
+        problems = (verdict(task, trials[0], a.with_judge) if len(trials) == 1
                     else [f"harbor run gave {len(trials)} trials (rc {r.returncode}):\n{(r.stdout + r.stderr)[-2000:]}"])
         failed += bool(problems)
         print(f"{'FAIL' if problems else 'ok  '} {task.name}" + "".join(f"\n       {p}" for p in problems))

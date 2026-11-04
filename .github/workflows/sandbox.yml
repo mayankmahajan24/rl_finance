@@ -34,7 +34,7 @@ jobs:
         run: python rl/build.py research_design kpi_nowcast panel --split bench
 
       - name: Agent phase has no network; dated task's clock reads as_of; the judge is still reachable
-        run: python rl/harness/sandbox_probe.py --judge rl/tasks/bench/kn-produce-AIR02-2017Q4-anon
+        run: python rl/harness/sandbox_probe.py --with-judge rl/tasks/bench/kn-produce-AIR02-2017Q4-anon
 
       - name: Agent phase has no network (one task per other family)
         run: >-

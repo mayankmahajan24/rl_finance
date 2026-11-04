@@ -128,7 +128,7 @@ def main(argv: list[str] | None = None) -> None:
         fam = m["family"]
         if done.get(fam, 0) == a.sample:
             continue
-        truth = json.loads((d / "tests" / "ground_truth.json").read_text())
+        truth = json.loads((d / "tests" / "gold.json").read_text())
         if truth.get("control"):
             continue                          # nothing planted
         done[fam] = done.get(fam, 0) + 1

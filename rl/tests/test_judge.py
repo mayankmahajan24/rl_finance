@@ -5,16 +5,14 @@ from __future__ import annotations
 
 import contextlib
 import json
-import sys
 from types import SimpleNamespace
 
 import pytest
 
+import judge_stability
 from conftest import RL, built, run_verifier
 from families._shared import judge
 
-sys.path.insert(0, str(RL / "harness"))      # judge.py imports client.py from there (from tests/ in a built task)
-import judge_stability  # noqa: E402
 
 CFG = {"model": "claude-opus-5-5", "effort": "medium", "votes": 1, "max_tokens": 1000}
 SCHEMA = {"type": "object", "properties": {"ok": {"type": "boolean"}}}
@@ -100,17 +98,17 @@ def test_overrides_are_recorded(tmp_path, monkeypatch):
     assert cfg["model"] == "claude-sonnet-5-5" and cfg["overridden"] == ["model"]
 
 
-def test_no_key_means_not_graded(tmp_path, monkeypatch):
+def test_no_key_means_not_graded(monkeypatch):
     """Without a key, the memo is not graded: no reward, and no silent switch to the keyword grader."""
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     monkeypatch.delenv("JUDGE", raising=False)
     task = built("bench", "thesis-bench-001")
     memo = "Airline X grew fastest; the panel ramp on one source is an artifact."
     answer = json.dumps({"fastest": "X", "growth": {}, "unreliable": []})
-    rewards, details = run_verifier(task, tmp_path, output={"answer.json": answer, "memo.md": memo})
+    rewards, details = run_verifier(task, output={"answer.json": answer, "memo.md": memo})
     assert rewards == {} and details["status"] == "not graded" and "JUDGE=keyword" in details["note"]
     monkeypatch.setenv("JUDGE", "keyword")
-    rewards, details = run_verifier(task, tmp_path / "kw", output={"answer.json": answer, "memo.md": memo})
+    rewards, details = run_verifier(task, output={"answer.json": answer, "memo.md": memo})
     assert "reward" in rewards and details["judge"] == "keyword"
 
 

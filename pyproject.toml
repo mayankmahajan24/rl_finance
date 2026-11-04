@@ -27,6 +27,7 @@ optional-dependencies.dev = { file = ["requirements-dev.txt"] }
 
 [tool.pytest.ini_options]
 testpaths = ["rl/tests"]
+pythonpath = ["rl", "rl/harness", "rl/review"]
 addopts = "-ra"
 markers = ["slow: runs solvers end to end (seconds per task)"]
 

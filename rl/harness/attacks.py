@@ -193,19 +193,20 @@ class KpiNowcast(Format):
 class Compare(Format):
     outputs = ["output/response.json"]
 
-    def answer(self, winner, confidence=3):
-        return json.dumps({"winner": winner, "confidence": confidence, "goal_type": "single_name_kpi",
-                           "error_asymmetry": "symmetric", "decisive_tenets": [], "key_differentiator": "x",
-                           "rationale": "x"})
+    def answer(self, ab, ba, confidence=3):
+        """A response picking `ab` in the AB ordering and `ba` in BA (the plans swapped)."""
+        rest = {"confidence": confidence, "goal_type": "single_name_kpi", "error_asymmetry": "symmetric",
+                "decisive_tenets": [], "key_differentiator": "x", "rationale": "x"}
+        return json.dumps({"AB": {"winner": ab, **rest}, "BA": {"winner": ba, **rest}})
 
     def placeholder(self, app, meta, rng):
-        put(app / "output/response.json", self.answer("A"))
+        put(app / "output/response.json", self.answer("A", "A"))
 
     def random(self, app, meta, rng):
-        put(app / "output/response.json", self.answer(rng.choice("AB")))
+        put(app / "output/response.json", self.answer(rng.choice("AB"), rng.choice("AB")))
 
     def extreme(self, app, meta, rng):
-        put(app / "output/response.json", self.answer("B", 5))
+        put(app / "output/response.json", self.answer("B", "B", 5))
 
 
 FORMATS = {"data_audit": DataAudit(), "anomaly_scoring": AnomalyScoring(), "growth_thesis": GrowthThesis(),
@@ -330,7 +331,8 @@ def good(task: pathlib.Path, meta: dict) -> dict:
         fc = {"target_period": gold["target_period"].replace(" ", ""), "unit": gold["unit"], "point": a,
               "low": a * 0.98, "high": a * 1.02, "interval_level": 0.9, "in_sample": [], "vs_consensus": "no_consensus"}
         return grade(task, lambda app, tests: put(app / "output/answer.md", kpi_answer(fc)))
-    return grade(task, lambda app, tests: put(app / "output/response.json", Compare().answer(gold["preference"])))  # AB ordering
+    flip = {"A": "B", "B": "A"}[gold["preference"]]
+    return grade(task, lambda app, tests: put(app / "output/response.json", Compare().answer(gold["preference"], flip)))
 
 
 def run(tasks: list[tuple[pathlib.Path, dict]], only: list[str] | None = None) -> tuple[list[dict], list[str]]:

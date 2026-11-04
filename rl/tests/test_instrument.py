@@ -4,7 +4,6 @@ shows up in the reviewer's diff."""
 
 from __future__ import annotations
 
-import shutil
 import subprocess
 
 import pytest
@@ -12,7 +11,6 @@ import yaml
 
 import instrument
 import lib
-from conftest import built
 from splits import check
 
 
@@ -79,9 +77,8 @@ def test_reapproval_keeps_history(repo):
     assert a["approved"]["approved_by"] == "B" and a["history"] == [first]
 
 
-def test_release_check_refuses_unapproved_instruments(tmp_path, monkeypatch):
-    monkeypatch.setattr(lib, "TASKS", tmp_path)
-    shutil.copytree(built("bench", "audit-bench-001"), tmp_path / "bench" / "audit-bench-001")
+def test_release_check_refuses_unapproved_instruments(tree):
+    tree()
     assert not any("instrument" in p for p in check.check())
     assert any(p.startswith("data_audit: instrument never approved")
                for p in check.release_problems(list(lib.iter_tasks())))

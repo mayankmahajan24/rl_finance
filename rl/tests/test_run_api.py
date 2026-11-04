@@ -6,18 +6,16 @@ from __future__ import annotations
 
 import contextlib
 import json
-import sys
 import time
 from types import SimpleNamespace
 
 import pytest
 
-from conftest import RL, built
+import client
+import records
+import run_api
+from conftest import built
 
-sys.path.insert(0, str(RL / "harness"))
-import client  # noqa: E402
-import records  # noqa: E402
-import run_api  # noqa: E402
 
 USAGE = SimpleNamespace(input_tokens=1000, output_tokens=100, cache_read_input_tokens=50, cache_creation_input_tokens=10)
 
@@ -123,12 +121,7 @@ def test_every_family_end_to_end(split, task_id, tmp_path, monkeypatch, offline)
     monkeypatch.setattr(run_api, "RL", tmp_path / "rl")
     monkeypatch.setattr(run_api.client, "connect", lambda: api)
     monkeypatch.setattr(run_api.instrument, "require_approved", lambda f: None)
-    # kpi_nowcast and research_design list their deleted run.py in `instrument` until their family.yaml changes
-    monkeypatch.setattr(records, "instrument_sha256", lambda f: "test")
-    fam = records.identity(task)["family"]
-    tools = fam in ("data_audit", "anomaly_scoring", "growth_thesis", "kpi_nowcast")
-    real = run_api.family
-    monkeypatch.setattr(run_api, "family", lambda f: dict(real(f), tools=["code_execution"] if tools else []))
+    tools = "code_execution" in run_api.family(records.identity(task)["family"]).get("tools", [])
     argv = ["--split", split, "--tasks", task_id, "--model", "claude-opus-5-5", "--budget", "1", "--run-id", "t"]
     run_api.main(argv)
     out = tmp_path / "rl" / "runs" / "api" / split / "t"

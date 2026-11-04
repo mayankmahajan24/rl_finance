@@ -24,9 +24,9 @@
 
 With --release (before handing tasks to anyone), over every built task (export.py runs the same rules
 over just the tasks it exports): they were all built from one commit, none with uncommitted changes
-to tracked files, and for every task in an exportable split (anything but held-out and retired):
-its family's current instrument is approved (rl/instrument.py), and its gold is approved, unchanged
-since review, and recorded so in the task.
+to tracked files, and for every task models are scored on (every split but retired, held-out
+included): its family's current instrument is approved (rl/instrument.py), and its gold is approved,
+unchanged since review, and recorded so in the task.
 
 Usage:
     python rl/splits/check.py

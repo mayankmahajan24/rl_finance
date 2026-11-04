@@ -3,27 +3,14 @@
 from __future__ import annotations
 
 import hashlib
-import shutil
 import tarfile
-
-import pytest
 
 import export
 import lib
-from conftest import built
 from families._shared import harbor
 from test_check import edit
 
 TASK = "audit-bench-001"
-
-
-@pytest.fixture
-def tree(tmp_path, monkeypatch):
-    """One built bench task in a scratch tasks/ tree."""
-    monkeypatch.setattr(lib, "TASKS", tmp_path / "tasks")
-    d = tmp_path / "tasks" / "bench" / TASK
-    shutil.copytree(built("bench", TASK), d)
-    return d
 
 
 def licence(monkeypatch, status: str) -> None:
@@ -37,12 +24,14 @@ def stamped(monkeypatch, tasks) -> None:
 
 
 def test_heldout_and_retired_are_never_exported(tree):
+    tree()
     for split in ("heldout", "retired"):
         assert export.refusals(split, "eval", export.select("bench", None), "0.1.0", False) == [
             f"{split} tasks are never exported"]
 
 
 def test_uncleared_source_is_refused(tree, monkeypatch):
+    tree()
     tasks = export.select("bench", None)
     stamped(monkeypatch, tasks)
     monkeypatch.setattr(export, "split_check", lambda tasks: [])
@@ -56,22 +45,23 @@ def test_uncleared_source_is_refused(tree, monkeypatch):
 
 
 def test_training_use_is_for_train_only(tree):
+    tree()
     for split in ("bench", "eval"):
         assert export.refusals(split, "training", export.select("bench", None), "0.1.0", False) == [
             f"{split} tasks are for evaluation: only train tasks may be exported for training use"]
 
 
-def test_unapproved_eval_task_is_refused(tmp_path, monkeypatch):
-    monkeypatch.setattr(lib, "TASKS", tmp_path / "tasks")
+def test_unapproved_eval_task_is_refused(tree):
     tid = "rd-review-S1-A"
-    shutil.copytree(built("eval", tid), tmp_path / "tasks" / "eval" / tid)
+    tree("eval", tid, "eval")
     p = export.refusals("eval", "eval", export.select("eval", None), "0.1.0", False)
     assert any(x.startswith(f"split check --release: {tid}: gold not approved: ") for x in p)
     assert any(x.startswith("split check --release: research_design: instrument never approved") for x in p)
 
 
 def test_dirty_build_is_refused(tree, monkeypatch):
-    edit(tree, "task.toml", "repo_dirty = false", "repo_dirty = true")
+    d = tree()
+    edit(d, "task.toml", "repo_dirty = false", "repo_dirty = true")
     licence(monkeypatch, "public")
     tasks = export.select("bench", None)
     stamped(monkeypatch, tasks)
@@ -80,6 +70,7 @@ def test_dirty_build_is_refused(tree, monkeypatch):
 
 
 def test_unstamped_build_and_missing_changelog_are_refused(tree, monkeypatch):
+    tree()
     tasks = export.select("bench", None)
     licence(monkeypatch, "public")
     monkeypatch.setattr(export, "commit_timestamp", lambda c: "2000-01-01T00:00:00+00:00")
@@ -90,6 +81,7 @@ def test_unstamped_build_and_missing_changelog_are_refused(tree, monkeypatch):
 
 
 def test_archive_is_byte_identical(tree, monkeypatch, tmp_path):
+    d = tree()
     monkeypatch.setattr(export, "refusals", lambda *a, **k: [])
     outs = []
     for name in ("a", "b"):
@@ -104,6 +96,6 @@ def test_archive_is_byte_identical(tree, monkeypatch, tmp_path):
         names = tar.getnames()
         assert names == sorted(names) and {m.mtime for m in tar.getmembers()} == {1_700_000_000}
         assert tar.getmember(f"rl_finance-test/tasks/{TASK}/tests/test.sh").mode == 0o755
-    assert manifest["tasks"][TASK]["content_sha256"] == harbor.content_sha256(tree)
+    assert manifest["tasks"][TASK]["content_sha256"] == harbor.content_sha256(d)
     assert {"release.json", "CHANGELOG.md", "DATASHEET.md", "cards/data_audit.md",
             f"tasks/{TASK}/checksums.sha256"} <= set(files)

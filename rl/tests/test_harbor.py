@@ -114,8 +114,9 @@ def test_environment_is_pinned():
 
 
 @pytest.mark.parametrize("judged", [False, True])
-def test_every_phase_has_an_explicit_network_policy(tmp_path, judged):
+def test_every_phase_has_an_explicit_network_policy(tmp_path, monkeypatch, judged):
     import tomllib
+    monkeypatch.setattr(lib, "family", lambda family_id: FAMILY)     # the check reads `dated` from family.yaml
     d = tmp_path / "t1"
     write(d, judged=judged)
     cfg = tomllib.loads((d / "task.toml").read_text())

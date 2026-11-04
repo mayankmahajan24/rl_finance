@@ -4,20 +4,15 @@
 from __future__ import annotations
 
 import json
-import shutil
-import sys
 
 import pytest
 import yaml
 
 import lib
 import provenance
-from conftest import RL, built
+import review as review_queue
 from splits import check
 from test_check import edit
-
-sys.path.insert(0, str(RL / "review"))
-import review as review_queue  # noqa: E402
 
 GOLD = "sources/s/gold.json"
 
@@ -89,27 +84,22 @@ def test_edit_and_reject_need_a_reason(rl):
 TASK = "audit-bench-001"
 
 
-@pytest.fixture
-def tree(tmp_path, monkeypatch):
-    monkeypatch.setattr(lib, "TASKS", tmp_path)
-    d = tmp_path / "bench" / TASK
-    shutil.copytree(built("bench", TASK), d)
-    return d
-
-
 def test_release_refuses_unapproved_gold(tree):
-    assert check.provenance_problems(tree, lib.task_meta(tree)) == []
-    p = check.gold_approval_problems(tree, lib.task_meta(tree))
+    d = tree()
+    assert check.provenance_problems(d, lib.task_meta(d)) == []
+    p = check.gold_approval_problems(d, lib.task_meta(d))
     assert p and p[0].startswith(f"{TASK}: gold not approved: ")
 
 
 def test_task_built_as_approved_after_approval_was_lost(tree):
-    edit(tree, "task.toml", 'status = "unapproved"', 'status = "approved"')
-    assert check.provenance_problems(tree, lib.task_meta(tree))[0].startswith(
+    d = tree()
+    edit(d, "task.toml", 'status = "unapproved"', 'status = "approved"')
+    assert check.provenance_problems(d, lib.task_meta(d))[0].startswith(
         f"{TASK}: built as approved, but ")
 
 
 def test_task_without_provenance(tree):
-    (tree / "tests" / "provenance.json").unlink()
-    assert check.provenance_problems(tree, lib.task_meta(tree)) == [
+    d = tree()
+    (d / "tests" / "provenance.json").unlink()
+    assert check.provenance_problems(d, lib.task_meta(d)) == [
         f"{TASK}: no gold provenance recorded (rebuild)"]

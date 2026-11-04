@@ -6,15 +6,13 @@ from __future__ import annotations
 
 import json
 import pathlib
-import sys
 
 import pytest
 
+import records
+import report
 from conftest import RL, built
 
-sys.path.insert(0, str(RL / "harness"))
-import records  # noqa: E402
-import report  # noqa: E402
 
 RUNNER = {"name": "test"}
 IDENT = {"task_id": "audit-bench-001", "family": "data_audit", "split": "bench", "mode": "review",

@@ -83,11 +83,15 @@ def _cached() -> dict[str, dict]:
     return load()
 
 
-def for_family(family: str) -> list[dict]:
-    """The provenance entries of a family's gold inputs, with each one's current state."""
+def for_paths(paths: list[str]) -> list[dict]:
+    """The provenance entries of these gold inputs, with each one's current state."""
     idx = _cached()
     return [{**{k: v for k, v in (idx.get(p) or {"path": p}).items() if k != "index"}, "state": state(idx.get(p), p)}
-            for p in lib.family(family).get("gold_inputs", [])]
+            for p in paths]
+
+
+def for_family(family: str) -> list[dict]:
+    return for_paths(lib.family(family).get("gold_inputs", []))
 
 
 def summary(entries: list[dict]) -> dict:

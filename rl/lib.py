@@ -21,7 +21,6 @@ ROOT = RL.parent
 TASKS = RL / "tasks"
 FAMILIES = RL / "families"
 SOURCES = RL / "sources"
-WORLDS = RL / "worlds"
 
 
 def families() -> list[str]:

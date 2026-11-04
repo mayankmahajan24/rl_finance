@@ -15,25 +15,23 @@ from __future__ import annotations
 import json
 import os
 import pathlib
-import sys
 
 import pytest
 
 import lib
+import run_solutions
 from conftest import RL, built, run_verifier
+from oracle_check import SAMPLE as ORACLE_SAMPLE, TOL
 
-sys.path.insert(0, str(RL / "harness"))
-import run_solutions  # noqa: E402
 
 EXPECTED = pathlib.Path(__file__).with_name("expected_rewards.json")
-TOL = 0.002
 MARGIN = 0.3       # reference minus naive on planted tasks; the smallest bench gap today is about 0.4
 
-# every bench task of the fast families; anomaly_scoring's reference takes ~50 s a task, so two of its;
-# a sample of kpi_nowcast's bench cases and research_design's compare tasks (eval)
-SAMPLE = ([f"audit-bench-{i:03d}" for i in range(1, 11)] + ["audit-bench-control-01", "audit-bench-control-02"]
-          + [f"thesis-bench-{i:03d}" for i in range(1, 11)] + ["thesis-bench-control-01", "thesis-bench-control-02"]
-          + ["anomaly-bench-001", "anomaly-bench-control-01"]
+# the oracle's Docker sample plus the rest of the fast families' bench tasks (anomaly_scoring's
+# reference takes ~50 s a task, so only the oracle's two), a sample of kpi_nowcast's bench cases and
+# research_design's compare tasks (eval)
+SAMPLE = (ORACLE_SAMPLE + [f"audit-bench-{i:03d}" for i in range(3, 11)] + ["audit-bench-control-02"]
+          + [f"thesis-bench-{i:03d}" for i in range(3, 11)] + ["thesis-bench-control-02"]
           + ["kn-produce-SAVE-2018Q2", "kn-produce-DAL-2018Q4", "kn-produce-M-FY2017Q3", "kn-produce-RET04-FY2018Q1-anon"]
           + ["rd-funding-S1", "rd-funding-S4", "rd-funding-S7"])
 
@@ -89,8 +87,8 @@ BAD_SCORERS = {      # anomaly_scoring grades a scorer script the agent leaves i
 
 
 @pytest.mark.parametrize("task_id,case", [(t, c) for t, cases in BAD.items() for c in cases])
-def test_bad_output_scores_zero(task_id, case, tmp_path, offline):
-    rewards, details = run_verifier(built("bench", task_id), tmp_path, output=BAD[task_id][case])
+def test_bad_output_scores_zero(task_id, case, offline):
+    rewards, details = run_verifier(built("bench", task_id), output=BAD[task_id][case])
     assert rewards["reward"] <= 0.1, details
 
 
@@ -104,18 +102,18 @@ DROPS_LAST_DAY = ("import argparse, subprocess, sys\nimport pandas as pd\nap = a
 
 
 @pytest.mark.slow
-def test_scorer_dropping_truncated_rows_fails_no_foresight(tmp_path, offline):
+def test_scorer_dropping_truncated_rows_fails_no_foresight(offline):
     task = built("bench", "anomaly-bench-001")
     ref = {f.name: f.read_text() for f in (task / "solution").iterdir() if f.suffix == ".py"}
-    rewards, details = run_verifier(task, tmp_path, solution={**ref, "reference_score.py": ref["score.py"],
+    rewards, details = run_verifier(task, solution={**ref, "reference_score.py": ref["score.py"],
                                                                "score.py": DROPS_LAST_DAY})
     assert rewards["reward"] == 0 and details["no_foresight"] is False, details
 
 
 @pytest.mark.parametrize("case", BAD_SCORERS)
-def test_bad_scorer_scores_zero(case, tmp_path, offline):
+def test_bad_scorer_scores_zero(case, offline):
     script = BAD_SCORERS[case]
-    rewards, details = run_verifier(built("bench", "anomaly-bench-001"), tmp_path,
+    rewards, details = run_verifier(built("bench", "anomaly-bench-001"),
                                     solution=None if script is None else {"score.py": script})
     assert rewards["reward"] == 0, details
 
@@ -131,36 +129,36 @@ def kn_answer(gold: dict, point: float, width: float = 0.1) -> str:
     return f"Write-up.\n\n```json\n{json.dumps(fc)}\n```\n"
 
 
-def test_kpi_exact_forecast(tmp_path, offline):
+def test_kpi_exact_forecast(offline):
     task = built("bench", KN)
     gold = json.loads((task / "tests" / "gold.json").read_text())
-    rewards, details = run_verifier(task, tmp_path, output={"answer.md": kn_answer(gold, gold["actual"])})
+    rewards, details = run_verifier(task, output={"answer.md": kn_answer(gold, gold["actual"])})
     assert rewards["schema_ok"] == 1 and rewards["abs_pct_error"] == 0 and rewards["covered"] == 1
     assert rewards["skill_vs_naive"] == 1 and rewards["reward"] == 1
     assert "writeup_score" not in rewards and details["judge"].startswith("not graded")
 
 
-def test_kpi_bad_forecast(tmp_path, offline):
+def test_kpi_bad_forecast(offline):
     task = built("bench", KN)
     gold = json.loads((task / "tests" / "gold.json").read_text())
-    rewards, _ = run_verifier(task, tmp_path, output={"answer.md": kn_answer(gold, 2 * gold["actual"])})
+    rewards, _ = run_verifier(task, output={"answer.md": kn_answer(gold, 2 * gold["actual"])})
     assert rewards["abs_pct_error"] == pytest.approx(1) and rewards["covered"] == 0
     assert rewards["skill_vs_naive"] < 0 and rewards["reward"] == 0
 
 
-def test_kpi_naive_forecast_earns_nothing(tmp_path, offline):
+def test_kpi_naive_forecast_earns_nothing(offline):
     task = built("bench", KN)
     gold = json.loads((task / "tests" / "gold.json").read_text())
-    rewards, _ = run_verifier(task, tmp_path, output={"answer.md": kn_answer(gold, gold["naive_forecast"])})
+    rewards, _ = run_verifier(task, output={"answer.md": kn_answer(gold, gold["naive_forecast"])})
     assert rewards["skill_vs_naive"] == 0 and rewards["reward"] == 0
 
 
 @pytest.mark.parametrize("answer", [None, "no json here", "```json\n{\"point\": 1}\n```",
                                     '```json\n{"target_period": "x", "point": 5, "low": 6, "high": 7, '
                                     '"interval_level": 0.8, "in_sample": []}\n```'])
-def test_kpi_invalid_forecast(answer, tmp_path, offline):
+def test_kpi_invalid_forecast(answer, offline):
     task = built("bench", KN)
-    rewards, details = run_verifier(task, tmp_path, output=None if answer is None else {"answer.md": answer})
+    rewards, details = run_verifier(task, output=None if answer is None else {"answer.md": answer})
     assert rewards == {"reward": 0.0, "schema_ok": 0.0}, details
 
 
@@ -177,38 +175,38 @@ def compare_answer(ab: str, ba: str, gold: dict) -> str:
     return json.dumps({o: {"winner": w, "goal_type": gold["goal_type"]} for o, w in (("AB", ab), ("BA", ba))})
 
 
-def test_compare_pick(tmp_path, offline):
+def test_compare_pick(offline):
     task = rd_task("compare")
     gold = json.loads((task / "tests" / "gold.json").read_text())
     right = gold["preference"]
     wrong = "B" if right == "A" else "A"
     # (AB pick, BA pick): BA shows the plans swapped, so the gold plan is the other letter there
     cases = [((right, wrong), 1.0), ((wrong, right), 0.0), (("A", "A"), 0.0), (("B", "B"), 0.0)]
-    for i, (picks, want) in enumerate(cases):
-        rewards, details = run_verifier(task, tmp_path / str(i), output={"response.json": compare_answer(*picks, gold)})
+    for picks, want in cases:
+        rewards, details = run_verifier(task, output={"response.json": compare_answer(*picks, gold)})
         assert rewards["reward"] == want, (picks, details)
 
 
 @pytest.mark.parametrize("response", ["[]", '{"AB": {"winner": "A"}}', '{"AB": {"winner": "A"}, "BA": "B"}',
                                       '{"AB": {"winner": "C"}, "BA": {"winner": "A"}}'])
-def test_compare_malformed_response(response, tmp_path, offline):
-    rewards, details = run_verifier(rd_task("compare"), tmp_path, output={"response.json": response})
+def test_compare_malformed_response(response, offline):
+    rewards, details = run_verifier(rd_task("compare"), output={"response.json": response})
     assert rewards["reward"] == 0 and "error" in details
 
 
-def test_compare_missing_response(tmp_path, offline):
-    rewards, _ = run_verifier(rd_task("compare"), tmp_path)
+def test_compare_missing_response(offline):
+    rewards, _ = run_verifier(rd_task("compare"))
     assert rewards["reward"] == 0
 
 
 @pytest.mark.parametrize("response", ["[]", "{}", '{"issues": "none"}', '{"issues": [1]}'])
-def test_review_malformed_response(response, tmp_path, offline):
-    rewards, details = run_verifier(rd_task("review"), tmp_path, output={"response.json": response})
+def test_review_malformed_response(response, offline):
+    rewards, details = run_verifier(rd_task("review"), output={"response.json": response})
     assert rewards["reward"] == 0 and "error" in details
 
 
-def test_review_without_scorer_is_not_graded(tmp_path, offline):
-    rewards, details = run_verifier(rd_task("review"), tmp_path, output={"response.json": '{"issues": []}'})
+def test_review_without_scorer_is_not_graded(offline):
+    rewards, details = run_verifier(rd_task("review"), output={"response.json": '{"issues": []}'})
     assert rewards == {} and details["status"] == "not graded"
 
 

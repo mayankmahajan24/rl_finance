@@ -5,15 +5,12 @@ survives test.sh."""
 from __future__ import annotations
 
 import subprocess
-import sys
 
 import pytest
 
-from conftest import RL, built
-
-sys.path.insert(0, str(RL / "harness"))
-import attacks  # noqa: E402
-from local import harbor  # noqa: E402
+import attacks
+from conftest import built
+from local import harbor
 
 
 @pytest.mark.slow

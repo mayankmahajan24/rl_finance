@@ -4,15 +4,11 @@ gap, and a re-run resumes the job only with the same arguments."""
 
 from __future__ import annotations
 
-import sys
 from types import SimpleNamespace
 
 import pytest
 
-from conftest import RL
-
-sys.path.insert(0, str(RL / "harness"))
-import calibrate  # noqa: E402
+import calibrate
 
 
 def rec(task, model, reward, status="ok", agent=None, family="data_audit"):

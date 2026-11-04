@@ -134,7 +134,8 @@ def test_as_of_pins_the_clock_for_the_agent_only(tmp_path):
     docker = (d / "environment" / "Dockerfile").read_text()
     assert 'FAKETIME="@2018-06-30 12:00:00"' in docker and "TASK_AS_OF=2018-06-30 " in docker
     assert re.search(r"libfaketime=[\w.+~-]+ ", docker)                 # pinned apt package
-    assert "FAKETIME_ONLY_CMDS=python,python3,python3.12,date " in docker  # the agent's own process keeps real time
+    assert "FAKETIME_ONLY_CMDS=python,python3,python3.12,date " in docker
+    assert "ENV LD_PRELOAD" not in docker and " LD_PRELOAD=/" not in docker  # the agent's own process never loads it
     assert "unset LD_PRELOAD FAKETIME" in (d / "tests" / "test.sh").read_text()
     write(d)
     assert "FAKETIME" not in (d / "environment" / "Dockerfile").read_text()

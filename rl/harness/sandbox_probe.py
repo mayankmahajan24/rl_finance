@@ -82,7 +82,7 @@ class SandboxProbe(BaseAgent):
         async def sh(cmd: str) -> str:
             r = await environment.exec(cmd, timeout_sec=60)
             return (r.stdout or "").strip() + (f" [rc={r.return_code}] {(r.stderr or '').strip()}" if r.return_code else "")
-        net = await sh(f"env -u LD_PRELOAD python3 -c {shlex.quote(NET)}")
+        net = await sh(f"env -u FAKETIME python3 -c {shlex.quote(NET)}")
         probe = {"network": json.loads(net) if net.startswith("{") else net,
                  "clock": {"date": await sh("date -u +%F"), "python": await sh(f"python -c {shlex.quote(CLOCK)}"),
                            "TASK_AS_OF": await sh("printenv TASK_AS_OF || true"),

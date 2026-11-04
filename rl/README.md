@@ -69,6 +69,10 @@ harbor run -p rl/tasks/bench -a claude-code -m claude-opus-5-5 --ak max_budget_u
 harbor check rl/tasks/bench -a claude-code -m claude-sonnet-5-5   # Harbor's task-quality rubric
 ```
 
+Harbor's network control doesn't work on Docker Desktop, so on a Mac it refuses these tasks. Run on
+Linux instead, or use the manual **Live run** workflow (`.github/workflows/live-run.yml`), which needs
+the `CLAUDE_CODE_OAUTH_TOKEN` repo secret.
+
 Tasks give the agent no network ([`FORMAT.md`](FORMAT.md), Point in time): the run adds the model
 API for the agent phase and the installer's hosts for setup. Those host lists are not yet validated
 against a live Claude Code run. `CLAUDE_FORCE_OAUTH=1` makes Harbor drop `ANTHROPIC_API_KEY` for the

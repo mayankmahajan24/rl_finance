@@ -262,7 +262,7 @@ def writeup_module(monkeypatch, tmp_path):
     monkeypatch.syspath_prepend(str(task / "tests"))
     monkeypatch.setenv("TESTS_DIR", str(task / "tests"))
     monkeypatch.setenv("LOGS_DIR", str(tmp_path / "logs"))
-    for m in ("common", "judge", "writeup"):
+    for m in ("common", "judge", "writeup", "client"):
         sys.modules.pop(m, None)
     return importlib.import_module("writeup")
 
@@ -285,11 +285,14 @@ def test_write_up_score_counts_applicable_items(monkeypatch, tmp_path):
     assert metrics["writeup_score"] == 0.875 and metrics["w_W2"] == 0.0 and "w_W3" not in metrics
 
 
-def test_failed_judge_leaves_the_write_up_ungraded(monkeypatch, tmp_path):
+@pytest.mark.parametrize("api_error", [False, True])
+def test_failed_judge_leaves_the_write_up_ungraded(api_error, monkeypatch, tmp_path):
     w = writeup_module(monkeypatch, tmp_path)
     monkeypatch.setattr(w.judge, "unavailable", lambda: None)
+    import client
 
     def fail(*a, **k):
-        raise w.judge.JudgeError("down")
+        raise client.anthropic.APIError("no credit", None, body=None) if api_error else w.judge.JudgeError("down")
     monkeypatch.setattr(w.judge, "judge", fail)
-    assert w.grade("A note.", {}, {})[0] == {}
+    metrics, why = w.grade("A note.", {}, {})
+    assert metrics == {} and why.startswith("not graded")

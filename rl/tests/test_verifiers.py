@@ -12,9 +12,11 @@
 
 from __future__ import annotations
 
+import importlib
 import json
 import os
 import pathlib
+import sys
 
 import pytest
 
@@ -251,3 +253,43 @@ def test_anomaly_scorer_cannot_read_the_gold_or_replay_the_future():
     assert rewards["reward"] == 0 and details["tp"] == 0
     rewards, details = run_verifier(task, solution={"score.py": ANOMALY_REPLAY})
     assert details["no_foresight"] is False and rewards["reward"] == 0
+
+
+# ---- write-ups (a separate metric: the reward never depends on them) ------------------------------
+
+def writeup_module(monkeypatch, tmp_path):
+    task = built("bench", "audit-bench-001")
+    monkeypatch.syspath_prepend(str(task / "tests"))
+    monkeypatch.setenv("TESTS_DIR", str(task / "tests"))
+    monkeypatch.setenv("LOGS_DIR", str(tmp_path / "logs"))
+    for m in ("common", "judge", "writeup"):
+        sys.modules.pop(m, None)
+    return importlib.import_module("writeup")
+
+
+def test_audit_reward_ignores_the_write_up(offline):
+    task = built("bench", "audit-bench-001")
+    ref, naive = (run_solutions.run_one(str(task), s) for s in ("reference", "naive"))
+    assert "writeup_score" not in ref["rewards"]          # written, but no judge here to grade it
+    assert naive["rewards"]["writeup_score"] == 0.0       # nothing written: no judge needed
+    assert ref["reward"] > naive["reward"]
+
+
+def test_write_up_score_counts_applicable_items(monkeypatch, tmp_path):
+    w = writeup_module(monkeypatch, tmp_path)
+    monkeypatch.setattr(w.judge, "unavailable", lambda: None)
+    items = {f"W{i}": {"verdict": "pass", "reason": "x"} for i in range(1, 10)}
+    items |= {"W2": {"verdict": "fail", "reason": "x"}, "W3": {"verdict": "na", "reason": "x"}}
+    monkeypatch.setattr(w.judge, "judge", lambda *a, **k: ([items], {}))
+    metrics, _ = w.grade("A note.", {}, {})
+    assert metrics["writeup_score"] == 0.875 and metrics["w_W2"] == 0.0 and "w_W3" not in metrics
+
+
+def test_failed_judge_leaves_the_write_up_ungraded(monkeypatch, tmp_path):
+    w = writeup_module(monkeypatch, tmp_path)
+    monkeypatch.setattr(w.judge, "unavailable", lambda: None)
+
+    def fail(*a, **k):
+        raise w.judge.JudgeError("down")
+    monkeypatch.setattr(w.judge, "judge", fail)
+    assert w.grade("A note.", {}, {})[0] == {}

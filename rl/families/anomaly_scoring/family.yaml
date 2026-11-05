@@ -6,32 +6,45 @@ authors:
   - name: Mayank Mahajan
 role: [quant_researcher]
 workflow: [anomaly_scoring]
-mode: [produce]            # the deliverable is code: /app/solution/score.py
+mode: [produce]            # /app/solution/score.py + writeup.md
 world: [systematic_consumer]
 source: txn_panel
 format: harbor
 tools: [code_execution]
 builder: families._shared.build_panel   # generator: generate.py
 verifier: verifier/anomaly_verify.py
-verifier_timeout_sec: 3600
+verifier_timeout_sec: 3900   # three 20-minute scorer runs, plus the write-up judge
 gold_file: gold.json
-reward: F1 on a hidden panel's planted spikes, drops and level shifts x coverage, zeroed if the no-foresight check fails
+reward: >-
+  F1 on a hidden panel's planted spikes, drops and level shifts x coverage, zeroed if the no-foresight check
+  fails (code, no judge). Never blended in: the W1-W9 write-up rubric (LLM judge; left out when the judge can't run)
+rubric_visibility: partial  # the instruction asks for the note but not the rubric's judgment items; draft rubric,
+                            # Mayank to confirm
+judge:                   # the write-up judge (judge.md); pinned, part of the instrument (families/_shared/judge.py)
+  model: claude-sonnet-5-5
+  effort: medium
+  votes: 1
+  max_tokens: 8000
 gold_inputs:             # files its gold comes from; each has a provenance entry (rl/provenance.py)
   - sources/txn_panel/annotations/data_artifacts.yaml
   - sources/txn_panel/annotations/entities.yaml
   - families/anomaly_scoring/generate.py
   - families/_shared/panel_perturb.py
+  - families/anomaly_scoring/judge.md
 instrument:              # what decides what the model sees and how it is scored; live use needs its hash
                          # approved (rl/instrument.py, rl/harness/approve.py)
   - families/anomaly_scoring/instruction.md
   - families/anomaly_scoring/generate.py
   - families/anomaly_scoring/verifier/anomaly_verify.py
+  - families/anomaly_scoring/judge.md
+  - families/_shared/writeup.py
   - families/_shared/build_panel.py
   - families/_shared/panel_perturb.py
   - families/_shared/panel_schema.md
   - families/_shared/firm.md
   - families/_shared/panel_copy_note.md
   - sources/txn_panel/panel.py
+  - families/anomaly_scoring/family.yaml       # pins the judge
 calibration:             # scored metric and pass threshold for rl/harness/calibrate.py; proposed, Mayank to confirm
   metric: reward
   pass: 0.5

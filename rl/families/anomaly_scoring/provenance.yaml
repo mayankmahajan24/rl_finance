@@ -14,3 +14,15 @@
     reviewed_at: null
     reason: null
   note: plants the anomalies that are the task's ground truth
+- path: families/anomaly_scoring/judge.md
+  kind: rubric
+  produced_by:
+    type: unrecorded
+  produced_at: 2026-11
+  sha256: 3b9eb779efaf267c6b8b3aa331bc42202d4241a689b7d802038c1937019917bb
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  note: the write-up rubric; it uses the gold as facts for the judge

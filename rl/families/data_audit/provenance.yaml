@@ -14,3 +14,15 @@
     reviewed_at: null
     reason: null
   note: plants the problems that are the task's ground truth
+- path: families/data_audit/judge.md
+  kind: rubric
+  produced_by:
+    type: unrecorded
+  produced_at: 2026-11
+  sha256: 078512117f1128ec733fc5947f1ddb9b5ab95fe272df717652936f2bd9b45b97
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  note: the write-up rubric; it uses the gold as facts for the judge

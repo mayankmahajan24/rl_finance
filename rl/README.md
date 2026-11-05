@@ -77,7 +77,7 @@ Tasks give the agent no network ([`FORMAT.md`](FORMAT.md), Point in time): the r
 API for the agent phase and the installer's hosts for setup. Those host lists are not yet validated
 against a live Claude Code run. `CLAUDE_FORCE_OAUTH=1` makes Harbor drop `ANTHROPIC_API_KEY` for the
 agent. The subscription covers the Claude Code agent only: judged verifiers (growth_thesis memo,
-research_design review scorer, kpi_nowcast write-up) and `run_api.py` still use `ANTHROPIC_API_KEY`.
+research_design review scorer, the kpi_nowcast, data_audit and anomaly_scoring write-ups) and `run_api.py` still use `ANTHROPIC_API_KEY`.
 
 **Tests** (`rl/tests/`; `.github/workflows/ci.yml` runs them on every PR after a ~7 min rebuild that
 must reproduce the committed manifests). `pip install -r requirements-dev.txt`, build the tasks as

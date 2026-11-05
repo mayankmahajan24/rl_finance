@@ -41,6 +41,7 @@ from sources.txn_panel import panel  # noqa: E402
 SCHEMA = (RL / "families" / "_shared" / "panel_schema.md").read_text().rstrip("\n")
 FIRM = (RL / "families" / "_shared" / "firm.md").read_text().rstrip("\n")
 COPY_NOTE = (RL / "families" / "_shared" / "panel_copy_note.md").read_text().rstrip("\n")
+WRITEUP = RL / "families" / "_shared" / "writeup.py"
 DEFAULT_SPLITS = ["bench", "heldout"]      # train has no fixed size: it needs n
 
 
@@ -80,10 +81,12 @@ def write_task(dest: pathlib.Path, fam: dict, instruction: str, data: dict[str, 
     if solution_params is not None:
         solution["params.json"] = json.dumps(solution_params)
     fp = lib.fingerprint(instruction, *[data[k] for k in sorted(data)])
+    rubric = fam_dir / "judge.md"
+    writeup = {"writeup.py": WRITEUP, "judge.md": rubric, "task_instruction.md": instruction} if rubric.exists() else {}
     return harbor.write(dest, family=fam, builder="rl/families/_shared/build_panel.py", instruction=instruction,
                         metadata=dict(meta, fingerprint=fp), description=fam["description"],
                         keywords=["alt-data", "data-science", fam["task_prefix"]], verifier=verifier,
-                        tests={verifier: fam_dir / fam["verifier"], **truth.pop("hidden_files", {})}, gold=json.dumps(truth, indent=1, default=str),
+                        tests={verifier: fam_dir / fam["verifier"], **writeup, **truth.pop("hidden_files", {})}, gold=json.dumps(truth, indent=1, default=str),
                         judged="judge" in fam, data=data, solution=solution)
 
 

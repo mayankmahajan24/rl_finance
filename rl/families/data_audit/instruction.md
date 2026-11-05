@@ -11,7 +11,7 @@ data-quality problems that would make any series misleading.
 
 ## What to deliver
 
-Write `/app/output/issues.json`: a JSON list with one object per distinct problem you find:
+1. `/app/output/issues.json`: a JSON list with one object per distinct problem you find:
 
 ```json
 [{"type": "outage", "ticker": "TAB", "source_id": 3, "start": "2016-04-02", "end": "2016-05-10",
@@ -31,6 +31,9 @@ Write `/app/output/issues.json`: a JSON list with one object per distinct proble
 * `source_id` is the affected sensor, or `null` if every sensor of the ticker is affected.
 * `start` is the first affected date; `end` is the last affected date, or `null` if it continues to the end.
 
+2. `/app/output/writeup.md`: a note (under 500 words) for the researchers who will build on this data: what you
+   found, how you know, what it means for anyone using these series, and what should be done about it.
+
 Real business events (holidays, seasonality, genuine growth) are not data problems. You are scored on precision and
 recall against a hidden list of real problems; reporting things that are not problems lowers your score, and some
-datasets contain few or no planted problems.
+datasets contain few or no planted problems. The note is graded separately and does not change that score.

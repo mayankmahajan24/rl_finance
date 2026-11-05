@@ -151,17 +151,19 @@ TOML has no null: a field with no value is absent.
 | research_design | review | `graders/review_issues.py` | blocking-issue recall − 0.1 × manufactured − 0.2 × contradicts-gold, clamped to [0, 1] |
 | research_design | compare | `graders/pairwise_pick.py` | the task shows both orderings and the agent answers `{"AB": {"winner": ...}, "BA": {...}}`; 1 only if both picks name gold's plan (always "A" scores 0) |
 | kpi_nowcast | produce | `grader.py` + `judge.md` | skill vs the naive forecast, clamped to [0, 1] (code); accuracy and the C1–C12 write-up rubric (LLM judge) as diagnostics |
-| data_audit, anomaly_scoring, growth_thesis | review / produce | `verifier/*.py` | see each `family.yaml` |
+| data_audit, anomaly_scoring | review / produce | `verifier/*.py` + `judge.md` | see each `family.yaml`; the W1–W9 write-up rubric (LLM judge, `_shared/writeup.py`) is a diagnostic, never in the reward |
+| growth_thesis | produce | `verifier/*.py` | see its `family.yaml` |
 
-Every model-graded verifier (growth_thesis memo, research_design review scorer, kpi_nowcast write-up)
+Every model-graded verifier (growth_thesis memo, research_design review scorer, the kpi_nowcast,
+data_audit and anomaly_scoring write-ups)
 calls the shared judge, `families/_shared/judge.py`, copied into `tests/` with the API client
 (`harness/client.py`) and `tests/judge.json`: the family's pinned judge (`judge` in `family.yaml`:
 model, effort, votes, max tokens). It retries
 with backoff, never falls back to another model, and records the requested and served model and
 the judge prompt's fingerprint in `details.json`. With `JUDGE_CACHE=<dir>`, judgments are cached by
 the exact request, so re-grading a saved answer is free and returns the same reward. Without
-`ANTHROPIC_API_KEY`, or when the judge fails, judged metrics are reported as not graded (kpi_nowcast
-keeps its accuracy metrics); `JUDGE=keyword` explicitly opts growth_thesis into its keyword grader.
+`ANTHROPIC_API_KEY`, or when the judge fails, judged metrics are reported as not graded (kpi_nowcast,
+data_audit and anomaly_scoring keep their code-graded rewards); `JUDGE=keyword` explicitly opts growth_thesis into its keyword grader.
 `python rl/harness/judge_stability.py` re-judges saved answers to measure per-item agreement.
 
 ## Gold provenance

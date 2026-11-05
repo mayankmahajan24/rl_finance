@@ -12,7 +12,7 @@ up or down relative to what it should read.
 
 ## What to deliver
 
-Create `/app/solution/score.py`, runnable as
+1. Create `/app/solution/score.py`, runnable as
 
 ```
 python /app/solution/score.py --input IN.csv --output OUT.csv
@@ -21,6 +21,9 @@ python /app/solution/score.py --input IN.csv --output OUT.csv
 `IN.csv` has the same columns as the data above. `OUT.csv` must contain `date, ticker, source_id, anomaly_score`
 with one row per input row, where `anomaly_score` is in [0, 1] and higher means more likely to be bad data.
 A score above 0.5 counts as a flag.
+
+2. Write `/app/output/writeup.md`: a note (under 500 words) for the researchers who will rely on these scores: what
+   the model does and why, how you checked it, and what they should know before trusting it.
 
 Requirements:
 * **New data.** Your script is graded on a different panel of the same kind that you never see, with its own tickers,
@@ -33,4 +36,5 @@ Requirements:
 
 You are scored on F1 against hidden labelled anomalies (one-day anomalies, and the first weeks of level shifts),
 multiplied by the share of rows you score, and set to zero if the no-foresight check fails. Some panels have nothing
-planted: on those, the F1 is replaced by 1 minus the share of rows you flag divided by 5%, floored at 0.
+planted: on those, the F1 is replaced by 1 minus the share of rows you flag divided by 5%, floored at 0. The note is graded
+separately and does not change that score.

@@ -17,6 +17,9 @@ Control variants (nothing planted): reward = 1 - (share of evaluated rows flagge
 score.py is agent code. Before it runs, the gold and the hidden panel leave the disk and it runs as
 `nobody` when the verifier is root. Truncated runs come first, earliest cutoff first, and every run
 gets its own folder, so no run can find or remember rows dated after its cutoff.
+
+/app/output/writeup.md is judged against judge.md (writeup.py) as a separate metric, never blended in,
+and before score.py runs, so agent code never gets to touch it.
 """
 import os
 import shutil
@@ -28,7 +31,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from common import APP, TESTS, f1, load_gold, write_reward
+import writeup
+from common import APP, TESTS, f1, load_gold
 
 TIMEOUT = int(os.environ.get('SCORE_TIMEOUT_SEC', '1200'))
 KEYS = ['date', 'ticker', 'source_id']
@@ -65,7 +69,14 @@ def main():
     data = pd.read_csv(TESTS / 'eval_panel.csv.gz', parse_dates=['date'])
     for f in ('gold.json', 'eval_panel.csv.gz'):
         (TESTS / f).unlink(missing_ok=True)
+    code = '\n\n'.join(f'# {f.name}\n{f.read_text(errors="replace")}' for f in sorted((APP / 'solution').glob('*.py')))
+    facts = dict(control=truth['control'], **truth['shown_planted'])
+    judged = writeup.grade(writeup.read(), facts, {'code': code or '(missing)'})
+    reward, details = score(truth, data)
+    writeup.report(reward, details, *judged)
 
+
+def score(truth, data):
     # ---- no-foresight gate: the truncated runs come first, so nothing later is on disk to reuse
     cutoffs = sorted(truth['truncation_cutoffs'])
     truncated = {}
@@ -73,11 +84,11 @@ def main():
         try:
             truncated[c] = run_scorer(data[data.date <= pd.Timestamp(c)])
         except Exception as e:  # noqa: BLE001
-            return write_reward(0.0, dict(error=f'truncated run failed: {e}'))
+            return 0.0, dict(error=f'truncated run failed: {e}')
     try:
         full = run_scorer(data)
     except Exception as e:  # noqa: BLE001
-        return write_reward(0.0, dict(error=str(e)))
+        return 0.0, dict(error=str(e))
 
     leaks = []
     for c in cutoffs:
@@ -129,8 +140,8 @@ def main():
         base = max(0.0, 1 - rate / 0.05)
         det = dict(control=True, flagged_share=round(rate, 4))
     reward = base * coverage * (1.0 if no_foresight else 0.0)
-    return write_reward(reward, dict(det, coverage=round(coverage, 4), no_foresight=no_foresight,
-                                     truncation_checks=leaks, rows_evaluated=int(len(e)), positives=int(pos.sum())))
+    return reward, dict(det, coverage=round(coverage, 4), no_foresight=no_foresight,
+                        truncation_checks=leaks, rows_evaluated=int(len(e)), positives=int(pos.sum()))
 
 
 if __name__ == '__main__':

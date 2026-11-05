@@ -18,9 +18,9 @@ from families._shared.panel_perturb import D, Frame, _fmt, inj_level_shift
 
 
 def make_variant(seed: int, control: bool, ctx, n_tickers=8):
-    shown, _ = plant(np.random.default_rng(seed), control, ctx, n_tickers)
+    shown, labels = plant(np.random.default_rng(seed), control, ctx, n_tickers)
     hidden, truth = plant(np.random.default_rng([seed, 1]), control, ctx, n_tickers)
-    truth = dict(truth, seed=seed, hidden_files={"eval_panel.csv.gz": gzip.compress(
+    truth = dict(truth, seed=seed, shown_planted={k: labels[k] for k in ("points", "shifts")}, hidden_files={"eval_panel.csv.gz": gzip.compress(
         hidden.to_csv(index=False, date_format="%Y-%m-%d").encode(), mtime=0)})
     return shown, truth, {}, None, ctx.companies
 

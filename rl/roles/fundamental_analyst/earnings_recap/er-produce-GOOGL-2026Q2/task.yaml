@@ -1,0 +1,41 @@
+id: er-produce-GOOGL-2026Q2
+role: fundamental_analyst
+workflow: earnings_recap
+mode: produce
+world: midsize_ls
+status: ungraded
+split: eval
+prompt:
+  template: earnings-quotes manifest v23 (prompt_prefix "/earnings-recap TICKER\n\n" + transcript)
+  fingerprint: null
+output_schema: null
+grader:
+  type: rubric
+  module: null
+  note: >
+    Model grader compares the post against grader/gold.md using grader/success_criteria.md.
+    grader/gold.json has the fact ledger, source conflicts, ranked decisions and fail signals.
+    Gold status is draft until an expert signs off.
+sources:
+- https://alphaseeker84.substack.com/p/alphabet-inc-goog-q2-2026-results
+- https://knowyourinvestments.substack.com/p/thoughts-on-googles-q2-2026-earnings
+- https://wealththeory.substack.com/p/breaking-down-googles-2026-q2-earnings
+- ~/Downloads/manifest.yaml (earnings-quotes eval, dataset v23)
+- rl/skills/house/earnings-recap (house format and selection rules)
+research:
+  cutoff: "2026-07-24T20:00:00Z"
+  # The gold was built from these public posts. A research-enabled agent that finds them
+  # is reading the answer key.
+  blocked_domains:
+  - alphaseeker84.substack.com
+  - knowyourinvestments.substack.com
+  - wealththeory.substack.com
+meta:
+  ticker: GOOGL
+  period: 2026Q2
+  call_date: "2026-07-22"
+  expected_skills: [earnings-recap]
+  blockers:
+  - transcript not yet added to prompt/inputs.json
+  - gold needs expert sign-off
+  - quotes are secondhand (from source A); check them against the transcript

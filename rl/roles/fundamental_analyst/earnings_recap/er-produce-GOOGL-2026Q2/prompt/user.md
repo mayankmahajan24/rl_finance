@@ -1,0 +1,3 @@
+/earnings-recap GOOGL
+
+{{transcript}}

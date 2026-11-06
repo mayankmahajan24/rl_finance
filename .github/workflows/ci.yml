@@ -1,6 +1,6 @@
 # Every PR: lint, rebuild every task CI can build (all but the panel families' held-out split, whose
-# seeds are secret; train at the size the manifests record), fail if the rebuild changes a committed
-# manifest, then the test suite. The Harbor oracle run in Docker is oracle.yml (nightly, on demand).
+# seeds are secret; train at the size the manifests record), run the test suite, then fail if the
+# rebuild changes a committed manifest. The Harbor oracle run in Docker is oracle.yml (nightly, on demand).
 name: CI
 
 on:
@@ -40,6 +40,9 @@ jobs:
       - name: Build the generated families' train split (the size the committed manifests record)
         run: python rl/build.py panel --split train --n 3 --controls 1
 
+      - name: Tests
+        run: pytest
+
       - name: Rebuild reproduces the committed manifests
         run: |
           if ! git diff --exit-code --stat -- rl/splits/manifests; then
@@ -47,6 +50,3 @@ jobs:
             git diff -- rl/splits/manifests | head -100
             exit 1
           fi
-
-      - name: Tests
-        run: pytest

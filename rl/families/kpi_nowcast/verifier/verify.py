@@ -23,7 +23,6 @@ def main():
     if why:
         details['judge'] = why
     else:
-        import client
         ctx = json.loads((TESTS / 'judge_context.json').read_text())
         system, user = G.judge_prompt(ctx['user'], ctx['as_of'], writeup, fc, gold)
         figures = G.figure_blocks(APP / 'output' / 'figures')
@@ -31,7 +30,7 @@ def main():
         for content in ([{'type': 'text', 'text': user}] + figures, user) if figures else (user,):
             try:
                 votes, meta = judge.judge(system, content, G.JUDGE_SCHEMA)
-            except (judge.JudgeError, client.anthropic.BadRequestError) as e:
+            except judge.JudgeError as e:
                 details['judge'] = f'not graded: write-up judge failed: {e}'
             else:
                 verdicts = judge.majority(votes, 'verdict')

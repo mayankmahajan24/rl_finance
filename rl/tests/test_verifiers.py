@@ -12,11 +12,13 @@
 
 from __future__ import annotations
 
+import http.server
 import importlib
 import json
 import os
 import pathlib
 import sys
+import threading
 
 import pytest
 
@@ -214,6 +216,54 @@ def test_review_without_scorer_is_not_graded(offline):
     assert rewards == {} and details["status"] == "not graded"
 
 
+@pytest.fixture
+def rejecting_api(monkeypatch):
+    """A local API that refuses every request with a 400, the way a key with no credit does."""
+    class Reject(http.server.BaseHTTPRequestHandler):
+        def do_POST(self):
+            self.rfile.read(int(self.headers.get("content-length", 0)))
+            body = b'{"type": "error", "error": {"type": "invalid_request_error", "message": "credit balance too low"}}'
+            self.send_response(400)
+            self.send_header("content-type", "application/json")
+            self.send_header("content-length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, *a):
+            pass
+
+    server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Reject)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+    monkeypatch.setenv("ANTHROPIC_BASE_URL", f"http://127.0.0.1:{server.server_port}")
+    monkeypatch.delenv("JUDGE", raising=False)
+    yield
+    server.shutdown()
+
+
+REVIEW_ANSWER = json.dumps({"issues": [{"title": "t", "description": "d"}]})
+THESIS_ANSWER = json.dumps({"fastest": "X", "growth": {}, "unreliable": []})
+
+
+def test_rejected_judge_request_keeps_kpi_reward(rejecting_api):
+    task = built("bench", KN)
+    gold = json.loads((task / "tests" / "gold.json").read_text())
+    rewards, details = run_verifier(task, output={"answer.md": kn_answer(gold, gold["actual"])})
+    assert rewards["reward"] == 1 and "writeup_score" not in rewards
+    assert details["judge"].startswith("not graded") and "credit balance" in details["judge"]
+
+
+def test_rejected_judge_request_is_not_graded_on_thesis(rejecting_api):
+    rewards, details = run_verifier(built("bench", "thesis-bench-001"),
+                                    output={"answer.json": THESIS_ANSWER, "memo.md": "A memo."})
+    assert rewards == {} and details["status"] == "not graded" and "credit balance" in details["note"]
+
+
+def test_rejected_judge_request_is_not_graded_on_review(rejecting_api):
+    rewards, details = run_verifier(rd_task("review"), output={"response.json": REVIEW_ANSWER})
+    assert rewards == {} and details["status"] == "not graded" and "credit balance" in details["note"]
+
+
 def test_every_built_task_is_graded():
     """No task ships without a grader: an ungraded one would hand a lab an empty reward."""
     for d in sorted((RL / "tasks").glob("*/*")):
@@ -285,14 +335,12 @@ def test_write_up_score_counts_applicable_items(monkeypatch, tmp_path):
     assert metrics["writeup_score"] == 0.875 and metrics["w_W2"] == 0.0 and "w_W3" not in metrics
 
 
-@pytest.mark.parametrize("api_error", [False, True])
-def test_failed_judge_leaves_the_write_up_ungraded(api_error, monkeypatch, tmp_path):
+def test_failed_judge_leaves_the_write_up_ungraded(monkeypatch, tmp_path):
     w = writeup_module(monkeypatch, tmp_path)
     monkeypatch.setattr(w.judge, "unavailable", lambda: None)
-    import client
 
     def fail(*a, **k):
-        raise client.anthropic.APIError("no credit", None, body=None) if api_error else w.judge.JudgeError("down")
+        raise w.judge.JudgeError("down")
     monkeypatch.setattr(w.judge, "judge", fail)
     metrics, why = w.grade("A note.", {}, {})
     assert metrics == {} and why.startswith("not graded")

@@ -90,7 +90,7 @@ def judge(system: str, user: str | list, schema: dict | None = None, cfg: dict |
             import client as model_client
             try:
                 msg, used, _ = model_client.stream(req, time.time() + TIMEOUT_S, client, 'judge')
-            except (RuntimeError, *model_client.TRANSIENT) as e:
+            except (RuntimeError, model_client.anthropic.APIError) as e:
                 raise JudgeError(f'judge call failed: {type(e).__name__}: {e}') from e
             usage = {k: usage.get(k, 0) + v for k, v in used.items()}
             if msg.stop_reason == 'refusal':

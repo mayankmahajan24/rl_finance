@@ -1,0 +1,7 @@
+{
+  "ticker": "GOOGL",
+  "period": "Q2 2026",
+  "call_date": "2026-07-22",
+  "transcript": null,
+  "transcript_note": "Missing. Add the complete Alphabet Q2 2026 earnings-call transcript here and render it into user.md as {{transcript}}. The task cannot run until this is done."
+}

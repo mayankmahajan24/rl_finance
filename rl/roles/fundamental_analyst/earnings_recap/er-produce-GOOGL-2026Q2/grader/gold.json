@@ -1,0 +1,77 @@
+{
+  "status": "draft: AI-written from three public Substack recaps; needs expert sign-off before it counts as gold",
+  "gold_post_file": "gold.md",
+  "word_count": {"total": 466, "opening": 156, "house_budget": "375-450 target, 475 max, opening < 90"},
+  "format": "editorial-patterns voice (FLEX-style layout: dense opening ending 'Detail below:', '• What happened' / '• Implications' as top-level bullets with ◦ and ▪ beneath). The opening exceeds the slack-format 90-word cap on purpose; success_criteria accepts a format used by the gold.",
+  "event": {
+    "issuer": "Alphabet Inc.",
+    "ticker": "GOOGL",
+    "period": "Q2 2026 (quarter ended 2026-06-30)",
+    "call_date": "2026-07-22 (after close)",
+    "research_cutoff": "close of 2026-07-24 (second trading day after the call)"
+  },
+  "sources": {
+    "A": {"url": "https://alphaseeker84.substack.com/p/alphabet-inc-goog-q2-2026-results", "author": "Elliot's Musings", "date": "2026-07-23", "used_for": "10-Q line items, call quotes, financing and per-share analysis, Q&A, valuation"},
+    "B": {"url": "https://knowyourinvestments.substack.com/p/thoughts-on-googles-q2-2026-earnings", "author": "Denis Buivolov", "date": "2026-07-23", "used_for": "headline P&L, Cloud margin history, backlog base, day-1 stock move, neocloud read-through"},
+    "C": {"url": "https://wealththeory.substack.com/p/breaking-down-googles-2026-q2-earnings", "author": "Jordan (Wealth Theory)", "date": "2026-07-23", "used_for": "backlog-slowdown diagnosis, TPU share of backlog, deal-count omission, capex guide history"}
+  },
+  "facts": [
+    {"id": "rev", "value": "Revenue $119.8B, +24% y/y", "kind": "company disclosure", "src": ["A", "B", "C"]},
+    {"id": "oi", "value": "Operating income $40.8B, +30% y/y, 34% margin (+~200bps y/y)", "kind": "company disclosure", "src": ["A", "B"]},
+    {"id": "cloud_rev", "value": "Google Cloud revenue $24.8B, +82% y/y (Q1: +63%)", "kind": "company disclosure", "src": ["A", "B", "C"]},
+    {"id": "cloud_margin", "value": "Cloud operating margin 35.6% vs. 32.9% Q1 and 20.6-20.7% Q2'25", "kind": "company disclosure", "src": ["A", "B", "C"]},
+    {"id": "backlog", "value": "Cloud backlog $514B; added ~$52-54B in Q2 vs. >$200B in Q1", "kind": "company disclosure", "src": ["A", "B", "C"], "conflict": "backlog_add"},
+    {"id": "tpu", "value": "TPU hardware revenue began in Q2, small; vast majority expected 2027; core Cloud accelerated ex-TPU; vast majority of backlog not TPU-related", "kind": "management framing", "src": ["A", "C"]},
+    {"id": "q3_margin", "value": "Q3: expand use of third-party capacity as a bridge, 'will create modest margin pressure'; plus Wiz integration", "kind": "management guidance", "src": ["A", "B", "C"]},
+    {"id": "capex_guide", "value": "FY26 capex $195-205B, raised from $180-190B (Q1), originally $175-185B; Q2 capex $44.9B; FY27 'increase significantly', unquantified", "kind": "company guidance", "src": ["A", "B", "C"]},
+    {"id": "capex_reason", "value": "Raise attributed to 'an acceleration in the delivery of capacity to meet growing demand', not component prices", "kind": "management framing", "src": ["A", "B"]},
+    {"id": "fcf", "value": "OCF $39.1B (Q1 $45.8B), FCF -$5.9B (Q1 +$10.1B), first negative FCF", "kind": "company disclosure", "src": ["A", "B", "C"]},
+    {"id": "wc", "value": "Inventory used $6.7B (vs. $0.2B yr ago), receivables $6.5B", "kind": "company disclosure (10-Q)", "src": ["A"]},
+    {"id": "financing", "value": "$49.6B common + 6.25% mandatory convertible preferred; $20.3B senior notes; buybacks $0 vs. $13.2B yr ago; $40B ATM", "kind": "company disclosure (10-Q)", "src": ["A"], "conflict": "equity_raise_size"},
+    {"id": "debt", "value": "LT debt $46.5B -> $98.2B y/y; interest expense $261M -> $1,278M", "kind": "company disclosure", "src": ["A", "B", "C"]},
+    {"id": "pref_div", "value": "Preferred dividend ~$300M/quarter", "kind": "inference (source A estimate)", "src": ["A"]},
+    {"id": "eps", "value": "GAAP diluted EPS $9.11 incl. ~$6.26 from securities marks; core ~$2.85 vs. $2.88 consensus", "kind": "company disclosure + source A calculation + external expectation", "src": ["A"]},
+    {"id": "marks", "value": "~$98-99B equity-securities gain; SpaceX and Anthropic the likely drivers", "kind": "company disclosure + inference", "src": ["A", "B"]},
+    {"id": "fy27_eps", "value": "Consensus FY27 EPS $14.86", "kind": "external expectation", "src": ["A"]},
+    {"id": "reaction", "value": "-2.9% after hours to ~$332; ~-7% intraday 2026-07-23", "kind": "market data", "src": ["A", "B"]},
+    {"id": "valuation", "value": "~26.7x trailing EV / operating income at ~$332", "kind": "market data (source A calc)", "src": ["A"]},
+    {"id": "peers", "value": "Azure ~40% cc, AWS ~28% (most recent reported quarters); MSFT reports 7/29, AMZN 7/30", "kind": "external", "src": ["A"]}
+  ],
+  "conflicts": [
+    {"id": "backlog_add", "A": "+$52B q/q (and +$222B in Q1)", "B": "+$54B, from $460B to $514B", "C": "'just over $50B'", "resolution": "Gold states ~$52-54B; the difference is the prior-quarter base. Do not penalize either figure."},
+    {"id": "equity_raise_size", "A": "$49.6B common + mandatory convertible preferred (cash-flow statement)", "C": "'$80B raise last month'", "resolution": "Gold uses A ($49.6B, sourced to the filing). C's $80B is unsupported; a post that uses $80B is a factual-fidelity error."},
+    {"id": "reaction", "A": "-2.9% after hours", "B": "-7% 'today' (2026-07-23)", "resolution": "Both are dated and compatible (AH vs. next session). Either is acceptable if labelled."},
+    {"id": "cloud_margin_yago", "B": "20.6%", "C": "20.7%", "resolution": "Immaterial."},
+    {"id": "net_cash", "A": "net cash ~$126B (appears to net out preferred)", "B/C": "$242.5B cash and securities, $98.2B debt", "resolution": "Gold omits net cash. Do not reward $144B or $126B without a definition."}
+  ],
+  "ranked_decisions": [
+    {"rank": 1, "decision": "The quarter's signal is the funding regime change: the raise ahead of need is the de facto FY27 capex guide (multi-year FCF deficit). Raise revenue estimates, not EPS.", "evidence": ["capex_guide", "fcf", "financing", "debt"]},
+    {"rank": 2, "decision": "Cloud acceleration is real (ex-TPU, record margin), but Q3 has a dated margin headwind from third-party capacity; the October margin decides whether capex returns hold.", "evidence": ["cloud_rev", "cloud_margin", "tpu", "q3_margin"]},
+    {"rank": 3, "decision": "Backlog net adds collapsed from >$200B to ~$50B, which threatens 2027 Cloud growth even with demand intact. Q3 net adds are the leading indicator.", "evidence": ["backlog", "tpu"]},
+    {"rank": 4, "decision": "Earnings quality: GAAP EPS is dominated by private marks (core roughly in line), and the OCF decline is a TPU inventory build that becomes structural if it repeats.", "evidence": ["eps", "marks", "wc", "fcf"]}
+  ],
+  "counterweights": [
+    "Management on record: no further equity issuance planned (dilution tail bounded)",
+    "Operating margin +200bps y/y while capex nearly doubled",
+    "Part of the OCF drop is working-capital timing that can reverse"
+  ],
+  "quotes": [
+    {"text": "we continue to expect our CapEx to increase significantly in 2027 and we will provide more details at a later date", "speaker": "Anat Ashkenazi, CFO", "proves": "FY27 capex left unquantified", "verified_against": "source A (secondhand; check against the transcript)"},
+    {"text": "at this point, we're not planning to go back to the equity markets", "speaker": "Anat Ashkenazi, CFO", "proves": "dilution counterweight", "verified_against": "source A (secondhand)"},
+    {"text": "will create modest margin pressure", "speaker": "management (prepared remarks)", "proves": "dated Q3 Cloud margin headwind", "verified_against": "source A (secondhand)"},
+    {"text": "we built ahead", "speaker": "Anat Ashkenazi, CFO (Q&A, Eric Sheridan)", "proves": "OCF drop is a TPU inventory build", "verified_against": "source A (secondhand)"}
+  ],
+  "acceptable_substitutes": [
+    "Leading with the capex raise + negative FCF + day-1 reaction instead of the financing regime change, provided the financing (equity/MCP + notes + zero buybacks) appears in the opening or first body bullet",
+    "Valuation framing in the opening instead of in Implications",
+    "A peer read-through to MSFT/AMZN/ORCL hyperscaler capex instead of neoclouds, if the mechanism is stated"
+  ],
+  "fail_signals": [
+    "Treating $9.11 GAAP EPS as a large beat",
+    "Reading 82% Cloud growth as TPU hardware recognition",
+    "Using $80B as the equity raise",
+    "Quoting an FY27 capex number (none was given)",
+    "Omitting the backlog-add slowdown and the financing change (both of the two top non-headline decisions)",
+    "Using events after 2026-07-24 (e.g., MSFT/AMZN actual results, Q3 print)"
+  ]
+}

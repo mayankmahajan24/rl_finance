@@ -26,3 +26,6 @@ rl/runs/**/errors.jsonl
 dist/
 .pytest_cache/
 .ruff_cache/
+
+# local Claude instructions: pilot scope rules, kept out of the repo
+CLAUDE.md

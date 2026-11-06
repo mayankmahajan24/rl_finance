@@ -26,3 +26,15 @@
     reviewed_at: null
     reason: null
   note: the write-up rubric; it uses the gold as facts for the judge
+- path: families/data_audit/solutions/reference/*
+  kind: reference
+  produced_by:
+    type: unrecorded
+  produced_at: 2026-11
+  sha256: 5d5e1c152b2bc21fac9e30b4cc42e08dfed45f6923e43f054b1bdd20a52bc2c9
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  note: the reference audit and write-up; what the grader treats as a strong answer. Not a gold input, so it does not reach tasks or the release check

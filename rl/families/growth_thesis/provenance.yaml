@@ -26,3 +26,15 @@
     reviewed_at: null
     reason: null
   note: 'rubric_items(): the memo rubric, and the 0.35/0.25/0.15/0.25 reward weights'
+- path: families/growth_thesis/solutions/reference/*
+  kind: reference
+  produced_by:
+    type: unrecorded
+  produced_at: 2026-10
+  sha256: 4300d035ece41548fb42819c43b4762e969b71836cb67ec0f6c8897c86b89e63
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  note: the reference analysis; what the grader treats as a strong answer. Not a gold input, so it does not reach tasks or the release check

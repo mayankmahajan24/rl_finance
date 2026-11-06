@@ -5,7 +5,7 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200000,
   "control": false,
@@ -13,9 +13,9 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "11629a33f248",
+  "fingerprint": "afc1a4e0f7b2",
   "gold_fingerprint": "72502ef9d978",
-  "content_sha256": "9738a6725336d5d8fc20721762530fe9e099a404c7310f9490beee4389917b88"
+  "content_sha256": "e8d3ccd7c8ae3abbf9568221d0dd26389bc09ba184ffff92fd67e26de9e1bfc0"
  },
  "thesis-bench-002": {
   "split": "bench",
@@ -23,7 +23,7 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200001,
   "control": false,
@@ -31,9 +31,9 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "5411d0cd944d",
+  "fingerprint": "14874dfa14c4",
   "gold_fingerprint": "2270cefe86de",
-  "content_sha256": "d210ff6bcd0102cca7744f9c4fa87ac60ffb36b5f153e7c5b1242b7693a4d115"
+  "content_sha256": "f022a7518ee4f1986995a399a3ae86929fd236cde9e94c7bc64cb5ae782ef809"
  },
  "thesis-bench-003": {
   "split": "bench",
@@ -41,7 +41,7 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200002,
   "control": false,
@@ -49,9 +49,9 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "08bb81a7fd6a",
+  "fingerprint": "2affeb119e95",
   "gold_fingerprint": "1bc2dd4833f9",
-  "content_sha256": "17a7618bf3c538df38ea35999ad781b4a80f376dc12f8763f9bcae50b17ebced"
+  "content_sha256": "7dcd7903e08892c35429e557ff430e9e2fbfc2a7108fd5adc9559546a8b57cb7"
  },
  "thesis-bench-004": {
   "split": "bench",
@@ -59,7 +59,7 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200003,
   "control": false,
@@ -67,9 +67,9 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "50f75321e493",
+  "fingerprint": "2bb7a3f1c877",
   "gold_fingerprint": "7d114d28969c",
-  "content_sha256": "f5f787697311a8ca91a0be88b0b832edb8af28ff717f803febe50817d5a7ba54"
+  "content_sha256": "7ab79aee4b870c21dcbc2abefb958eb3fb305ba55620cbadbb5ebe8982d827e3"
  },
  "thesis-bench-005": {
   "split": "bench",
@@ -77,7 +77,7 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200004,
   "control": false,
@@ -85,9 +85,9 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "c6cacbbe860b",
+  "fingerprint": "d4fdb166395f",
   "gold_fingerprint": "07b33fe12e82",
-  "content_sha256": "cffd9c02b39c163f98ebff8230e3cebe51453b834187a0377d34b599b338f8c1"
+  "content_sha256": "243c50f8620ddbf4f56e4e363b04de273d6e178d0a62e7a44b54e152cffb6a37"
  },
  "thesis-bench-006": {
   "split": "bench",
@@ -95,7 +95,7 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200005,
   "control": false,
@@ -103,9 +103,9 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "b1820587bf76",
+  "fingerprint": "0bc22174420c",
   "gold_fingerprint": "27d2d45d73ac",
-  "content_sha256": "a444bcd9cd081839c44c23495b01a96a1b0cb37e2cce37f6c7989e5ec0f34d4b"
+  "content_sha256": "e8c8b31813eca02c28d93846534d28156aa0084818d2f4a3768bafa9c23474e0"
  },
  "thesis-bench-007": {
   "split": "bench",
@@ -113,7 +113,7 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200006,
   "control": false,
@@ -121,9 +121,9 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "869c3cbf7bec",
+  "fingerprint": "b22428767f34",
   "gold_fingerprint": "2f30f31e2b5f",
-  "content_sha256": "f822fce5f0fbb7503fb1ca2a28dc4a002f5e5d826c6a8e334adf59694c95db01"
+  "content_sha256": "4a0fe1be5060be1cfea6d13008eb5d696b7bb9eaf5137e929ed5b93b117779dc"
  },
  "thesis-bench-008": {
   "split": "bench",
@@ -131,7 +131,7 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200007,
   "control": false,
@@ -139,9 +139,9 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "42e2ff7f2a06",
+  "fingerprint": "183ce1c3567a",
   "gold_fingerprint": "328644474874",
-  "content_sha256": "c1ac443990269355d86f3c29e6345ed90fdbf3256c95ba20731febef8fa7ada1"
+  "content_sha256": "f26b071e2166954e5eb37ce18b2e9b5a6602702fefa09a9579ab13266a28ddf8"
  },
  "thesis-bench-009": {
   "split": "bench",
@@ -149,7 +149,7 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200008,
   "control": false,
@@ -157,9 +157,9 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "7fb02f638cb0",
+  "fingerprint": "952f54d9a18e",
   "gold_fingerprint": "b2be7597d68c",
-  "content_sha256": "6ac5246189dbe719b71f3753fcec8865d71b5f3b45df26a2a884c0aba69456f6"
+  "content_sha256": "a8e894371e8ff8ae3b9068c1c3b692911cc6a1b3e78964f74f53f7094346e34d"
  },
  "thesis-bench-010": {
   "split": "bench",
@@ -167,7 +167,7 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200009,
   "control": false,
@@ -175,9 +175,9 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "4e06eb131503",
+  "fingerprint": "f67be52ae81e",
   "gold_fingerprint": "10f0298a2e77",
-  "content_sha256": "3bcd4ba69f3297dcf198d668a73d7ae817fcc44820a241134a3c4f736fb4ec9f"
+  "content_sha256": "b23a36f2469e141edae3e458e274bd133f5d652c043c929c1d9a87daf125e404"
  },
  "thesis-bench-control-01": {
   "split": "bench",
@@ -185,7 +185,7 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 290000,
   "control": true,
@@ -193,9 +193,9 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "25e803635339",
+  "fingerprint": "488ea463ae89",
   "gold_fingerprint": "53b4b2cf9baf",
-  "content_sha256": "c18f79e0d8b88a459ed3d24c4b7eb86f1a1c9119c4f93c2fa6637de069c4b2db"
+  "content_sha256": "e8d389c7066cfe1930890b1afa9c56ddaba5ca3780419abc030438ecc67819d3"
  },
  "thesis-bench-control-02": {
   "split": "bench",
@@ -203,7 +203,7 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 290001,
   "control": true,
@@ -211,9 +211,9 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "7c194a5df88f",
+  "fingerprint": "4b3a21f42c4d",
   "gold_fingerprint": "ee5d7dce90a2",
-  "content_sha256": "6dbc419557b5427aa90d2f891c7a20b80cfd76533017e2c6d3faf97b424d7595"
+  "content_sha256": "283df3fff0b6d4ff1aaf2896f0ba4882511665f6914c3d4ff70d47f8d6ca1cc7"
  },
  "thesis-heldout-001": {
   "split": "heldout",
@@ -221,16 +221,16 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "57c228a22dbe",
+  "fingerprint": "2c346a36b5ef",
   "gold_fingerprint": "824d48c9ea2c",
-  "content_sha256": "b6c1848fa3a9c81d0d5664ce3a1d8b7ca3e58f254cb851c722ee9953c3c51a95"
+  "content_sha256": "c47f3a0900a3c887345b079863ccb2523712030b16ec8c933835e0f8d852ddfc"
  },
  "thesis-heldout-002": {
   "split": "heldout",
@@ -238,16 +238,16 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "1fea5cc11fc7",
+  "fingerprint": "19fa4f9d52d5",
   "gold_fingerprint": "2e572bd9bcd8",
-  "content_sha256": "03ea06775d2dee0e5d382cc3e125a6ef6ea59bf0c82372f84b5bdd8cc9a46ac9"
+  "content_sha256": "72e96d093cdf320d0c7dfe04af7eee2ad40c28a9f9fbf1a80b4be1da613a9ce9"
  },
  "thesis-heldout-003": {
   "split": "heldout",
@@ -255,16 +255,16 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "0764de23328b",
+  "fingerprint": "43bd18383b3a",
   "gold_fingerprint": "7b763b9e0811",
-  "content_sha256": "cabbc80d967db310a82c2997401a8c9ac8175d608c5cc1c68a213145e9612cad"
+  "content_sha256": "b38add8deb4457c0b95911bbfe181c9885ca5f15224a88daaef5e0bbe60e9b82"
  },
  "thesis-heldout-004": {
   "split": "heldout",
@@ -272,16 +272,16 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "48d278a178b4",
+  "fingerprint": "87904d36b69f",
   "gold_fingerprint": "49c3e486542b",
-  "content_sha256": "85fa59546b395fbce56d99727a16446cae268c4357364d9773e7d8ffc32b50ea"
+  "content_sha256": "a7ec64c18c39b22853f6907f4e290a6b03dd40717dc6ae4435fb5cf61d7a2823"
  },
  "thesis-heldout-005": {
   "split": "heldout",
@@ -289,16 +289,16 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "e234464c3d55",
+  "fingerprint": "5ad66ea2ce52",
   "gold_fingerprint": "fd6249eb2f65",
-  "content_sha256": "ded42508c862b8e14662a54a4333c44bbabbfd8c5012448f53a11217861942c4"
+  "content_sha256": "e944446befa68295bbcce08c34f2e2f403a6fa055d44b3fde006a43c360f603c"
  },
  "thesis-heldout-006": {
   "split": "heldout",
@@ -306,16 +306,16 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "2918ea396fde",
+  "fingerprint": "2b8dc50bd8bb",
   "gold_fingerprint": "802d66da2be8",
-  "content_sha256": "90ee4f731dd4ed90f555c6a85c71d84102c7f91dad42b8bdb5b40d965444564f"
+  "content_sha256": "a943e1bcfa8758c6dafb07c9d7d279a16958208b293a07e6d2da9a1651cb5424"
  },
  "thesis-heldout-007": {
   "split": "heldout",
@@ -323,16 +323,16 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "45bbc50e9264",
+  "fingerprint": "e558840e0474",
   "gold_fingerprint": "e84369dcf9de",
-  "content_sha256": "d06bbc955b731953128c8a9bed8d3b5b08b94b2d3202fb26ff55228ada4ea189"
+  "content_sha256": "331c3f557d677b06e57721b0645b9fa4c9c48ca77174ec6302146e4668697b22"
  },
  "thesis-heldout-008": {
   "split": "heldout",
@@ -340,16 +340,16 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "fac6cef5199e",
+  "fingerprint": "c4d9baed8232",
   "gold_fingerprint": "4eff998a286e",
-  "content_sha256": "c71a215e533d66f26f4c7a2c74b5661948abce2a26fdad52b863ff9658f106d8"
+  "content_sha256": "d1d4d6fefbe2a75b598f3f1bec35e1efafce1044c59ad1891a4c585ec4506007"
  },
  "thesis-heldout-009": {
   "split": "heldout",
@@ -357,16 +357,16 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "7377b91fa3bb",
+  "fingerprint": "68ab09f0910a",
   "gold_fingerprint": "a19e8b5ddc06",
-  "content_sha256": "bea2af1f0a9d09613c25faab70b5268ed717b903f37da430be69aa8baecc8809"
+  "content_sha256": "7958287cc57ff3150cf48d73bb080b0247a60703bc52d2ba89ac3b6b1a29f58e"
  },
  "thesis-heldout-010": {
   "split": "heldout",
@@ -374,16 +374,16 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "6bccf0f9f623",
+  "fingerprint": "705e7d50ec3b",
   "gold_fingerprint": "debad0286457",
-  "content_sha256": "581ba7bd4f5c6ed12a1004303eae4ee4d2751dfdef2711077b66d3bba63506e4"
+  "content_sha256": "a763e46b29cc202227866b403417b36280c2faa4848b93f86db6c33d297b3aa8"
  },
  "thesis-heldout-control-01": {
   "split": "heldout",
@@ -391,16 +391,16 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": true,
   "companies": [
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "f4418c1390c6",
+  "fingerprint": "ae63b2948936",
   "gold_fingerprint": "9906b427cd9a",
-  "content_sha256": "501cf73b18bd2ab6be3f85315930653b6255b896ec0b4e6be0833fafc000d5d2"
+  "content_sha256": "91c291ace44d10502af38a5683f6289fbb4dc070e5adecebc1100e4e35ce4c40"
  },
  "thesis-heldout-control-02": {
   "split": "heldout",
@@ -408,16 +408,16 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": true,
   "companies": [
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "69a1c5e45243",
+  "fingerprint": "69a9e9e32fff",
   "gold_fingerprint": "ab49a4c5d41a",
-  "content_sha256": "6e3981cb67ee2c51c64a043d26438962812751d6e218f69593dedd8689fb90cb"
+  "content_sha256": "1e6c7fc8985535bc8442a6ac8e63b4763a42079f0092ffa23eca2878da7cf633"
  },
  "thesis-train-001": {
   "split": "train",
@@ -425,7 +425,7 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 100000,
   "control": false,
@@ -433,9 +433,9 @@
    "LUV",
    "UAL"
   ],
-  "fingerprint": "5eabdbd2eca0",
+  "fingerprint": "cf2de583076b",
   "gold_fingerprint": "0d389ca1e27c",
-  "content_sha256": "45263313d2798be41bfdd27bdb13b0e1babd5a125d65436a4bcd334ad9fbb99a"
+  "content_sha256": "95b1cf8d205d3baeee3500c403afb66614aee076fa17953806101b5a6059d712"
  },
  "thesis-train-002": {
   "split": "train",
@@ -443,7 +443,7 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 100001,
   "control": false,
@@ -451,9 +451,9 @@
    "LUV",
    "UAL"
   ],
-  "fingerprint": "a8bb14e8f6cb",
+  "fingerprint": "3fe2bcb57443",
   "gold_fingerprint": "475a18a24984",
-  "content_sha256": "06ecfa78ab9c68bec3bceda93cd1ee11a0e4af244f97b9ecbe8d1022308afdff"
+  "content_sha256": "618489668933c522cf5d83c046c8bf1e19abbc512a70a55060207a6ddf6cc630"
  },
  "thesis-train-003": {
   "split": "train",
@@ -461,7 +461,7 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 100002,
   "control": false,
@@ -469,9 +469,9 @@
    "LUV",
    "UAL"
   ],
-  "fingerprint": "a615abe684e2",
+  "fingerprint": "58d11296fb9b",
   "gold_fingerprint": "ba9ff56a174d",
-  "content_sha256": "5cb30933136b8007a202fef191f3ff6c357922e02b8f62bce3d40418684d8022"
+  "content_sha256": "dbb4849d800a4b4b3f3e78d96e0261d037a7faa7f72435731ca37911879d3dfa"
  },
  "thesis-train-control-01": {
   "split": "train",
@@ -479,7 +479,7 @@
   "role": "quant_researcher",
   "workflow": "growth_thesis",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 190000,
   "control": true,
@@ -487,8 +487,8 @@
    "LUV",
    "UAL"
   ],
-  "fingerprint": "4242ed020592",
+  "fingerprint": "21b2f74796ba",
   "gold_fingerprint": "8c468ce2fae4",
-  "content_sha256": "1478ead8cec956ac4bb5877ccee9da7a463cc6d24b3ab5e0a9de46358eb33bbb"
+  "content_sha256": "e1837fb61216f0a9f125f7b37a6e20fb1b8b98738571b4ae57a6ff59f20ee348"
  }
 }

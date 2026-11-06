@@ -15,8 +15,8 @@ Harbor and through `harness/run_api.py`, graded by the same verifier (commands: 
 |---|---|---|---|
 | [`research_design`](research_design/) | research_design_case | Review a research plan for a named fund, or compare two (as PM) in both orders | Issue recall − penalties; 1 only for the gold plan in both orders |
 | [`kpi_nowcast`](kpi_nowcast/) | txn_panel | Nowcast a company's quarterly KPI from the sensor panel and filed actuals; forecast JSON + write-up | Skill vs the naive forecast, clamped to [0, 1]; accuracy and the C1–C12 write-up rubric (LLM judge) as diagnostics |
-| [`data_audit`](data_audit/) | txn_panel | Find planted data-quality problems in a disguised panel | F1 against planted + natural problems |
-| [`anomaly_scoring`](anomaly_scoring/) | txn_panel | Write an online anomaly scorer with no foresight | F1 × coverage, zeroed by a foresight check |
+| [`data_audit`](data_audit/) | txn_panel | Find planted data-quality problems in a disguised panel | F1 against planted + natural problems; write-up rubric as a separate metric |
+| [`anomaly_scoring`](anomaly_scoring/) | txn_panel | Write an online anomaly scorer with no foresight | F1 × coverage, zeroed by a foresight check; write-up rubric as a separate metric |
 | [`growth_thesis`](growth_thesis/) | txn_panel | Which airline grew fastest? Answer + memo, on semi-synthetic data with traps | 0.35 answer + 0.25 growth + 0.15 unreliable list + 0.25 memo rubric |
 
 The three Harbor families came from `~/altdata_evals` (2026-10-21). Built on every company with

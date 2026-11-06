@@ -10,12 +10,15 @@ Reward = F1 of precision and recall against the hidden ground truth:
     source-level behaviour) or that sit on a low-volume series (median ct < 10).
 A reported item can match at most one required item; extra reports of an already-matched issue
 (e.g. one per source of a ticker-wide break) are neither credited nor penalised.
+
+/app/output/writeup.md is judged against judge.md (writeup.py) as a separate metric, never blended in.
 """
 import json
 
 import pandas as pd
 
-from common import APP, f1, load_gold, write_reward
+import writeup
+from common import APP, f1, load_gold
 
 ISSUE_TYPES = ['duplicate_rows', 'swapped_columns', 'unit_scale', 'date_shift', 'series_swap',
                'double_count', 'outage', 'level_shift', 'ticker_remap']
@@ -58,8 +61,7 @@ def optional_match(rep, opt):
     return rs is not None and _d(opt['lo']) <= rs <= _d(opt['hi'])
 
 
-def main():
-    truth = load_gold()
+def score(truth):
     tol = truth['date_tolerance_days']
     try:
         reported = json.loads((APP / 'output' / 'issues.json').read_text())
@@ -67,7 +69,7 @@ def main():
             reported = reported.get('issues', [])
         assert isinstance(reported, list)
     except Exception as e:  # noqa: BLE001
-        return write_reward(0.0, dict(error=f'could not read output/issues.json: {e}'))
+        return 0.0, dict(error=f'could not read output/issues.json: {e}')
 
     ignore = {(i['ticker'], i['source_id']) for i in truth['ignore_series']}
     req = truth['required']
@@ -97,9 +99,18 @@ def main():
     recall = sum(matched_req) / len(req) if req else 1.0
     missed = [dict(type=r['type'], ticker=r['ticker'], source_id=r['source_id'], start=r['start'], origin=r.get('origin'))
               for r, m in zip(req, matched_req) if not m]
-    return write_reward(f1(precision, recall), dict(precision=round(precision, 3), recall=round(recall, 3),
-                                                    n_reported=len(reported), tp=n_tp, fp=n_fp, ignored=n_ignored,
-                                                    missed=missed, reports=per_report))
+    return f1(precision, recall), dict(precision=round(precision, 3), recall=round(recall, 3),
+                                       n_reported=len(reported), tp=n_tp, fp=n_fp, ignored=n_ignored,
+                                       missed=missed, reports=per_report)
+
+
+def main():
+    truth = load_gold()
+    reward, details = score(truth)
+    issues = APP / 'output' / 'issues.json'
+    facts = {k: truth[k] for k in ('control', 'required', 'optional')}
+    material = {'issues_json': issues.read_text(errors='replace') if issues.is_file() else '(missing)'}
+    writeup.report(reward, details, *writeup.grade(writeup.read(), facts, material))
 
 
 if __name__ == '__main__':

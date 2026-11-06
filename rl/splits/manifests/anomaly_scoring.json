@@ -5,7 +5,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200000,
   "control": false,
@@ -15,9 +15,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "d8219f4a5e97",
-  "gold_fingerprint": "03ff92fc0e99",
-  "content_sha256": "b5f76f3f1aa3df9f8e4075d7723c783a978c5d5eeb44cf4cd88ad2d2e708a70a"
+  "fingerprint": "990cc72c44a0",
+  "gold_fingerprint": "4d48da49f967",
+  "content_sha256": "78d6d2535aa46b58eaba95d5b2c6aebea3c02e033cd842e471c25a162a6c616f"
  },
  "anomaly-bench-002": {
   "split": "bench",
@@ -25,7 +25,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200001,
   "control": false,
@@ -35,9 +35,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "f63cdef0d0c6",
-  "gold_fingerprint": "0dfd093a1a93",
-  "content_sha256": "ca397e30916ab5e1ca1a69c920d3d7421de642adf545976b30aacaa7846577aa"
+  "fingerprint": "abab0e5b398a",
+  "gold_fingerprint": "7751bea8cdd1",
+  "content_sha256": "d0fbd9e8796e4bbbcfbc26ae781ebf45c2b6753de78e091ffc9c44a858d5b501"
  },
  "anomaly-bench-003": {
   "split": "bench",
@@ -45,7 +45,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200002,
   "control": false,
@@ -55,9 +55,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "4c4f0e415ae1",
-  "gold_fingerprint": "e5742164a2ed",
-  "content_sha256": "7c61923ff41e2cc8fbcdbe892368371cbc8d745a101555bfbd46f6f1650aeb64"
+  "fingerprint": "0fab663ed528",
+  "gold_fingerprint": "c88541ed2551",
+  "content_sha256": "33ebdf49fbb6d0173aa0d0bc9e3af7c9bcc9d7b01e8726e967aa8b7699843927"
  },
  "anomaly-bench-004": {
   "split": "bench",
@@ -65,7 +65,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200003,
   "control": false,
@@ -75,9 +75,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "d52d9c654216",
-  "gold_fingerprint": "f1eee4177002",
-  "content_sha256": "07fc14f506beb2d52bc6060c9d06605a635106f49ea3ee428a7092d1096ad589"
+  "fingerprint": "e6e92a89a37e",
+  "gold_fingerprint": "ba8c815e4a75",
+  "content_sha256": "cb41b800d4374c5e40f644adda21b9903f2cbeeaa8e29e292cb73ed0f1ae104d"
  },
  "anomaly-bench-005": {
   "split": "bench",
@@ -85,7 +85,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200004,
   "control": false,
@@ -95,9 +95,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "4feb8c3e801a",
-  "gold_fingerprint": "f1710845845e",
-  "content_sha256": "25f5ced5056ef1941892569bb0c73764b0ae5b73b21673ccd596c891973f0d25"
+  "fingerprint": "7b3b9bf9d76b",
+  "gold_fingerprint": "20d06b87b42d",
+  "content_sha256": "90151bc8cc1a3b1d3673fed362fb294c4e6b5f1e1b03aeaf85abe0270b04edd2"
  },
  "anomaly-bench-006": {
   "split": "bench",
@@ -105,7 +105,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200005,
   "control": false,
@@ -115,9 +115,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "e1a16261af36",
-  "gold_fingerprint": "8689cc51af3c",
-  "content_sha256": "d8b005b628be4cf157aab3a5883fc3ac6905c705d1434231b5a5453e80225b02"
+  "fingerprint": "d133811f4543",
+  "gold_fingerprint": "2fdd66bfd41b",
+  "content_sha256": "70cb913a78a5268886e165487f4a0231579046b5fc5484867219abb0587a17d2"
  },
  "anomaly-bench-007": {
   "split": "bench",
@@ -125,7 +125,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200006,
   "control": false,
@@ -135,9 +135,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "cf9da72f76e9",
-  "gold_fingerprint": "219c714c2f02",
-  "content_sha256": "cccac2ad04cbfc61712efcbd4f802e193356b56aefb93d1067e648d33b97389a"
+  "fingerprint": "c4e64625739a",
+  "gold_fingerprint": "bc523a929961",
+  "content_sha256": "de105956221c86de989a36dc811d07d5d4080263603a502dfcdc2de7c9f32140"
  },
  "anomaly-bench-008": {
   "split": "bench",
@@ -145,7 +145,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200007,
   "control": false,
@@ -155,9 +155,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "33829fcd0d38",
-  "gold_fingerprint": "a47b0d2b49d7",
-  "content_sha256": "764f828d40b8b735d57881459330e1f8f4338b4247fb5c840a3bd830139a69d3"
+  "fingerprint": "e88ab077f853",
+  "gold_fingerprint": "e7e729334f55",
+  "content_sha256": "8ace6f539f3427a3209642cb09f6d57811950dcbab83902ce392d040dd9c1029"
  },
  "anomaly-bench-009": {
   "split": "bench",
@@ -165,7 +165,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200008,
   "control": false,
@@ -175,9 +175,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "ca7461d59da1",
-  "gold_fingerprint": "757934edde23",
-  "content_sha256": "df0ead560069c41eedb8453c38a39fc49b61d4e100afedbe349e6e32a313be65"
+  "fingerprint": "659414090ce2",
+  "gold_fingerprint": "d2cb37716469",
+  "content_sha256": "a544eeb6557bb4f868f93d06db52052d699f77e5fc459efbc137af97b8faabc3"
  },
  "anomaly-bench-010": {
   "split": "bench",
@@ -185,7 +185,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200009,
   "control": false,
@@ -195,9 +195,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "197235121f01",
-  "gold_fingerprint": "a4a7ce78f79b",
-  "content_sha256": "1e4933a2d6efe8f393b0d5c3d75c1d136d6f2a1b25e3cbbb3faa5e908a63352f"
+  "fingerprint": "df43fc103347",
+  "gold_fingerprint": "118645b39e85",
+  "content_sha256": "807587d713ea7869f77a22b0eacdb0a11d682a8f11708a097aa5d50d3f477923"
  },
  "anomaly-bench-control-01": {
   "split": "bench",
@@ -205,7 +205,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 290000,
   "control": true,
@@ -215,9 +215,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "613a0ec9acbc",
-  "gold_fingerprint": "c4479437b8d6",
-  "content_sha256": "782548a69a44cf5585cb8dde3780cdd5ab115f6cfe4d9791a4f44868d227ed42"
+  "fingerprint": "1c7371037ae2",
+  "gold_fingerprint": "92dc68b5d5b9",
+  "content_sha256": "61bf8ebf109d4db93415dd6c5d001b6ed7a0255e845d4dec5d4c7a7cfcebab9c"
  },
  "anomaly-bench-control-02": {
   "split": "bench",
@@ -225,7 +225,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 290001,
   "control": true,
@@ -235,9 +235,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "0f5f8aac5d91",
-  "gold_fingerprint": "b6f63748f709",
-  "content_sha256": "d966f9b62229b6cf12b7b5d958c23eef7d11009fad6c207a242cb54017af331b"
+  "fingerprint": "d94ffddc0f41",
+  "gold_fingerprint": "2d9ea5a4f204",
+  "content_sha256": "bdc825928f234a1a376c99b2d36feba1463c54f5c06694c854bbc7d8a7f91ddd"
  },
  "anomaly-heldout-001": {
   "split": "heldout",
@@ -245,7 +245,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
@@ -254,9 +254,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "6335b828faf6",
-  "gold_fingerprint": "136272743777",
-  "content_sha256": "8e95ff24271edb1343a55af6874207e28ad29060b17cccdbd7837c8c86d9e5b9"
+  "fingerprint": "3e9e4cdb55e5",
+  "gold_fingerprint": "a9db99905683",
+  "content_sha256": "c1b865d1bbb000949ad5cb94dc17e20ebf9e6e5f95135f848846cb9396e7c537"
  },
  "anomaly-heldout-002": {
   "split": "heldout",
@@ -264,7 +264,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
@@ -273,9 +273,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "186c931a3bd9",
-  "gold_fingerprint": "7bf8fa3c85e7",
-  "content_sha256": "7baf393ee81e5749a5ddfb8486e9ef99c5f06cd6934173739d3ba369d44a7bb5"
+  "fingerprint": "2c9f17d20627",
+  "gold_fingerprint": "38838095ab7c",
+  "content_sha256": "0f4e0f2606c9313ef290a3495716229ceed7b99bcacc6cba15b45b415e07748d"
  },
  "anomaly-heldout-003": {
   "split": "heldout",
@@ -283,7 +283,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
@@ -292,9 +292,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "d0b8fb0bb1eb",
-  "gold_fingerprint": "fb1e4568a6c9",
-  "content_sha256": "d82096cf5cbd701d4f6df0094f53e14df26c2982192a9dea144250e2e054e4fb"
+  "fingerprint": "5399abb194ba",
+  "gold_fingerprint": "a0439dbde0d2",
+  "content_sha256": "a36b80e4dddbdbad5a06863eb404cd6ba950c9f8e39d75547b363ab54bacd68a"
  },
  "anomaly-heldout-004": {
   "split": "heldout",
@@ -302,7 +302,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
@@ -311,9 +311,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "a22330d17e0a",
-  "gold_fingerprint": "965a04102d19",
-  "content_sha256": "1a3357fe2d047ffd03139e2805689a151a3ac3541de0770cb3c2af0ccb6fd34d"
+  "fingerprint": "b8be7a381a4f",
+  "gold_fingerprint": "0abd39754960",
+  "content_sha256": "60f4e6a435cf09e617f5fbfa5c21d7e0d5f009b7b3b5ce6c9326600966d8d327"
  },
  "anomaly-heldout-005": {
   "split": "heldout",
@@ -321,7 +321,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
@@ -330,9 +330,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "e8c6f46d3a71",
-  "gold_fingerprint": "802c1427e935",
-  "content_sha256": "1091837383410af1c37e7464da3ef1ded49b93b8ea21657fe5fe2ff26e7a1699"
+  "fingerprint": "76038ac6fbb3",
+  "gold_fingerprint": "2a07bcca2fa2",
+  "content_sha256": "361eafd117b2d8eb2208edf6cf85b9d0f3c58b68fc1c6c7f4161cd79f42def99"
  },
  "anomaly-heldout-006": {
   "split": "heldout",
@@ -340,7 +340,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
@@ -349,9 +349,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "a6737f0c445c",
-  "gold_fingerprint": "55dcb1ba70f7",
-  "content_sha256": "3f7056f53fd6819ec9df75d8e4fe58b266069754c234b4c03ca9da1e2ccc521a"
+  "fingerprint": "18a4c7e8c777",
+  "gold_fingerprint": "1c4cd1c6e56e",
+  "content_sha256": "ad1e0366335f6aad2fb433aabe9985dc1390d27a9a8646a38b2d0effe4831d21"
  },
  "anomaly-heldout-007": {
   "split": "heldout",
@@ -359,7 +359,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
@@ -368,9 +368,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "572a6cd2cf14",
-  "gold_fingerprint": "e3a3d1c7d499",
-  "content_sha256": "4691b0e31138aa7b07697f6efd00b5b5a1e843bc3dec5a31f1e54ee0c9a9f70c"
+  "fingerprint": "99b156f4b9b4",
+  "gold_fingerprint": "f85a81a04f5e",
+  "content_sha256": "74b6d8e7bbea1bbc6871333e07f3e5e1b05d0e3931dab41fcda6e189af2063e1"
  },
  "anomaly-heldout-008": {
   "split": "heldout",
@@ -378,7 +378,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
@@ -387,9 +387,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "b10f615eab26",
-  "gold_fingerprint": "590dfcf3ec46",
-  "content_sha256": "3f0514a7081aece23caafc7bc4615384f702193a843fc0862c2fe97906260195"
+  "fingerprint": "c450df3a8002",
+  "gold_fingerprint": "8cc166911667",
+  "content_sha256": "dee6e1c97e28dedfc0203243a3965b9d6fb31ea74c4892fa4245588f3faa96bf"
  },
  "anomaly-heldout-009": {
   "split": "heldout",
@@ -397,7 +397,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
@@ -406,9 +406,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "e831d6892138",
-  "gold_fingerprint": "fa7be4d54a44",
-  "content_sha256": "bed19bca5e802af30f8db596de744336c40b15c42796b2e49869ff3afcc37c9c"
+  "fingerprint": "1ce81fdb95ed",
+  "gold_fingerprint": "d279e672c76c",
+  "content_sha256": "3ecaafcace7abc3e8947ba983984000e8860445e2cafddd7bcf0f8a020a2590b"
  },
  "anomaly-heldout-010": {
   "split": "heldout",
@@ -416,7 +416,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
@@ -425,9 +425,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "854f7ebd6581",
-  "gold_fingerprint": "771963430903",
-  "content_sha256": "5b973b56bbddf5336dba531ec18e8acfd515a55efdb32e06b5c01cbd51df5f54"
+  "fingerprint": "3f51b8e3b863",
+  "gold_fingerprint": "a74ba318829d",
+  "content_sha256": "95136c6b4442af8dd229ca7c1cc2a68654b8a5d4af7c924e1e1438479ab02326"
  },
  "anomaly-heldout-control-01": {
   "split": "heldout",
@@ -435,7 +435,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": true,
   "companies": [
@@ -444,9 +444,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "7caf6f2d1597",
-  "gold_fingerprint": "45afd36725b6",
-  "content_sha256": "aa21cd0085e5d217ebffe17797c814aec59a122bfd4d53d90ada3130c8e6b1b9"
+  "fingerprint": "f064806052a6",
+  "gold_fingerprint": "d271c763d3a5",
+  "content_sha256": "311378ca3bcbdeb2ba4a7ef9bae16c12b9d5b37c0b83c03f68ce5af0a694860d"
  },
  "anomaly-heldout-control-02": {
   "split": "heldout",
@@ -454,7 +454,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": true,
   "companies": [
@@ -463,9 +463,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "a0ff068cd898",
-  "gold_fingerprint": "fa52d2f145ff",
-  "content_sha256": "1731b69dba3fca8aa9fd728b0ebb01ebb8ecd866729869e6585ae5cb93632bd4"
+  "fingerprint": "0980bcb3ae37",
+  "gold_fingerprint": "b44b0796d2a0",
+  "content_sha256": "ef32c28120b1e0550c8cd49a038a0c7faf40ff896ae22f0c0b53018ad4e000db"
  },
  "anomaly-train-001": {
   "split": "train",
@@ -473,7 +473,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 100000,
   "control": false,
@@ -487,9 +487,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "612c8bda97c7",
-  "gold_fingerprint": "145e0392edeb",
-  "content_sha256": "3b00a9a371325b9d21caf4b94116fabde415f6987c27e82de10c479c05a0a614"
+  "fingerprint": "df14bc2b85b9",
+  "gold_fingerprint": "c8e06967b742",
+  "content_sha256": "4a8a214b958a4320e46648c9015d2cd7164faf8e3390fba640931adaae15efec"
  },
  "anomaly-train-002": {
   "split": "train",
@@ -497,7 +497,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 100001,
   "control": false,
@@ -511,9 +511,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "800cf4699252",
-  "gold_fingerprint": "535edb4deffc",
-  "content_sha256": "5ba71efce04a61a019cf833a6ebaf66335a32f5a29acc6882223db205948517a"
+  "fingerprint": "3a682f39578f",
+  "gold_fingerprint": "d3d6b72bbb31",
+  "content_sha256": "f073e74425ea34873ef631a2f644bcc3a716470e82a0b0a1fccf7f69bc1e552d"
  },
  "anomaly-train-003": {
   "split": "train",
@@ -521,7 +521,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 100002,
   "control": false,
@@ -535,9 +535,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "9f2c3a758538",
-  "gold_fingerprint": "54cec69adc10",
-  "content_sha256": "4ed87d92c8d8111685e219f1beb4b42e7930531a7231c4063adb2426e135c27d"
+  "fingerprint": "363125c73d78",
+  "gold_fingerprint": "c0b621640ad9",
+  "content_sha256": "1e9d3b673c2b36ab028961743fee3fbe328e6f5daff5b6f5ccb209cb07af2f7f"
  },
  "anomaly-train-control-01": {
   "split": "train",
@@ -545,7 +545,7 @@
   "role": "quant_researcher",
   "workflow": "anomaly_scoring",
   "mode": "produce",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 190000,
   "control": true,
@@ -559,8 +559,8 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "1bd366af42ba",
-  "gold_fingerprint": "d63cf8c3d6a0",
-  "content_sha256": "aa9e654381b3b40cabbfd81a0fc00eed1c7fd90c27a1d499715a3da6b130935d"
+  "fingerprint": "75bde78ed051",
+  "gold_fingerprint": "1a38b73955b0",
+  "content_sha256": "914a8954a97495b014af6d4b1d16b35e6b5966e365da4206f6adcf6bd4ad88d8"
  }
 }

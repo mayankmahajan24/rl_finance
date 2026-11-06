@@ -3,8 +3,13 @@ anomalies and level shifts, and the labels the verifier scores against.
 
 Ported from make_anomaly_variant in ~/altdata_evals/generator.py; identical on the full panel. On a
 split's smaller panel it uses every ticker the split has when that is fewer than 8.
+
+The agent gets one such panel and is graded on a second, built with a different random stream and
+shipped only in tests/ (hidden_files), so scores worked out on the data it can see are worth nothing.
 """
 from __future__ import annotations
+
+import gzip
 
 import numpy as np
 import pandas as pd
@@ -13,7 +18,15 @@ from families._shared.panel_perturb import D, Frame, _fmt, inj_level_shift
 
 
 def make_variant(seed: int, control: bool, ctx, n_tickers=8):
-    rng = np.random.default_rng(seed)
+    shown, labels = plant(np.random.default_rng(seed), control, ctx, n_tickers)
+    hidden, truth = plant(np.random.default_rng([seed, 1]), control, ctx, n_tickers)
+    truth = dict(truth, seed=seed, shown_planted={k: labels[k] for k in ("points", "shifts")}, hidden_files={"eval_panel.csv.gz": gzip.compress(
+        hidden.to_csv(index=False, date_format="%Y-%m-%d").encode(), mtime=0)})
+    return shown, truth, {}, None, ctx.companies
+
+
+def plant(rng, control: bool, ctx, n_tickers: int):
+    """One disguised panel with its planted anomalies, and the labels for it."""
     raw = ctx.raw
     tks = list(rng.choice(sorted(raw.ticker.unique()), min(n_tickers, raw.ticker.nunique()), replace=False))
     F = Frame(raw, rng, tickers=tks, artifacts=ctx.artifacts)
@@ -39,9 +52,9 @@ def make_variant(seed: int, control: bool, ctx, n_tickers=8):
            [dict(ticker=i['ticker'], source_id=i['source_id'], lo=i['lo'], hi=i['hi']) for i in opt]
     d0, d1 = F.df.date.min(), F.df.date.max()
     cutoffs = [_fmt(d0 + (d1 - d0) * f) for f in (0.45, 0.7)]
-    truth = dict(family='anomaly', seed=seed, control=control, points=points, shifts=shifts,
+    truth = dict(family='anomaly', control=control, points=points, shifts=shifts,
                  exclusions=excl, ignore_series=F.low_volume_series(),
                  eval_start=_fmt(d0 + pd.Timedelta(days=545)), shift_positive_days=60, shift_ignore_after_days=60,
                  threshold=0.5, truncation_cutoffs=cutoffs)
     df = F.df.sort_values(['date', 'ticker', 'source_id']).reset_index(drop=True)
-    return df, truth, {}, None, ctx.companies
+    return df, truth

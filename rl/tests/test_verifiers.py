@@ -12,9 +12,11 @@
 
 from __future__ import annotations
 
+import importlib
 import json
 import os
 import pathlib
+import sys
 
 import pytest
 
@@ -217,3 +219,80 @@ def test_every_built_task_is_graded():
     for d in sorted((RL / "tasks").glob("*/*")):
         if (d / "task.toml").exists():
             assert (d / "tests" / "gold.json").exists() and lib.task_meta(d)["status"] == "graded", d.name
+
+
+ANOMALY_CHEAT = """import argparse, json, pathlib
+import pandas as pd
+a = argparse.ArgumentParser(); a.add_argument('--input'); a.add_argument('--output'); x = a.parse_args()
+df = pd.read_csv(x.input)[['date', 'ticker', 'source_id']]
+gold = pathlib.Path.cwd().parent / 'tests' / 'gold.json'
+df['anomaly_score'] = 0.0
+if gold.exists():
+    t = json.loads(gold.read_text())
+    for p in t['points']:
+        df.loc[(df.ticker == p['ticker']) & (df.source_id == p['source_id']) & (df.date == p['date']), 'anomaly_score'] = 1.0
+df.to_csv(x.output, index=False)
+"""
+ANOMALY_REPLAY = """import argparse, pathlib
+import pandas as pd
+a = argparse.ArgumentParser(); a.add_argument('--input'); a.add_argument('--output'); x = a.parse_args()
+df = pd.read_csv(x.input)
+seen = pathlib.Path.cwd().parent / 'seen.csv'
+if seen.exists() and len(pd.read_csv(seen)) > len(df):
+    df = pd.read_csv(seen)
+df.to_csv(seen, index=False)
+df['anomaly_score'] = float(df.ct.mean() > 100) * 0.0 + len(df) % 97 / 97
+df[['date', 'ticker', 'source_id', 'anomaly_score']].to_csv(x.output, index=False)
+"""
+
+
+def test_anomaly_scorer_cannot_read_the_gold_or_replay_the_future():
+    task = built("bench", "anomaly-bench-001")
+    assert not (task / "environment" / "data" / "eval_panel.csv.gz").exists()
+    rewards, details = run_verifier(task, solution={"score.py": ANOMALY_CHEAT})
+    assert rewards["reward"] == 0 and details["tp"] == 0
+    rewards, details = run_verifier(task, solution={"score.py": ANOMALY_REPLAY})
+    assert details["no_foresight"] is False and rewards["reward"] == 0
+
+
+# ---- write-ups (a separate metric: the reward never depends on them) ------------------------------
+
+def writeup_module(monkeypatch, tmp_path):
+    task = built("bench", "audit-bench-001")
+    monkeypatch.syspath_prepend(str(task / "tests"))
+    monkeypatch.setenv("TESTS_DIR", str(task / "tests"))
+    monkeypatch.setenv("LOGS_DIR", str(tmp_path / "logs"))
+    for m in ("common", "judge", "writeup", "client"):
+        sys.modules.pop(m, None)
+    return importlib.import_module("writeup")
+
+
+def test_audit_reward_ignores_the_write_up(offline):
+    task = built("bench", "audit-bench-001")
+    ref, naive = (run_solutions.run_one(str(task), s) for s in ("reference", "naive"))
+    assert "writeup_score" not in ref["rewards"]          # written, but no judge here to grade it
+    assert naive["rewards"]["writeup_score"] == 0.0       # nothing written: no judge needed
+    assert ref["reward"] > naive["reward"]
+
+
+def test_write_up_score_counts_applicable_items(monkeypatch, tmp_path):
+    w = writeup_module(monkeypatch, tmp_path)
+    monkeypatch.setattr(w.judge, "unavailable", lambda: None)
+    items = {f"W{i}": {"verdict": "pass", "reason": "x"} for i in range(1, 10)}
+    items |= {"W2": {"verdict": "fail", "reason": "x"}, "W3": {"verdict": "na", "reason": "x"}}
+    monkeypatch.setattr(w.judge, "judge", lambda *a, **k: ([items], {}))
+    metrics, _ = w.grade("A note.", {}, {})
+    assert metrics["writeup_score"] == 0.875 and metrics["w_W2"] == 0.0 and "w_W3" not in metrics
+
+
+@pytest.mark.parametrize("api_error", [False, True])
+def test_failed_judge_leaves_the_write_up_ungraded(api_error, monkeypatch, tmp_path):
+    w = writeup_module(monkeypatch, tmp_path)
+    monkeypatch.setattr(w.judge, "unavailable", lambda: None)
+    import client
+
+    def fail(*a, **k):
+        raise client.anthropic.APIError("no credit", None, body=None) if api_error else w.judge.JudgeError("down")
+    monkeypatch.setattr(w.judge, "judge", fail)
+    metrics, why = w.grade("A note.", {}, {})
+    assert metrics == {} and why.startswith("not graded")

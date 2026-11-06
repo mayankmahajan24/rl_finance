@@ -3,3 +3,4 @@ set -euo pipefail
 APP="${APP_DIR:-/app}"; DIR="$(cd "$(dirname "$0")" && pwd)"
 mkdir -p "$APP/solution"
 cp "$DIR/score.py" "$DIR/anomaly_model.py" "$APP/solution/"
+mkdir -p "$APP/output"; cp "$DIR/writeup.md" "$APP/output/"

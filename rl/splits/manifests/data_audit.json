@@ -5,7 +5,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200000,
   "control": false,
@@ -15,9 +15,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "d0397e54073f",
+  "fingerprint": "eff7debcc5a3",
   "gold_fingerprint": "95fc3fa577a7",
-  "content_sha256": "24cea699c2b550783adf97b942a068146641b5ac85251cc813fc3c353ee26823"
+  "content_sha256": "408ebeb11c3d747a39edb89f4997167ab900ae9139c06ff96ee69377157780c6"
  },
  "audit-bench-002": {
   "split": "bench",
@@ -25,7 +25,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200001,
   "control": false,
@@ -35,9 +35,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "240d9647fe87",
+  "fingerprint": "e4e62b190d0f",
   "gold_fingerprint": "9bc98700846a",
-  "content_sha256": "17d08393989e86088633a6a7d41718669efe1c8231d9e4de9bab2e0c6ac1ae11"
+  "content_sha256": "fd6eee46f2bd1ae2f6819f094f98ac6f3c965117f1ce95edba7cdbd8efaa3a0e"
  },
  "audit-bench-003": {
   "split": "bench",
@@ -45,7 +45,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200002,
   "control": false,
@@ -55,9 +55,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "61458860a1da",
+  "fingerprint": "a175230ca147",
   "gold_fingerprint": "fc0e2bbf18ab",
-  "content_sha256": "c2a6559314ad2d2807514a25ce0493a587ce890dc82bfa4c997f8597fc7da3ac"
+  "content_sha256": "486145835d1c0393f1b28c593f8bd211d6752c123ec1c1532318f9211aa24b41"
  },
  "audit-bench-004": {
   "split": "bench",
@@ -65,7 +65,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200003,
   "control": false,
@@ -75,9 +75,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "a879d7078ec7",
+  "fingerprint": "01feefaa6ed6",
   "gold_fingerprint": "c516c26f94d0",
-  "content_sha256": "b3ac35c61c2467a51e0f60ea4094173c4747d06779920f681be83e0eeeab089a"
+  "content_sha256": "e8b9b185ec1282a0d243a78b5f11b5c993ebde651c186c4992aad16839beafb8"
  },
  "audit-bench-005": {
   "split": "bench",
@@ -85,7 +85,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200004,
   "control": false,
@@ -95,9 +95,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "9d067f4a0833",
+  "fingerprint": "7065ced35d3c",
   "gold_fingerprint": "0ddc2c845434",
-  "content_sha256": "3c7795c3b6d86a6df47e15a44d3b032f65168385191a66e5d1d1da582e5245cd"
+  "content_sha256": "d58e5e33b236c0ea5300062c1bf1d5020919be013864408789cd6eb2948f37b2"
  },
  "audit-bench-006": {
   "split": "bench",
@@ -105,7 +105,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200005,
   "control": false,
@@ -115,9 +115,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "eb507fe8e72c",
+  "fingerprint": "9e3bfc1f79bd",
   "gold_fingerprint": "3778e291f4ff",
-  "content_sha256": "7cf3806f2c986e7904793a3fca69a09663ff811637cf8e4315f8d12ab0044a95"
+  "content_sha256": "86e756c5e0b91bcdf03e686443e55e248d27dd7fd34207ca1311a1f0a79de99c"
  },
  "audit-bench-007": {
   "split": "bench",
@@ -125,7 +125,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200006,
   "control": false,
@@ -135,9 +135,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "2a4447617771",
+  "fingerprint": "6db811ec0137",
   "gold_fingerprint": "89065b042fe6",
-  "content_sha256": "7bd30e56588249114dd095fd417facff0378f3a3e9fe2919f0fbef47e106aa75"
+  "content_sha256": "04ab5c024c79e95b3b0f817203190de1d9ba973aff00482fa8049a70eb83577c"
  },
  "audit-bench-008": {
   "split": "bench",
@@ -145,7 +145,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200007,
   "control": false,
@@ -155,9 +155,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "89c54f7fe91e",
+  "fingerprint": "0a7372a8a11e",
   "gold_fingerprint": "c17974ef69c9",
-  "content_sha256": "a6e9fdae59a47f6c73003f187541c968eccc5733b5b8fa3371b38acc996a8a14"
+  "content_sha256": "fd63e9e7a71c5c66a9bb6f6910b7bc086f5d2adf01e733e6c7b339dbdd6894ad"
  },
  "audit-bench-009": {
   "split": "bench",
@@ -165,7 +165,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200008,
   "control": false,
@@ -175,9 +175,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "e2c914b2db31",
+  "fingerprint": "06e1f542a5c4",
   "gold_fingerprint": "955037668fb9",
-  "content_sha256": "f5c086bc1ad64417cc99ffae96d4421b3fd3b52eb39d00250cc945495a2297fb"
+  "content_sha256": "f243433854b9a12f80bfce129889f006f71fd8a612076e4ef1948f5efd133e15"
  },
  "audit-bench-010": {
   "split": "bench",
@@ -185,7 +185,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 200009,
   "control": false,
@@ -195,9 +195,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "ee0125eef137",
+  "fingerprint": "82902d4a59d6",
   "gold_fingerprint": "1109ece76493",
-  "content_sha256": "3a5393eca900b626081514a77b5ada71dde0b42cd2d6423055b9416479bf0573"
+  "content_sha256": "b96b3c111ea6f3460a723c2f463357ab2384728caef82c6fd21a2beae4d81bde"
  },
  "audit-bench-control-01": {
   "split": "bench",
@@ -205,7 +205,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 290000,
   "control": true,
@@ -215,9 +215,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "d184a72e2b6d",
+  "fingerprint": "50b032694bf5",
   "gold_fingerprint": "d8351670a0f7",
-  "content_sha256": "721e4842af73163864a06413fe0781f35a5263777a0c49ac30cad4c78f0d4b44"
+  "content_sha256": "1ac3141361e05aa12380d6b72ec1361f313ad5736f06d0f9e93d788c65d9d04f"
  },
  "audit-bench-control-02": {
   "split": "bench",
@@ -225,7 +225,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 290001,
   "control": true,
@@ -235,9 +235,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "f00164b8b31c",
+  "fingerprint": "22d8fb5cce08",
   "gold_fingerprint": "12fa8453ecb9",
-  "content_sha256": "9b7308cb82e1429c6500e2db5f1e040e4628a9cb6019841b89d3049ef989ae14"
+  "content_sha256": "69638e52f90c5c60c692bad03e69be264b8bf0a7cc5e11e136438d7c38273e71"
  },
  "audit-heldout-001": {
   "split": "heldout",
@@ -245,7 +245,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
@@ -254,9 +254,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "5224045bff21",
+  "fingerprint": "88b1ecf18625",
   "gold_fingerprint": "d9337191616c",
-  "content_sha256": "5a8c1120a56af3a9550f9d34141470833487d91dc605a8a29a42770b7841ce4f"
+  "content_sha256": "736d51558546d34488405c2f3b9fd76036bce9cf4b30fc4b7316b85d28e0507d"
  },
  "audit-heldout-002": {
   "split": "heldout",
@@ -264,7 +264,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
@@ -273,9 +273,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "337190fefa4b",
+  "fingerprint": "1d8c1ce665eb",
   "gold_fingerprint": "5c10ba11f6e0",
-  "content_sha256": "f193fe6c55fac83bce7e0b3ca04a85c46188c5576a2decfe5044239c4b18f0a7"
+  "content_sha256": "fc207236ab4ed5356b4082874ed8006e4445b79818dff92b5fa8d09837ecdeb1"
  },
  "audit-heldout-003": {
   "split": "heldout",
@@ -283,7 +283,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
@@ -292,9 +292,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "d01d0c0e9fef",
+  "fingerprint": "9aa1275e5626",
   "gold_fingerprint": "e91db46f87b6",
-  "content_sha256": "d5e8da62f06eaf1470ddcee2e9b7b8ba0de5dcc40cf3ed9bec9d6f0ef5ae8875"
+  "content_sha256": "b7ed226160b5ef28654cdec178d581e7a8631c1f046b35783006b357423e6c2e"
  },
  "audit-heldout-004": {
   "split": "heldout",
@@ -302,7 +302,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
@@ -311,9 +311,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "c341c890c320",
+  "fingerprint": "39974e1b7430",
   "gold_fingerprint": "88d8de2e8265",
-  "content_sha256": "a132a267c134414814f6a8cecbcb15183ad3de37ad1b95216cfd309cf29f0000"
+  "content_sha256": "2d6dcec4566b3c0085a60b871680fc6712528760e0135e9a76c4d5c5b54e608a"
  },
  "audit-heldout-005": {
   "split": "heldout",
@@ -321,7 +321,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
@@ -330,9 +330,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "9b566f3e92bb",
+  "fingerprint": "f134309e3251",
   "gold_fingerprint": "8e6d90d3ea77",
-  "content_sha256": "7e593c85a35d56cf888bcda9b921f50a358fb7efcbba3fb428211d5beda283d2"
+  "content_sha256": "92faf1faa21cb6fc527e717466ff7be6dbeb8a06f47512d2ab50456955c6ecb9"
  },
  "audit-heldout-006": {
   "split": "heldout",
@@ -340,7 +340,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
@@ -349,9 +349,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "d73e950b3db5",
+  "fingerprint": "f277db1a473f",
   "gold_fingerprint": "030a5ca74cbd",
-  "content_sha256": "2098c0dd5c07ce5e19f46ed976bab9ee6679c5cb6c3d1ab42419a8820da05878"
+  "content_sha256": "400f164c88d535d75f55b8cf1b0955b699966507cd2292af8811c7e96d4a827d"
  },
  "audit-heldout-007": {
   "split": "heldout",
@@ -359,7 +359,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
@@ -368,9 +368,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "b37eaac54284",
+  "fingerprint": "7686f10c6755",
   "gold_fingerprint": "d2ec999eb652",
-  "content_sha256": "8af38325cddffbc5c3c54a09b1c85c6c7f96beee1ac1659c911a34a96df54670"
+  "content_sha256": "be456131f34d9ab6878336fc7c5b5f3f4e2bc0d9f830277d29e6aac1fc5f95fb"
  },
  "audit-heldout-008": {
   "split": "heldout",
@@ -378,7 +378,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
@@ -387,9 +387,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "e1f181960d25",
+  "fingerprint": "d2d799c84437",
   "gold_fingerprint": "a6445f76a577",
-  "content_sha256": "64ac6fbf9e0117d3b89d3cd41beac32cc33b32588f567c9072510c8bc6b740e6"
+  "content_sha256": "7632bda0a65afcc69c950bba6a38c510e7bb8dc2ad79d9d8c674e3a57e6bff52"
  },
  "audit-heldout-009": {
   "split": "heldout",
@@ -397,7 +397,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
@@ -406,9 +406,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "2826d21e194a",
+  "fingerprint": "553af42e8543",
   "gold_fingerprint": "a91e848aee6d",
-  "content_sha256": "6b7fcdcef857b4eb1c2d2bf9b29df1c3cd587d9a86cfe10ec75a8f2c0becd065"
+  "content_sha256": "5a007b168f84ee319eeb73d10aa23fd8da20a145f1984d7042b5f4b614d781d4"
  },
  "audit-heldout-010": {
   "split": "heldout",
@@ -416,7 +416,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": false,
   "companies": [
@@ -425,9 +425,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "f8066a06ea4f",
+  "fingerprint": "e5f11f2fd5a9",
   "gold_fingerprint": "46a9d94982ed",
-  "content_sha256": "632e0c553bbefae6db295f1a07c1c6826224f4dfbbb592c4ffa3dd293f0fbaf5"
+  "content_sha256": "c96d14d3b8a35f59c0961fce4b054c61fa52a92ef247602f19136f00ae781dcb"
  },
  "audit-heldout-control-01": {
   "split": "heldout",
@@ -435,7 +435,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": true,
   "companies": [
@@ -444,9 +444,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "f94f8e2552f1",
+  "fingerprint": "47a2c4fd7901",
   "gold_fingerprint": "572e679afb30",
-  "content_sha256": "48180653f15300afc9fba086163a92a4df8c7d0a82cc4afcddce2515f6674e5c"
+  "content_sha256": "4a70220f2681e6a7ae2c570e252179e002f9b8c96be29d293331831b432983a0"
  },
  "audit-heldout-control-02": {
   "split": "heldout",
@@ -454,7 +454,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "control": true,
   "companies": [
@@ -463,9 +463,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "06068d5b917e",
+  "fingerprint": "329442abbb2f",
   "gold_fingerprint": "6a817fdd67a1",
-  "content_sha256": "2db72150a4b2c4d67a62dac7b79bf7513a17e7c358bbcbc2fac714e4c117a7e0"
+  "content_sha256": "d82ae952590d40953e84d6a818b33faacac5fba145b837db262639813b4b5f3c"
  },
  "audit-train-001": {
   "split": "train",
@@ -473,7 +473,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 100000,
   "control": false,
@@ -487,9 +487,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "4a934dce2407",
+  "fingerprint": "5227c9315202",
   "gold_fingerprint": "ca76dd1afe23",
-  "content_sha256": "650c3719b286783206378b3451ad91085d51def4710458bee7749a5d0c4f0be4"
+  "content_sha256": "bb42d2c80ca5e9ba2c1dc2f994809b76a361e062a471a8d5e12e90a2b8ee6c84"
  },
  "audit-train-002": {
   "split": "train",
@@ -497,7 +497,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 100001,
   "control": false,
@@ -511,9 +511,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "eaab3c8af44c",
+  "fingerprint": "434e3f1eb834",
   "gold_fingerprint": "06b3e919686c",
-  "content_sha256": "5112b47e26f2fdeb895a2d807d1f362c2e4d98009e4e196bc7e16cb962fd8155"
+  "content_sha256": "6763958f2ae03ebdd155d294691f0f83ca870e9744f29e2e8242e90c60a20d90"
  },
  "audit-train-003": {
   "split": "train",
@@ -521,7 +521,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 100002,
   "control": false,
@@ -535,9 +535,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "81df0a8d3b1f",
+  "fingerprint": "35b3cede7272",
   "gold_fingerprint": "7a2e01aef87d",
-  "content_sha256": "6145474ea9e05ddd2a71ec0ab7f60a1a66445e7cc9e8241c566aa49828eb4912"
+  "content_sha256": "ea12925bfc0fa47e5ad8631e36d2ef3e4336bd577168af8909b75b95c7b269e4"
  },
  "audit-train-control-01": {
   "split": "train",
@@ -545,7 +545,7 @@
   "role": "quant_researcher",
   "workflow": "data_audit",
   "mode": "review",
-  "world": "ls_altdata",
+  "world": "systematic_consumer",
   "status": "graded",
   "seed": 190000,
   "control": true,
@@ -559,8 +559,8 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "7631ed7d188e",
+  "fingerprint": "a98bf9a7490d",
   "gold_fingerprint": "1d0c65b3f113",
-  "content_sha256": "de5cce6c483aba3004aa6bb73dfcc635db918a7a98a52832adfc340b507fc446"
+  "content_sha256": "4f5f04648b2dd10247e544f04823806e124fa8e2119029d3393b7ef5ce161dce"
  }
 }

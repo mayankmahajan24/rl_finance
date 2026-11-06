@@ -142,7 +142,7 @@ def test_policy_missing_between_phases(tree):
 
 def test_verifier_policy_disagrees_with_metadata(tree):
     d = tree()
-    edit(d, "task.toml", '[verifier]\ntimeout_sec = 600\nnetwork_mode = "no-network"',
+    edit(d, "task.toml", '[verifier]\ntimeout_sec = 600\nnetwork_mode = "allowlist"',
          '[verifier]\ntimeout_sec = 600\nnetwork_mode = "public"')
     assert any(p.startswith(f"{TASK}: [verifier] network policy 'public'") for p in problems())
 

@@ -26,3 +26,15 @@
     reviewed_at: null
     reason: null
   note: the write-up rubric; it uses the gold as facts for the judge
+- path: families/anomaly_scoring/solutions/reference/*
+  kind: reference
+  produced_by:
+    type: unrecorded
+  produced_at: 2026-11
+  sha256: 37c929641f4eb16e683446031ec9b940e774b8eadb3f2820ced876c3f91b9844
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  note: the reference scorer and write-up; what the grader treats as a strong answer. Not a gold input, so it does not reach tasks or the release check

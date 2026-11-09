@@ -4,18 +4,22 @@ Reads the brief and forecast from /app/output/answer.md and the methods note fro
 Writes reward.json: `reward`, accuracy_reward (skill_vs_naive clamped to [0, 1], gated on the metric)
 scaled by the write-up score (grader.py `blend`), and diagnostics: schema_ok, abs_pct_error,
 signed_pct_error, skill_vs_naive, covered, interval_score_pct (programmatic), and writeup_score plus
-w_C1..w_C27 from the family's pinned model judge (judge.md, judge.py, judge.json). When the judge
+w_C1..w_C38 from the family's pinned model judge (judge.md, judge.py, judge.json). When the judge
 can't run (no ANTHROPIC_API_KEY) or fails, the write-up metrics are left out, reward is
 accuracy_reward alone, and details say why.
 """
 import json
+import shutil
 
 import grader as G
 import judge
-from common import APP, TESTS, load_gold, write_rewards
+from common import APP, LOGS, TESTS, load_gold, write_rewards
 
 
 def main():
+    # keep the documents and charts with the run's logs, so a reviewer sees what the judge saw
+    if (APP / 'output').is_dir():
+        shutil.copytree(APP / 'output', LOGS / 'verifier' / 'output', dirs_exist_ok=True)
     gold = load_gold()
     answer = APP / 'output' / 'answer.md'
     fc, writeup, perr = G.parse_response(answer.read_text() if answer.exists() else '')

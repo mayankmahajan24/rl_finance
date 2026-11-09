@@ -431,7 +431,7 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                     "output_schema": "families/kpi_nowcast/schema.json",
                     "grader": {"type": "kpi_nowcast", "module": "families/kpi_nowcast/grader.py",
                                "accuracy": "programmatic (metric gate on gold.metric_history, then forecast vs gold.actual)",
-                               "writeup": "LLM judge rubric C1-C27, over the brief and the methods note (families/kpi_nowcast/judge.md)"},
+                               "writeup": "LLM judge rubric C1-C38, over the brief and the methods note (families/kpi_nowcast/judge.md)"},
                     "sources": ["rl/sources/txn_panel/raw/sensor_panel.csv.gz", "rl/sources/txn_panel/raw/statement_facts.csv.gz",
                                 "rl/sources/txn_panel/grader_only/kpi_facts.csv",
                                 q["first_source"]],

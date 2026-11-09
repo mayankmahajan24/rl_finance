@@ -131,6 +131,7 @@ def judge_prompt(task_user: str, as_of: str, writeup: str, fc: dict | None, gold
     facts = {"as_of_date": as_of, "target_period": gold["target_period"], "actual_reported_value": gold["actual"],
              "metric_history_matches_correct_metric": metric_ok(fc, gold) if fc else None,
              "walk_forward_errors_from_forecast_json": walk_forward(fc, gold) if fc else None,
+             "naive_benchmark_estimate": gold.get("naive_forecast"),
              "unit": gold["unit"], "consensus_provided_to_author": gold.get("consensus") is not None,
              **gold["facts"]}
     user = (f"<task>\n{task_user}\n</task>\n\n<grader_facts>\n{json.dumps(facts, indent=2)}\n</grader_facts>\n\n"

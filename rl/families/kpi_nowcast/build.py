@@ -472,11 +472,14 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                 if c and c["published"] > as_of:
                     c = None
                 cons_value = round(float(c["consensus_musd"]) * f, 1) if c else None
-                cons_text = (f"The analyst consensus for {label} {c['line']}, published by {c['provider']} on {c['published']}, is "
-                             f"${cons_value:,.1f}m. Compare your estimate with it in the brief, and set `vs_consensus` to `above` or "
-                             f"`below`: whether you expect the reported figure to come in above or below the consensus."
-                             if c else "`vs_consensus` stays `no_consensus`, because no consensus estimate is provided.")
-                kw = dict(timing=timing.replace("{company}", company), consensus=cons_text,
+                bench_text = (f"Compare your estimate with the analyst consensus for {label} {c['line']}, published by "
+                              f"{c['provider']} on {c['published']}: ${cons_value:,.1f}m. Say whether you expect the reported "
+                              f"figure to beat or miss it, and how confident you are."
+                              if c else f"Compare your estimate with the naive benchmark's estimate for {label}.")
+                cons_text = ("Set `vs_consensus` to `above` or `below`: whether you expect the reported figure to come in "
+                             "above or below the consensus." if c
+                             else "`vs_consensus` stays `no_consensus`, because no consensus estimate is provided.")
+                kw = dict(timing=timing.replace("{company}", company), consensus=cons_text, benchmark=bench_text,
                           walk_forward=walk, company=company, industry=INDUSTRY_LABEL["airlines" if s["calendar"] == "calendar" else "department stores"],
                           tickers=", ".join(tickers_shown), target=label, target_end=target_end,
                           as_of=as_of, first_quarter=quarter_label(s, first_quarter), prior=prior_label,

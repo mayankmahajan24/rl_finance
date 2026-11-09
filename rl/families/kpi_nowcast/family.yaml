@@ -26,8 +26,9 @@ reward: >-
   interval score (code) and each rubric item
 rubric_visibility: partial  # the instruction states the fund's write-up conventions (headline estimate, range
                             # and units first, with Y/Y growth, in a plain-language brief; a methods note that states what
-                            # was modelled on what, coefficients and significance; walk-forward error next to a simple
-                            # benchmark; the brief agrees with the note, is succinct and leaves the metric choice and modelling
+                            # was modelled on what, coefficients and significance; walk-forward error next to the naive
+                            # benchmark (last quarter's Y/Y growth on the year-ago quarter); the estimate against consensus, or the naive
+                            # benchmark when there is none; the brief agrees with the note, is succinct and leaves the metric choice and modelling
                             # detail to it; dollar figures as $m/$bn, to one decimal place like percentages; word limits; low <= point <= high)
                             # but not the judgment items (C3, C6-C15, C17-C23, C25-C30, C32, C36-C39; C35 only in part): models are graded on whether
                             # they do what a careful analyst would, unprompted. Deliberate.

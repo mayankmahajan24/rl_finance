@@ -2,8 +2,11 @@
 
 One agent run per task. The agent gets a sandbox with code execution (no internet) and files:
   sensor_panel.csv   every sensor ticker of the companies in the case's split, truncated at the as-of date
-  actuals.csv        the KPI's reported history: only values filed on or before the as-of date,
-                     including restated comparatives, so the agent sees what an analyst saw
+  actuals.csv        every income-statement line the company reported, with its segment, product,
+                     geography and sales-channel splits: only values filed on or before the as-of
+                     date, including restated comparatives, so the agent sees what an analyst saw
+and must choose the metric the sensors can track best (gold: the series' KPI), then return an
+investor write-up plus a forecast JSON for that metric's target quarter.
   data_brief.md      a description of the panel and its known data issues
 and must return an investor write-up plus a forecast JSON for the target quarter.
 
@@ -16,6 +19,7 @@ Inputs (all from the txn_panel source, rl/sources/txn_panel/):
   raw/sensor_panel.csv.gz        the full panel (2014-01-01 .. 2018-12-31)
   assignment/brief.txt           description of the panel, rewritten from the original note
   annotations/company_facts.yaml reporting-basis and structural facts for the judge; low-signal series
+  raw/statement_facts.csv.gz     income-statement lines with filing dates (built by build/sec_xbrl/)
   grader_only/kpi_facts.csv      gold KPI facts with filing dates (built by build/sec_xbrl/)
   grader_only/kpi_quarterly.csv  first-reported and restated value per quarter
 
@@ -68,7 +72,7 @@ SEED = 20261018
 # Harbor delivery: the API runner attaches the files and reads the final message; a Harbor agent
 # finds the files under /app/data and leaves its final message in a file for the verifier.
 HARBOR_NOTE = ("---\nThe attached files are in /app/data/. When you are done, write your final message "
-               "(the write-up, then the ```json block) to /app/output/answer.md, and any charts to /app/output/figures/. The container's clock "
+               "(the brief, then the ```json block) to /app/output/answer.md, the methods note to /app/output/methods.md, and any charts to /app/output/figures/. The container's clock "
                "(`python`, `date`) reads the as-of date, {as_of}, which is also in $TASK_AS_OF.")
 VARIANTS = ("named", "coded", "anon")
 COPY_NOTE = {
@@ -88,6 +92,46 @@ REFERENCE = HERE / "solutions" / "reference"
 # fiscal quarter that ends nearest each anchor.
 CALENDAR_TARGETS = ["2017-12-31", "2018-06-30", "2018-12-31"]
 FISCAL_ANCHORS = ["2017-10-28", "2018-05-05", "2018-11-03"]
+
+# Disguised variants: statement labels that name a company, its brands or its segments, and their stand-ins.
+# Longest first, so "Alaska Mainline" is replaced before "Alaska".
+LABEL_SWAPS = [
+    ("Nordstromrack.com/HauteLook", "Off-price online"), ("Nordstrom full-line stores", "Full-price stores"),
+    ("Nordstrom.com", "Full-price online"), ("Nordstrom Rack", "Off-price stores"), ("Nordstrom", "Full-price"),
+    ("Alaska Mainline", "Mainline"), ("Alaska Regional", "Regional"), ("Air Group Adjusted", "Adjusted total"),
+    ("Mileage Plan", "Loyalty program"), ("Horizon", "Regional subsidiary"), ("Alaska", "Company"),
+    ("TJX Canada", "Canada"), ("TJX Europe", "Europe"), ("TJX International", "International"),
+    ("HomeGoods", "U.S. home"), ("Marmaxx", "U.S. apparel"), ("A.J. Wright", "Closed chain"), ("TJX", "Company"),
+    ("Macy's", "Company"), ("Sephora", "Partner beauty"), ("Refinery", "Non-airline subsidiary"),
+]
+UNIT_LABEL = {"USD": "USD millions", "USD/share": "USD per share", "shares": "millions of shares"}
+ACTUALS_COLS = ["period_start", "period_end", "line", "split", "value", "unit", "reported_on", "report",
+                "q4_derived_from_annual"]
+
+
+def disguise(label: str) -> str:
+    for real, stand_in in LABEL_SWAPS:
+        label = label.replace(real, stand_in)
+    return label
+
+
+def statement_feed(lines: list[dict], as_of: str, target_end: str) -> list[dict]:
+    """actuals.csv rows: every line and split filed on or before the as-of date, for quarters before the target."""
+    feed, seen = [], set()
+    for r in sorted(lines, key=lambda r: (r["line"], r["split_kind"], r["member_label"], r["end"], r["filed"])):
+        if r["filed"] > as_of or r["end"] >= target_end:
+            continue
+        key = (r["line"], r["split_kind"], r["member_label"], r["end"])
+        member = r["member_label"].replace(" [Member]", "")
+        feed.append({"period_start": str(d(r["start"]) + timedelta(days=1)) if r["derived"] == "True" else r["start"],
+                     "period_end": r["end"], "line": r["line"],
+                     "split": f"{r['split_kind']}: {member}" if r["split_kind"] else "",
+                     "value": float(r["value"]), "unit": r["unit"], "reported_on": r["filed"],
+                     "report": "later filing (comparative, may be restated)" if key in seen else "first report",
+                     "q4_derived_from_annual": r["derived"]})
+        seen.add(key)
+    return feed
+
 
 INDUSTRY_LABEL = {"airlines": "US airline", "department stores": "US department store / off-price retailer"}
 
@@ -247,8 +291,10 @@ def naive_forecast(feed: list[dict], target_end: str) -> float | None:
 def reference_answer(gold: dict) -> str:
     """The reference's final message: the gold actual as the forecast."""
     a = gold["actual"]
-    fc = {"target_period": gold["target_period"], "unit": gold["unit"], "point": a, "low": round(a * 0.98, 3),
-          "high": round(a * 1.02, 3), "interval_level": 0.95, "in_sample": [], "vs_consensus": "no_consensus"}
+    fc = {"target_period": gold["target_period"], "metric": gold["kpi"], "unit": gold["unit"], "point": a,
+          "low": round(a * 0.98, 3), "high": round(a * 1.02, 3), "interval_level": 0.95,
+          "metric_history": [{"period_end": e, "value": v[-1]} for e, v in gold["metric_history"].items()],
+          "in_sample": [], "vs_consensus": "no_consensus"}
     return f"Reference forecast: {a} {gold['unit']} for {gold['target_period']}.\n\n```json\n{json.dumps(fc)}\n```\n"
 
 
@@ -263,6 +309,9 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
 
     rows_all = read_csv(panel.RAW)
     facts = read_csv(panel.GRADER_ONLY / "kpi_facts.csv")
+    statements = defaultdict(list)
+    for r in read_csv(panel.STATEMENTS):
+        statements[int(r["cik"])].append(r)
     quarterly = {(r["series"], r["period_end"]): r for r in read_csv(panel.GRADER_ONLY / "kpi_quarterly.csv")}
     brief = panel.BRIEF.read_text()
     system_t = (PROMPTS / "system.md").read_text().strip()
@@ -304,6 +353,14 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                                  "q4_derived_from_annual": r["derived"]})
                     seen_periods.add(r["end"])
             naive = naive_forecast(feed, target_end)
+            ciks = sorted({c["cik"] for v in s["variants"] for c in v})
+            assert len(ciks) == 1, s["id"]
+            lines = statement_feed(statements[ciks[0]], as_of, target_end)
+            # the metric gate: the KPI's last four reported quarters, every version the feed holds
+            history = defaultdict(list)
+            for r in feed:
+                history[r["period_end"]].append(float(r["value_usd_m"]))
+            history = {e: history[e] for e in sorted(history)[-4:]}
             first_quarter = min(r["period_end"] for r in feed)
             prior_label = quarter_label(s, max(r["period_end"] for r in feed))
             dq = sensor_facts(rows_all, s["sensors"], as_of)
@@ -332,8 +389,11 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                             rr["amt"] = f"{float(r['amt']) * factor[r['ticker']]:.2f}"
                     rows.append(rr)
                 files["sensor_panel.csv"] = to_csv(rows, ["date", "ct", "amt", "ticker", "industry", "source_id"])
-                feed_out = [dict(r, value_usd_m=f"{float(r['value_usd_m']) * f:.3f}") for r in feed]
-                files["actuals.csv"] = to_csv(feed_out, ["period_start", "period_end", "value_usd_m", "reported_on", "report", "q4_derived_from_annual"])
+                lines_out = [dict(r, line=disguise(r["line"]) if anon else r["line"],
+                                  split=disguise(r["split"]) if anon else r["split"],
+                                  value=round(r["value"] * (f if r["unit"] != "shares" else 1.0), 4),
+                                  unit=UNIT_LABEL.get(r["unit"], r["unit"])) for r in lines]
+                files["actuals.csv"] = to_csv(lines_out, ACTUALS_COLS)
                 b = brief
                 if anon:
                     b = b.replace("ticker: a company, or a company segment when the ticker contains an underscore",
@@ -341,8 +401,7 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                     assert "underscore" not in b
                 files["data_brief.md"] = f"{b.rstrip()}\nAbout this copy\n{COPY_NOTE[variant]}\n"
 
-                kw = dict(company=company, kpi=s["kpi"].lower() if not anon else s["kpi"].lower(),
-                          industry=INDUSTRY_LABEL["airlines" if s["calendar"] == "calendar" else "department stores"],
+                kw = dict(company=company, industry=INDUSTRY_LABEL["airlines" if s["calendar"] == "calendar" else "department stores"],
                           tickers=", ".join(tickers_shown), target=label, target_end=target_end,
                           as_of=as_of, first_quarter=quarter_label(s, first_quarter), prior=prior_label,
                           fiscal_note=("calendar quarters" if s["calendar"] == "calendar"
@@ -354,9 +413,11 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                         "actual": round(actual * f, 3), "actual_first_filed": q["first_filed"],
                         "actual_source": q["first_source"], "actual_q4_derived": q["first_derived"] == "True",
                         "naive_forecast": round(naive * f, 3) if naive else None,
+                        "metric_history": {e: [round(v * f, 3) for v in vs] for e, vs in history.items()},
                         "consensus": None, "consensus_note": "not compiled for v1",
                         "scale_factor": f, "series": s["id"], "kpi": s["kpi"],
-                        "facts": {"reporting_basis_and_structural": known_facts(s["id"], as_of) + basis,
+                        "facts": {"correct_metric": s["kpi"] + (f" (shown as: {disguise(s['kpi'])})" if anon else ""),
+                                  "reporting_basis_and_structural": known_facts(s["id"], as_of) + basis,
                                   "sensor_data_quality_auto": dq_shown}}
                 fp = fingerprint(system, user, *[files[k] for k in sorted(files)])
                 meta = {
@@ -369,9 +430,10 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                     "environment": {"tools": ["code_execution"], "internet": False},
                     "output_schema": "families/kpi_nowcast/schema.json",
                     "grader": {"type": "kpi_nowcast", "module": "families/kpi_nowcast/grader.py",
-                               "accuracy": "programmatic (forecast JSON vs gold.actual)",
-                               "writeup": "LLM judge rubric C1-C12 (families/kpi_nowcast/judge.md)"},
-                    "sources": ["rl/sources/txn_panel/raw/sensor_panel.csv.gz", "rl/sources/txn_panel/grader_only/kpi_facts.csv",
+                               "accuracy": "programmatic (metric gate on gold.metric_history, then forecast vs gold.actual)",
+                               "writeup": "LLM judge rubric C1-C27, over the brief and the methods note (families/kpi_nowcast/judge.md)"},
+                    "sources": ["rl/sources/txn_panel/raw/sensor_panel.csv.gz", "rl/sources/txn_panel/raw/statement_facts.csv.gz",
+                                "rl/sources/txn_panel/grader_only/kpi_facts.csv",
                                 q["first_source"]],
                     "tags": [s["calendar"], variant] + ([] if anon else [s["id"]])
                             + (["low_signal"] if s["id"] in LOW_SIGNAL else []),
@@ -388,7 +450,7 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                 built[task_id] = harbor.write(
                     TASKS / case_split / task_id, family=fam, builder="rl/families/kpi_nowcast/build.py",
                     instruction=instruction, metadata=meta,
-                    description=f"Nowcast {company}'s {label} {s['kpi'].lower()} from transaction sensors",
+                    description=f"Choose and nowcast {company}'s {label} metric from transaction sensors",
                     keywords=["alt-data", "kpi-nowcast", variant], verifier="verify.py",
                     tests={"verify.py": HERE / "verifier" / "verify.py", "grader.py": HERE / "grader.py",
                            "judge.md": HERE / "judge.md",

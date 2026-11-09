@@ -29,3 +29,6 @@ dist/
 
 # local Claude instructions: pilot scope rules, kept out of the repo
 CLAUDE.md
+
+# raw SEC filings fetched by fetch_xbrl.py; regenerated, not committed
+rl/sources/txn_panel/build/sec_xbrl/sec/

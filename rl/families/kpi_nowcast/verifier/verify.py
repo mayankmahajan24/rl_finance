@@ -1,10 +1,12 @@
 """Harbor verifier for kpi_nowcast: grade /app/output/answer.md as the API runner grades a final message.
 
-Writes reward.json: `reward`, skill_vs_naive clamped to [0, 1] (grader.py), and diagnostics never
-blended into it: schema_ok, abs_pct_error, signed_pct_error, skill_vs_naive, covered,
-interval_score_pct (programmatic), and writeup_score plus w_C1..w_C12 from the family's pinned model
-judge (judge.md, judge.py, judge.json). The reward needs no judge; when the judge can't run (no
-ANTHROPIC_API_KEY) or fails, the write-up metrics are left out and details say why.
+Reads the brief and forecast from /app/output/answer.md and the methods note from methods.md.
+Writes reward.json: `reward`, accuracy_reward (skill_vs_naive clamped to [0, 1], gated on the metric)
+scaled by the write-up score (grader.py `blend`), and diagnostics: schema_ok, abs_pct_error,
+signed_pct_error, skill_vs_naive, covered, interval_score_pct (programmatic), and writeup_score plus
+w_C1..w_C27 from the family's pinned model judge (judge.md, judge.py, judge.json). When the judge
+can't run (no ANTHROPIC_API_KEY) or fails, the write-up metrics are left out, reward is
+accuracy_reward alone, and details say why.
 """
 import json
 
@@ -25,7 +27,9 @@ def main():
     else:
         import client
         ctx = json.loads((TESTS / 'judge_context.json').read_text())
-        system, user = G.judge_prompt(ctx['user'], ctx['as_of'], writeup, fc, gold)
+        methods = APP / 'output' / 'methods.md'
+        system, user = G.judge_prompt(ctx['user'], ctx['as_of'], writeup, fc, gold,
+                                      methods.read_text(errors='replace') if methods.is_file() else '')
         figures = G.figure_blocks(APP / 'output' / 'figures')
         # a chart the API rejects must not cost the run its write-up score: judge the text alone
         for content in ([{'type': 'text', 'text': user}] + figures, user) if figures else (user,):
@@ -39,7 +43,9 @@ def main():
                 details['judge'] = {**meta, 'figures_judged': content is not user,
                                     **{i: f"{v['verdict']}: {v['reason']}" for i, v in verdicts.items()}}
                 break
-    write_rewards(rewards, details)
+    if 'writeup_score' not in rewards and 'accuracy_reward' in rewards:
+        details['reward_basis'] = 'accuracy only: the write-up was not judged'
+    write_rewards(G.blend(rewards), details)
 
 
 if __name__ == '__main__':

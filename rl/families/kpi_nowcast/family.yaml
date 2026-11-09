@@ -1,7 +1,7 @@
 id: kpi_nowcast
 task_prefix: kn
-description: Nowcast a company's quarterly KPI from the transaction-sensor panel and its filed actuals
-version: 3.0.0          # bump when the family's tasks change in a way results can't be compared across
+description: Choose the company metric the transaction-sensor panel tracks best and nowcast it from the panel and the filed income statement
+version: 4.0.0          # bump when the family's tasks change in a way results can't be compared across
 authors:
   - name: Mayank Mahajan
 role: [quant_researcher]
@@ -17,12 +17,16 @@ verifier: verifier/verify.py
 verifier_timeout_sec: 600
 gold_file: gold.json
 reward: >-
-  skill_vs_naive clamped to [0, 1] (0 = no better than last year's seasonal step, 1 = exact; code, no judge).
-  Diagnostics, never blended in: abs % error, coverage, interval score (code) and the C1-C12 write-up
-  rubric (LLM judge; left out when the judge can't run)
+  0 unless metric_history shows the task's metric (the gold KPI) was chosen; then skill_vs_naive clamped to
+  [0, 1] (0 = no better than last year's seasonal step, 1 = exact; code), scaled by 0.5 + 0.5 x the
+  C1-C27 write-up score (LLM judge, over the brief and the methods note), so the write-up moves the reward by at most half and can't earn it
+  alone. Accuracy only when the judge can't run (details say so). Diagnostics: abs % error, coverage,
+  interval score (code) and each rubric item
 rubric_visibility: partial  # the instruction states the fund's write-up conventions (headline estimate, range
-                            # and units first; walk-forward accuracy next to a simple benchmark; low <= point <= high)
-                            # but not the judgment items (C2-C5, C7, C9, C11, C12): models are graded on whether
+                            # and units first, with Y/Y growth, in a plain-language brief; a methods note that states what
+                            # was modelled on what, coefficients and significance; walk-forward error next to a simple
+                            # benchmark; the brief agrees with the note; low <= point <= high)
+                            # but not the judgment items (C3-C5, C7, C9, C11-C15, C18-C26): models are graded on whether
                             # they do what a careful analyst would, unprompted. Deliberate.
 judge:                   # the write-up judge (judge.md); pinned, part of the instrument (families/_shared/judge.py)
   model: claude-sonnet-5-5

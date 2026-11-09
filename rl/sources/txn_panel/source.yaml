@@ -36,6 +36,10 @@ public_filings:
   release_matches: raw/release_matches.csv      # filed figures found in an earlier earnings release: when each was first public
   licence: SEC EDGAR filings are US government public records
 
+consensus: annotations/consensus.csv   # analyst revenue consensus (Zacks) in articles published before each release, with URL
+                                       # and date: 7 release-dated cases (M, JCP, KSS, ROST) where the consensus line is the KPI;
+                                       # figures only, no article text; Zacks' terms on reuse not yet checked
+
 grader_only:
   kpi_facts.csv: KPI actuals per filing, from SEC XBRL (build/sec_xbrl/)
   kpi_quarterly.csv: first-reported and restated value per quarter

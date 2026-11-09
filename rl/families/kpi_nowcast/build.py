@@ -95,6 +95,7 @@ FISCAL_ANCHORS = ["2017-10-28", "2018-05-05", "2018-11-03"]
 CUTS = ["release", "mid"]   # dated the day before the results came out, or halfway through the quarter
 RELEASES = panel.HERE / "raw" / "earnings_releases.csv"   # 8-K Item 2.02 dates (build/sec_xbrl/fetch_releases.py)
 MATCHES = panel.HERE / "raw" / "release_matches.csv"      # filed figures found in an earlier release (match_releases.py)
+CONSENSUS = panel.HERE / "annotations" / "consensus.csv"  # analyst consensus published before the release (sources noted)
 
 # Disguised variants: statement labels that name a company, its brands or its segments, and their stand-ins.
 # Longest first, so "Alaska Mainline" is replaced before "Alaska".
@@ -348,6 +349,7 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
     panel_end = max(r["date"] for r in rows_all)
     q_first_filed = lambda sid, end: quarterly[(sid, end)]["first_filed"]
     matches = {(r["accession"], r["concept"], r["member"], r["end"]): r for r in read_csv(MATCHES)}
+    consensus = {(r["series"], r["target_end"]): r for r in read_csv(CONSENSUS)}
     brief = panel.BRIEF.read_text()
     system_t = (PROMPTS / "system.md").read_text().strip()
     user_t = (PROMPTS / "user.md").read_text().strip()
@@ -465,7 +467,16 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                     assert "underscore" not in b
                 files["data_brief.md"] = f"{b.rstrip()}\nAbout this copy\n{COPY_NOTE[variant]}\n"
 
-                kw = dict(timing=timing.replace("{company}", company),
+                # consensus: only on the release cut, and only when published by the as-of date
+                c = consensus.get((s["id"], target_end)) if cut == "release" else None
+                if c and c["published"] > as_of:
+                    c = None
+                cons_value = round(float(c["consensus_musd"]) * f, 1) if c else None
+                cons_text = (f"The analyst consensus for {label} {c['line']}, published by {c['provider']} on {c['published']}, is "
+                             f"${cons_value:,.1f}m. Compare your estimate with it in the brief, and set `vs_consensus` to `above` or "
+                             f"`below`: whether you expect the reported figure to come in above or below the consensus."
+                             if c else "`vs_consensus` stays `no_consensus`, because no consensus estimate is provided.")
+                kw = dict(timing=timing.replace("{company}", company), consensus=cons_text,
                           walk_forward=walk, company=company, industry=INDUSTRY_LABEL["airlines" if s["calendar"] == "calendar" else "department stores"],
                           tickers=", ".join(tickers_shown), target=label, target_end=target_end,
                           as_of=as_of, first_quarter=quarter_label(s, first_quarter), prior=prior_label,
@@ -481,7 +492,9 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                         "naive_forecast": round(naive * f, 3) if naive else None,
                         "metric_history": {e: [round(v * f, 3) for v in vs] for e, vs in history.items()},
                         "first_reported": {e: round(v * f, 3) for e, v in first_reported.items()},
-                        "consensus": None, "consensus_note": "not compiled for v1",
+                        "consensus": cons_value,
+                        "consensus_note": (f"{c['provider']}, {c['line']}, published {c['published']}: {c['url']} ({c['note']})"
+                                           if c else "none published before the as-of date was found (annotations/consensus.csv)"),
                         "scale_factor": f, "series": s["id"], "kpi": s["kpi"],
                         "facts": {"correct_metric": s["kpi"] + (f" (shown as: {disguise(s['kpi'])})" if anon else ""),
                                   "reporting_basis_and_structural": known_facts(s["id"], as_of) + basis,

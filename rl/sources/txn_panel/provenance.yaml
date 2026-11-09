@@ -71,3 +71,19 @@
     reviewed_at: null
     reason: null
   note: 'companies, sensor tickers and KPI series: the split unit'
+- path: sources/txn_panel/annotations/consensus.csv
+  kind: annotation
+  produced_by:
+    type: model
+    who: Claude (web search, 2026-11-09), from Zacks preview articles published before each release
+  produced_at: '2026-11-09'
+  sha256: 9876df132f789bdb8279448296b1f51117bfcd035c4ccf2ad1aa52224f950ebb
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  evidence:
+  - each row's url and published date (the article, dated on or before the task's as-of date)
+  - each row's note (what the article printed, and why the line is net sales or total sales)
+  note: analyst revenue consensus for 7 release-dated retailer cases; 5 others excluded (date unconfirmed or a different line)

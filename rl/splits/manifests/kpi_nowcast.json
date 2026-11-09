@@ -17,9 +17,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "e2241c3a2389",
-  "gold_fingerprint": "5774913be95b",
-  "content_sha256": "658a9abc5475d3fe188317246db00ef9421e834dbc40c8062ac3ea999b5afee2"
+  "fingerprint": "91c3ca9de5b7",
+  "gold_fingerprint": "e22789b9e940",
+  "content_sha256": "ea58ece6245dbf780eb6b3f41578670895d29a7a50f9c0947f8e445ea597566d"
+ },
+ "kn-produce-AAL-2017Q4-mid": {
+  "split": "train",
+  "case": "AAL-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "e4cca3c7a232",
+  "gold_fingerprint": "28c50d4d150b",
+  "content_sha256": "772c6a95390bbcdd327449db694bb5e69a5b3ea3b812b26f1a8b1d6ab4c37d52"
  },
  "kn-produce-AAL-2018Q2": {
   "split": "train",
@@ -39,9 +61,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "3aa67bbcbfed",
-  "gold_fingerprint": "111150d9586a",
-  "content_sha256": "9f9508b526d5b716746d4317bf9e5f3ab6a3150e9cbb0bae2152e9abfe173b69"
+  "fingerprint": "ad2ac097bbf4",
+  "gold_fingerprint": "174d797f4968",
+  "content_sha256": "74aa1ecff65a334967c66771760bc0d033ef9b65306a630586cac54488d9b07c"
+ },
+ "kn-produce-AAL-2018Q2-mid": {
+  "split": "train",
+  "case": "AAL-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "b78330a76722",
+  "gold_fingerprint": "0434d3f0aa74",
+  "content_sha256": "d097c45f8d666bc6b4521447ee66f966f43a78e4ca695f0652bde060a3281a0a"
  },
  "kn-produce-AAL-2018Q4": {
   "split": "train",
@@ -61,9 +105,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "cea1812bf814",
-  "gold_fingerprint": "14b298ff24a5",
-  "content_sha256": "26da65fc69ad96bfe8b7590e0676970ea6e565f5ef6e2cacea57a264a9a52403"
+  "fingerprint": "98a8b6c711bb",
+  "gold_fingerprint": "2b5de36769c0",
+  "content_sha256": "59c8206b708379528172c74f3b969024fcb61def33c79770605bfbb5ed393725"
+ },
+ "kn-produce-AAL-2018Q4-mid": {
+  "split": "train",
+  "case": "AAL-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "11c54ac41935",
+  "gold_fingerprint": "b45744c21da9",
+  "content_sha256": "6bba05fbabdefcddfa2d361ebe9eaeec9494b3c4771f0489aef71a4f253dbc7b"
  },
  "kn-produce-AIR01-2017Q4-anon": {
   "split": "train",
@@ -83,9 +149,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "548550d822bc",
-  "gold_fingerprint": "b91dfce63dd1",
-  "content_sha256": "7be34564f15cb9899bff6e33e1c30a1f5fc3f1be7e128f24ee33a2b3e6498022"
+  "fingerprint": "05ba1e5d9a0e",
+  "gold_fingerprint": "38dca0ec43da",
+  "content_sha256": "67075bc17e41b86e9bf96b3420ded55f82ea03fb92043b5df9e3b6f7909ca0c9"
  },
  "kn-produce-AIR01-2017Q4-coded": {
   "split": "train",
@@ -105,9 +171,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "8077aa180f23",
-  "gold_fingerprint": "1b402e826af2",
-  "content_sha256": "b345ccc343f5017b885ba37640872580ab1f2b46e787adea4fcbf1216d48c151"
+  "fingerprint": "797c0de9567f",
+  "gold_fingerprint": "2c8c79201baf",
+  "content_sha256": "72c847ca2a60f4c858e3e4f2507d72e1b0135f21e0b1c7e8cb09fe36a131e27d"
+ },
+ "kn-produce-AIR01-2017Q4-mid-anon": {
+  "split": "train",
+  "case": "HA-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "17068d083d24",
+  "gold_fingerprint": "9dc9ae569d49",
+  "content_sha256": "dfe27cae3acc6539399b2496f6fd0fc97831da8e07e63e874b2cf7a79bf8bc3f"
+ },
+ "kn-produce-AIR01-2017Q4-mid-coded": {
+  "split": "train",
+  "case": "HA-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "01451162bcc2",
+  "gold_fingerprint": "1f413649fb64",
+  "content_sha256": "89ac6a15f4791b96b17d30b115c16a16e806f03345404c557b526ff83ab606eb"
  },
  "kn-produce-AIR01-2018Q2-anon": {
   "split": "train",
@@ -127,9 +237,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "af9e9eb560ac",
-  "gold_fingerprint": "ee06c6e57e03",
-  "content_sha256": "549d122c8908d4fb17542893826bae24d32834ba507c2ade60d330fa270bca94"
+  "fingerprint": "64c2bf71a736",
+  "gold_fingerprint": "b7a7b0eb5628",
+  "content_sha256": "fb949d950ae541045015a00b36bdf703f45b5b7d43f2e6758aa1f9e1fc1eb3e0"
  },
  "kn-produce-AIR01-2018Q2-coded": {
   "split": "train",
@@ -149,9 +259,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "1eeb41134975",
-  "gold_fingerprint": "89dd8258234f",
-  "content_sha256": "0dcc90d5cd6f3e19493040fcad3b9a004b784390df4df0d0f0bdd3bac2e4c906"
+  "fingerprint": "f00aa7e26e0f",
+  "gold_fingerprint": "e593e9ba4012",
+  "content_sha256": "81dd4c1046a516e72c8e21cbb99e7224e467e74c8b94d7a0467302250352d980"
+ },
+ "kn-produce-AIR01-2018Q2-mid-anon": {
+  "split": "train",
+  "case": "HA-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "8ed86f5829cf",
+  "gold_fingerprint": "fcd63fac386f",
+  "content_sha256": "381568bf4366514a9fd1faea96598e5fb58875584418f725bf37614f2480cafa"
+ },
+ "kn-produce-AIR01-2018Q2-mid-coded": {
+  "split": "train",
+  "case": "HA-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "484aa806e9f4",
+  "gold_fingerprint": "b3b6e0545963",
+  "content_sha256": "7fa07637260f0a0562ae7ee7c9908d58f76ca77e4ef0a5adf32b732b29e124a7"
  },
  "kn-produce-AIR01-2018Q4-anon": {
   "split": "train",
@@ -171,9 +325,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "2450b4ab6ac8",
-  "gold_fingerprint": "ffd28b2504a0",
-  "content_sha256": "f632359a4866249a84892382bc85e02032b3872293515d8fc8c5c1903379a3ef"
+  "fingerprint": "3859e0d0d13d",
+  "gold_fingerprint": "c46dd370382a",
+  "content_sha256": "ca94a90c5c5d25fc05a9824774be0371e08953e2dd59817d38b5ae3b3b09485e"
  },
  "kn-produce-AIR01-2018Q4-coded": {
   "split": "train",
@@ -193,9 +347,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "61c3dde20bc7",
-  "gold_fingerprint": "3443ff37e27b",
-  "content_sha256": "714200f566a971ed83be94286703f10116399c77704477d1e55933c6dd319595"
+  "fingerprint": "9aa65d34dabd",
+  "gold_fingerprint": "dfcc017dff92",
+  "content_sha256": "da3bae94e3a6f1e0063eb08dd01b39ba515716492ab2faeae3712569961faec4"
+ },
+ "kn-produce-AIR01-2018Q4-mid-anon": {
+  "split": "train",
+  "case": "HA-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "3fa6c63bcd29",
+  "gold_fingerprint": "2b6a18869fb8",
+  "content_sha256": "6056914d660279d3d67b793e09639d05aef00cef7c2cd6d28bcf74f9e4143d19"
+ },
+ "kn-produce-AIR01-2018Q4-mid-coded": {
+  "split": "train",
+  "case": "HA-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "305f86661246",
+  "gold_fingerprint": "82c4033c7b25",
+  "content_sha256": "e43be278646096043ca0485aa20a489ffa4c728807e649d668ef90b3bcc9757e"
  },
  "kn-produce-AIR02-2017Q4-anon": {
   "split": "bench",
@@ -211,9 +409,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "8f53ec034df8",
-  "gold_fingerprint": "5238b5ab6953",
-  "content_sha256": "376dea7476bc5d2720e987feb8da2032822ab22a9de5d2177bcd47d77dfb2a57"
+  "fingerprint": "6809daa6133b",
+  "gold_fingerprint": "188112e90654",
+  "content_sha256": "55ca16de2b1135e4c2b0d85b112bdfa72419438a51f05812c7959d5aade38433"
  },
  "kn-produce-AIR02-2017Q4-coded": {
   "split": "bench",
@@ -229,9 +427,45 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "072555c1de91",
-  "gold_fingerprint": "c306abd128e5",
-  "content_sha256": "d4fec155a543ba5aa762718d6b267122c2fa09d939ffa7aa7edbd767a953fb2b"
+  "fingerprint": "fbb24f8c89b5",
+  "gold_fingerprint": "23a4ed3a411f",
+  "content_sha256": "abb92b7b50fc1e36e4467a0a887c9c665bfd9761a8d28efc132f0a60e458bd99"
+ },
+ "kn-produce-AIR02-2017Q4-mid-anon": {
+  "split": "bench",
+  "case": "SAVE-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "effbdfd0a374",
+  "gold_fingerprint": "46419c51e974",
+  "content_sha256": "d60e4375cef9a3b0a70ecfcd64a6f55b90459fb5b14178f1f021403d2900dea2"
+ },
+ "kn-produce-AIR02-2017Q4-mid-coded": {
+  "split": "bench",
+  "case": "SAVE-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "4e9dbfebd33a",
+  "gold_fingerprint": "b14ed1ba217b",
+  "content_sha256": "71679e3a575617436a07a7c139596da2cc56110e55dcbfc9b7e05b0ac74d624c"
  },
  "kn-produce-AIR02-2018Q2-anon": {
   "split": "bench",
@@ -247,9 +481,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "89ab495795e6",
-  "gold_fingerprint": "7593408c2c75",
-  "content_sha256": "bad32a712808cc59719eb3226efd031fa8b70b702bd3a94d23821d23a589d772"
+  "fingerprint": "0fc898a982b3",
+  "gold_fingerprint": "d817d8c9af57",
+  "content_sha256": "c5f65fda5b07a1077fc52cdf47304b5b941c6a130abcb9bd76c55c70a6097981"
  },
  "kn-produce-AIR02-2018Q2-coded": {
   "split": "bench",
@@ -265,9 +499,45 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "bda2e0dfb8a8",
-  "gold_fingerprint": "19b958a9739a",
-  "content_sha256": "c2aaa1c7019a61e9ba7fb4049606f13a7ead9faba5c3b7f99cab549db0712d4a"
+  "fingerprint": "1cbc780ac838",
+  "gold_fingerprint": "d053423e4151",
+  "content_sha256": "7c12d9d2a498b4796d546f012bc46f6fa9dd5eb944945d88e0685004a64434d2"
+ },
+ "kn-produce-AIR02-2018Q2-mid-anon": {
+  "split": "bench",
+  "case": "SAVE-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "1c0db995d6ef",
+  "gold_fingerprint": "d817d8c9af57",
+  "content_sha256": "ddff97ca8e65da760b4da9d6e889c723b3a85f3793606ec9fdd52bbd44e5ca3d"
+ },
+ "kn-produce-AIR02-2018Q2-mid-coded": {
+  "split": "bench",
+  "case": "SAVE-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "3d9d6a915a42",
+  "gold_fingerprint": "d053423e4151",
+  "content_sha256": "471d857d13b631dcccff4c369d5f44ec9e2ff94689f23c9957a1e6b2170f77d6"
  },
  "kn-produce-AIR02-2018Q4-anon": {
   "split": "bench",
@@ -283,9 +553,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "7a393374a965",
-  "gold_fingerprint": "25383569eb0c",
-  "content_sha256": "68a90162914a964e11967959771df347ac90de2039f71a6ba45a9227b2bf37e0"
+  "fingerprint": "89fd542ae048",
+  "gold_fingerprint": "9b03ff725522",
+  "content_sha256": "a501d8a52bc9126109375a16a00769854f0eb066087e760c887aa1437db5075e"
  },
  "kn-produce-AIR02-2018Q4-coded": {
   "split": "bench",
@@ -301,9 +571,45 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "69258b0ad2df",
-  "gold_fingerprint": "270747fcf6e3",
-  "content_sha256": "1e39aac3eae065542aa05329269d1f0901cf0ce348990343f6e7d32fac308dc7"
+  "fingerprint": "2157b876aa1e",
+  "gold_fingerprint": "cccecf923df2",
+  "content_sha256": "a51730d25980742beda47d8a857fee9551311971a3dd6af59c334299be8c1247"
+ },
+ "kn-produce-AIR02-2018Q4-mid-anon": {
+  "split": "bench",
+  "case": "SAVE-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "1a2d9e6d7524",
+  "gold_fingerprint": "9b03ff725522",
+  "content_sha256": "6dbf4d2e605605af837db4e2318142cb88537bef02c69bc96c3666b8a0c8ee45"
+ },
+ "kn-produce-AIR02-2018Q4-mid-coded": {
+  "split": "bench",
+  "case": "SAVE-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "ab26e0f55279",
+  "gold_fingerprint": "cccecf923df2",
+  "content_sha256": "076b50fbe13b514ba3ebeb29f2c2f43c41c328de91b9ac5eba9370c8947eab9e"
  },
  "kn-produce-AIR03-2017Q4-anon": {
   "split": "train",
@@ -323,9 +629,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "d5b89ab36446",
-  "gold_fingerprint": "71c5af28dd68",
-  "content_sha256": "35ea7386634ec654257fc27d2b5a52c7d6ccd32621634f4a0d4ced9d9b3e29e6"
+  "fingerprint": "59fa5070dab2",
+  "gold_fingerprint": "b25650deccc1",
+  "content_sha256": "35176f70b1fe01dcadae991f3b1cf46540b457941ea0bcea6878e0afdeb1872b"
  },
  "kn-produce-AIR03-2017Q4-coded": {
   "split": "train",
@@ -345,9 +651,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "23dc5d021e68",
-  "gold_fingerprint": "19d7c9b52349",
-  "content_sha256": "cc3d9b064a727bb0c456e3022d06cb4776d030781b1e75886051a4c19917cd8f"
+  "fingerprint": "14c4769692ab",
+  "gold_fingerprint": "0123202723c2",
+  "content_sha256": "fc1dff119e31ec90697ad878618d3f916a6b21795cd9bf597f4eff684607cc0b"
+ },
+ "kn-produce-AIR03-2017Q4-mid-anon": {
+  "split": "train",
+  "case": "UAL-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "85df4a4f4184",
+  "gold_fingerprint": "fa2dc4c47804",
+  "content_sha256": "16de6a57f6c5540b4bd7470a9d134476125415688cf25ad93403ec0ee19a52c0"
+ },
+ "kn-produce-AIR03-2017Q4-mid-coded": {
+  "split": "train",
+  "case": "UAL-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "59b0366b0d46",
+  "gold_fingerprint": "28fb3f974bc6",
+  "content_sha256": "7b21253375145cec7ddbb34c89b34fb53b2372a64b30b1da9f6548cdee084c02"
  },
  "kn-produce-AIR03-2018Q2-anon": {
   "split": "train",
@@ -367,9 +717,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "a692650ea0c1",
-  "gold_fingerprint": "404d7d6468f8",
-  "content_sha256": "c078a9aebb565c7223d126bf1ee84d53fb803191c29588f862599288f92bf044"
+  "fingerprint": "6b03ed1e24ea",
+  "gold_fingerprint": "aecb0c4e738d",
+  "content_sha256": "ff2aa797a118432d301d0ab653a7dc0e3a6a29dbe8eb978efa9e87f82feccbff"
  },
  "kn-produce-AIR03-2018Q2-coded": {
   "split": "train",
@@ -389,9 +739,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "3eaba3620aa6",
-  "gold_fingerprint": "b02a50015567",
-  "content_sha256": "4c9b81f588ef13a10e53f2d8c1591be1c27773d2181b339057631d206799a0ed"
+  "fingerprint": "2f8e3882e759",
+  "gold_fingerprint": "c742aded6a37",
+  "content_sha256": "c4ca879531244a18b94e9447773bbc948a12a13bb6216a183167d13bc9fc5024"
+ },
+ "kn-produce-AIR03-2018Q2-mid-anon": {
+  "split": "train",
+  "case": "UAL-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "8a83bddc3574",
+  "gold_fingerprint": "aecb0c4e738d",
+  "content_sha256": "e660e51a74681bb4a986529ee5f1fb44fb906e8b93f74f874ea8b5cc0c958ffb"
+ },
+ "kn-produce-AIR03-2018Q2-mid-coded": {
+  "split": "train",
+  "case": "UAL-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "e3067177b5d9",
+  "gold_fingerprint": "c742aded6a37",
+  "content_sha256": "dcf75e553fbfbf62bda9087d9dc6e0d59fe9e1abc235d712bc0d811e5eca343f"
  },
  "kn-produce-AIR03-2018Q4-anon": {
   "split": "train",
@@ -411,9 +805,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "4023d83a7273",
-  "gold_fingerprint": "747d143e314e",
-  "content_sha256": "b8d8e7894402f2927c9ce3d971211da17e6f9b8854b6fb239c9d1c785f2cf2dd"
+  "fingerprint": "adf4501916a8",
+  "gold_fingerprint": "52836bc303a0",
+  "content_sha256": "c272ee4e5ee146eb628f15a037d1783da5e90ec459346bbb43faaacdb50369ff"
  },
  "kn-produce-AIR03-2018Q4-coded": {
   "split": "train",
@@ -433,9 +827,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "49a2139f5e2a",
-  "gold_fingerprint": "33c4e93d7a8c",
-  "content_sha256": "06ad43b4d21645486aafbfd5679b7abfac8423add4ea159012e36a168c76ad41"
+  "fingerprint": "c34b05dfc477",
+  "gold_fingerprint": "f4e219be8d31",
+  "content_sha256": "987c0c25ad95dafbf53a2a9e7140483a478d113422a6950859609bbdd6b923f2"
+ },
+ "kn-produce-AIR03-2018Q4-mid-anon": {
+  "split": "train",
+  "case": "UAL-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "e48435a0c851",
+  "gold_fingerprint": "52836bc303a0",
+  "content_sha256": "5d97a618fa4fe9121c1a05c692280ade3dad92bebedd5c4a78edce47f7ec71df"
+ },
+ "kn-produce-AIR03-2018Q4-mid-coded": {
+  "split": "train",
+  "case": "UAL-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "151369aa2a38",
+  "gold_fingerprint": "f4e219be8d31",
+  "content_sha256": "a4e5326c7305343d50246a6bf41634e7a1449b92f3899005085cfd25012f0641"
  },
  "kn-produce-AIR04-2017Q4-anon": {
   "split": "train",
@@ -455,9 +893,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "942b601cc09d",
-  "gold_fingerprint": "701a73364ea3",
-  "content_sha256": "e302409234d1297da35f1b85230a68314603322aec6edb670ad4969302632788"
+  "fingerprint": "4d2db222ee73",
+  "gold_fingerprint": "8732ed255c6f",
+  "content_sha256": "1488064b50a03586abf621b0b70672c2c515ad923c266988640d08b93f02b6cb"
  },
  "kn-produce-AIR04-2017Q4-coded": {
   "split": "train",
@@ -477,9 +915,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "2f5809375cbe",
-  "gold_fingerprint": "88cab798f1fc",
-  "content_sha256": "5d1dab82c45946cbcc828c176fb6c993f447381c9e26dad39213d66b35109255"
+  "fingerprint": "b500f5142fcd",
+  "gold_fingerprint": "d76979d40c45",
+  "content_sha256": "4e442f52f8c0ec9d5095f3ae166b2311b32b1e6becc4ecf2aab5b85f7ea91d74"
+ },
+ "kn-produce-AIR04-2017Q4-mid-anon": {
+  "split": "train",
+  "case": "LUV-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "64fd4bb8115c",
+  "gold_fingerprint": "c7c78dc6a71d",
+  "content_sha256": "24ece647250884302ff3d80835e64daf87210b0de6fed46d65399a64c3ba82e7"
+ },
+ "kn-produce-AIR04-2017Q4-mid-coded": {
+  "split": "train",
+  "case": "LUV-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "726ac8c82243",
+  "gold_fingerprint": "d94a0b5448be",
+  "content_sha256": "70ce28edfc0a6ed28764558ebcd2aff14a0a27e3f191f76892c9b053babad502"
  },
  "kn-produce-AIR04-2018Q2-anon": {
   "split": "train",
@@ -499,9 +981,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "6bc854c843d5",
-  "gold_fingerprint": "dd9447ac16b7",
-  "content_sha256": "7f54d6e3d76cad564b457cdf6c24453f1413be2d00dc3d5865fdde517b61e28d"
+  "fingerprint": "a1f04edd26b7",
+  "gold_fingerprint": "bb6d6142ae40",
+  "content_sha256": "31e6626329d9360aa9f3f7086e4b89b1b68bc40d46fccf7931989b71fead8320"
  },
  "kn-produce-AIR04-2018Q2-coded": {
   "split": "train",
@@ -521,9 +1003,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "b6b94a126a8e",
-  "gold_fingerprint": "63d8636ea27c",
-  "content_sha256": "00ecc7d5753fc246ebc8ca51329dc5953e23bdd13ce9e18778d4c0e570f29372"
+  "fingerprint": "48f293765b47",
+  "gold_fingerprint": "5cd4f25adad0",
+  "content_sha256": "fa63c955c8606661ce1bbf790bf53952d8053cd250389bfd7b31720008871f70"
+ },
+ "kn-produce-AIR04-2018Q2-mid-anon": {
+  "split": "train",
+  "case": "LUV-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "dc8bcf300951",
+  "gold_fingerprint": "bb6d6142ae40",
+  "content_sha256": "c16cb709b7d56a701ff293602319ca17daacc8f4199f55af6324382bb6b0ca8d"
+ },
+ "kn-produce-AIR04-2018Q2-mid-coded": {
+  "split": "train",
+  "case": "LUV-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "1c0ffce330b0",
+  "gold_fingerprint": "5cd4f25adad0",
+  "content_sha256": "596a5b8eeaa5187d95f14f6a46d50fdc681fded0c43f4407427645d753751273"
  },
  "kn-produce-AIR04-2018Q4-anon": {
   "split": "train",
@@ -543,9 +1069,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "1b97d2faa968",
-  "gold_fingerprint": "482a24a0cd95",
-  "content_sha256": "a55729b26ea4804dc451af63fa6b0bcfc39c68aaac2a6dbbcdcbd9a6e6f0124a"
+  "fingerprint": "32ced8c6772d",
+  "gold_fingerprint": "f9e085af5dd1",
+  "content_sha256": "d5d18b71a9733c859b4f269a18ed7e9609fc6d828429a49a3de73d57f43bfeb7"
  },
  "kn-produce-AIR04-2018Q4-coded": {
   "split": "train",
@@ -565,9 +1091,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "05887ade86a1",
-  "gold_fingerprint": "61844b86e7f4",
-  "content_sha256": "a1ee3a8b247a5cda793cd88d9d84f06f7b0f2299978dad6af8045b7b6bd76492"
+  "fingerprint": "d75067b8efce",
+  "gold_fingerprint": "2c3b6ffdb328",
+  "content_sha256": "77bfef7404d9a5926d755f197c7848bf853e83bf80710294852203b4b94a3e9c"
+ },
+ "kn-produce-AIR04-2018Q4-mid-anon": {
+  "split": "train",
+  "case": "LUV-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "f4e0a7b51cb5",
+  "gold_fingerprint": "f9e085af5dd1",
+  "content_sha256": "9e452382b0c0f6289dda3b408ac08a9014a2aa9ab4af027326d919bfad1d4b8c"
+ },
+ "kn-produce-AIR04-2018Q4-mid-coded": {
+  "split": "train",
+  "case": "LUV-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "b2f6541cec42",
+  "gold_fingerprint": "2c3b6ffdb328",
+  "content_sha256": "3d2135bd735750553c4ab93882c72aef01ed68ce9d2d8d35b998d26b8d41f38f"
  },
  "kn-produce-AIR05-2017Q4-anon": {
   "split": "train",
@@ -587,9 +1157,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "0db3b24899c2",
-  "gold_fingerprint": "315f99089afa",
-  "content_sha256": "aa7240a80fd196cfca1cf73f5910aee18416b2e3618110d7344270cd5e080feb"
+  "fingerprint": "9873c9edd99e",
+  "gold_fingerprint": "88d0f1f69872",
+  "content_sha256": "26503c0fefafd9db6edee8468704da08a7a5c906964c4715bb90772150f53c76"
  },
  "kn-produce-AIR05-2017Q4-coded": {
   "split": "train",
@@ -609,9 +1179,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "00c725df71ed",
-  "gold_fingerprint": "2e5d0b50ca4f",
-  "content_sha256": "a3bc72f9d0812dde494f90e0acbb2a2af77068f05bafdc676a44a8b8fc92b233"
+  "fingerprint": "3609c1178245",
+  "gold_fingerprint": "bf73deba20fe",
+  "content_sha256": "4a1f6e397deefbff8cb46e28eb2989913729fb5526aa48a9a436998436e2bd31"
+ },
+ "kn-produce-AIR05-2017Q4-mid-anon": {
+  "split": "train",
+  "case": "AAL-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "e64cf8955cfd",
+  "gold_fingerprint": "4ccf7fb5d622",
+  "content_sha256": "01cdfdae38ac8b9f706b7f946677e056ddd4cf18fb0a1453e2761748da077058"
+ },
+ "kn-produce-AIR05-2017Q4-mid-coded": {
+  "split": "train",
+  "case": "AAL-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "63159222190c",
+  "gold_fingerprint": "99abfe1eb064",
+  "content_sha256": "93df2907a780fe8f1ef2d0fcac48c14d899e9084e0e282f49362c605b2999b67"
  },
  "kn-produce-AIR05-2018Q2-anon": {
   "split": "train",
@@ -631,9 +1245,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "11c156bf8425",
-  "gold_fingerprint": "b062ad0ac863",
-  "content_sha256": "43e22fd48391ddd60f2098f0bf9b98bd8c23a4b0241d8ec394a38bbb835e08de"
+  "fingerprint": "c3d8372a4205",
+  "gold_fingerprint": "19a05694b8be",
+  "content_sha256": "3b8aa8b66b37249d1659c1a64daff72f012f7b46e8e7faaf1757e404a6dfd460"
  },
  "kn-produce-AIR05-2018Q2-coded": {
   "split": "train",
@@ -653,9 +1267,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "a33a1055c1e1",
-  "gold_fingerprint": "a96c50061168",
-  "content_sha256": "254802a7d01af9e4bbc04ea5991f053dda8c50f76b6b354129318febed1a42a3"
+  "fingerprint": "249f9ac9cb29",
+  "gold_fingerprint": "495221b8a12c",
+  "content_sha256": "ba74a0dca68ed61984f87ac627cad7a894869e153713dfc84661808180a4409a"
+ },
+ "kn-produce-AIR05-2018Q2-mid-anon": {
+  "split": "train",
+  "case": "AAL-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "d71eca2e63de",
+  "gold_fingerprint": "1a6a7a369f5d",
+  "content_sha256": "092ae22c8d249354853c63fd99388fb035361e0000684b0d8ac590f624ebf3c0"
+ },
+ "kn-produce-AIR05-2018Q2-mid-coded": {
+  "split": "train",
+  "case": "AAL-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "49bff5291c71",
+  "gold_fingerprint": "7928f1ff2d4d",
+  "content_sha256": "a0cbd9cefd9abdb89502f58f90d92ed1fde1bc53604b17cb4c7c336650db619b"
  },
  "kn-produce-AIR05-2018Q4-anon": {
   "split": "train",
@@ -675,9 +1333,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "542e5a899356",
-  "gold_fingerprint": "b38042ca66de",
-  "content_sha256": "da481cb2a90b646bfce65ddc6281096084ffa6e8c580321deb45f3f0af9704d8"
+  "fingerprint": "3db7c917b28d",
+  "gold_fingerprint": "571f257387d1",
+  "content_sha256": "82edc85ab8ef9815339921c90d7c78f5bfd9236bd820b8634a2a6f62f19d8433"
  },
  "kn-produce-AIR05-2018Q4-coded": {
   "split": "train",
@@ -697,9 +1355,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "a04716a062c0",
-  "gold_fingerprint": "7bc0885faffb",
-  "content_sha256": "1fef34bd700eb41dac6e49d3f27b867b66f855e7a33baa2baab91b37a5a4c712"
+  "fingerprint": "b18d3fe5dd5e",
+  "gold_fingerprint": "161107b27e30",
+  "content_sha256": "7eb4d0bb1c058d07ec81bff46aa163f00f8a152ae536c3f155da8e9f8a4c9037"
+ },
+ "kn-produce-AIR05-2018Q4-mid-anon": {
+  "split": "train",
+  "case": "AAL-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "aba01f32c6fb",
+  "gold_fingerprint": "ffd2775e9f6b",
+  "content_sha256": "0032c308c8b21adb6a07021689fbbfdc7c00b0a3cb6d4d5c1898feafd18ea564"
+ },
+ "kn-produce-AIR05-2018Q4-mid-coded": {
+  "split": "train",
+  "case": "AAL-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "59e7c5945f3f",
+  "gold_fingerprint": "8abb639adc0f",
+  "content_sha256": "34fe398de5564eb78b95e2077302290f34a57b3d00716cf799856619aec29da3"
  },
  "kn-produce-AIR06-2017Q4-anon": {
   "split": "bench",
@@ -715,9 +1417,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "6acf4f66960a",
-  "gold_fingerprint": "a479eddb7d08",
-  "content_sha256": "255f785eb33920ffb1d164d32992644ab8a95e3a9ca94974fbd50a5cd4ad6e2e"
+  "fingerprint": "35386c81bbd6",
+  "gold_fingerprint": "2803a183cd81",
+  "content_sha256": "1484c8b9c3181d43f3b97bb35953b1e85510ec798da1c976d6262a4b430be5f0"
  },
  "kn-produce-AIR06-2017Q4-coded": {
   "split": "bench",
@@ -733,9 +1435,45 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "7fdd7fee069a",
-  "gold_fingerprint": "1377fba8af16",
-  "content_sha256": "a9f9c8a8539141727c70efaf74576086e1ceff4d71adc608630c15f7525fe616"
+  "fingerprint": "4eec41ec9427",
+  "gold_fingerprint": "9a6b9b9f87f1",
+  "content_sha256": "5e8e83a2315f857e53bfcc79b569cfa11fa0518aa91f4c9b8639fc388581600b"
+ },
+ "kn-produce-AIR06-2017Q4-mid-anon": {
+  "split": "bench",
+  "case": "DAL-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "72eadec7489c",
+  "gold_fingerprint": "ec3958b8561f",
+  "content_sha256": "ee1daf5fb00313d513454d736f55edaae5d512bc2a0347a0f55b4babc64a7f02"
+ },
+ "kn-produce-AIR06-2017Q4-mid-coded": {
+  "split": "bench",
+  "case": "DAL-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "eed8866fb9b7",
+  "gold_fingerprint": "81aaea4c3146",
+  "content_sha256": "2dc09228ceb822a5e063e61755dcc9387708737fd4d1bd811051a4cf1468d858"
  },
  "kn-produce-AIR06-2018Q2-anon": {
   "split": "bench",
@@ -751,9 +1489,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "28ea9546c276",
-  "gold_fingerprint": "5967ed280a49",
-  "content_sha256": "f8afde0fc2fcb3e0f5e684aa76a071ca2b6b9ac6e8eebfc77ec7fba5b9b1d605"
+  "fingerprint": "e99ad136b3d9",
+  "gold_fingerprint": "76cd6227c686",
+  "content_sha256": "8d3aeb22205e1aefcfa18bbfe2a27d6d808710330c0c10aa693b7e02f5446fd4"
  },
  "kn-produce-AIR06-2018Q2-coded": {
   "split": "bench",
@@ -769,9 +1507,45 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "9aa376c039f5",
-  "gold_fingerprint": "610e133fd6b4",
-  "content_sha256": "da06fbdc8da779d4e2630a8e2954b74df20f6da008d84f90643ca080041b36d2"
+  "fingerprint": "f100249fa375",
+  "gold_fingerprint": "63619776654b",
+  "content_sha256": "ef5edfd5b160a8612e649e0f303d5c680677ef1046b1d598df73d89b39209721"
+ },
+ "kn-produce-AIR06-2018Q2-mid-anon": {
+  "split": "bench",
+  "case": "DAL-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "84acc38fbe1e",
+  "gold_fingerprint": "76cd6227c686",
+  "content_sha256": "a140c0cdb1dd7e6760d83694cb44460327029cbd482bd60d3ea3d0fdbfaa02ac"
+ },
+ "kn-produce-AIR06-2018Q2-mid-coded": {
+  "split": "bench",
+  "case": "DAL-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "4a6535d735b1",
+  "gold_fingerprint": "63619776654b",
+  "content_sha256": "e4df601f310093583c8366817594c7d1b06cac1e5264947e3ed99f2a7b430fc5"
  },
  "kn-produce-AIR06-2018Q4-anon": {
   "split": "bench",
@@ -787,9 +1561,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "c498b0887ef0",
-  "gold_fingerprint": "3e61e055f6dd",
-  "content_sha256": "cbc0dd75ef333f1c39025325fb8d675e36adb95358a1fb703c9f32a75d93f6fd"
+  "fingerprint": "0dea4da7ca6c",
+  "gold_fingerprint": "c1baff187e6e",
+  "content_sha256": "ec3e2e17f8af70c2ed8b5607d6e434d947b6b2747dc6fc7df0710a60aad94e5b"
  },
  "kn-produce-AIR06-2018Q4-coded": {
   "split": "bench",
@@ -805,9 +1579,45 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "5cdcf55631d1",
-  "gold_fingerprint": "c1343a61620c",
-  "content_sha256": "6c3adab58e7a71ef4de19be9d2067302fa8975a718a1c555030ffe5fa1f5417c"
+  "fingerprint": "dbd0aca0cd00",
+  "gold_fingerprint": "67e3447b39ee",
+  "content_sha256": "1cfecc30b4372597ee26b478de5549b482a6bba6fdd0b540cf1e0411cd73e15d"
+ },
+ "kn-produce-AIR06-2018Q4-mid-anon": {
+  "split": "bench",
+  "case": "DAL-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "6dccce61456d",
+  "gold_fingerprint": "520b6440691a",
+  "content_sha256": "fa67533af4f1f975b5c471cf836a903e8d7cb9e308a969bb838edf41dec5e962"
+ },
+ "kn-produce-AIR06-2018Q4-mid-coded": {
+  "split": "bench",
+  "case": "DAL-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "6a9ce7ff065a",
+  "gold_fingerprint": "4106c27d0c7f",
+  "content_sha256": "ab1d7aa2647666ea8fca3c4b88a5e1efa9806a8a6eec8386b07a6d4d6ff121de"
  },
  "kn-produce-AIR07-2017Q4-anon": {
   "split": "train",
@@ -827,9 +1637,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "7622f1c4a956",
-  "gold_fingerprint": "dd374cb4043c",
-  "content_sha256": "68c2e2260a889748c4c9b48fc03f9806d4547cd69f1301335322aa4f77e06296"
+  "fingerprint": "6afde63f5a5a",
+  "gold_fingerprint": "d8af60c216fe",
+  "content_sha256": "419cd857f306a3c933b782388d0ecb236ccc4b139e37a1d1e061969b3064e1cd"
  },
  "kn-produce-AIR07-2017Q4-coded": {
   "split": "train",
@@ -849,9 +1659,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "ac5f9a7a9174",
-  "gold_fingerprint": "9f5f25142081",
-  "content_sha256": "32eb8af0f6eb018c03f3d95e7e3605cf0f9b9451cb7679a87b48f01eaab530d9"
+  "fingerprint": "581fcc32fa8c",
+  "gold_fingerprint": "c28458c82a50",
+  "content_sha256": "6787be02ca9bc69ddf29fc56bee5331579f050e0c1281a6f7081025294f89f3b"
+ },
+ "kn-produce-AIR07-2017Q4-mid-anon": {
+  "split": "train",
+  "case": "ALGT-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "5602c14470ee",
+  "gold_fingerprint": "d958dfd1872c",
+  "content_sha256": "49b9599a4739df54b8ec863e3533aa3404172df3b5c931a1bd63ad4d0732e91a"
+ },
+ "kn-produce-AIR07-2017Q4-mid-coded": {
+  "split": "train",
+  "case": "ALGT-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "a67481b3f2c2",
+  "gold_fingerprint": "bf5d3f98662e",
+  "content_sha256": "e1c77494a6c605fecfc3cc9ade5aac1f135f6a4eed0b1bd8e7a1110e0bc417af"
  },
  "kn-produce-AIR07-2018Q2-anon": {
   "split": "train",
@@ -871,9 +1725,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "4b4357192e2b",
-  "gold_fingerprint": "19ecb097ea5a",
-  "content_sha256": "7c4b3b1113cf363ee36dd1c5af6f09568e49fc56a4ae252b800ab6fa2aac171b"
+  "fingerprint": "d2644f0824f1",
+  "gold_fingerprint": "c3ebb779c13b",
+  "content_sha256": "7b9afc3370ee2c021831976bfccb1a5feba167dce52bff00b18513d6f91c916b"
  },
  "kn-produce-AIR07-2018Q2-coded": {
   "split": "train",
@@ -893,9 +1747,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "614b72620638",
-  "gold_fingerprint": "1c3edfbfc425",
-  "content_sha256": "35cc31e75f84bb0fba5b4f6a3befa1c4fcf67e7cbfe5b14d6d0079ba9fe4679b"
+  "fingerprint": "fa18d1471f21",
+  "gold_fingerprint": "aa271fd70cd9",
+  "content_sha256": "54e7f6933311cf983d6ffa6557d38755f0de1cadd0b2a6582c80805992725ae4"
+ },
+ "kn-produce-AIR07-2018Q2-mid-anon": {
+  "split": "train",
+  "case": "ALGT-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "5c8667ceb282",
+  "gold_fingerprint": "67f013c8c3cb",
+  "content_sha256": "eedc785c2b8d275a6a6b21f301976e02ee761662a74d74909faf57e9b1731b1a"
+ },
+ "kn-produce-AIR07-2018Q2-mid-coded": {
+  "split": "train",
+  "case": "ALGT-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "331b6f438c66",
+  "gold_fingerprint": "e77060e1045e",
+  "content_sha256": "5a19873240cc083ecb1c22f0ed0785e27826a582b6228b1a6e551a8455c4c990"
  },
  "kn-produce-AIR07-2018Q4-anon": {
   "split": "train",
@@ -915,9 +1813,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "3c9cd71a6b90",
-  "gold_fingerprint": "9349babb5c04",
-  "content_sha256": "3fce83f49a9f62608c0c5f674fab2f1d299ab925b1ff02c15a96be89a69f2888"
+  "fingerprint": "db0e51c2665e",
+  "gold_fingerprint": "71cc1fcc96c0",
+  "content_sha256": "a5a8dcb6c24d76e3ec4652fe08370c527fd5932d1f0fb1fe9405481764444949"
  },
  "kn-produce-AIR07-2018Q4-coded": {
   "split": "train",
@@ -937,9 +1835,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "236263d53e28",
-  "gold_fingerprint": "6a609bfa099e",
-  "content_sha256": "999fd3371c2b379e97e7a6aa28b00c462e4bd829faf9ee0d00c95f3fa014c828"
+  "fingerprint": "5dc90294d43c",
+  "gold_fingerprint": "68fc14c0d1b6",
+  "content_sha256": "3ab8e7a06591d54401f1a5289c186b5a7a264dd5a8d34f44cf8f86de3e699854"
+ },
+ "kn-produce-AIR07-2018Q4-mid-anon": {
+  "split": "train",
+  "case": "ALGT-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "6e71c4aa8a1f",
+  "gold_fingerprint": "2498c144b66e",
+  "content_sha256": "fb99ba380a831ef1e8810f68d4a81f8b0b7080bf4149d977c706a67ff3c9520f"
+ },
+ "kn-produce-AIR07-2018Q4-mid-coded": {
+  "split": "train",
+  "case": "ALGT-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "20b1bfdca92e",
+  "gold_fingerprint": "5b6b3ec0bea9",
+  "content_sha256": "b88d6f2bb66192d1cc1df94a9b6cfc4dc60b19d40b03a2bd56730be348e5a7e2"
  },
  "kn-produce-AIR08-2017Q4-anon": {
   "split": "retired",
@@ -955,9 +1897,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "12bd30f2eca3",
-  "gold_fingerprint": "4c77de03c91b",
-  "content_sha256": "32b5e2a7ba1af4d217dbef430710b5480b7be3b845f2bbca3743cd6acd8612e6"
+  "fingerprint": "cba4c2bac072",
+  "gold_fingerprint": "305849cbfad9",
+  "content_sha256": "e7d5a49ab6762ebe07687f205f4c273fee64de82deb9c6b11b994aecf0f706b4"
  },
  "kn-produce-AIR08-2017Q4-coded": {
   "split": "retired",
@@ -973,9 +1915,45 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "0ce6bd078507",
-  "gold_fingerprint": "ece60b30f1d4",
-  "content_sha256": "cbf46f2c061a9c421416bc0e36409617ecbe3b9a99c304b3ad8bfeece772a8af"
+  "fingerprint": "6d47474d8a87",
+  "gold_fingerprint": "ac0ad870c74d",
+  "content_sha256": "1ac860e932ad58f8b1adabc3c75c9b43b2489f4181fef31bf5cd971b4bf1b9fe"
+ },
+ "kn-produce-AIR08-2017Q4-mid-anon": {
+  "split": "heldout",
+  "case": "ALK-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "f4eb24d2b862",
+  "gold_fingerprint": "7b3feca0e33e",
+  "content_sha256": "04a51cab927888fd29fa0a881edd3ee06d1a2d98877ad8cee9084dc97fa8aac9"
+ },
+ "kn-produce-AIR08-2017Q4-mid-coded": {
+  "split": "heldout",
+  "case": "ALK-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "30bfcb02de73",
+  "gold_fingerprint": "b6ec316215d6",
+  "content_sha256": "b9000ebb8a1317ae018f28c286f70bd625c7b70eaba3ec34df7afb51d1136d79"
  },
  "kn-produce-AIR08-2018Q2-anon": {
   "split": "heldout",
@@ -991,9 +1969,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "121d82978af2",
-  "gold_fingerprint": "f59e496051e8",
-  "content_sha256": "8528d75405612533c75adcbae9ec1d0bc72bc2941671479403d2abc56a457767"
+  "fingerprint": "13d48a7c1286",
+  "gold_fingerprint": "c894d5e7ad7e",
+  "content_sha256": "b2d37656d1e636969fc1dd8b7c7c5df490929ae19b34d1b65a05ede539c4366c"
  },
  "kn-produce-AIR08-2018Q2-coded": {
   "split": "heldout",
@@ -1009,9 +1987,45 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "defb36ed2686",
-  "gold_fingerprint": "f24089519c39",
-  "content_sha256": "bf29a1c86431f4741af680484057c61ab010ad43d06e0308de14fecddc519681"
+  "fingerprint": "174adbadd9e6",
+  "gold_fingerprint": "a41797a6eb15",
+  "content_sha256": "8d00bce7e855ee5f028a08064a59a08767aba01dee9732c662ec311adaf38e92"
+ },
+ "kn-produce-AIR08-2018Q2-mid-anon": {
+  "split": "heldout",
+  "case": "ALK-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "8e374ec23948",
+  "gold_fingerprint": "03159ba7a144",
+  "content_sha256": "b171530668ab4ff8dade88179a3aa6c2647d971c02dd5cc350016c52fa4f2eeb"
+ },
+ "kn-produce-AIR08-2018Q2-mid-coded": {
+  "split": "heldout",
+  "case": "ALK-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "f77c10bec970",
+  "gold_fingerprint": "865572e74682",
+  "content_sha256": "f5794f57eaf017ea9730b32c3bfe5bfada3f9a404885cf4166fc7dc004e6678f"
  },
  "kn-produce-AIR08-2018Q4-anon": {
   "split": "heldout",
@@ -1027,9 +2041,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "f02f482ff788",
-  "gold_fingerprint": "b588f6c7abc1",
-  "content_sha256": "0741cb16aa9369213d72c8813cd2ef5d6faa7038513fff02b18be03eedc99a38"
+  "fingerprint": "851e8b10e5ef",
+  "gold_fingerprint": "9e1f407cbd33",
+  "content_sha256": "dd7516decb07ef8b1e596ff378f51128816a23dace94c42ca4f7f1030a4f85a2"
  },
  "kn-produce-AIR08-2018Q4-coded": {
   "split": "heldout",
@@ -1045,9 +2059,45 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "18dde5ea1cb1",
-  "gold_fingerprint": "b303b3b8accd",
-  "content_sha256": "45fd228633d34f61eab5f0fe8d934e6503cbb650f0d0d6caf297ae09f34884fc"
+  "fingerprint": "3ae22c47e350",
+  "gold_fingerprint": "e29c04217559",
+  "content_sha256": "c16eda2b97ad2114fb1b4a315322a6f01e402ce9b2833cfdd226c362937c67d4"
+ },
+ "kn-produce-AIR08-2018Q4-mid-anon": {
+  "split": "heldout",
+  "case": "ALK-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "6cba1cb25435",
+  "gold_fingerprint": "a1412ad59334",
+  "content_sha256": "b2b5aaea1f4ae54c2f7a6bf868b749ba383863cf436d3abf8c7b3091cc49ba26"
+ },
+ "kn-produce-AIR08-2018Q4-mid-coded": {
+  "split": "heldout",
+  "case": "ALK-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "212d249fae65",
+  "gold_fingerprint": "5b161c5d3b64",
+  "content_sha256": "21c48508ab4f6c4393e6ddc2ec96c3feb70cd5e6fb3e0275001acf2de0a10207"
  },
  "kn-produce-AIR09-2017Q4-anon": {
   "split": "heldout",
@@ -1063,9 +2113,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "33ef23d28463",
-  "gold_fingerprint": "b9a9b857eae9",
-  "content_sha256": "45d72bb873d5fe53aa4566f40db04ae9e7c5df729a70e5db06b8f9a51d6a14cb"
+  "fingerprint": "3791a726a37a",
+  "gold_fingerprint": "e2ee6bc047f2",
+  "content_sha256": "d377a486144e3803a0df933d04738d30a95aefce489dff94ab9cdcf3e5ac1084"
  },
  "kn-produce-AIR09-2017Q4-coded": {
   "split": "heldout",
@@ -1081,9 +2131,45 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "ff480b961d9a",
-  "gold_fingerprint": "6c6f6d4ea134",
-  "content_sha256": "4a0117f876a9bfab5cfdc36778f60e2f5a881462d649d796c54cd96147a736df"
+  "fingerprint": "c28ecc35a0c1",
+  "gold_fingerprint": "adc76cf25b52",
+  "content_sha256": "d1e92c797bdfbb417336d962e83b2c162435643b03b709250d322dfb8d364da0"
+ },
+ "kn-produce-AIR09-2017Q4-mid-anon": {
+  "split": "heldout",
+  "case": "JBLU-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "cc0e7365e482",
+  "gold_fingerprint": "383dc7d2741b",
+  "content_sha256": "1d11c3b8deece564d34ccd3f96343cd187be2de4bf9ca8a912d04a5ac1e10114"
+ },
+ "kn-produce-AIR09-2017Q4-mid-coded": {
+  "split": "heldout",
+  "case": "JBLU-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "e9f9319b46a7",
+  "gold_fingerprint": "86a7a2b8dbc8",
+  "content_sha256": "ea0f51d764ebe676b527871281ee164599c7caff3660a31607c336dabb91cca6"
  },
  "kn-produce-AIR09-2018Q2-anon": {
   "split": "heldout",
@@ -1099,9 +2185,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "4209d3e62589",
-  "gold_fingerprint": "182e62b76f22",
-  "content_sha256": "79c82e679cc4138b7fc85f3aeb731de8662a357ed1bd54018aeddcd744bd8918"
+  "fingerprint": "0855351dbc69",
+  "gold_fingerprint": "685d6e1368f0",
+  "content_sha256": "e6483874b5e364696baa84427b3b6608b02dfc904fd7169530c930573ad8ec3d"
  },
  "kn-produce-AIR09-2018Q2-coded": {
   "split": "heldout",
@@ -1117,9 +2203,45 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "56620c76efe0",
-  "gold_fingerprint": "3d6392829edf",
-  "content_sha256": "9efc7236873e5f19800c4d9ff0e3820b1643a34f8588d241e880d23306a0ffdf"
+  "fingerprint": "8a1f646ca43b",
+  "gold_fingerprint": "ee58d1488f3e",
+  "content_sha256": "78099f28f43b8e3c1ad6166c1eb0f6f6c16bf1cc7f8839d0db781744f9c2afd0"
+ },
+ "kn-produce-AIR09-2018Q2-mid-anon": {
+  "split": "heldout",
+  "case": "JBLU-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "e8d93c11c9be",
+  "gold_fingerprint": "865f7ed4493c",
+  "content_sha256": "f308975a708cd256815f96146386de8e55667a7469dce35bb0c86e8212d13cde"
+ },
+ "kn-produce-AIR09-2018Q2-mid-coded": {
+  "split": "heldout",
+  "case": "JBLU-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "eee48af53d50",
+  "gold_fingerprint": "e7128983ccbe",
+  "content_sha256": "61112a9dc288e990a73cd84c613961f6442c840ac514939c1e49dce52688b2d5"
  },
  "kn-produce-AIR09-2018Q4-anon": {
   "split": "heldout",
@@ -1135,9 +2257,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "0da0e70e4217",
-  "gold_fingerprint": "e6d6a6fbd845",
-  "content_sha256": "c46b4e76ed5183f0a523c0911dec2ae92932fdaaba87b2adeb62818ca9061a37"
+  "fingerprint": "8c1d5b817200",
+  "gold_fingerprint": "a251ffbf2fc6",
+  "content_sha256": "64888cf54b348b98474fa9e196db46b50becfd4a94eb013ffb04932c44f56318"
  },
  "kn-produce-AIR09-2018Q4-coded": {
   "split": "heldout",
@@ -1153,9 +2275,45 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "4b3617595ad1",
-  "gold_fingerprint": "d777e1e86511",
-  "content_sha256": "31af57eca5e9ad47b35e7197f763f8c1b1f7235fb0509c8cb5ec23c8837ec37c"
+  "fingerprint": "cb20f8e48036",
+  "gold_fingerprint": "c9f2550e1b5b",
+  "content_sha256": "cba20a20ca3ce8f8c509f7e099787e0dc67185acec5b32f48b019497b568a3dc"
+ },
+ "kn-produce-AIR09-2018Q4-mid-anon": {
+  "split": "heldout",
+  "case": "JBLU-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "a82f27446688",
+  "gold_fingerprint": "fce4e8a3fbc6",
+  "content_sha256": "a8738f9a88b62f9ed233923e087ad5be799a9fe468ff1233bfacbbdcad07691b"
+ },
+ "kn-produce-AIR09-2018Q4-mid-coded": {
+  "split": "heldout",
+  "case": "JBLU-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "4377fadf786a",
+  "gold_fingerprint": "c93ae9f0ae2b",
+  "content_sha256": "232b46833c24c6ac7b6ac2cd7936f2565f08d5f19ff64fd8376d5ce8cdd6754f"
  },
  "kn-produce-ALGT-2017Q4": {
   "split": "train",
@@ -1175,9 +2333,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "8a3993cb4b9d",
-  "gold_fingerprint": "dea3c71a7658",
-  "content_sha256": "82135c2b548036b1af975d1422c3e8ee1de665adc22db160896081a538ef8602"
+  "fingerprint": "d8f0e759f325",
+  "gold_fingerprint": "270abd1fce3c",
+  "content_sha256": "00075e986fabdf1420f5511d1d065ddf6c49c70d1c785403ea90c58184ef30d8"
+ },
+ "kn-produce-ALGT-2017Q4-mid": {
+  "split": "train",
+  "case": "ALGT-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "ca9473b3b04b",
+  "gold_fingerprint": "9101fa8f9a04",
+  "content_sha256": "e17202ee9523aa639a779f024e278abf2ec3fba13e03361e9952746f6bee6818"
  },
  "kn-produce-ALGT-2018Q2": {
   "split": "train",
@@ -1197,9 +2377,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "7b37de278983",
-  "gold_fingerprint": "205cc487b5a2",
-  "content_sha256": "67deeb15dac12c71712eddaa794f1a30aa6ebaa2e20f3cdbf20473a4065be05f"
+  "fingerprint": "3b103f5cbe81",
+  "gold_fingerprint": "05a50d19fe09",
+  "content_sha256": "ad60aeacb2e74c953068f75ecc769ec8adb119af8c8698ddb3a3325de388088b"
+ },
+ "kn-produce-ALGT-2018Q2-mid": {
+  "split": "train",
+  "case": "ALGT-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "f494e740a452",
+  "gold_fingerprint": "9c250fec3481",
+  "content_sha256": "1c1558ebbef413e21d883d07e0f829e6022917e6d16d48703e7245abafd3dc0e"
  },
  "kn-produce-ALGT-2018Q4": {
   "split": "train",
@@ -1219,9 +2421,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "d3c042876632",
-  "gold_fingerprint": "fe60e4da1139",
-  "content_sha256": "7477cd5f7766f73b90ba445b4d4d9a68dc8b219ac0798330f1cdfd5d6327fb4d"
+  "fingerprint": "2d18b19b8b89",
+  "gold_fingerprint": "52dc9fcced73",
+  "content_sha256": "984a26aa20bb1e28065c55c1784ba4a03ceec821a8b7aced55c5042955fc4993"
+ },
+ "kn-produce-ALGT-2018Q4-mid": {
+  "split": "train",
+  "case": "ALGT-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "9b3826b428a1",
+  "gold_fingerprint": "1363e49b703a",
+  "content_sha256": "956af5f8ded004c7e7bebd9dfc7bc5cf40b497f7e5b06f39dde26b8ab253bb88"
  },
  "kn-produce-ALK-2017Q4": {
   "split": "retired",
@@ -1237,9 +2461,27 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "b273ed304b4a",
-  "gold_fingerprint": "2f786cd8507a",
-  "content_sha256": "0b2f34654882ac4e8d1cff05458c09cf8b8de496f9fd860b54db31b903ee6215"
+  "fingerprint": "4257e2d8847e",
+  "gold_fingerprint": "14dc1c9fa2b6",
+  "content_sha256": "adfc9f143656473eef9f0772bbc7fe639cf073abbe864160e63a2623fb1075ad"
+ },
+ "kn-produce-ALK-2017Q4-mid": {
+  "split": "heldout",
+  "case": "ALK-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "9bec8f4251e2",
+  "gold_fingerprint": "084e3a10dd8e",
+  "content_sha256": "a278c88d1a00056f1e64cf2f17369d5239f05de17f58a50365352821b68be76a"
  },
  "kn-produce-ALK-2018Q2": {
   "split": "heldout",
@@ -1255,9 +2497,27 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "15a0c13141bb",
-  "gold_fingerprint": "1353f14cfbf7",
-  "content_sha256": "d6d3b775d8a87d37bfcc1144f62f88f40a4c814097ff701777dd9f127855eccd"
+  "fingerprint": "58c0c5f943aa",
+  "gold_fingerprint": "400674b6d040",
+  "content_sha256": "3919ca68d9c1758b9196569389152dca349edf490fc8eb4394d26de186f37c3d"
+ },
+ "kn-produce-ALK-2018Q2-mid": {
+  "split": "heldout",
+  "case": "ALK-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "85ca2ee71eec",
+  "gold_fingerprint": "a70d7b2a21a3",
+  "content_sha256": "60e4b6e5d6784e10f61329cc7da3b86a45925f7e2b0f755e88b6524821b40c7f"
  },
  "kn-produce-ALK-2018Q4": {
   "split": "heldout",
@@ -1273,9 +2533,27 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "800bbc0e7e1a",
-  "gold_fingerprint": "103f90471e06",
-  "content_sha256": "f884eb292f7fc2ef65a25ee4de70fe24349be6e8fec2679a803657b951a3740d"
+  "fingerprint": "e633142997c4",
+  "gold_fingerprint": "fd0ec4e024b9",
+  "content_sha256": "d8b6fe463da46d02932015dad851a1cf5ac908427dcd7ea3321d2972146bfaf8"
+ },
+ "kn-produce-ALK-2018Q4-mid": {
+  "split": "heldout",
+  "case": "ALK-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "6451b0dc0bfb",
+  "gold_fingerprint": "a1c098463066",
+  "content_sha256": "0300e3e394a29139a43907d213d53f01da437baa02c73d2151b7835f455aa69b"
  },
  "kn-produce-DAL-2017Q4": {
   "split": "bench",
@@ -1291,9 +2569,27 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "ef9acd634259",
-  "gold_fingerprint": "e4e7da09f6af",
-  "content_sha256": "60a276ee82424fbc853d1686ebd9f211c268e5dbdbd8410ba5975fb73ce6e27e"
+  "fingerprint": "c0016566be07",
+  "gold_fingerprint": "52b4ccc26f13",
+  "content_sha256": "2bef61f60cc7938ddebd6d9470cbfd1aa59db86d60a7be6bd7ce01ac7c86e5c5"
+ },
+ "kn-produce-DAL-2017Q4-mid": {
+  "split": "bench",
+  "case": "DAL-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "5624397925d9",
+  "gold_fingerprint": "9d42e3468377",
+  "content_sha256": "2032e0a7731c006bd4ec14b79f11e0da02473915a359accd65006fa2136b4489"
  },
  "kn-produce-DAL-2018Q2": {
   "split": "bench",
@@ -1309,9 +2605,27 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "e1236bc328db",
-  "gold_fingerprint": "e117927d7184",
-  "content_sha256": "041389a01789f3a4aa58c4b371f6a2a2011db916063e1acd7b18d38a7ae34eeb"
+  "fingerprint": "58604a099bd1",
+  "gold_fingerprint": "427f4f217f0e",
+  "content_sha256": "db3a651052dc8fc8b0fe957ddf479b2e4db8992f3621cdaba35531fb868fe0f7"
+ },
+ "kn-produce-DAL-2018Q2-mid": {
+  "split": "bench",
+  "case": "DAL-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "a6ce283c245c",
+  "gold_fingerprint": "427f4f217f0e",
+  "content_sha256": "024c5796bb4afe5081e6cc598854411d8dd7ffcfdaf562b6f51acdc5f24c25ff"
  },
  "kn-produce-DAL-2018Q4": {
   "split": "bench",
@@ -1327,9 +2641,27 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "bc74872cd4af",
-  "gold_fingerprint": "77d4f8632cc0",
-  "content_sha256": "1fd926aa0e1b1c8a7127c9b3ddce517c2ebd0221421bcffb7c959d73b5f03067"
+  "fingerprint": "ac50a53081e9",
+  "gold_fingerprint": "55098e83e8dc",
+  "content_sha256": "909b76f84ab543ca280dd40f03d7535efe5b0398c779b92ce49c19ee9dd00bdc"
+ },
+ "kn-produce-DAL-2018Q4-mid": {
+  "split": "bench",
+  "case": "DAL-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "05a6b4433233",
+  "gold_fingerprint": "ce43d48e2bf4",
+  "content_sha256": "5b1e1edc00c465f29a4e2087c060a4898050cb9e7d19a041fa3e4f70ed269fdf"
  },
  "kn-produce-DDS-FY2017Q3": {
   "split": "bench",
@@ -1345,9 +2677,27 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "92db5b21f4bc",
-  "gold_fingerprint": "1a5fa09b1202",
-  "content_sha256": "ff27a7fb950fb19450b28d14549bf1954379300235c5d40171da176968ca539b"
+  "fingerprint": "6637dc9f8433",
+  "gold_fingerprint": "5c0452e048a6",
+  "content_sha256": "8c25e0c0bf83a0e43b144154f7dbcf2a9928892566672f134b80c40fd26b6970"
+ },
+ "kn-produce-DDS-FY2017Q3-mid": {
+  "split": "bench",
+  "case": "DDS-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "7dd07e8a1aef",
+  "gold_fingerprint": "0754a0188da8",
+  "content_sha256": "bb98d45db467cd2ffe6f0a42864c88a1e325e6adc44481a70b479e1206031fc3"
  },
  "kn-produce-DDS-FY2018Q1": {
   "split": "bench",
@@ -1363,9 +2713,27 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "534dff8dea03",
-  "gold_fingerprint": "7219de5df8b6",
-  "content_sha256": "4e90bb8643269f874761b96ad5a65e9e18bb8cadb5c1d2ed9ae044e07420acdb"
+  "fingerprint": "a913dc7640f3",
+  "gold_fingerprint": "29a54be3f9c5",
+  "content_sha256": "78e6921d48720124a01f9a5cd960b202231762a3c20c737234e5e0864455de35"
+ },
+ "kn-produce-DDS-FY2018Q1-mid": {
+  "split": "bench",
+  "case": "DDS-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "7d2a81e70288",
+  "gold_fingerprint": "ded43faa540f",
+  "content_sha256": "86ea8e7eb62da7b3d9826d6e5508a7173e8ed01709b9682758882e7d697d8263"
  },
  "kn-produce-DDS-FY2018Q3": {
   "split": "bench",
@@ -1381,9 +2749,27 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "c5844f69fd03",
-  "gold_fingerprint": "1b4110900b7c",
-  "content_sha256": "2d440d303392fa79dc56d264ef3cf486cc969ae8f7b54556e5b5dbc0d9fc4137"
+  "fingerprint": "e840702fec43",
+  "gold_fingerprint": "952d71e995a6",
+  "content_sha256": "21a2e50058bfffcb3818656c81a5dc8d79cb88a446bebabbe7a4fdc24fba7599"
+ },
+ "kn-produce-DDS-FY2018Q3-mid": {
+  "split": "bench",
+  "case": "DDS-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "47fa7fa119ac",
+  "gold_fingerprint": "952d71e995a6",
+  "content_sha256": "a084f86ea6c06b2490073bf61c9ff9c1f30ee77b399be3c55b53ec24aaac04ef"
  },
  "kn-produce-HA-2017Q4": {
   "split": "train",
@@ -1403,9 +2789,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "f338ef09ea01",
-  "gold_fingerprint": "b7215857fa6c",
-  "content_sha256": "9c8cb371c64cc59268edab057bc6c56a5ae0087fcc1fde7f9fe173f7b4049b0b"
+  "fingerprint": "2b8e07001fa4",
+  "gold_fingerprint": "1bb81f8392df",
+  "content_sha256": "30ba5afb7d762b628d21370b09cd154a1fca9d5fa5ce647796e04fcd9ad46829"
+ },
+ "kn-produce-HA-2017Q4-mid": {
+  "split": "train",
+  "case": "HA-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "9e311d978048",
+  "gold_fingerprint": "15965c024070",
+  "content_sha256": "6a2013db0e948dbf5d6f01df9d1a732e6d1a761d2e042a1f48c9d79c4bb44af2"
  },
  "kn-produce-HA-2018Q2": {
   "split": "train",
@@ -1425,9 +2833,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "ba1e3294b930",
-  "gold_fingerprint": "52671a49b082",
-  "content_sha256": "c3083fa6f565ae4f01206a9542a0f2b31e75d950fc62bda68c25bbacf1933715"
+  "fingerprint": "c8255d78f5a4",
+  "gold_fingerprint": "04525d5c45a2",
+  "content_sha256": "22c03739adc7a247ff06f73e8b80fb76d976053fd565df815e640322f82d3858"
+ },
+ "kn-produce-HA-2018Q2-mid": {
+  "split": "train",
+  "case": "HA-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "24dd18396477",
+  "gold_fingerprint": "81cd1585e4b9",
+  "content_sha256": "267e2b9addb09e5dc8035cb20ae2d8aae23ee890db0d2d1ec7dead0e684c46f5"
  },
  "kn-produce-HA-2018Q4": {
   "split": "train",
@@ -1447,9 +2877,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "58c500260fd8",
-  "gold_fingerprint": "beefc5f9517e",
-  "content_sha256": "eaf0da7af78a21bf1ad0e05b7d62d785cb8fcc474cea83a776f7e1018cf8e9c1"
+  "fingerprint": "8645e013ba2e",
+  "gold_fingerprint": "2242c899a73e",
+  "content_sha256": "4771f517a6ec64efdf45cd29b9b275cbddeba52440898fa25ba8a07ce2605cf1"
+ },
+ "kn-produce-HA-2018Q4-mid": {
+  "split": "train",
+  "case": "HA-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "a53a58530701",
+  "gold_fingerprint": "933f2c9e078b",
+  "content_sha256": "fba89068e51602863cd657ff5fe6f3721f00064c81244bdaed0c12669e64f200"
  },
  "kn-produce-JBLU-2017Q4": {
   "split": "heldout",
@@ -1465,9 +2917,27 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "3500ef92884d",
-  "gold_fingerprint": "2fcfe6f64a4d",
-  "content_sha256": "ac07e650e203e8f16a91965c83333f3ccc2c329b5036958503619e57da421843"
+  "fingerprint": "b28444530441",
+  "gold_fingerprint": "606f9ac8b345",
+  "content_sha256": "4d6f20f97cd52e78c7cb2ea04a3f58d221ed24a6466505b876edfbbdb17f311d"
+ },
+ "kn-produce-JBLU-2017Q4-mid": {
+  "split": "heldout",
+  "case": "JBLU-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "0925c389aef6",
+  "gold_fingerprint": "cf6ae6f20686",
+  "content_sha256": "59955fe1a039156091b28b63ece1b1d4db1d5afffcd4f3433915854baeef3f67"
  },
  "kn-produce-JBLU-2018Q2": {
   "split": "heldout",
@@ -1483,9 +2953,27 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "b2250ec2239f",
-  "gold_fingerprint": "e43b6d46b247",
-  "content_sha256": "4f2f13b98f7b94c67cae1d3d10bf46540164e1f402d39642341d6576ea14f913"
+  "fingerprint": "07fd44759fc4",
+  "gold_fingerprint": "cc0b0592263e",
+  "content_sha256": "6cfc30952c22673ac943526a685ed0eafc811c789b6640bf15a43215a0c9e14b"
+ },
+ "kn-produce-JBLU-2018Q2-mid": {
+  "split": "heldout",
+  "case": "JBLU-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "239a70dd2a21",
+  "gold_fingerprint": "1f11c1f10f4c",
+  "content_sha256": "8f3baf71c03b66b9b37b85801894972668dfb2084ba0ab3e67e27fbe77f8f2f9"
  },
  "kn-produce-JBLU-2018Q4": {
   "split": "heldout",
@@ -1501,9 +2989,27 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "473245ff82c8",
-  "gold_fingerprint": "1fd263e214a5",
-  "content_sha256": "6c252864253f71f7216eb2b9bac86245ae2cacc7d015b5300ee4f60c6cb296a7"
+  "fingerprint": "d56fc5e6ecee",
+  "gold_fingerprint": "ebf5e2095c1a",
+  "content_sha256": "8209f7a11df701d35c64b0eff6dbbc0c15ca160affb4d5117eb4c490132a7de0"
+ },
+ "kn-produce-JBLU-2018Q4-mid": {
+  "split": "heldout",
+  "case": "JBLU-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "906bccd6b4ec",
+  "gold_fingerprint": "9068cfce55a9",
+  "content_sha256": "4211cadea4627274a98ebb92706a5990f38f7fa60d68ec9b901acedd36939057"
  },
  "kn-produce-JCP-FY2017Q3": {
   "split": "heldout",
@@ -1519,9 +3025,27 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "ea40cbb642a2",
-  "gold_fingerprint": "d4ad52511a06",
-  "content_sha256": "6345229a143ca36ff1bdb77ab6b73c87d1ac5a48f9f1eebaa076c0246c21f935"
+  "fingerprint": "1f501b42163b",
+  "gold_fingerprint": "d1d0f6262c60",
+  "content_sha256": "a96e50f4979bf23634fe9c7c37a6ebd06346aa3eecbe68e386f424de6ddfeef4"
+ },
+ "kn-produce-JCP-FY2017Q3-mid": {
+  "split": "heldout",
+  "case": "JCP-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "16467a8571c7",
+  "gold_fingerprint": "0424d2084a54",
+  "content_sha256": "11740f9b561f3d5385bbf5e62acf4de4cccb9df1cdea70736f464c17f63cfc16"
  },
  "kn-produce-JCP-FY2018Q1": {
   "split": "heldout",
@@ -1537,9 +3061,27 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "20a0b132f5a8",
-  "gold_fingerprint": "57bdaa524934",
-  "content_sha256": "974a951fbfc9dd69c0f92711bd1e692c813ca265942a6ed05abee52b68929378"
+  "fingerprint": "9ae8a0c42394",
+  "gold_fingerprint": "ab2d2122354c",
+  "content_sha256": "edbe68a873709e1a2fefcabb1604b8a88a71c8f5febc26171ec6f0b185c12337"
+ },
+ "kn-produce-JCP-FY2018Q1-mid": {
+  "split": "heldout",
+  "case": "JCP-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "2e2ff725f716",
+  "gold_fingerprint": "7e6e552af757",
+  "content_sha256": "8c7a9d1c23c2ca8c53568700a5fc0a19fb6c9e5a9768f50a09b1e2bf4173a7e5"
  },
  "kn-produce-JCP-FY2018Q3": {
   "split": "heldout",
@@ -1555,9 +3097,27 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "cf480ecf83a3",
-  "gold_fingerprint": "4f10dc12bc61",
-  "content_sha256": "3747bb6d3f2e129fd51849c36a9c0cf415cef0196f1e46d63a3a27818e1edb7c"
+  "fingerprint": "2cd7bf361f3a",
+  "gold_fingerprint": "8f17754bb90a",
+  "content_sha256": "64962d3c8a4637c8a733fdddc8b1ea3ed4842592ca54984c31b45ae1ad58923a"
+ },
+ "kn-produce-JCP-FY2018Q3-mid": {
+  "split": "heldout",
+  "case": "JCP-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "584fb3322fa0",
+  "gold_fingerprint": "8f17754bb90a",
+  "content_sha256": "efe63e2538b73c2f3b54f83565a10c5caa15301b8c174dc6f9931e504532bb52"
  },
  "kn-produce-JWN_FP-FY2017Q3": {
   "split": "train",
@@ -1577,9 +3137,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "2a09ed686028",
-  "gold_fingerprint": "dd662d5548ea",
-  "content_sha256": "9a657f22db55ab5e6e1e14b85413eaa683e5645db799f12953593506d05dc72a"
+  "fingerprint": "141bdce682c6",
+  "gold_fingerprint": "ab84159fe093",
+  "content_sha256": "a85f778c18410c60c8a5924d8f306e94c33586b83276592e5e9b27f7bd0728d0"
+ },
+ "kn-produce-JWN_FP-FY2017Q3-mid": {
+  "split": "train",
+  "case": "JWN_FP-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "a3ed4e03b21c",
+  "gold_fingerprint": "fe694f12a248",
+  "content_sha256": "ca8565b65c4a87099d0c5f2c3f2c746d5330c2f478594d03f31ded59f64ddab3"
  },
  "kn-produce-JWN_FP-FY2018Q1": {
   "split": "train",
@@ -1599,9 +3181,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "48cc0a2bb428",
-  "gold_fingerprint": "4661918432db",
-  "content_sha256": "5e0017b25ff673815be1aff785c89e67ad2703e01ba358038e747f33eb40cf28"
+  "fingerprint": "61aec7a703bf",
+  "gold_fingerprint": "33ff9bd65311",
+  "content_sha256": "25ea7d9754c45ef1b27a95b4899861210863cb53c77de9d6023e173022c21fae"
+ },
+ "kn-produce-JWN_FP-FY2018Q1-mid": {
+  "split": "train",
+  "case": "JWN_FP-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "ca9e3114c30d",
+  "gold_fingerprint": "33ff9bd65311",
+  "content_sha256": "b718b42d2f1cde1c0f27ec476a8916fae79553e1951ac0240cd3eaecdb18b8eb"
  },
  "kn-produce-JWN_FP-FY2018Q3": {
   "split": "train",
@@ -1621,9 +3225,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "ffa99dfb5439",
-  "gold_fingerprint": "48719094e74f",
-  "content_sha256": "3462d528cd037f1430acc32024ff763b1bc09ae5f96682136e4b727915b79e13"
+  "fingerprint": "4defa64505d7",
+  "gold_fingerprint": "60cda776729d",
+  "content_sha256": "d32af80c705a09c2acc2865f31e959c8ae7eca030e9f86a83c4507bcf2f68f50"
+ },
+ "kn-produce-JWN_FP-FY2018Q3-mid": {
+  "split": "train",
+  "case": "JWN_FP-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "8773c543a693",
+  "gold_fingerprint": "60cda776729d",
+  "content_sha256": "1606f5f5841a1d1de4e9757c947a9329b9e31dcb0ba6be2ffb289429cd699d3f"
  },
  "kn-produce-JWN_OP-FY2017Q3": {
   "split": "train",
@@ -1643,9 +3269,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "b572e168607d",
-  "gold_fingerprint": "69c7d4856d35",
-  "content_sha256": "b1bb21b097c07a89ca1e2db84cb88116d3b280b878f177f81e46db4889ba34f9"
+  "fingerprint": "d446fa623f2d",
+  "gold_fingerprint": "536b1a136316",
+  "content_sha256": "1037bcebb3c9978bd87dc01cc2785686b0360abb55f5a0f5ae4f0b353d393843"
+ },
+ "kn-produce-JWN_OP-FY2017Q3-mid": {
+  "split": "train",
+  "case": "JWN_OP-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "6de2afcb566b",
+  "gold_fingerprint": "2f2d9d56e5d9",
+  "content_sha256": "3cfed55af45104868a6b68624f49e5f248278b5082194228de00e6339ae41b18"
  },
  "kn-produce-JWN_OP-FY2018Q1": {
   "split": "train",
@@ -1665,9 +3313,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "a891ccd66944",
-  "gold_fingerprint": "a8dc0e58c6c6",
-  "content_sha256": "d8e2f8085dd014732d2c5f941b2bb8239f44cb5e831f7e506cced699030ec01e"
+  "fingerprint": "dd13521c0948",
+  "gold_fingerprint": "e26e67a68619",
+  "content_sha256": "c54403e782c329f3ac3081eb6d269ba3e54df7ba60e59dcecdf5106cf71eb0a0"
+ },
+ "kn-produce-JWN_OP-FY2018Q1-mid": {
+  "split": "train",
+  "case": "JWN_OP-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "387c4d20e4c3",
+  "gold_fingerprint": "3667fc410c5b",
+  "content_sha256": "e77384edfbe202c58a5943f034c72745a67755fc9e70af25600bd68038747db4"
  },
  "kn-produce-JWN_OP-FY2018Q3": {
   "split": "train",
@@ -1687,9 +3357,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "2f7a71b56d13",
-  "gold_fingerprint": "5f1ccae8b64d",
-  "content_sha256": "2e406177971b74f7a7115104a7441ec6ee6977e5e5d6d1c505dc5fa137efd4a8"
+  "fingerprint": "bb66dce424c8",
+  "gold_fingerprint": "4378223a8e55",
+  "content_sha256": "0af3d53e84ef48329641f847b23589f6c162e593e414ac5f946c7b01f2e82ce2"
+ },
+ "kn-produce-JWN_OP-FY2018Q3-mid": {
+  "split": "train",
+  "case": "JWN_OP-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "3540b4533cd1",
+  "gold_fingerprint": "4378223a8e55",
+  "content_sha256": "3a49366413a1dd59449eb6385eac3bf4cce0dd3f756f07f971817d1a4eb33508"
  },
  "kn-produce-KSS-FY2017Q3": {
   "split": "heldout",
@@ -1705,9 +3397,27 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "22279d316cc8",
-  "gold_fingerprint": "4440f9ca3a21",
-  "content_sha256": "fcf08f9f163c184e15d3e0affe7f1f0ae36b8c9ac9783258059795f1de5dbd7b"
+  "fingerprint": "ca2823418dc5",
+  "gold_fingerprint": "f483621ec487",
+  "content_sha256": "a210be379d65d48d47db85fe76c91d60fd71ef8f7fb765ef19a5e01c4c08c633"
+ },
+ "kn-produce-KSS-FY2017Q3-mid": {
+  "split": "heldout",
+  "case": "KSS-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "1e9f7839cc20",
+  "gold_fingerprint": "fe3d95ef8ede",
+  "content_sha256": "e97f8d91dadeade17e2c2959568149545e6f89699e930d287d1b3423fc938017"
  },
  "kn-produce-KSS-FY2018Q1": {
   "split": "heldout",
@@ -1723,9 +3433,27 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "851dc9ae15c4",
-  "gold_fingerprint": "ecc268e58e8b",
-  "content_sha256": "7ae234004eafe66dcb35cb2a155d19745858b347ca56d7e93779ab9d024742ac"
+  "fingerprint": "4d38a5b074e6",
+  "gold_fingerprint": "119cd07363ee",
+  "content_sha256": "7a3ac2707334dd69b9a61221a315aa57a6a07a68a8f8f99a0be724593bdd3cb3"
+ },
+ "kn-produce-KSS-FY2018Q1-mid": {
+  "split": "heldout",
+  "case": "KSS-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "914d2a7c8b45",
+  "gold_fingerprint": "97886675a286",
+  "content_sha256": "a847c0a16618b48ed9eabc1d88dbb7fa073f8d2d0b8b6e6382e16ad258f9bca0"
  },
  "kn-produce-KSS-FY2018Q3": {
   "split": "heldout",
@@ -1741,9 +3469,27 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "bd3175dced20",
-  "gold_fingerprint": "d9b7bef1eee4",
-  "content_sha256": "613213665fc59e3d1e0abe87e957675906874065878bd190e23f651ce19eab18"
+  "fingerprint": "4a01daef5d68",
+  "gold_fingerprint": "c351664d1504",
+  "content_sha256": "1978212d0c32091bea4820e465c73130876f90df134b8a9df8833615a0a845af"
+ },
+ "kn-produce-KSS-FY2018Q3-mid": {
+  "split": "heldout",
+  "case": "KSS-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "5be714da194f",
+  "gold_fingerprint": "c351664d1504",
+  "content_sha256": "523109bc8e5098f06e31680855854f7f00357e0258dc425cc82f6258890049bd"
  },
  "kn-produce-LUV-2017Q4": {
   "split": "train",
@@ -1763,9 +3509,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "2d6be65ffc40",
-  "gold_fingerprint": "9bdaa26cc8f5",
-  "content_sha256": "41a33a96d5d85464b2fa635fcb90b3218f318e85b69415824a4349356d02a685"
+  "fingerprint": "36689069bc23",
+  "gold_fingerprint": "42d8bd4457c2",
+  "content_sha256": "0dab7300aced4a373fe3c14507d1777e4aa20e7e6cae986546b31d67bb7a06a2"
+ },
+ "kn-produce-LUV-2017Q4-mid": {
+  "split": "train",
+  "case": "LUV-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "b5e8be32225a",
+  "gold_fingerprint": "1492993a7f87",
+  "content_sha256": "1ccb7059040a8a60a11e7f20524f2ed66fdd37b7fedd8d69acc0fdb8b6cb281c"
  },
  "kn-produce-LUV-2018Q2": {
   "split": "train",
@@ -1785,9 +3553,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "01f7b9f6cef7",
-  "gold_fingerprint": "ef55ee5fa316",
-  "content_sha256": "1611f1540763fc734dfbcf43cfb360f2c232ed926f05caf1bd668a6050c5d513"
+  "fingerprint": "b9ff68b26a3b",
+  "gold_fingerprint": "519560ccc981",
+  "content_sha256": "fc9aab71f686658e960cd3a41bab6578e76550720eff7cf1bd33204c2745de99"
+ },
+ "kn-produce-LUV-2018Q2-mid": {
+  "split": "train",
+  "case": "LUV-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "49912bebd1f6",
+  "gold_fingerprint": "519560ccc981",
+  "content_sha256": "69db6b52017d786adbcd4c4d7b2500909573a82e2a6cc71668db87b24f682698"
  },
  "kn-produce-LUV-2018Q4": {
   "split": "train",
@@ -1807,9 +3597,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "0bab1d218967",
-  "gold_fingerprint": "f5523b34b562",
-  "content_sha256": "02a063a1e2215ddebb26310827546a9bf7a2c629c19e8f7197cb7f925dbe93fb"
+  "fingerprint": "14115c8bcefe",
+  "gold_fingerprint": "92a02131c1b5",
+  "content_sha256": "a72a96afd96dafb2c5342b3182aa7b99bce1517e374aa1722588e98dc2acbfcd"
+ },
+ "kn-produce-LUV-2018Q4-mid": {
+  "split": "train",
+  "case": "LUV-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "76af0c6a3583",
+  "gold_fingerprint": "92a02131c1b5",
+  "content_sha256": "cda93da8b0d4068fdfbded35947e836becfc93ad4fa459ba059770bd76f6779c"
  },
  "kn-produce-M-FY2017Q3": {
   "split": "bench",
@@ -1825,9 +3637,27 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "52ad8de4c689",
-  "gold_fingerprint": "a962b2d84702",
-  "content_sha256": "e4eec05209b6078840418bf5db8d9ae7cceaef141ebb580c59f7421b0e543144"
+  "fingerprint": "c1356be4e566",
+  "gold_fingerprint": "d08c66380b74",
+  "content_sha256": "8fde2eded9ccc46d7803c6818902dd573138e05c0b2fd0fedc2b1acc64d2784d"
+ },
+ "kn-produce-M-FY2017Q3-mid": {
+  "split": "bench",
+  "case": "M-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "2b3e9d719c48",
+  "gold_fingerprint": "3ceedce1ae9c",
+  "content_sha256": "e437f217ac4071f02579bcebc4bf126e2d6fdb24dd0d8e0735f6579b7e8d3506"
  },
  "kn-produce-M-FY2018Q1": {
   "split": "bench",
@@ -1843,9 +3673,27 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "e929b7a2c8b4",
-  "gold_fingerprint": "5b2857f2b476",
-  "content_sha256": "e071bc8e009c93d662537d667483cf90b09a966b122aaf460b8a4b48f7cb1cbd"
+  "fingerprint": "b88ccfb5c46f",
+  "gold_fingerprint": "25b94260fef2",
+  "content_sha256": "dd19212b555530fab9871895f65db58d6e13bbae5673b616d075e95b6a65289f"
+ },
+ "kn-produce-M-FY2018Q1-mid": {
+  "split": "bench",
+  "case": "M-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "d1e5a6b594ba",
+  "gold_fingerprint": "d6b5b1af5256",
+  "content_sha256": "f19a10b5ba731c2cf8a4a959a37616f164a3530a03aedf7eaa13047f18dc12c1"
  },
  "kn-produce-M-FY2018Q3": {
   "split": "bench",
@@ -1861,9 +3709,27 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "1737812159d5",
-  "gold_fingerprint": "e9a13fe0e9f1",
-  "content_sha256": "0541cf1eef62808f213d483808bf5375f0319869bd477af3065bac2d247e79c6"
+  "fingerprint": "c4bc42ccb4ee",
+  "gold_fingerprint": "08afd4e1b79c",
+  "content_sha256": "51498c66e094314737d55838d69c69617422d8376ca094987890ce7ad1888a53"
+ },
+ "kn-produce-M-FY2018Q3-mid": {
+  "split": "bench",
+  "case": "M-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "ca9b89694d58",
+  "gold_fingerprint": "7148239f1a46",
+  "content_sha256": "dd0e8a3ddf128a88c8b1d22cb160b3c93d448b29752023fc206032b8a284b0b5"
  },
  "kn-produce-RET01-FY2017Q3-anon": {
   "split": "train",
@@ -1883,9 +3749,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "4e53a659b4d1",
-  "gold_fingerprint": "6a599be73ce5",
-  "content_sha256": "ad1c2e8aab82347a036546f4f4174fe0e8521ca757fe29269d7752f83806c8be"
+  "fingerprint": "0592505bc836",
+  "gold_fingerprint": "c7b748a7cbfc",
+  "content_sha256": "d1fe7e57b91a4d6be79a3274248eab775dc740e0ba98448319e690005e0608c2"
  },
  "kn-produce-RET01-FY2017Q3-coded": {
   "split": "train",
@@ -1905,9 +3771,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "48d87517e1b1",
-  "gold_fingerprint": "aacb75201a09",
-  "content_sha256": "f4ef2c16def568db363ece4a3630b6b84ebee0cf5b492e4b6e89aa68ec5aee28"
+  "fingerprint": "2514089d299d",
+  "gold_fingerprint": "ed3e9575111e",
+  "content_sha256": "4cf64d05268f1506d0a731605fb58630eafa432cc18ca4a7b4caf673e2ceece9"
+ },
+ "kn-produce-RET01-FY2017Q3-mid-anon": {
+  "split": "train",
+  "case": "TJX_MARMAXX-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "38fb3b8a9c3e",
+  "gold_fingerprint": "ed00d9913fcd",
+  "content_sha256": "5b345ea07a6b5275267f9f02a287c9629f42f6f0286fe954ab20558b1c2615c2"
+ },
+ "kn-produce-RET01-FY2017Q3-mid-coded": {
+  "split": "train",
+  "case": "TJX_MARMAXX-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "85ef7eded080",
+  "gold_fingerprint": "6ffd09bd8017",
+  "content_sha256": "ce4ac0b9110b8ea444a7367906da853502ef8d6c2ae562393d299bc7af118a61"
  },
  "kn-produce-RET01-FY2018Q1-anon": {
   "split": "train",
@@ -1927,9 +3837,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "e138cd788ca4",
-  "gold_fingerprint": "d66d6f10030f",
-  "content_sha256": "788de30a1e8d19d4b5b99a8f48d5ac7af8c08f1db9177fb2c06f75f5572ddebf"
+  "fingerprint": "74fb33e6e766",
+  "gold_fingerprint": "eb4b1f6f290b",
+  "content_sha256": "5f2e24f4747274751661a20f37688fdfcc6b58dfab0ca47b3bbcc42bdb12e683"
  },
  "kn-produce-RET01-FY2018Q1-coded": {
   "split": "train",
@@ -1949,9 +3859,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "b72f73a90859",
-  "gold_fingerprint": "7f31a94855c1",
-  "content_sha256": "285b3016fec38c4ba9fb3a7efafe0375e8e26df643447360f905fd9cbe95173a"
+  "fingerprint": "f288a985a2e8",
+  "gold_fingerprint": "5c686eeb4be9",
+  "content_sha256": "f6ad4c29a1bc7bb8221feb2d7faea80f6bbea032f6113ceb55c16b50e7de19b6"
+ },
+ "kn-produce-RET01-FY2018Q1-mid-anon": {
+  "split": "train",
+  "case": "TJX_MARMAXX-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "25ae516c8f10",
+  "gold_fingerprint": "ba207e49b0d4",
+  "content_sha256": "dc7ca677bcf250781a72d9797122110fdc14eddf907424ff0768839910a4334c"
+ },
+ "kn-produce-RET01-FY2018Q1-mid-coded": {
+  "split": "train",
+  "case": "TJX_MARMAXX-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "cc395d8f5fe9",
+  "gold_fingerprint": "6d32a8baa95b",
+  "content_sha256": "12b7900a8f868c7ce02cd98c663016670e403c60e1f67080de62a58e1c388938"
  },
  "kn-produce-RET01-FY2018Q3-anon": {
   "split": "train",
@@ -1971,9 +3925,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "f1d63183ecff",
-  "gold_fingerprint": "ab42e4a3189d",
-  "content_sha256": "d3312a5b47b4459da6d5d1e81b4332c961eea79c41c1bb7c66e3a654d3cfb4d3"
+  "fingerprint": "21dfaee1b26c",
+  "gold_fingerprint": "5e59670400c5",
+  "content_sha256": "57eaddb70331cc63b4892cd0ddda3153d60c0bb5f80ab3eb51fa8242b7995625"
  },
  "kn-produce-RET01-FY2018Q3-coded": {
   "split": "train",
@@ -1993,9 +3947,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "7b72cea75c5b",
-  "gold_fingerprint": "7b284aa9ea2a",
-  "content_sha256": "9cff92d9403b2354041baea8eb4d33a07b161e11e19886333926032107543f4d"
+  "fingerprint": "2d355942e5aa",
+  "gold_fingerprint": "91ce370af3c1",
+  "content_sha256": "d9af52136fe5bb568c703a7bd66a865038a910125b7a494b5541b83628982101"
+ },
+ "kn-produce-RET01-FY2018Q3-mid-anon": {
+  "split": "train",
+  "case": "TJX_MARMAXX-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "b2a5da8f8cbe",
+  "gold_fingerprint": "5e59670400c5",
+  "content_sha256": "0d18c542ee46f84be3738759dfb46395f8cc63a67b6ada4fd5035e6968bd25af"
+ },
+ "kn-produce-RET01-FY2018Q3-mid-coded": {
+  "split": "train",
+  "case": "TJX_MARMAXX-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "acf3979cd06e",
+  "gold_fingerprint": "91ce370af3c1",
+  "content_sha256": "9203e9e31218ba81f43d7f7968bdbb460a7862226d8bf11d5aaf23be90686794"
  },
  "kn-produce-RET02-FY2017Q3-anon": {
   "split": "train",
@@ -2015,9 +4013,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "696462b35ac9",
-  "gold_fingerprint": "25728b7d65ec",
-  "content_sha256": "32d009dd64b2a29f2ab79ee9595876a1257e5bcce2371be7954a62800a8650e4"
+  "fingerprint": "e2a5bf1601aa",
+  "gold_fingerprint": "37085a5bffd5",
+  "content_sha256": "664540d51b64624e4fddfb6ef8e9f5bf9f74dab43962eafc2fce8bd2d880aaa0"
  },
  "kn-produce-RET02-FY2017Q3-coded": {
   "split": "train",
@@ -2037,9 +4035,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "ffa206c8a319",
-  "gold_fingerprint": "b326df6d4ffa",
-  "content_sha256": "aac96e45020c05df28468776ce7d1d149e7dd438fcafd26cde8ed26658996ba0"
+  "fingerprint": "ec1d57c003da",
+  "gold_fingerprint": "3a3c9cee1eac",
+  "content_sha256": "363d56e9f28b106711a9f41786899c6d61b57036dc460088efd3eef5560e53ca"
+ },
+ "kn-produce-RET02-FY2017Q3-mid-anon": {
+  "split": "train",
+  "case": "JWN_OP-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "5763f84b8487",
+  "gold_fingerprint": "5ed3d10fe72b",
+  "content_sha256": "c232f47b2daeb64040eb9b3a7b4fee20598005c89d1c7fc128826dab218569a5"
+ },
+ "kn-produce-RET02-FY2017Q3-mid-coded": {
+  "split": "train",
+  "case": "JWN_OP-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "10e86dd4cab2",
+  "gold_fingerprint": "428501c4b6e7",
+  "content_sha256": "1bfad96e7482749cab822b6602cb92b94e5020a69122cd10234738293b43432a"
  },
  "kn-produce-RET02-FY2018Q1-anon": {
   "split": "train",
@@ -2059,9 +4101,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "4c29f6b83bd8",
-  "gold_fingerprint": "75c41b595289",
-  "content_sha256": "b51f3a641e9214e81635cd188efd822d40d6755d27dfb048e2c5c7ae9e6983e4"
+  "fingerprint": "ea7975245d98",
+  "gold_fingerprint": "72118899ecaf",
+  "content_sha256": "2cef2c2e4be77b4c66890eb6031b8170f8b0743dffcc9f80fc1f3f113b7c6c9b"
  },
  "kn-produce-RET02-FY2018Q1-coded": {
   "split": "train",
@@ -2081,9 +4123,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "40a092dffe50",
-  "gold_fingerprint": "325810eb1165",
-  "content_sha256": "6b56097b77af78b313ab08f979b5c6b9b9e616af0ea6dd4d01c68676df8fd3bd"
+  "fingerprint": "b4fb621a41fa",
+  "gold_fingerprint": "08539c2b43f8",
+  "content_sha256": "efd17dc8ecc0e0e17f5dbf904bcf872bac815498947ec94715d2bd494ad93107"
+ },
+ "kn-produce-RET02-FY2018Q1-mid-anon": {
+  "split": "train",
+  "case": "JWN_OP-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "c1c0b4c50074",
+  "gold_fingerprint": "c1de8c669619",
+  "content_sha256": "5d9b5a1f5c10fc7904985205aedd10fa8795a2440a8717d1ca3da894d9eca9df"
+ },
+ "kn-produce-RET02-FY2018Q1-mid-coded": {
+  "split": "train",
+  "case": "JWN_OP-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "f569534fa9c7",
+  "gold_fingerprint": "4430e458c8e4",
+  "content_sha256": "677a27c57a1405279e2be9d685c7a52f4ef5cc35cc5f82d65682334afdcbc2d4"
  },
  "kn-produce-RET02-FY2018Q3-anon": {
   "split": "train",
@@ -2103,9 +4189,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "dcc835279728",
-  "gold_fingerprint": "3be8c64254fa",
-  "content_sha256": "6b50127e9cd0f9cb7f44f416ab29267c2b27cff3cf83d46dd596969ce2502c4d"
+  "fingerprint": "7f5fca2df674",
+  "gold_fingerprint": "f96ab97635fe",
+  "content_sha256": "d7814acff78c93dff67c716139a65ea895d84fb9c094aae230e1b5033aa59a83"
  },
  "kn-produce-RET02-FY2018Q3-coded": {
   "split": "train",
@@ -2125,9 +4211,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "1f98e603ca0b",
-  "gold_fingerprint": "5a45ea6b2a03",
-  "content_sha256": "4450bd729f69b251fdf638091c460023d99eea015caadc5311b5868511ca97a1"
+  "fingerprint": "967194d72ef7",
+  "gold_fingerprint": "57e1eba275ce",
+  "content_sha256": "29e83a4270753089caabb1a24838564d43a96500fe22a5cf5f7efd3aa57daf4e"
+ },
+ "kn-produce-RET02-FY2018Q3-mid-anon": {
+  "split": "train",
+  "case": "JWN_OP-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "deb8cceb3e64",
+  "gold_fingerprint": "f96ab97635fe",
+  "content_sha256": "22c88f2cd9b9f15288be0caac821a3979997f9ee46ab289cc0f091f88551fa73"
+ },
+ "kn-produce-RET02-FY2018Q3-mid-coded": {
+  "split": "train",
+  "case": "JWN_OP-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "f37c841c3497",
+  "gold_fingerprint": "57e1eba275ce",
+  "content_sha256": "05108d98ff0e6f4e7b44baa4cb6d3ecfd8aa3dce7d3b752b54f63f4e5dbbaf98"
  },
  "kn-produce-RET03-FY2017Q3-anon": {
   "split": "heldout",
@@ -2143,9 +4273,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "52bd57e876ec",
-  "gold_fingerprint": "c4fa79f12a26",
-  "content_sha256": "2a4672fbee6532fc1811a669cf7df155a24533ed59d43d4f5beb6005bb69fbbf"
+  "fingerprint": "96204c08cea4",
+  "gold_fingerprint": "2866025f11f3",
+  "content_sha256": "41036b2192f1e9835bec5ecd6d070cea5fe514c010cc1eaccfad6098ba8d5c2d"
  },
  "kn-produce-RET03-FY2017Q3-coded": {
   "split": "heldout",
@@ -2161,9 +4291,45 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "f25da3822dd5",
-  "gold_fingerprint": "82f5f9c98811",
-  "content_sha256": "99528bf6010de83296382778c19705c30d2823b71dc945911c96aadf818d1aaa"
+  "fingerprint": "e8f9ff1bc7b4",
+  "gold_fingerprint": "b368f1b2bffe",
+  "content_sha256": "c1e8257c2b410594df8bbe75a00ac2b58975b348f3661540deb06333893ee6ef"
+ },
+ "kn-produce-RET03-FY2017Q3-mid-anon": {
+  "split": "heldout",
+  "case": "JCP-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "fa3daef52970",
+  "gold_fingerprint": "9662d5927f0d",
+  "content_sha256": "8f48db9862125f8e7b9386441028881ae438187a2ced8d02610d00af093aa9e1"
+ },
+ "kn-produce-RET03-FY2017Q3-mid-coded": {
+  "split": "heldout",
+  "case": "JCP-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "aa76fc9999ca",
+  "gold_fingerprint": "c378f4ab9e40",
+  "content_sha256": "845e48052779ac9a196970fe3fded54819626e11fd1cf2a9dafb38d7ecc8aec3"
  },
  "kn-produce-RET03-FY2018Q1-anon": {
   "split": "heldout",
@@ -2179,9 +4345,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "8eb4fde8ea58",
-  "gold_fingerprint": "c0b03d61726d",
-  "content_sha256": "501c1f5eadb3afc1e89e10cb9e96d01f1652a0de8f6b281fbcbc97414f08b531"
+  "fingerprint": "c2087387c6be",
+  "gold_fingerprint": "be38157bf74f",
+  "content_sha256": "aaf016686becc0d2794c27efe6fa717b3d6a1874e3437f7d05744dd864a203c8"
  },
  "kn-produce-RET03-FY2018Q1-coded": {
   "split": "heldout",
@@ -2197,9 +4363,45 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "9fb2decd4a85",
-  "gold_fingerprint": "ceae6deab57b",
-  "content_sha256": "f84126f542b5695f693bf16db2a32233f4086c88fe6fd7158a3502ec25e41d65"
+  "fingerprint": "b7dab2788891",
+  "gold_fingerprint": "4f4bf6c39f51",
+  "content_sha256": "98bb96daffc7e768d841095045c3f150fbcf338aa8de131ca03defa70045f720"
+ },
+ "kn-produce-RET03-FY2018Q1-mid-anon": {
+  "split": "heldout",
+  "case": "JCP-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "6db81c5d5fe7",
+  "gold_fingerprint": "ac9e8a9cf756",
+  "content_sha256": "72e422a240d7e47545746811587de9ce4386e6d3e2d7a5cabbeece01452969f0"
+ },
+ "kn-produce-RET03-FY2018Q1-mid-coded": {
+  "split": "heldout",
+  "case": "JCP-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "d3f07a77f415",
+  "gold_fingerprint": "75bb01f862cc",
+  "content_sha256": "57cffa39c8e01cad08ec93bcc32244e97ad95f825425c102c4b01608e8c6d45a"
  },
  "kn-produce-RET03-FY2018Q3-anon": {
   "split": "heldout",
@@ -2215,9 +4417,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "621da59e60a5",
-  "gold_fingerprint": "12f17785a6db",
-  "content_sha256": "beb7beef578e6b9e2dfbfd98a112931d3923947f404aade8c886df14c2729f28"
+  "fingerprint": "4a3f9d081830",
+  "gold_fingerprint": "1de6d191ff3e",
+  "content_sha256": "83bb81c8a0812928c5ccf237eabedab3d9da8cbaadc7af28a0e5bbdab75abad1"
  },
  "kn-produce-RET03-FY2018Q3-coded": {
   "split": "heldout",
@@ -2233,9 +4435,45 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "23a52ccdd2dd",
-  "gold_fingerprint": "dd47ca660792",
-  "content_sha256": "2739badc4e3fce045bc4a569fe3715a06597cc202652bf7dcb57db41d1b23529"
+  "fingerprint": "f78059a4e7dd",
+  "gold_fingerprint": "81d78ab60d40",
+  "content_sha256": "dc6e7a9a8b1011dfe62fc5d9b1ac0243f743cb68d7bbd064c918b614bfabfe92"
+ },
+ "kn-produce-RET03-FY2018Q3-mid-anon": {
+  "split": "heldout",
+  "case": "JCP-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "80352501de23",
+  "gold_fingerprint": "1de6d191ff3e",
+  "content_sha256": "f45b4d16f80163034d9dde077c280e5133ef4f89be6b71b30dc0a1e233082a28"
+ },
+ "kn-produce-RET03-FY2018Q3-mid-coded": {
+  "split": "heldout",
+  "case": "JCP-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "b1ad50b04a17",
+  "gold_fingerprint": "81d78ab60d40",
+  "content_sha256": "9090658963d8318308bc3862497b87accdd36924690f6b2541cb189633388250"
  },
  "kn-produce-RET04-FY2017Q3-anon": {
   "split": "bench",
@@ -2251,9 +4489,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "932e474405a5",
-  "gold_fingerprint": "beeb1e1532a1",
-  "content_sha256": "58fad6118c16b634d2c85b93088bfdb2b5786c5b31c6d98ead151d08358738dd"
+  "fingerprint": "b739df01a35f",
+  "gold_fingerprint": "222c25476914",
+  "content_sha256": "57716e1380bb5c6d00db41335b9ff8fb86f6b85641bdb54b512c6c82b4c3e673"
  },
  "kn-produce-RET04-FY2017Q3-coded": {
   "split": "bench",
@@ -2269,9 +4507,45 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "ab2841d8ef40",
-  "gold_fingerprint": "0161ddc0d98c",
-  "content_sha256": "ea0740368ea7bd3576396c3fb8d8ec4e42326f7d9bd6e3cd530088136fa56fe9"
+  "fingerprint": "45fe16a3c3f2",
+  "gold_fingerprint": "d77df8097eb9",
+  "content_sha256": "8fa29d2809cc18cc67294b8eb7f766d20c658ccc531194ae5ffaac469f00c196"
+ },
+ "kn-produce-RET04-FY2017Q3-mid-anon": {
+  "split": "bench",
+  "case": "M-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "aa6402559c99",
+  "gold_fingerprint": "9cb16f0b8a0a",
+  "content_sha256": "ba7b0d780bd52de9bcf9abc3d5f37a419742286f56efcc1c0a3df65f342adf44"
+ },
+ "kn-produce-RET04-FY2017Q3-mid-coded": {
+  "split": "bench",
+  "case": "M-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "04acf17bbecc",
+  "gold_fingerprint": "ef039c8187a4",
+  "content_sha256": "e14d5616f87baee5fdcdedd124a93ac1fe2019e7697c5ea8d0e025717312a7b0"
  },
  "kn-produce-RET04-FY2018Q1-anon": {
   "split": "bench",
@@ -2287,9 +4561,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "248e1e49fd10",
-  "gold_fingerprint": "bc2e01388b43",
-  "content_sha256": "f81dda45c00af631aaba275b120cbfb2e4b5bf1ffaeb1454682b44e20500da33"
+  "fingerprint": "a47fed6715e7",
+  "gold_fingerprint": "b91f91f58953",
+  "content_sha256": "a59d20e6c96a3fb881f35c1226bacd743e5c927fa659462b7e50a90d16cdf4c5"
  },
  "kn-produce-RET04-FY2018Q1-coded": {
   "split": "bench",
@@ -2305,9 +4579,45 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "983078fbc700",
-  "gold_fingerprint": "84a2e74a0d71",
-  "content_sha256": "b5da9e15754a4589fb161dea8b92c5b0af369c7dc3af22ab2bcfbd5e40e98e43"
+  "fingerprint": "7ea79d99b5ce",
+  "gold_fingerprint": "171d275fdae4",
+  "content_sha256": "d256e7149ba888cc869f289aef60bd286754f197e101c8828a95d9e023081655"
+ },
+ "kn-produce-RET04-FY2018Q1-mid-anon": {
+  "split": "bench",
+  "case": "M-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "761c197e15bd",
+  "gold_fingerprint": "0c8030b58341",
+  "content_sha256": "b04c88fae857819d3416d9911cdfc4e10aebbb46cee0e7115758fb944ea656e2"
+ },
+ "kn-produce-RET04-FY2018Q1-mid-coded": {
+  "split": "bench",
+  "case": "M-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "a92bbbe0bd9b",
+  "gold_fingerprint": "827ffaaf7c00",
+  "content_sha256": "30da3aaa23b33a0bb6f01581144470b59691605d54860607c05be162988a10de"
  },
  "kn-produce-RET04-FY2018Q3-anon": {
   "split": "bench",
@@ -2323,9 +4633,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "bf8bf26960d4",
-  "gold_fingerprint": "c1976aac358a",
-  "content_sha256": "e0385afa439feb06ced4bd8e972e15ba58e9729a09a3a51e88080b7990d22c95"
+  "fingerprint": "783f503e4a7e",
+  "gold_fingerprint": "31715e5edb24",
+  "content_sha256": "fb8539ff96202b84ffa64d2403f874b7f9b36d426159fe4be276992e3adcc763"
  },
  "kn-produce-RET04-FY2018Q3-coded": {
   "split": "bench",
@@ -2341,9 +4651,45 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "e9c4ed63bb43",
-  "gold_fingerprint": "0852c7e70e64",
-  "content_sha256": "c02a67cf705d3cedd6f1890e894fd003b1f16670fb9ba805716b906066af009f"
+  "fingerprint": "3ce0add49ac0",
+  "gold_fingerprint": "2f6c8919b539",
+  "content_sha256": "8553069c53900ed24baa219f0fad62c754bdc944033fa5893a835293256fa20d"
+ },
+ "kn-produce-RET04-FY2018Q3-mid-anon": {
+  "split": "bench",
+  "case": "M-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "78cb5dec14a5",
+  "gold_fingerprint": "d16e2378b9bf",
+  "content_sha256": "4a6b28780456d3229643ca387f91ca1c695ec00c9ab88f6e55a8fb702f28dd05"
+ },
+ "kn-produce-RET04-FY2018Q3-mid-coded": {
+  "split": "bench",
+  "case": "M-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "ec5664319286",
+  "gold_fingerprint": "c34980fdf417",
+  "content_sha256": "dc05f665769eae9dda4952b85d11607b7f15eca1a980beeadb6a0cb08c7543b3"
  },
  "kn-produce-RET05-FY2017Q3-anon": {
   "split": "bench",
@@ -2359,9 +4705,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "fbd821c6ff5b",
-  "gold_fingerprint": "0936d8ed10b8",
-  "content_sha256": "890340fecd0ec5f4e4eff71bb847714fd502dc400b78c5d4835d0677a0d0871d"
+  "fingerprint": "6e2b714066d8",
+  "gold_fingerprint": "38706d39a839",
+  "content_sha256": "2aaa72eaf379d4972f476b6f8497c1894a12235f81f4624d40ca11647762b2ad"
  },
  "kn-produce-RET05-FY2017Q3-coded": {
   "split": "bench",
@@ -2377,9 +4723,45 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "15b0ddb7fc45",
-  "gold_fingerprint": "5a2ff4b38c00",
-  "content_sha256": "27066b001e4b611dd9d261ef74720eaa9f50afeb45932088f1d7d5343d3c3896"
+  "fingerprint": "d6eab89f84f2",
+  "gold_fingerprint": "25814826528d",
+  "content_sha256": "2493570afcff9da427700adffd9eb4978043d83e98faf342c1c64ea2fa34a353"
+ },
+ "kn-produce-RET05-FY2017Q3-mid-anon": {
+  "split": "bench",
+  "case": "DDS-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "80eab875821d",
+  "gold_fingerprint": "0ea3dbe10ee6",
+  "content_sha256": "a7af21f16e0cf422d7e7021e3a12604b4a87ca87f0ab4b3b94c8a4c78f95c9fb"
+ },
+ "kn-produce-RET05-FY2017Q3-mid-coded": {
+  "split": "bench",
+  "case": "DDS-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "754c2a47d836",
+  "gold_fingerprint": "ad8bd9480143",
+  "content_sha256": "d9a47de83ea3c40bae587ce029d25be37ff905ab34828196c02d0ee631b9a226"
  },
  "kn-produce-RET05-FY2018Q1-anon": {
   "split": "bench",
@@ -2395,9 +4777,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "fc7ea188c762",
-  "gold_fingerprint": "47abdbc6446a",
-  "content_sha256": "7ad0c33d413f95425ffe4a8082f7ba91f525e21677796ab9a7c7734c9a0f5946"
+  "fingerprint": "9827254f5cec",
+  "gold_fingerprint": "4e67e798181e",
+  "content_sha256": "48e92ae0be3ab8fa948a1913689bdbe26e7ba5039c1dfced0a88515bb61e423b"
  },
  "kn-produce-RET05-FY2018Q1-coded": {
   "split": "bench",
@@ -2413,9 +4795,45 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "c7b945ad1b5f",
-  "gold_fingerprint": "d471db60c69e",
-  "content_sha256": "8f231cbd12e2bc4bfa8b4a23f294b0553916fd63b3a7a4683790b3a41fcb93a8"
+  "fingerprint": "7f5b1b83c090",
+  "gold_fingerprint": "0c20da2d2faf",
+  "content_sha256": "53e480120bf413abf4ab6db8897bb29d5feeeedb1841844e4168653293bfdf36"
+ },
+ "kn-produce-RET05-FY2018Q1-mid-anon": {
+  "split": "bench",
+  "case": "DDS-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "3e526c12e840",
+  "gold_fingerprint": "caf3cbfea4af",
+  "content_sha256": "cac987cf9c778dcd71be78623eb1cd867918f305aebefa0a6a0b96839ffcfc1f"
+ },
+ "kn-produce-RET05-FY2018Q1-mid-coded": {
+  "split": "bench",
+  "case": "DDS-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "7111830b1069",
+  "gold_fingerprint": "12d01600d573",
+  "content_sha256": "03df96705bcc1b0bc010a64aea7ee84cebeb80aa18851a0122936f37140aa018"
  },
  "kn-produce-RET05-FY2018Q3-anon": {
   "split": "bench",
@@ -2431,9 +4849,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "1518cb27d1e1",
-  "gold_fingerprint": "6a4920674d7f",
-  "content_sha256": "82548741f7d552155a2f9d5445260283272bd9215fbbdec64f4672892d4d516d"
+  "fingerprint": "0370a85acc62",
+  "gold_fingerprint": "dfaddbb469e9",
+  "content_sha256": "829c1eef4653febfd68c44ebd7c23b7e1381dcd853d91421c3214cdcacc5655e"
  },
  "kn-produce-RET05-FY2018Q3-coded": {
   "split": "bench",
@@ -2449,9 +4867,45 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "031946421b64",
-  "gold_fingerprint": "7d5749394a1b",
-  "content_sha256": "280ba82550f10928736c7603ebd5f5581e2893ba066c6cff022998e26ce765a4"
+  "fingerprint": "0ec92b9b7f67",
+  "gold_fingerprint": "0a1512db9f7e",
+  "content_sha256": "dae10186f1a4911ada3d098a0a049139c1bba4f100e57b1525b09db09c7a792b"
+ },
+ "kn-produce-RET05-FY2018Q3-mid-anon": {
+  "split": "bench",
+  "case": "DDS-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "ac1e75a1e060",
+  "gold_fingerprint": "dfaddbb469e9",
+  "content_sha256": "102161c1bf82d8ab1a5e65e4e2ecac6b049f5626fe57506175cb3fd4fe140de0"
+ },
+ "kn-produce-RET05-FY2018Q3-mid-coded": {
+  "split": "bench",
+  "case": "DDS-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "2a28cd23bdd2",
+  "gold_fingerprint": "0a1512db9f7e",
+  "content_sha256": "b31aa13d92c657969fc4d6f8a9a0d94be4b3c9c653bc32b4731c62c5d7b09817"
  },
  "kn-produce-RET07-FY2017Q3-anon": {
   "split": "train",
@@ -2471,9 +4925,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "2eca3eeaa9b7",
-  "gold_fingerprint": "ce1fda34e8c1",
-  "content_sha256": "76b8329db1d14ed3f8aaa2c80157fff1716379954ef9aef02873a810a93f7664"
+  "fingerprint": "64c5d224f135",
+  "gold_fingerprint": "807d50ac8a54",
+  "content_sha256": "3d5ee3a343fb83c09d7f2dc3f847ff5d9a5fbaa748a6b48e7dac5467fbbe040d"
  },
  "kn-produce-RET07-FY2017Q3-coded": {
   "split": "train",
@@ -2493,9 +4947,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "a9fc3611f5f8",
-  "gold_fingerprint": "8a0b8300bd0e",
-  "content_sha256": "05d7b7207b661f1279bc40865ca41f2928b64239da94a93d358e55928c72897a"
+  "fingerprint": "477783597d97",
+  "gold_fingerprint": "0c99c8017601",
+  "content_sha256": "939cf9286db32b975d6995a37b442d787883799ed68385c900c2bc8234f35acf"
+ },
+ "kn-produce-RET07-FY2017Q3-mid-anon": {
+  "split": "train",
+  "case": "ROST-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "75fd701ca7d2",
+  "gold_fingerprint": "e2985b5245cb",
+  "content_sha256": "518d9c35883e8ebd5bb1793f71d30e578ea16d1a80859be59c32c8cf908807d2"
+ },
+ "kn-produce-RET07-FY2017Q3-mid-coded": {
+  "split": "train",
+  "case": "ROST-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "9c8a90a67725",
+  "gold_fingerprint": "7b613fe7a613",
+  "content_sha256": "3d827dd00fae9372e61ea9d0af44595318d84411f5425c3b51ac1f8266166e20"
  },
  "kn-produce-RET07-FY2018Q1-anon": {
   "split": "train",
@@ -2515,9 +5013,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "f951c5c2809f",
-  "gold_fingerprint": "319eec555021",
-  "content_sha256": "10f1324792fa7c391994ebc7dfc1923e1c487e08503da3e2d54d461f1b54f095"
+  "fingerprint": "e8ee7049e115",
+  "gold_fingerprint": "4a19ac2b7a77",
+  "content_sha256": "fff90d2a8d4c8c579b87bb27959e46e9d119aaff1f88e660b6edf0a8c1c1986e"
  },
  "kn-produce-RET07-FY2018Q1-coded": {
   "split": "train",
@@ -2537,9 +5035,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "dfbc61e45f47",
-  "gold_fingerprint": "894118e9dcea",
-  "content_sha256": "41cac30b223fd75f8ee98a8ab72261ed1cdfe4023227ccdf3b0096059d01471d"
+  "fingerprint": "0783007b7fc5",
+  "gold_fingerprint": "7dff63cacb0d",
+  "content_sha256": "19a02b54b780d2682896124ac681500f60a7a8767541b010ce5b4de0414ab426"
+ },
+ "kn-produce-RET07-FY2018Q1-mid-anon": {
+  "split": "train",
+  "case": "ROST-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "71859b1e37a0",
+  "gold_fingerprint": "be62cf93f314",
+  "content_sha256": "7962d7d120969247be3534559e90081d308fbd976b78d4a2e62bbf9324796077"
+ },
+ "kn-produce-RET07-FY2018Q1-mid-coded": {
+  "split": "train",
+  "case": "ROST-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "99237c9c2410",
+  "gold_fingerprint": "4f0ceae634ee",
+  "content_sha256": "7f26b9f4bf83c9127d6d0190db12801ffe26cfca0733d8d076bbd6b7c3d32def"
  },
  "kn-produce-RET07-FY2018Q3-anon": {
   "split": "train",
@@ -2559,9 +5101,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "691ba16cb6c7",
-  "gold_fingerprint": "386db4134314",
-  "content_sha256": "ada4ba242b137c68feb4182965d7c9626496d08e6f54f39dcd4b8b8b94690366"
+  "fingerprint": "0efdb32b0d0d",
+  "gold_fingerprint": "f0190a1aa684",
+  "content_sha256": "43aa722ed1749d737eed7912165e696060445e7a5601d00141e1af495b10cc19"
  },
  "kn-produce-RET07-FY2018Q3-coded": {
   "split": "train",
@@ -2581,9 +5123,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "06e4ac5e6e68",
-  "gold_fingerprint": "399ca048f32b",
-  "content_sha256": "82e1145e9d800ce175253a0771d14b0071bcf904a4b6a4617e3d117c905faa03"
+  "fingerprint": "f45b7b10a164",
+  "gold_fingerprint": "0242d1ba8abb",
+  "content_sha256": "936ed58d37e676b2b2715bf95c0d333a7f8f44bc32e072e9b277c7db781fb491"
+ },
+ "kn-produce-RET07-FY2018Q3-mid-anon": {
+  "split": "train",
+  "case": "ROST-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "02b72e0d25a7",
+  "gold_fingerprint": "c45f2dd23f27",
+  "content_sha256": "aaddb1c22703cc43c9e7487c897bfbfd630a7cb368b3a8aa7fde2c49d95fa958"
+ },
+ "kn-produce-RET07-FY2018Q3-mid-coded": {
+  "split": "train",
+  "case": "ROST-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "22478a31db4a",
+  "gold_fingerprint": "f1beeb8ad600",
+  "content_sha256": "b31a8e710941700df4f225058ed8435a0df7edfaa4754265a35a42a824479976"
  },
  "kn-produce-RET08-FY2017Q3-anon": {
   "split": "train",
@@ -2603,9 +5189,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "530143096db1",
-  "gold_fingerprint": "f76b619cd298",
-  "content_sha256": "c259b8cc84981ecadfe617e7207aacab905b6efd1914b648a0e20fa5bfaf6d7a"
+  "fingerprint": "581cff60feb4",
+  "gold_fingerprint": "ea0c88367602",
+  "content_sha256": "8805e7a0672328a2663d0bba972f9742013a74be95579bc9827d00de1c197a7e"
  },
  "kn-produce-RET08-FY2017Q3-coded": {
   "split": "train",
@@ -2625,9 +5211,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "d262feed5676",
-  "gold_fingerprint": "b2c742681c42",
-  "content_sha256": "f1cc4f3ef816324cbcc467a6a19cf28a8a412b7631544cd756d0082e400be60a"
+  "fingerprint": "8f44f22e473f",
+  "gold_fingerprint": "bf4417088649",
+  "content_sha256": "cc1e1d3a00b6bec65b33d9c23a7e0d023ef919d527d7b02237e2fc7a39807bc8"
+ },
+ "kn-produce-RET08-FY2017Q3-mid-anon": {
+  "split": "train",
+  "case": "JWN_FP-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "80eea80b7098",
+  "gold_fingerprint": "9e6d7ebbd572",
+  "content_sha256": "d64183628e312b36b18923a8552c8bab82323c6f099886f575b2e6f22ebabd62"
+ },
+ "kn-produce-RET08-FY2017Q3-mid-coded": {
+  "split": "train",
+  "case": "JWN_FP-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "af4971507f69",
+  "gold_fingerprint": "0fbdd950df61",
+  "content_sha256": "8dd1a84c7e0e74ac880121de1f820914a1f9c7b1051809d6f3b39d8f52b171fb"
  },
  "kn-produce-RET08-FY2018Q1-anon": {
   "split": "train",
@@ -2647,9 +5277,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "31a99553f3cd",
-  "gold_fingerprint": "edde03759f3a",
-  "content_sha256": "9f71bd333f059c279fd1f42474558891dd400bf3ffcfac7265e40bc693a9a076"
+  "fingerprint": "497a28e1e107",
+  "gold_fingerprint": "b5ad80d5f2c8",
+  "content_sha256": "5636f02de787dd705c4d5b10f8941fc2324950d2e0d468c3c2f5a4724ab60b21"
  },
  "kn-produce-RET08-FY2018Q1-coded": {
   "split": "train",
@@ -2669,9 +5299,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "daed7747685f",
-  "gold_fingerprint": "c762a22f872b",
-  "content_sha256": "8c3821423ff6892fa956c64a8160d7ebf56f3414f56fccfec280c42691800610"
+  "fingerprint": "d1377b001cd2",
+  "gold_fingerprint": "0aad4b15fb44",
+  "content_sha256": "390d2a2963079648786031356f176d5ace2586503568a5feb705e024286de4e3"
+ },
+ "kn-produce-RET08-FY2018Q1-mid-anon": {
+  "split": "train",
+  "case": "JWN_FP-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "426cfa56d707",
+  "gold_fingerprint": "b5ad80d5f2c8",
+  "content_sha256": "c00e8b040b5af648bd48c5e7affaf49307e189eafcf549c008fc3e3f12739c37"
+ },
+ "kn-produce-RET08-FY2018Q1-mid-coded": {
+  "split": "train",
+  "case": "JWN_FP-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "4a1c8ea8095c",
+  "gold_fingerprint": "0aad4b15fb44",
+  "content_sha256": "06d6a890c4e892198f455c0f254fb78cba244decf83f4d4e62fc3f842ecb7e7e"
  },
  "kn-produce-RET08-FY2018Q3-anon": {
   "split": "train",
@@ -2691,9 +5365,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "89f5f3731095",
-  "gold_fingerprint": "326a9a3ecd35",
-  "content_sha256": "b330eb0510d5cbefcf5b8c766af6d69ea32354c3af87c071d92989d3d66566a5"
+  "fingerprint": "48e854c4c64d",
+  "gold_fingerprint": "51fdbe902def",
+  "content_sha256": "4a3d48b0d5032bced8d8b46b21b0ddd45530890ec6c6e2ff10cd86b4a2201c97"
  },
  "kn-produce-RET08-FY2018Q3-coded": {
   "split": "train",
@@ -2713,9 +5387,53 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "e039303a30b9",
-  "gold_fingerprint": "ef706de234d9",
-  "content_sha256": "3a602405b554e80b799b354cf48e96d34b4e0c8b46a23911bed71c3223aa7086"
+  "fingerprint": "891100a2569c",
+  "gold_fingerprint": "8670fd9a58b8",
+  "content_sha256": "3bb3f7fcc1bdef4621b78daff2c640e48410b07363fa1fa3eb76d24a2a10068a"
+ },
+ "kn-produce-RET08-FY2018Q3-mid-anon": {
+  "split": "train",
+  "case": "JWN_FP-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "6a2c8c60c8be",
+  "gold_fingerprint": "51fdbe902def",
+  "content_sha256": "3c157e6f2d81695998d2725be4ac0805b7f98dd92cc8f816265f9b7f2c44456f"
+ },
+ "kn-produce-RET08-FY2018Q3-mid-coded": {
+  "split": "train",
+  "case": "JWN_FP-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "536ae3f0edd7",
+  "gold_fingerprint": "8670fd9a58b8",
+  "content_sha256": "7a66922778973385f63e7fa829fe4e65d3d87d88b6edee7a1626651d7dbb5b0b"
  },
  "kn-produce-RET10-FY2017Q3-anon": {
   "split": "heldout",
@@ -2731,9 +5449,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "b36798b4921f",
-  "gold_fingerprint": "53a6f2e14307",
-  "content_sha256": "911e1a05b97c1b9060bd8840b008d7d292f17e76958fc254e368d52c323f386a"
+  "fingerprint": "3847b8ad9a0c",
+  "gold_fingerprint": "ccf2fabf698c",
+  "content_sha256": "8a52112681176c9e753076e614ec6d185c8f66bdbeff51d442c1c36ba19ac3e0"
  },
  "kn-produce-RET10-FY2017Q3-coded": {
   "split": "heldout",
@@ -2749,9 +5467,45 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "068c54a0db89",
-  "gold_fingerprint": "66be610d1860",
-  "content_sha256": "1492a7ce4dbc78a8cf8a08f948ef5b3ebb6bd35dc884f384fa85ac12bbd88028"
+  "fingerprint": "d426b8969235",
+  "gold_fingerprint": "f21f5acc3f2b",
+  "content_sha256": "1a20d3cab3200b83b356865fc7470a11215cd465bfde0240d29c73df6d1dff8f"
+ },
+ "kn-produce-RET10-FY2017Q3-mid-anon": {
+  "split": "heldout",
+  "case": "KSS-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "ab120e52f94e",
+  "gold_fingerprint": "05c88637a8cf",
+  "content_sha256": "d7caef0df42148904ec42944b465e6cf6d218ef4a24ac249bcfd3742fbf99d94"
+ },
+ "kn-produce-RET10-FY2017Q3-mid-coded": {
+  "split": "heldout",
+  "case": "KSS-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "602df15eed83",
+  "gold_fingerprint": "82c41922e105",
+  "content_sha256": "8e41f8f6bea8f0da793ffe94cb4b2990928b496f88cceec2f49e6fbd9c18b790"
  },
  "kn-produce-RET10-FY2018Q1-anon": {
   "split": "heldout",
@@ -2767,9 +5521,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "c484dc8397c7",
-  "gold_fingerprint": "3253c4746162",
-  "content_sha256": "7e3fdf087b7a929dcf1aab239a62292f337eb964901d1cea74dca03c3019acce"
+  "fingerprint": "b990a953b1da",
+  "gold_fingerprint": "8719b7e1855b",
+  "content_sha256": "66148b56b9ad71ed2d40f26dcd87bbc7bc95d2d90cd5c90f83a808f372513b00"
  },
  "kn-produce-RET10-FY2018Q1-coded": {
   "split": "heldout",
@@ -2785,9 +5539,45 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "3e09af4271d4",
-  "gold_fingerprint": "ad4a753c8531",
-  "content_sha256": "93c1b5996802e9b7f75f81fbc3491cbc8c7a250c8e04eadcf78365ac6897f894"
+  "fingerprint": "8a8cd89d8d23",
+  "gold_fingerprint": "38c1d39a333d",
+  "content_sha256": "9790603d8fe97e29d88245faf3d24a7562ff4d641daca526b2ec13f37c7e3ad1"
+ },
+ "kn-produce-RET10-FY2018Q1-mid-anon": {
+  "split": "heldout",
+  "case": "KSS-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "72c272f51573",
+  "gold_fingerprint": "b00e8284480a",
+  "content_sha256": "38c8ee3979dd96fde3b8f87b0139d76869141b1307fc39456cc777db1937c13d"
+ },
+ "kn-produce-RET10-FY2018Q1-mid-coded": {
+  "split": "heldout",
+  "case": "KSS-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "0c8908224e76",
+  "gold_fingerprint": "3e3f1d970e62",
+  "content_sha256": "2074a8e88185976e98062fe9752b9986075891ba0b36317f99acc3dccbc57545"
  },
  "kn-produce-RET10-FY2018Q3-anon": {
   "split": "heldout",
@@ -2803,9 +5593,9 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "a56904f1aa63",
-  "gold_fingerprint": "a9208c36a625",
-  "content_sha256": "9d076354be6253a7c6b72aa2c5f17caa212f531707571c2b74d172faf0f84abf"
+  "fingerprint": "d278e9aaa5c5",
+  "gold_fingerprint": "31fe1ffe1719",
+  "content_sha256": "eda918a41f74b5597c97031ec6c8972ce49a83edd9302a8b02b85b17ca7fa5a3"
  },
  "kn-produce-RET10-FY2018Q3-coded": {
   "split": "heldout",
@@ -2821,9 +5611,45 @@
    "KSS",
    "JCP"
   ],
-  "fingerprint": "3de8982afec1",
-  "gold_fingerprint": "781ce57dbc5e",
-  "content_sha256": "759d639c2780105ce837683b8b88168821f196ed93731574733c0166d23186a0"
+  "fingerprint": "d761dfa3cb2b",
+  "gold_fingerprint": "ccb3a2c7cc9c",
+  "content_sha256": "b2029aa066fd6a65337a8a8404c255138ae4241200ac4da3b960bb1ebfb7bfea"
+ },
+ "kn-produce-RET10-FY2018Q3-mid-anon": {
+  "split": "heldout",
+  "case": "KSS-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "03f11fcb099c",
+  "gold_fingerprint": "31fe1ffe1719",
+  "content_sha256": "daa596b54c188936ea1d77101ea02620f3622ec16e2ecb661dd00c5b0541e362"
+ },
+ "kn-produce-RET10-FY2018Q3-mid-coded": {
+  "split": "heldout",
+  "case": "KSS-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "ALK",
+   "JBLU",
+   "KSS",
+   "JCP"
+  ],
+  "fingerprint": "4d2c4ce47afd",
+  "gold_fingerprint": "ccb3a2c7cc9c",
+  "content_sha256": "7fc9e4b188f44f9e200cef37683420ed25e812b490e62bb3f4d85fd03bd60a1a"
  },
  "kn-produce-ROST-FY2017Q3": {
   "split": "train",
@@ -2843,9 +5669,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "8a0cf763493b",
-  "gold_fingerprint": "cd8c6aa54b28",
-  "content_sha256": "27f83f9d2de44bd4c2bacaf3c13b4427d93e4f5639c942617537386b9b034b13"
+  "fingerprint": "b83a214db7ad",
+  "gold_fingerprint": "5e0524622172",
+  "content_sha256": "ce8232addbe9fb355ad3617c18923d04450fee1056232bc610c340c2bca45839"
+ },
+ "kn-produce-ROST-FY2017Q3-mid": {
+  "split": "train",
+  "case": "ROST-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "22c23058cd47",
+  "gold_fingerprint": "9370a1912471",
+  "content_sha256": "5236ec5d453645eb2752b2153c117347578497ea7d0a1438d4eca9c9e0c65cb0"
  },
  "kn-produce-ROST-FY2018Q1": {
   "split": "train",
@@ -2865,9 +5713,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "5facc88474d5",
-  "gold_fingerprint": "b70139ea8b2d",
-  "content_sha256": "64d92aca99cfe3bc07d105b6ff9cee65969c778517e8064d16d05a6ead385b7a"
+  "fingerprint": "cc63d6e098b9",
+  "gold_fingerprint": "fb224647960a",
+  "content_sha256": "ac6c966cd74f366349ba76a4309f3b29123298fe485786e711e948cd386e8b4b"
+ },
+ "kn-produce-ROST-FY2018Q1-mid": {
+  "split": "train",
+  "case": "ROST-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "da6496812f65",
+  "gold_fingerprint": "0dae29c7ec42",
+  "content_sha256": "a2f417cfd1e6b8f36e2b2bbb5680210f1d5105015884499cfdede3b31e8a2fa5"
  },
  "kn-produce-ROST-FY2018Q3": {
   "split": "train",
@@ -2887,9 +5757,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "f752633ec69b",
-  "gold_fingerprint": "82a7ec21d1d7",
-  "content_sha256": "a07d76768252c366a81fb6618d24e371580bd5088914947913a8a1bf622b379f"
+  "fingerprint": "ede2cbe04964",
+  "gold_fingerprint": "5f29a12d8827",
+  "content_sha256": "5c1c177a02a3e551b37cf6d4d90435eced709a759ecc6ade4f4deafa4de0c538"
+ },
+ "kn-produce-ROST-FY2018Q3-mid": {
+  "split": "train",
+  "case": "ROST-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "0204ffbe0160",
+  "gold_fingerprint": "d91cea499d64",
+  "content_sha256": "6f41e080190d41e81f3adca3dc9eec64812a00a76157ef7188ceebf949a57891"
  },
  "kn-produce-SAVE-2017Q4": {
   "split": "bench",
@@ -2905,9 +5797,27 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "789bc6f870fa",
-  "gold_fingerprint": "7fd05002b934",
-  "content_sha256": "78f2cf5f890c630a50380180836311b70c1a9f141add81268276fd889f694f51"
+  "fingerprint": "1e581cff6796",
+  "gold_fingerprint": "bf6aca4339c9",
+  "content_sha256": "65a86bd4abd449e12576646accb83bb250e206f387bc476f2770ca4daf2cc10a"
+ },
+ "kn-produce-SAVE-2017Q4-mid": {
+  "split": "bench",
+  "case": "SAVE-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "539adf1d496c",
+  "gold_fingerprint": "2e62fe829636",
+  "content_sha256": "aa5a902fb250acf9fa262dd94e9cae3a4d12a276ca03d7586055c805e02da610"
  },
  "kn-produce-SAVE-2018Q2": {
   "split": "bench",
@@ -2923,9 +5833,27 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "1f45a6321150",
-  "gold_fingerprint": "858f7cfb37ee",
-  "content_sha256": "9a19671cf3a3c498064f50550ad3e96bfaa1721de3c1ef1fcf990da9ce0f331c"
+  "fingerprint": "a5d7dd40db46",
+  "gold_fingerprint": "65800461514d",
+  "content_sha256": "74d18905b361a09669514a319e98a095fbd1b4eb797796d7decf286e99f58bde"
+ },
+ "kn-produce-SAVE-2018Q2-mid": {
+  "split": "bench",
+  "case": "SAVE-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "18e303f84590",
+  "gold_fingerprint": "65800461514d",
+  "content_sha256": "f1425218f998ebf2d0c6e6f58beaebcca0bee0cdf50ea757c38e3f849a0b443a"
  },
  "kn-produce-SAVE-2018Q4": {
   "split": "bench",
@@ -2941,9 +5869,27 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "d016988f60c3",
-  "gold_fingerprint": "0c0c7ced0214",
-  "content_sha256": "cb91c6652fa629ea7ad8323a247bb7dc451194da7693ddc3af4a3a1fa7e69cbe"
+  "fingerprint": "d37f31b6d5a6",
+  "gold_fingerprint": "3f657ad656ad",
+  "content_sha256": "c10134281268b511de62beb2075689017bcdcca3dd2246c5f12a0bf9d4404756"
+ },
+ "kn-produce-SAVE-2018Q4-mid": {
+  "split": "bench",
+  "case": "SAVE-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "DAL",
+   "SAVE",
+   "M",
+   "DDS"
+  ],
+  "fingerprint": "03e6d82b4c39",
+  "gold_fingerprint": "3f657ad656ad",
+  "content_sha256": "509642cb27798c26aabc8e9c46b7799ee12fc2f881796c1bd7b0c599ea4ed97c"
  },
  "kn-produce-TJX_MARMAXX-FY2017Q3": {
   "split": "train",
@@ -2963,9 +5909,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "509cacef09ee",
-  "gold_fingerprint": "f02e6654101f",
-  "content_sha256": "ab03d14b49fdd763dcd8dc40350d9bf217a3d15b9a30c78ffa090a33fa1f5075"
+  "fingerprint": "42fa6d5194b3",
+  "gold_fingerprint": "4a71c9e475b5",
+  "content_sha256": "a9c6a1b99f89e6b11a455422a4c2aa9b339b881beaf09e2fb909b7323d8748bb"
+ },
+ "kn-produce-TJX_MARMAXX-FY2017Q3-mid": {
+  "split": "train",
+  "case": "TJX_MARMAXX-FY2017Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "90a38363eb5c",
+  "gold_fingerprint": "68b2523c908b",
+  "content_sha256": "476f26917a4f12f7c6121e4ef1bed73f5b9e0b7ab94986ba5e450ef3b75dffa4"
  },
  "kn-produce-TJX_MARMAXX-FY2018Q1": {
   "split": "train",
@@ -2985,9 +5953,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "9821070cf3c0",
-  "gold_fingerprint": "0ba78de83d2c",
-  "content_sha256": "1fa1a7b8e374c892a09dc67ae249b86f11d42c1cdb969e9f34e8da9ee0b3d40d"
+  "fingerprint": "67bc86b4b103",
+  "gold_fingerprint": "7b162d218002",
+  "content_sha256": "2519d0ead92e9a13ee81ea69fccda5765c1f227b6654a401293151ce16d363c3"
+ },
+ "kn-produce-TJX_MARMAXX-FY2018Q1-mid": {
+  "split": "train",
+  "case": "TJX_MARMAXX-FY2018Q1-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "001bf41c9e4e",
+  "gold_fingerprint": "16fdec3fd22e",
+  "content_sha256": "c23f0ae3fb29133d134c5d87e52529fbe6572ee1dc2cf6e569a91044653f601a"
  },
  "kn-produce-TJX_MARMAXX-FY2018Q3": {
   "split": "train",
@@ -3007,9 +5997,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "238f2123a9ad",
-  "gold_fingerprint": "0cca9e6055a3",
-  "content_sha256": "6ef908939af6bb27885e833de42902ca5af7bd8e9122db0242aebf5768e9d644"
+  "fingerprint": "11ad92353ddc",
+  "gold_fingerprint": "9e7137a51d1d",
+  "content_sha256": "3d2f703cce22726762445e0b56be0d60c11e55a666ab310cd6e3f8e9d675f050"
+ },
+ "kn-produce-TJX_MARMAXX-FY2018Q3-mid": {
+  "split": "train",
+  "case": "TJX_MARMAXX-FY2018Q3-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "44c2c3af3bfe",
+  "gold_fingerprint": "9e7137a51d1d",
+  "content_sha256": "c272d1ab55aa86b15a69925af787c0d2c2d9e0f59144ce9d125571e057045874"
  },
  "kn-produce-UAL-2017Q4": {
   "split": "train",
@@ -3029,9 +6041,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "45387976bb85",
-  "gold_fingerprint": "6f7676d61913",
-  "content_sha256": "5f8d47e1591bcb7ec73c678a8345a2309d0b50d612b176fca31d18a80a71c07a"
+  "fingerprint": "1fd2102ebed8",
+  "gold_fingerprint": "27d997ab4ec0",
+  "content_sha256": "484d52602e4804b3b23bdea33e0786cc9bc6b7e58d787bbeefc1190ae122eb3a"
+ },
+ "kn-produce-UAL-2017Q4-mid": {
+  "split": "train",
+  "case": "UAL-2017Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "e62507f19f52",
+  "gold_fingerprint": "197487e94d37",
+  "content_sha256": "447a260893e6566943cd91003a365f8376a43b7726d26b012f2fab1999ca0ba1"
  },
  "kn-produce-UAL-2018Q2": {
   "split": "train",
@@ -3051,9 +6085,31 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "7c93c0125ae5",
-  "gold_fingerprint": "15313ec04de7",
-  "content_sha256": "e255a21f3e49db6702daaeb5c126ca9111c29259565dc0f82339b032f233d275"
+  "fingerprint": "6ee6eaeb04cd",
+  "gold_fingerprint": "2fe380d80d59",
+  "content_sha256": "3cbf72c293a69287c9af0af6710c1c934a06283a28f500229940a58b2e4d8909"
+ },
+ "kn-produce-UAL-2018Q2-mid": {
+  "split": "train",
+  "case": "UAL-2018Q2-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "ca67cae74cce",
+  "gold_fingerprint": "2fe380d80d59",
+  "content_sha256": "8d05b8620b877c492f2742010abb996cc8734cd6c11bbc1eb82ab9034bda531a"
  },
  "kn-produce-UAL-2018Q4": {
   "split": "train",
@@ -3073,8 +6129,30 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "787893be4899",
-  "gold_fingerprint": "d0857f693e26",
-  "content_sha256": "2fe002afd72bd77d12201ff8211f76f260de70db5aea2059304febdb68e48487"
+  "fingerprint": "91991e98da05",
+  "gold_fingerprint": "66572e16be0f",
+  "content_sha256": "3cfdcc1340c852cba85808b63c2c058718a762e40d9db7be3e259332ded1c0f1"
+ },
+ "kn-produce-UAL-2018Q4-mid": {
+  "split": "train",
+  "case": "UAL-2018Q4-mid",
+  "role": "quant_researcher",
+  "workflow": "kpi_nowcast",
+  "mode": "produce",
+  "world": "systematic_consumer",
+  "status": "graded",
+  "companies": [
+   "AAL",
+   "ALGT",
+   "HA",
+   "LUV",
+   "UAL",
+   "JWN",
+   "ROST",
+   "TJX"
+  ],
+  "fingerprint": "5c328682980f",
+  "gold_fingerprint": "66572e16be0f",
+  "content_sha256": "369a1b338ed2aa6ae3a6da14c9d32b6aa7862551a6de0590c33c9d809a3658dd"
  }
 }

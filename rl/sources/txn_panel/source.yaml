@@ -30,6 +30,12 @@ annotations:
   data_artifacts.yaml: real data breaks in the panel (grader-only)
   company_facts.yaml: reporting-basis and structural facts per KPI series (grader-only)
 
+public_filings:
+  statement_facts: raw/statement_facts.csv.gz   # income statements as filed in 10-Qs and 10-Ks (SEC XBRL)
+  earnings_releases: raw/earnings_releases.csv  # every 8-K under Item 2.02 (results of operations), from SEC submissions
+  release_matches: raw/release_matches.csv      # filed figures found in an earlier earnings release: when each was first public
+  licence: SEC EDGAR filings are US government public records
+
 grader_only:
   kpi_facts.csv: KPI actuals per filing, from SEC XBRL (build/sec_xbrl/)
   kpi_quarterly.csv: first-reported and restated value per quarter

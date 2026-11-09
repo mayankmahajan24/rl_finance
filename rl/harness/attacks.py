@@ -170,7 +170,7 @@ class KpiNowcast(Format):
     prose = "output/answer.md"
 
     def forecast(self, app, meta, point, low, high, level=0.95, text="Estimate below."):
-        fc = {"target_period": meta["meta"]["target_period"].replace(" ", ""), "unit": "USD millions",
+        fc = {"target_period": meta["meta"]["target_period"].replace(" ", ""), "unit": "$ millions",
               "point": point, "low": low, "high": high, "interval_level": level, "in_sample": [],
               "vs_consensus": "no_consensus"}
         put(app / "output/answer.md", kpi_answer(fc, text))

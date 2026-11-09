@@ -19,7 +19,7 @@ Rubric (pass if...):
 - C1: States the metric being nowcast, the target period, the point estimate, the range, the units and the implied year-on-year growth (against the same quarter last year on a like-for-like basis) within the first screen of text (roughly the first 15 lines).
 - C2: Explains the method and the view in plain language; any statistical term used (R², MAPE, regression, standard deviation, confidence interval) is explained in words or avoided.
 - C3: Caveats are specific to this case: names the weakest assumption and what would make the estimate wrong.
-- C4: Does not explain why the metric was chosen over other lines (that belongs in the methods note); naming the metric is enough.
+- C4: Is succinct: holds only what an investor needs to judge the estimate and how far to trust it. Fail if it explains why the metric was chosen over other lines, or carries data-cleaning or modelling detail that belongs in the methods note (e.g. anomaly thresholds, imputation steps, lag tests, coefficient tables, alternative models tried). Naming the metric and describing the method in a few plain sentences is enough.
 - C5: If the task provided consensus: compares with it and states the implied beat/miss with a confidence level. Mark na when the task provided no consensus.
 
 ## Methods note
@@ -46,7 +46,7 @@ Rubric (pass if...):
 - C17: Forecasts with a statistical model fitted to history (e.g. a regression of the metric, or its growth, on variables derived from the alternative data), not a hand-picked ratio, growth rate or judgment adjustment alone.
 - C18: The model's variables are in units with a direct business meaning (dollars, transaction counts, year-on-year or quarter-on-quarter percentage growth, a ratio of reported figures), so each coefficient can be read in those terms (e.g. "1 point of card-spend growth adds 0.7 points of sales growth"). Fail when the dependent or an explanatory variable is a transformation with no such meaning, such as the log of sales over prior-year sales (a numerical approximation to growth, not a business quantity), even if the note converts its coefficients back into percentage terms.
 - C19: Every explanatory variable measures the company's own activity (the tickers the task lists for it, or a reported line of its own) or has a stated, direct business tie to the metric. Fail if the model uses another company's or a sector's data as a predictor because it correlates with the metric, without such a tie; using peers only to diagnose a data problem is fine.
-- C20: Every model parameter that was set rather than fitted (a weight, a threshold, a window length, a fixed coefficient) is either estimated from the data or backed with stated evidence (e.g. a share of sales the company reports). Fail if a set value has no source or rests on a rough guess (e.g. "0.15 is a rough share of sales").
+- C20: Every hardcoded number (one set rather than fitted or computed in the analysis: a weight, a threshold, a window length, a fixed coefficient, or an outside fact such as a share of sales or a store count), wherever either document uses it, is either estimated from the data or cited in the methods note: its source (a named filing or document, or a stated calculation on the attached files) and the period it covers. Fail if a hardcoded number has no source, gives no period, or rests on a rough guess (e.g. "0.15 is roughly Bloomingdale's share of sales", with no source or years).
 - C21: Tests at least one lead or lag between the alternative data and the reported quarter (e.g. bookings made before the flight, revenue recognised later), and states which alignment it uses and why.
 - C22: If grader_facts.reporting_basis_and_structural lists an event that makes earlier quarters unlike the target quarter (an acquisition, store closures, a one-off, a disruption), excludes those quarters from fitting, adds a term for them, adjusts them, or shows they don't distort the fit. Mark na when none is listed.
 
@@ -74,7 +74,7 @@ Rubric (pass if...):
 
 - C32: The brief agrees with the methods note: its numbers, method and view match the note, and it claims no more than the note supports (e.g. it doesn't present the alternative data as driving the estimate when the note shows its terms aren't significant).
 - C33: Every number in either document that also appears in forecast_json (point, low, high, interval level) matches it.
-- C34: Within a bullet, sentence or table, figures of the same kind use the same unit and scale (not "$5,550m" next to "$5.3bn").
+- C34: Units and precision are conventional and consistent. Dollar figures are written with "$" ($5,404.3m, $5.4bn), not as "USD millions" or "USD 5,404". Within a bullet, sentence or table, figures of the same kind use the same unit and scale (not "$5,550m" next to "$5.3bn"). Across each document, dollar figures with decimals and percentages are given to one decimal place, not a mix of precisions (not "$5,425m" beside "$5,404.27m", or "0.39%" beside "2.1%").
 
 ### Sound claims
 

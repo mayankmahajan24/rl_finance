@@ -21,7 +21,7 @@ def main():
     ap.add_argument('--params', required=True)
     p = json.loads(Path(ap.parse_args().params).read_text())
     rows = [r for r in csv.DictReader((APP / 'data' / 'actuals.csv').open())
-            if not r['split'] and r['unit'] == 'USD millions']
+            if not r['split'] and r['unit'] == '$ millions']
     last = max(r['period_end'] for r in rows)
     top = [r for r in rows if r['period_end'] == last and ('revenue' in r['line'].lower() or 'sales' in r['line'].lower())]
     metric = max(top or [r for r in rows if r['period_end'] == last], key=lambda r: float(r['value']))['line']
@@ -36,7 +36,7 @@ def main():
         return next(x for x in ends if abs((date.fromisoformat(x) - target).days) <= 10)
 
     point = latest[ends[-1]] * first[year_ago(p['target_end'])] / first[year_ago(ends[-1])]
-    fc = {'target_period': p['target_period'], 'metric': metric, 'unit': 'USD millions', 'point': round(point, 3),
+    fc = {'target_period': p['target_period'], 'metric': metric, 'unit': '$ millions', 'point': round(point, 3),
           'low': round(point * 0.9, 3), 'high': round(point * 1.1, 3), 'interval_level': 0.95,
           'metric_history': [{'period_end': e, 'value': latest[e]} for e in ends[-4:]],
           'in_sample': [], 'vs_consensus': 'no_consensus'}

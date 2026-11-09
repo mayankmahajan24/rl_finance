@@ -25,8 +25,9 @@ reward: >-
 rubric_visibility: partial  # the instruction states the fund's write-up conventions (headline estimate, range
                             # and units first, with Y/Y growth, in a plain-language brief; a methods note that states what
                             # was modelled on what, coefficients and significance; walk-forward error next to a simple
-                            # benchmark; the brief agrees with the note and leaves the metric choice to it; low <= point <= high)
-                            # but not the judgment items (C3, C6-C15, C17-C22, C24-C29, C31, C34-C38): models are graded on whether
+                            # benchmark; the brief agrees with the note, is succinct and leaves the metric choice and modelling
+                            # detail to it; dollar figures as $m/$bn, to one decimal place like percentages; low <= point <= high)
+                            # but not the judgment items (C3, C6-C15, C17-C22, C24-C29, C31, C35-C38; C34 only in part): models are graded on whether
                             # they do what a careful analyst would, unprompted. Deliberate.
 judge:                   # the write-up judge (judge.md); pinned, part of the instrument (families/_shared/judge.py)
   model: claude-sonnet-5-5

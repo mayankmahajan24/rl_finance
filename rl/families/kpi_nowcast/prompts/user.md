@@ -1,7 +1,7 @@
 Work out which of {company}'s reported metrics the transaction data can track most usefully, then nowcast it.
 
 Attached:
-- `sensor_panel.csv`: daily transaction counts (`ct`) and dollar amounts (`amt`) by ticker and data source, through {as_of}. {company} appears as {tickers}.
+- `transaction_panel.csv`: daily transaction counts (`ct`) and dollar amounts (`amt`) by ticker and data source, through {as_of}. {company} appears as {tickers}.
 - `data_brief.md`: a description of the data and its known issues.
 - `actuals.csv`: {company}'s reported income statement ({industry}, {fiscal_note}) from our data feed: every line, with its segment, product, geography or sales-channel splits where the company reports them (`split`). It holds every value reported on or before {as_of}, through {prior}, including figures re-reported in later filings, with the date each was reported. `report` says whether a row is the earliest filing of that line and quarter in the feed or a later one. `q4_derived_from_annual` marks a fourth quarter computed as the full year minus the first nine months; per-share and share-count lines are not derived that way, so their fourth quarter is missing unless the filing reported it. Line names are as the company labelled them and can change between filings. The feed begins with filings from early 2014, so earlier quarters show the date of a later filing, not their original report.
 

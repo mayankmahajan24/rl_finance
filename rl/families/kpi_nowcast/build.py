@@ -1,7 +1,7 @@
-"""Build the kpi_nowcast tasks: nowcast a company's quarterly KPI from transaction sensors.
+"""Build the kpi_nowcast tasks: nowcast a company's quarterly KPI from transaction data.
 
 One agent run per task. The agent gets a sandbox with code execution (no internet) and files:
-  sensor_panel.csv   every sensor ticker of the companies in the case's split, truncated at the as-of date
+  transaction_panel.csv  every panel ticker of the companies in the case's split, truncated at the as-of date
   actuals.csv        every income-statement line the company reported, with its segment, product,
                      geography and sales-channel splits: only values filed on or before the as-of
                      date, including restated comparatives, so the agent sees what an analyst saw
@@ -92,6 +92,7 @@ REFERENCE = HERE / "solutions" / "reference"
 # fiscal quarter that ends nearest each anchor.
 CALENDAR_TARGETS = ["2017-12-31", "2018-06-30", "2018-12-31"]
 FISCAL_ANCHORS = ["2017-10-28", "2018-05-05", "2018-11-03"]
+RELEASES = panel.HERE / "raw" / "earnings_releases.csv"   # 8-K Item 2.02 dates (build/sec_xbrl/fetch_releases.py)
 
 # Disguised variants: statement labels that name a company, its brands or its segments, and their stand-ins.
 # Longest first, so "Alaska Mainline" is replaced before "Alaska".
@@ -313,6 +314,11 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
     for r in read_csv(panel.STATEMENTS):
         statements[int(r["cik"])].append(r)
     quarterly = {(r["series"], r["period_end"]): r for r in read_csv(panel.GRADER_ONLY / "kpi_quarterly.csv")}
+    releases = defaultdict(list)
+    for r in read_csv(RELEASES):
+        releases[int(r["cik"])].append(r["filed"])
+    panel_end = max(r["date"] for r in rows_all)
+    q_first_filed = lambda sid, end: quarterly[(sid, end)]["first_filed"]
     brief = panel.BRIEF.read_text()
     system_t = (PROMPTS / "system.md").read_text().strip()
     user_t = (PROMPTS / "user.md").read_text().strip()
@@ -333,12 +339,18 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
             targets = [e for e in CALENDAR_TARGETS if e in ends]
         else:
             targets = [min(ends, key=lambda e: abs((d(e) - d(a)).days)) for a in FISCAL_ANCHORS]
+        ciks = sorted({c["cik"] for v in s["variants"] for c in v})
+        assert len(ciks) == 1, s["id"]
         for target_end in targets:
             label = quarter_label(s, target_end)
             key = f"{s['id']}-{label.replace(' ', '')}"
             if only and key not in only:
                 continue
-            as_of = target_end
+            # the task runs on the last day before the target quarter's results were first public (its first
+            # earnings release after quarter end), or on the panel's last day if that comes first
+            released = min(r for r in releases[ciks[0]] if r > target_end)
+            assert released <= q_first_filed(s["id"], target_end), (key, released)
+            as_of = min(str(d(released) - timedelta(days=1)), panel_end)
             q = quarterly[(s["id"], target_end)]
             actual = float(q["first_value"])
             feed = []
@@ -353,8 +365,6 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                                  "q4_derived_from_annual": r["derived"]})
                     seen_periods.add(r["end"])
             naive = naive_forecast(feed, target_end)
-            ciks = sorted({c["cik"] for v in s["variants"] for c in v})
-            assert len(ciks) == 1, s["id"]
             lines = statement_feed(statements[ciks[0]], as_of, target_end)
             # the metric gate: the KPI's last four reported quarters, every version the feed holds
             history = defaultdict(list)
@@ -388,7 +398,7 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                         if variant == "anon":
                             rr["amt"] = f"{float(r['amt']) * factor[r['ticker']]:.2f}"
                     rows.append(rr)
-                files["sensor_panel.csv"] = to_csv(rows, ["date", "ct", "amt", "ticker", "industry", "source_id"])
+                files["transaction_panel.csv"] = to_csv(rows, ["date", "ct", "amt", "ticker", "industry", "source_id"])
                 lines_out = [dict(r, line=disguise(r["line"]) if anon else r["line"],
                                   split=disguise(r["split"]) if anon else r["split"],
                                   value=round(r["value"] * (f if r["unit"] != "shares" else 1.0), 4),
@@ -418,7 +428,7 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                         "scale_factor": f, "series": s["id"], "kpi": s["kpi"],
                         "facts": {"correct_metric": s["kpi"] + (f" (shown as: {disguise(s['kpi'])})" if anon else ""),
                                   "reporting_basis_and_structural": known_facts(s["id"], as_of) + basis,
-                                  "sensor_data_quality_auto": dq_shown}}
+                                  "alt_data_quality_auto": dq_shown}}
                 fp = fingerprint(system, user, *[files[k] for k in sorted(files)])
                 meta = {
                     "id": task_id, "family": family_id, "case": key, "role": "quant_researcher",
@@ -440,7 +450,7 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                     "meta": {"series": s["id"], "company": company_id, "variant": variant, "as_of": as_of, "target_period": label,
                              "sensors": s["sensors"], "low_signal": LOW_SIGNAL.get(s["id"])},
                 }
-                data = {"sensor_panel.csv.gz": gzip.compress(files["sensor_panel.csv"].encode(), mtime=0),
+                data = {"transaction_panel.csv.gz": gzip.compress(files["transaction_panel.csv"].encode(), mtime=0),
                         "actuals.csv": files["actuals.csv"], "data_brief.md": files["data_brief.md"]}
                 prompt = {"system.md": system + "\n", "user.md": user + "\n",
                           "inputs.json": json.dumps(kw, indent=2, ensure_ascii=False) + "\n"}
@@ -450,7 +460,7 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                 built[task_id] = harbor.write(
                     TASKS / case_split / task_id, family=fam, builder="rl/families/kpi_nowcast/build.py",
                     instruction=instruction, metadata=meta,
-                    description=f"Choose and nowcast {company}'s {label} metric from transaction sensors",
+                    description=f"Choose and nowcast {company}'s {label} metric from transaction data",
                     keywords=["alt-data", "kpi-nowcast", variant], verifier="verify.py",
                     tests={"verify.py": HERE / "verifier" / "verify.py", "grader.py": HERE / "grader.py",
                            "judge.md": HERE / "judge.md",

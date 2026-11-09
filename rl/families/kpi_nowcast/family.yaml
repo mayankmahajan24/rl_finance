@@ -19,15 +19,17 @@ gold_file: gold.json
 reward: >-
   0 unless metric_history shows the task's metric (the gold KPI) was chosen; then skill_vs_naive clamped to
   [0, 1] (0 = no better than last year's seasonal step, 1 = exact; code), scaled by 0.5 + 0.5 x the
-  C1-C38 write-up score (LLM judge, over the brief and the methods note), so the write-up moves the reward by at most half and can't earn it
-  alone. Accuracy only when the judge can't run (details say so). Diagnostics: abs % error, coverage,
+  C1-C39 write-up score (LLM judge, over the brief and the methods note; 0 if a gate item fails: C33 brief contradicts
+  the note, C34 numbers don't match the forecast JSON or the walk-forward errors computed from it, C36 look-ahead; two code-checked items join
+  the score: brief <= 300 words, methods note <= 2,500, excluding tables, code and charts), so the
+  write-up moves the reward by at most half and can't earn it alone. Accuracy only when the judge can't run (details say so). Diagnostics: abs % error, coverage,
   interval score (code) and each rubric item
 rubric_visibility: partial  # the instruction states the fund's write-up conventions (headline estimate, range
                             # and units first, with Y/Y growth, in a plain-language brief; a methods note that states what
                             # was modelled on what, coefficients and significance; walk-forward error next to a simple
                             # benchmark; the brief agrees with the note, is succinct and leaves the metric choice and modelling
-                            # detail to it; dollar figures as $m/$bn, to one decimal place like percentages; low <= point <= high)
-                            # but not the judgment items (C3, C6-C15, C17-C22, C24-C29, C31, C35-C38; C34 only in part): models are graded on whether
+                            # detail to it; dollar figures as $m/$bn, to one decimal place like percentages; word limits; low <= point <= high)
+                            # but not the judgment items (C3, C6-C15, C17-C23, C25-C30, C32, C36-C39; C35 only in part): models are graded on whether
                             # they do what a careful analyst would, unprompted. Deliberate.
 judge:                   # the write-up judge (judge.md); pinned, part of the instrument (families/_shared/judge.py)
   model: claude-sonnet-5-5

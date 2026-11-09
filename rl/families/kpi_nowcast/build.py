@@ -274,7 +274,23 @@ def sensor_facts(panel: list[dict], tickers: list[str], as_of: str) -> list[str]
                     med = others[len(others) // 2]
                     if abs(v - med) > 0.25:
                         facts.append(f"{t} source {s}: spend changed {v:+.0%} {y0}->{y1} vs {med:+.0%} on the other sources (level shift / panel change)")
+    # days the business is known to be open but the data shows nothing: Thanksgiving, with no like day to impute from
+    for (t, src), series in sorted(by.items()):
+        gaps = [day for day in thanksgivings(first, as_of) if not series.get(day)]
+        if gaps:
+            facts.append(f"{t} source {src}: no data on Thanksgiving ({', '.join(gaps)}), a day the business is open")
     return facts
+
+
+def thanksgivings(first: str, last: str) -> list[str]:
+    """US Thanksgiving (fourth Thursday of November) in [first, last]."""
+    out = []
+    for y in range(int(first[:4]), int(last[:4]) + 1):
+        nov1 = date(y, 11, 1)
+        day = str(nov1 + timedelta(days=(3 - nov1.weekday()) % 7 + 21))
+        if first <= day <= last:
+            out.append(day)
+    return out
 
 
 def naive_forecast(feed: list[dict], target_end: str) -> float | None:
@@ -387,6 +403,10 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
             first = next(r for r in kpi_rows if r["end"] == target_end)
             first_public, actual, actual_doc = first["public"]
             assert first_public > as_of, (key, first_public, as_of)
+            first_reported = {}            # each earlier quarter as first made public, to check walk-forward errors
+            for r in kpi_rows:
+                if r["end"] < target_end:
+                    first_reported.setdefault(r["end"], r["public"][1])
             feed = []
             seen_periods = set()
             for r in kpi_rows:
@@ -460,6 +480,7 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                         "actual_source": q["first_source"], "actual_q4_derived": q["first_derived"] == "True",
                         "naive_forecast": round(naive * f, 3) if naive else None,
                         "metric_history": {e: [round(v * f, 3) for v in vs] for e, vs in history.items()},
+                        "first_reported": {e: round(v * f, 3) for e, v in first_reported.items()},
                         "consensus": None, "consensus_note": "not compiled for v1",
                         "scale_factor": f, "series": s["id"], "kpi": s["kpi"],
                         "facts": {"correct_metric": s["kpi"] + (f" (shown as: {disguise(s['kpi'])})" if anon else ""),
@@ -477,7 +498,7 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                     "output_schema": "families/kpi_nowcast/schema.json",
                     "grader": {"type": "kpi_nowcast", "module": "families/kpi_nowcast/grader.py",
                                "accuracy": "programmatic (metric gate on gold.metric_history, then forecast vs gold.actual)",
-                               "writeup": "LLM judge rubric C1-C38, over the brief and the methods note (families/kpi_nowcast/judge.md)"},
+                               "writeup": "LLM judge rubric C1-C39, over the brief and the methods note (families/kpi_nowcast/judge.md)"},
                     "sources": ["rl/sources/txn_panel/raw/sensor_panel.csv.gz", "rl/sources/txn_panel/raw/statement_facts.csv.gz",
                                 "rl/sources/txn_panel/grader_only/kpi_facts.csv",
                                 q["first_source"]],

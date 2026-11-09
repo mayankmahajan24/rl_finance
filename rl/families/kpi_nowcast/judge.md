@@ -74,7 +74,7 @@ Rubric (pass if...):
 
 - C32: The brief agrees with the methods note: its numbers, method and view match the note, and it claims no more than the note supports (e.g. it doesn't present the alternative data as driving the estimate when the note shows its terms aren't significant).
 - C33: Every number in either document that also appears in forecast_json (point, low, high, interval level) matches it.
-- C34: Units and precision are conventional and consistent. Dollar figures are written with "$" ($5,404.3m, $5.4bn), not as "USD millions" or "USD 5,404". Within a bullet, sentence or table, figures of the same kind use the same unit and scale (not "$5,550m" next to "$5.3bn"). Across each document, dollar figures with decimals and percentages are given to one decimal place, not a mix of precisions (not "$5,425m" beside "$5,404.27m", or "0.39%" beside "2.1%").
+- C34: Units and precision are conventional and consistent. Dollar figures are written with "$" ($5,404.3m, $5.4bn), not as "USD millions" or "USD 5,404". Within a bullet, sentence or table, figures of the same kind use the same unit and scale (not "$5,550m" next to "$5.3bn"). Across each document, dollar figures with decimals and percentages are given to one decimal place, not a mix of precisions (not "$5,425m" beside "$5,404.27m", or "0.39%" beside "2.1%"). Every figure, table and chart axis names the unit it is actually in, the same way in the text and the charts: a log difference is not labelled "%" or "pts", and a chart of the model's variables uses the units the note gives them.
 
 ### Sound claims
 

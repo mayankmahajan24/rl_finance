@@ -1,7 +1,7 @@
 id: kpi_nowcast
 task_prefix: kn
 description: Choose the company metric the transaction-sensor panel tracks best and nowcast it from the panel and the filed income statement
-version: 4.0.0          # bump when the family's tasks change in a way results can't be compared across
+version: 0.1.0          # bump when the family's tasks change in a way results can't be compared across
 authors:
   - name: Mayank Mahajan
 role: [quant_researcher]

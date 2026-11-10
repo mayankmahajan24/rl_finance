@@ -1,7 +1,7 @@
 id: growth_thesis
 task_prefix: thesis
 description: 'Artifact-sensitive thesis: fastest-growing airline'
-version: 2.1.0          # bump when the family's tasks change in a way results can't be compared across
+version: 0.1.0          # bump when the family's tasks change in a way results can't be compared across
 authors:
   - name: Mayank Mahajan
 role: [quant_researcher]

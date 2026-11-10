@@ -506,7 +506,7 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                              "before that quarter's report was found, with the provider and publication date. Quarters without one are left out."
                              .replace("{company}", company) if cons_hist else "")
                 gap_rule = ("State the gap as the difference between the two estimates' year-on-year growth, both measured "
-                            f"against last year's reported figure for the quarter, in percentage points.")
+                            "against last year's reported figure for the quarter, in percentage points.")
                 bench_text = (f"Compare your estimate with the analyst consensus for {label} {c['line']}, published by "
                               f"{c['provider']} on {c['published']}: ${cons_value:,.1f}m. {gap_rule} Give your call on the "
                               f"quarter against consensus, beat, miss or in line, and how confident you are, and in your "

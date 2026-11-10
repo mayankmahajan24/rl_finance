@@ -2,7 +2,7 @@
 
 Two parts from one agent's output:
   accuracy  programmatic: the forecast JSON block (end of the brief, answer.md) vs the task's tests/gold.json
-  writeup   LLM judge: rubric C1-C39 (judge.md), pass/fail/na per item, over the brief and the
+  writeup   LLM judge: rubric C1-C42 (judge.md), pass/fail/na per item, over the brief and the
             methods note (methods.md); each item grades the brief, the note, or both
 
 The agent chooses the metric to nowcast, and each task has one right metric (gold: the series' KPI).
@@ -15,7 +15,7 @@ writeup_score is the share of applicable items passed, and 0 if a gate item fail
 the brief contradicting the note, numbers that don't match the forecast JSON). The judge gets the
 walk-forward errors computed in code from the JSON's in_sample, to check the errors the documents
 report; with no chart saved, the item that requires the year-on-year chart fails without the judge.
-Two code-checked items join the score: the brief and the methods note within their stated word limits.
+A brief or methods note over its stated word limit halves writeup_score (checked in code).
 When the judge can't run, reward is accuracy_reward alone and the verifier's details say so.
 Everything else is a diagnostic. A response without a valid forecast JSON gets
 schema_ok = 0, reward 0 and no other accuracy metrics (no answer is not a wrong number).
@@ -29,7 +29,7 @@ import pathlib
 import re
 
 HERE = pathlib.Path(__file__).resolve().parent
-ITEMS = [f"C{i}" for i in range(1, 40)]
+ITEMS = [f"C{i}" for i in range(1, 43)]
 MATCH = 0.005          # a metric_history value matches a reported value within 0.5%
 INTERVAL_LEVEL = 0.95
 MAX_FIGURES = 4
@@ -38,8 +38,8 @@ PNG = b"\x89PNG\r\n\x1a\n"
 JSON_BLOCK = re.compile(r"```json\s*(\{.*?\})\s*```", re.S)
 REQUIRED = ["target_period", "point", "low", "high", "interval_level", "in_sample"]
 WORD_LIMITS = {"brief": 300, "methods": 2500}   # stated in the prompt; checked here, not by the judge
-GATES = ["C33", "C34", "C36"]   # brief agrees with the note, numbers match the JSON, no look-ahead
-CHART_ITEM = "C31"               # requires the year-on-year chart of model vs actuals
+GATES = ["C35", "C36", "C38"]   # brief agrees with the note, numbers match the JSON, no look-ahead
+CHART_ITEM = "C33"               # requires the year-on-year chart of model vs actuals
 
 
 def parse_response(text: str) -> tuple[dict | None, str, str | None]:
@@ -178,20 +178,21 @@ def words(text: str) -> int:
 
 
 def grade_writeup(verdicts: dict, n_figures: int | None = None, docs: dict | None = None) -> dict:
-    """docs: {"brief": text, "methods": text}; each over its WORD_LIMITS fails one code-checked item
-    (len_brief, len_methods) that counts in writeup_score like a rubric item."""
+    """docs: {"brief": text, "methods": text}; a document over its WORD_LIMITS halves writeup_score
+    (len_brief, len_methods record pass/fail as diagnostics)."""
     verdicts = dict(verdicts)
     if n_figures == 0:
         verdicts[CHART_ITEM] = {"verdict": "fail", "reason": "no chart saved"}
-    for name, text in (docs or {}).items():
-        verdicts[f"len_{name}"] = {"verdict": "pass" if words(text) <= WORD_LIMITS[name] else "fail"}
     applicable = [i for i in verdicts if verdicts[i]["verdict"] != "na"]
     passed = [i for i in applicable if verdicts[i]["verdict"] == "pass"]
     gated = [i for i in GATES if verdicts[i]["verdict"] == "fail"]
-    out = {"writeup_score": (0.0 if gated else round(len(passed) / len(applicable), 4)) if applicable else None,
+    over = [name for name, text in (docs or {}).items() if words(text) > WORD_LIMITS[name]]
+    score = (0.0 if gated else len(passed) / len(applicable) * (0.5 if over else 1.0)) if applicable else None
+    out = {"writeup_score": round(score, 4) if score is not None else None,
            "writeup_gate_failed": 1.0 if gated else 0.0}
     for name, text in (docs or {}).items():
         out[f"words_{name}"] = float(words(text))
+        out[f"w_len_{name}"] = 0.0 if name in over else 1.0
     for i in verdicts:
         v = verdicts[i]["verdict"]
         if v != "na":

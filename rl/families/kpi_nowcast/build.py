@@ -95,6 +95,7 @@ FISCAL_ANCHORS = ["2017-10-28", "2018-05-05", "2018-11-03"]
 CUTS = ["release", "mid"]   # dated the day before the results came out, or halfway through the quarter
 RELEASES = panel.HERE / "raw" / "earnings_releases.csv"   # 8-K Item 2.02 dates (build/sec_xbrl/fetch_releases.py)
 MATCHES = panel.HERE / "raw" / "release_matches.csv"      # filed figures found in an earlier release (match_releases.py)
+PRO_FORMA = panel.HERE / "annotations" / "pro_forma.csv"  # restated history a company published outside its filings (sources noted)
 CONSENSUS = panel.HERE / "annotations" / "consensus.csv"  # analyst consensus published before the release (sources noted)
 
 # Disguised variants: statement labels that name a company, its brands or its segments, and their stand-ins.
@@ -173,7 +174,7 @@ def restatement_facts(feed: list[dict], target_end: str) -> list[str]:
     lo, hi = min(restated.values()), max(restated.values())
     since = min(last[e][1] for e in restated)
     ly = [e for e in first if abs((d(e) - (d(target_end) - timedelta(days=364))).days) <= 10]
-    comparable = ("is already in the feed on the new basis" if ly and ly[0] in restated
+    comparable = ("is already in the feed on the new basis" if ly and (ly[0] in restated or last[ly[0]][1] >= since)
                   else "is NOT yet available on the new basis (only its original figure is in the feed)")
     return [f"Reporting basis changed: {len(restated)} earlier quarter(s) were re-reported in filings from {since} on, "
             f"by {lo:+.1%} to {hi:+.1%} (e.g. a new accounting standard or a segment redefinition). The target quarter "
@@ -263,18 +264,25 @@ def sensor_facts(panel: list[dict], tickers: list[str], as_of: str) -> list[str]
             facts.append(f"{t} source {src}: {spikes} days more than 4x above or below the trailing 4-week median")
         for day, v in series.items():
             yearly[(t, src)][day[:4]] += v
-    # level shifts: one source's year-over-year change departs from the other sources' median by >25 points
+    # level shifts: a change in a source's drift. Its yearly spend growth minus the median of the ticker's other
+    # sources (its gap) moving by more than 10 points from one year to the next; a steady gap is drift, not a shift.
+    # Full calendar years only, so a partial last year doesn't distort the growth.
+    full = {y for y in {day[:4] for s in by.values() for day in s} if f"{y}-01-01" >= first and f"{y}-12-31" <= as_of}
     for t in tickers:
         srcs = [s for (tt, s) in yearly if tt == t]
-        years = sorted({y for s in srcs for y in yearly[(t, s)]})
+        years = sorted(y for y in {y for s in srcs for y in yearly[(t, s)]} if y in full)
+        gaps = {}
         for y0, y1 in zip(years, years[1:]):
             g = {s: yearly[(t, s)].get(y1, 0) / yearly[(t, s)][y0] - 1 for s in srcs if yearly[(t, s)].get(y0)}
             for s, v in g.items():
                 others = sorted(x for k, x in g.items() if k != s)
                 if len(others) >= 2:
-                    med = others[len(others) // 2]
-                    if abs(v - med) > 0.25:
-                        facts.append(f"{t} source {s}: spend changed {v:+.0%} {y0}->{y1} vs {med:+.0%} on the other sources (level shift / panel change)")
+                    med = others[len(others) // 2] if len(others) % 2 else sum(others[len(others) // 2 - 1:len(others) // 2 + 1]) / 2
+                    gap = v - med
+                    if (s, y0) in gaps and abs(gap - gaps[(s, y0)]) > 0.10:
+                        facts.append(f"{t} source {s}: spend growth {v:+.0%} {y0}->{y1} vs {med:+.0%} on the other sources, "
+                                     f"a gap of {gap:+.0%} after {gaps[(s, y0)]:+.0%} the year before (level shift / panel change)")
+                    gaps[(s, y1)] = gap
     # days the business is known to be open but the data shows nothing: Thanksgiving, with no like day to impute from
     for (t, src), series in sorted(by.items()):
         gaps = [day for day in thanksgivings(first, as_of) if not series.get(day)]
@@ -349,7 +357,11 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
     panel_end = max(r["date"] for r in rows_all)
     q_first_filed = lambda sid, end: quarterly[(sid, end)]["first_filed"]
     matches = {(r["accession"], r["concept"], r["member"], r["end"]): r for r in read_csv(MATCHES)}
-    consensus = {(r["series"], r["target_end"]): r for r in read_csv(CONSENSUS)}
+    consensus_rows = read_csv(CONSENSUS)
+    consensus = {(r["series"], r["target_end"]): r for r in consensus_rows}
+    pro_forma = defaultdict(list)
+    for r in read_csv(PRO_FORMA):
+        pro_forma[r["series"]].append(r)
     brief = panel.BRIEF.read_text()
     system_t = (PROMPTS / "system.md").read_text().strip()
     user_t = (PROMPTS / "user.md").read_text().strip()
@@ -420,8 +432,20 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                                  "report": "first report" if r["end"] not in seen_periods else "later filing (comparative, may be restated)",
                                  "q4_derived_from_annual": r["derived"]})
                     seen_periods.add(r["end"])
-            naive = naive_forecast(feed, target_end)
             lines = statement_feed(statements[ciks[0]], as_of, target_end, matches)
+            # restated history the company published outside its filings (e.g. pro forma recasts for a new standard)
+            for r in pro_forma.get(s["id"], []):
+                if r["published"] <= as_of and r["period_end"] < target_end:
+                    feed.append({"period_start": r["period_start"], "period_end": r["period_end"],
+                                 "value_usd_m": float(r["value_musd"]), "reported_on": r["published"],
+                                 "report": "later filing (comparative, may be restated)", "q4_derived_from_annual": "False"})
+                    lines.append({"period_start": r["period_start"], "period_end": r["period_end"], "line": r["line"],
+                                  "split": "", "value": float(r["value_musd"]), "unit": "USD", "reported_on": r["published"],
+                                  "source": "pro forma recast", "report": "later filing (comparative, may be restated)",
+                                  "q4_derived_from_annual": "False"})
+            feed.sort(key=lambda r: (r["period_end"], r["reported_on"]))
+            lines.sort(key=lambda r: (r["line"], r["split"], r["period_end"], r["reported_on"]))
+            naive = naive_forecast(feed, target_end)
             # the metric gate: the KPI's last four reported quarters, every version the feed holds
             history = defaultdict(list)
             for r in feed:
@@ -472,14 +496,26 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                 if c and c["published"] > as_of:
                     c = None
                 cons_value = round(float(c["consensus_musd"]) * f, 1) if c else None
+                # every consensus for this series published by the as-of date, for the target and earlier quarters
+                cons_hist = [{"period_end": r["target_end"], "consensus": round(float(r["consensus_musd"]) * f, 1),
+                              "line": disguise(r["line"]) if anon else r["line"], "provider": r["provider"], "published": r["published"]}
+                             for r in consensus_rows if r["series"] == s["id"] and r["published"] <= as_of and r["target_end"] <= target_end]
+                if cons_hist:
+                    files["consensus.csv"] = to_csv(cons_hist, ["period_end", "consensus", "line", "provider", "published"])
+                cons_file = ("\n- `consensus.csv`: analyst consensus estimates ($ millions) for {company}'s quarters where one published "
+                             "before that quarter's report was found, with the provider and publication date. Quarters without one are left out."
+                             .replace("{company}", company) if cons_hist else "")
+                gap_rule = ("State the gap as the difference between the two estimates' year-on-year growth, both measured "
+                            f"against last year's reported figure for the quarter, in percentage points.")
                 bench_text = (f"Compare your estimate with the analyst consensus for {label} {c['line']}, published by "
-                              f"{c['provider']} on {c['published']}: ${cons_value:,.1f}m. Say whether you expect the reported "
-                              f"figure to beat or miss it, and how confident you are."
-                              if c else f"Compare your estimate with the naive benchmark's estimate for {label}.")
+                              f"{c['provider']} on {c['published']}: ${cons_value:,.1f}m. {gap_rule} Say whether you expect "
+                              f"the reported figure to beat or miss the consensus, and how confident you are, and in your "
+                              f"track record say how the gap compares with your usual walk-forward miss."
+                              if c else f"Compare your estimate with the naive benchmark's estimate for {label}. {gap_rule}")
                 cons_text = ("Set `vs_consensus` to `above` or `below`: whether you expect the reported figure to come in "
                              "above or below the consensus." if c
                              else "`vs_consensus` stays `no_consensus`, because no consensus estimate is provided.")
-                kw = dict(timing=timing.replace("{company}", company), consensus=cons_text, benchmark=bench_text,
+                kw = dict(timing=timing.replace("{company}", company), consensus=cons_text, benchmark=bench_text, consensus_file=cons_file,
                           walk_forward=walk, company=company, industry=INDUSTRY_LABEL["airlines" if s["calendar"] == "calendar" else "department stores"],
                           tickers=", ".join(tickers_shown), target=label, target_end=target_end,
                           as_of=as_of, first_quarter=quarter_label(s, first_quarter), prior=prior_label,
@@ -501,7 +537,8 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                         "scale_factor": f, "series": s["id"], "kpi": s["kpi"],
                         "facts": {"correct_metric": s["kpi"] + (f" (shown as: {disguise(s['kpi'])})" if anon else ""),
                                   "reporting_basis_and_structural": known_facts(s["id"], as_of) + basis,
-                                  "alt_data_quality_auto": dq_shown}}
+                                  "alt_data_quality_auto": dq_shown,
+                                  "consensus_provided_for": [r["period_end"] for r in cons_hist]}}
                 fp = fingerprint(system, user, *[files[k] for k in sorted(files)])
                 meta = {
                     "id": task_id, "family": family_id, "case": key, "role": "quant_researcher",
@@ -514,7 +551,7 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                     "output_schema": "families/kpi_nowcast/schema.json",
                     "grader": {"type": "kpi_nowcast", "module": "families/kpi_nowcast/grader.py",
                                "accuracy": "programmatic (metric gate on gold.metric_history, then forecast vs gold.actual)",
-                               "writeup": "LLM judge rubric C1-C39, over the brief and the methods note (families/kpi_nowcast/judge.md)"},
+                               "writeup": "LLM judge rubric C1-C42, over the brief and the methods note (families/kpi_nowcast/judge.md)"},
                     "sources": ["rl/sources/txn_panel/raw/sensor_panel.csv.gz", "rl/sources/txn_panel/raw/statement_facts.csv.gz",
                                 "rl/sources/txn_panel/grader_only/kpi_facts.csv",
                                 q["first_source"]],
@@ -525,6 +562,8 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                 }
                 data = {"transaction_panel.csv.gz": gzip.compress(files["transaction_panel.csv"].encode(), mtime=0),
                         "actuals.csv": files["actuals.csv"], "data_brief.md": files["data_brief.md"]}
+                if "consensus.csv" in files:
+                    data["consensus.csv"] = files["consensus.csv"]
                 prompt = {"system.md": system + "\n", "user.md": user + "\n",
                           "inputs.json": json.dumps(kw, indent=2, ensure_ascii=False) + "\n"}
                 instruction = f"{system}\n\n{user}\n\n{HARBOR_NOTE.format(as_of=as_of)}\n"

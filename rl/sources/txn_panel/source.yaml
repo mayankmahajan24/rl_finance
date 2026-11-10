@@ -36,8 +36,9 @@ public_filings:
   release_matches: raw/release_matches.csv      # filed figures found in an earlier earnings release: when each was first public
   licence: SEC EDGAR filings are US government public records
 
+pro_forma: annotations/pro_forma.csv  # restated quarters a company published outside its filings (Macy's FY2016-17 pro forma recast, 2018-05-16), with URL
 consensus: annotations/consensus.csv   # analyst revenue consensus (Zacks) in articles published before each release, with URL
-                                       # and date: 7 release-dated cases (M, JCP, KSS, ROST) where the consensus line is the KPI;
+                                       # and date: 39 quarters (M, JCP, KSS, ROST) where the consensus line is the KPI;
                                        # figures only, no article text; Zacks' terms on reuse not yet checked
 
 grader_only:

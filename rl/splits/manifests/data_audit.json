@@ -489,7 +489,7 @@
   ],
   "fingerprint": "5227c9315202",
   "gold_fingerprint": "ca76dd1afe23",
-  "content_sha256": "bb42d2c80ca5e9ba2c1dc2f994809b76a361e062a471a8d5e12e90a2b8ee6c84"
+  "content_sha256": "1460a1844b0f91f9428935bdb4655286a608f7ee87ac690ed10187947fb6cb55"
  },
  "audit-train-002": {
   "split": "train",
@@ -513,7 +513,7 @@
   ],
   "fingerprint": "434e3f1eb834",
   "gold_fingerprint": "06b3e919686c",
-  "content_sha256": "6763958f2ae03ebdd155d294691f0f83ca870e9744f29e2e8242e90c60a20d90"
+  "content_sha256": "6ed7e767bdce3b86b576ef4a7bb776951970bfc2ea7831eb5bb386abb316b9af"
  },
  "audit-train-003": {
   "split": "train",
@@ -537,7 +537,7 @@
   ],
   "fingerprint": "35b3cede7272",
   "gold_fingerprint": "7a2e01aef87d",
-  "content_sha256": "ea12925bfc0fa47e5ad8631e36d2ef3e4336bd577168af8909b75b95c7b269e4"
+  "content_sha256": "72fe9a2ebd38db49fec4a73212a60526bc7fbfc9db4d1362cd0136d8ca13c839"
  },
  "audit-train-control-01": {
   "split": "train",
@@ -561,6 +561,6 @@
   ],
   "fingerprint": "a98bf9a7490d",
   "gold_fingerprint": "1d0c65b3f113",
-  "content_sha256": "4f5f04648b2dd10247e544f04823806e124fa8e2119029d3393b7ef5ce161dce"
+  "content_sha256": "3f1145faeef3f6923107e5359343a89941ddb410928fce9bf712f1b8ef27c6d3"
  }
 }

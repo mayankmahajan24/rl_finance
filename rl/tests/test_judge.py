@@ -7,6 +7,8 @@ import contextlib
 import json
 from types import SimpleNamespace
 
+import anthropic
+import httpx
 import pytest
 
 import judge_stability
@@ -89,6 +91,15 @@ def test_votes_and_majority():
 def test_refusal_and_truncation_are_errors(stop):
     with pytest.raises(judge.JudgeError):
         judge.judge("g", "a", SCHEMA, CFG, FakeClient('{"ok": true}', stop=stop))
+
+
+def test_a_rejected_request_is_a_judge_error():
+    class Rejecting(FakeClient):
+        def stream(self, **req):
+            raise anthropic.BadRequestError("credit balance is too low", response=httpx.Response(
+                400, request=httpx.Request("POST", "https://api.anthropic.com/v1/messages")), body=None)
+    with pytest.raises(judge.JudgeError, match="credit balance"):
+        judge.judge("g", "a", SCHEMA, CFG, Rejecting())
 
 
 def test_overrides_are_recorded(tmp_path, monkeypatch):

@@ -43,12 +43,11 @@ def grade(text: str, facts: dict, material: dict[str, str]) -> tuple[dict, objec
     why = judge.unavailable()
     if why:
         return {}, why
-    import client
     parts = {'task': (TESTS / 'task_instruction.md').read_text(), 'grader_facts': json.dumps(facts, indent=1, default=str),
              **{k: v[:MAX_CHARS] for k, v in material.items()}, 'writeup': text[:MAX_CHARS]}
     try:
         votes, meta = judge.judge(rubric, '\n\n'.join(f'<{k}>\n{v}\n</{k}>' for k, v in parts.items()), schema(items))
-    except (judge.JudgeError, client.anthropic.APIError) as e:   # never cost the run its reward
+    except judge.JudgeError as e:   # never cost the run its reward
         return {}, f'not graded: write-up judge failed: {e}'
     verdicts = judge.majority(votes, 'verdict')
     return score(verdicts), {**meta, **{i: f"{v['verdict']}: {v['reason']}" for i, v in verdicts.items()}}

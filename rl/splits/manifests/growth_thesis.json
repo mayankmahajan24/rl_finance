@@ -13,9 +13,9 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "afc1a4e0f7b2",
-  "gold_fingerprint": "72502ef9d978",
-  "content_sha256": "9951fe06fd16ef2cd6c51c14ad811be366eda0ed44db0192f0ce8e9eb3522b5b"
+  "fingerprint": "e9dc6e08a43a",
+  "gold_fingerprint": "29f9df1eee9d",
+  "content_sha256": "b1dbef156755e9d9516d813067b04cda8c3947953687a9ba347859b9eeff7a48"
  },
  "thesis-bench-002": {
   "split": "bench",
@@ -31,9 +31,9 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "14874dfa14c4",
-  "gold_fingerprint": "2270cefe86de",
-  "content_sha256": "b2f6ded30b1be1f4bdf2ca53d9bbc38c2b4b015861d11a954276a3c68e20bf30"
+  "fingerprint": "f9d36f1b2a00",
+  "gold_fingerprint": "f66a81185cc8",
+  "content_sha256": "11f72e2d1e8815cb73c520f67441b5dd6f7e4914e013fff76372fe2fa526b2cb"
  },
  "thesis-bench-003": {
   "split": "bench",
@@ -49,9 +49,9 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "2affeb119e95",
-  "gold_fingerprint": "1bc2dd4833f9",
-  "content_sha256": "97f8794b8d341b3f0a1c3f28a37850c072d807a2768a7900e575c266c576ac78"
+  "fingerprint": "4768ee0e695f",
+  "gold_fingerprint": "54a28cce5cf6",
+  "content_sha256": "c0054d49751248ae70f7c96c5c54da2308e81b4569a688b7b1d8e933228a5bd1"
  },
  "thesis-bench-004": {
   "split": "bench",
@@ -67,9 +67,9 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "2bb7a3f1c877",
-  "gold_fingerprint": "7d114d28969c",
-  "content_sha256": "5240d74bd5df7593bb214ea49f9763251391cf3c61553f96e9ff2b35018477d2"
+  "fingerprint": "952e4de0a573",
+  "gold_fingerprint": "e701995108a5",
+  "content_sha256": "7be618c3d3974c709f4dd935717ca578f73c8cffa79a143cfdf549e165117d03"
  },
  "thesis-bench-005": {
   "split": "bench",
@@ -85,9 +85,9 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "d4fdb166395f",
-  "gold_fingerprint": "07b33fe12e82",
-  "content_sha256": "577085f3f1bee4b732831389175b0a303f07974212f89c718f2f8a34da437cb7"
+  "fingerprint": "dd44725820eb",
+  "gold_fingerprint": "d887e1d68a88",
+  "content_sha256": "448d0cc849b9a1d2d0449038849400185468cd2b879f8ddee1c1f953edcd4507"
  },
  "thesis-bench-006": {
   "split": "bench",
@@ -103,9 +103,9 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "0bc22174420c",
-  "gold_fingerprint": "27d2d45d73ac",
-  "content_sha256": "9604f0f33890c7a0ccaecdc9c63864cc1c3034555b07da140e26e9b75859c591"
+  "fingerprint": "330a9dd28de2",
+  "gold_fingerprint": "3b2d92077d48",
+  "content_sha256": "4ca58b3f727e83b74374da357b1275f64dc77bb47a60d1f245fe7f6bf9fb644e"
  },
  "thesis-bench-007": {
   "split": "bench",
@@ -121,9 +121,9 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "b22428767f34",
-  "gold_fingerprint": "2f30f31e2b5f",
-  "content_sha256": "3f86a59eb41c7c0a7c11b69449aa3d0ea3e883330cf1a8d874050e9f8a63789f"
+  "fingerprint": "8f581504829d",
+  "gold_fingerprint": "37a16f5c68f8",
+  "content_sha256": "a044a4413a7cdd9faa6b98968d5c5aafdfc45b26053d9b26d38e3d0d8fdaec1b"
  },
  "thesis-bench-008": {
   "split": "bench",
@@ -139,9 +139,9 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "183ce1c3567a",
-  "gold_fingerprint": "328644474874",
-  "content_sha256": "e12a44086d68f679d509446cdc642904c3e8db5dd57499362487373d38d879db"
+  "fingerprint": "505c250d2da6",
+  "gold_fingerprint": "857947dd38e2",
+  "content_sha256": "1329424ce505f57f0f02f6cc3ba2af7db5c265787ac7a33a837dc379f0caf351"
  },
  "thesis-bench-009": {
   "split": "bench",
@@ -157,9 +157,9 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "952f54d9a18e",
-  "gold_fingerprint": "b2be7597d68c",
-  "content_sha256": "40f58e849c53ea896f9c34df0b46bfc7a568461bf937724a6b4114320d4c954c"
+  "fingerprint": "1f0d06b88537",
+  "gold_fingerprint": "6be248324949",
+  "content_sha256": "6703b9bb3371dbf89f872e01df535525ec6ad75967dc7f57c49bd02a0fd65f1f"
  },
  "thesis-bench-010": {
   "split": "bench",
@@ -175,9 +175,9 @@
    "DAL",
    "SAVE"
   ],
-  "fingerprint": "f67be52ae81e",
-  "gold_fingerprint": "10f0298a2e77",
-  "content_sha256": "13305d5c5b6d49f99141cc9f69446770e512255216605d444bcfa0a9cd6e3c1b"
+  "fingerprint": "2686ddcc55f9",
+  "gold_fingerprint": "28c468fb5140",
+  "content_sha256": "774dfbe301cd86397895e70bcc8cdeac9284142b9f66dfc04efe104e4a1fb23e"
  },
  "thesis-bench-control-01": {
   "split": "bench",
@@ -195,7 +195,7 @@
   ],
   "fingerprint": "488ea463ae89",
   "gold_fingerprint": "53b4b2cf9baf",
-  "content_sha256": "9d36763750bca97d11300bd8237de70ef4b75224abd55f37abd49f6436630c6d"
+  "content_sha256": "a9f09c56a0365831b3885387ca890bbff749508c634fc66aa2025c412c603674"
  },
  "thesis-bench-control-02": {
   "split": "bench",
@@ -213,7 +213,7 @@
   ],
   "fingerprint": "4b3a21f42c4d",
   "gold_fingerprint": "ee5d7dce90a2",
-  "content_sha256": "b422aea16cd44600706ff3b6d893c2684de552d57e18e7a04d1bc72a739c1aee"
+  "content_sha256": "821235d0f6a40508ef182099324791724569b11d6da0ecb1c6da313d523954c7"
  },
  "thesis-heldout-001": {
   "split": "heldout",
@@ -228,9 +228,9 @@
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "2c346a36b5ef",
-  "gold_fingerprint": "824d48c9ea2c",
-  "content_sha256": "28d4464ec1c23006df0e65fc35a632575cfbc203de4d9e9b0f3f4af5d90cd699"
+  "fingerprint": "8020c4ce1db2",
+  "gold_fingerprint": "c29f76ed29d9",
+  "content_sha256": "9916e620be520873ec2c0286de587faa3c95701d9b14d35afe32a959c8455a24"
  },
  "thesis-heldout-002": {
   "split": "heldout",
@@ -245,9 +245,9 @@
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "19fa4f9d52d5",
-  "gold_fingerprint": "2e572bd9bcd8",
-  "content_sha256": "3a7e3ed92c8b383edfb5e5e008d47677dc774e01db4db51cef20c50aa1a140bb"
+  "fingerprint": "5deddd76a86c",
+  "gold_fingerprint": "fc03419fd410",
+  "content_sha256": "6508bc1912a8c00da7be6affc2976fd1c4d476cba73969f5464bd7dac8399187"
  },
  "thesis-heldout-003": {
   "split": "heldout",
@@ -262,9 +262,9 @@
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "43bd18383b3a",
-  "gold_fingerprint": "7b763b9e0811",
-  "content_sha256": "02e955a3de21c8b06266369f3c81e8d8b799b42cf746de9612a05243c555d93d"
+  "fingerprint": "88ecdff3ecc0",
+  "gold_fingerprint": "3d0db5c3e011",
+  "content_sha256": "d565d4c143753e3e89decccc41e7aea1065932f771227aaca34dbe95dd00900f"
  },
  "thesis-heldout-004": {
   "split": "heldout",
@@ -279,9 +279,9 @@
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "87904d36b69f",
-  "gold_fingerprint": "49c3e486542b",
-  "content_sha256": "d35ce00ff00fa3f9b17fc124aa29d5c6aab01613363c8096c4669f741d514430"
+  "fingerprint": "ce5cd5e67fbf",
+  "gold_fingerprint": "2b10145fca14",
+  "content_sha256": "40007c5254c59b15703fa69ec96b52b64636a34d78ce3641888dd13b587fe92a"
  },
  "thesis-heldout-005": {
   "split": "heldout",
@@ -296,9 +296,9 @@
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "5ad66ea2ce52",
-  "gold_fingerprint": "fd6249eb2f65",
-  "content_sha256": "99d1b308b78508df37848f8f49369bab53773116f9d33b385274c85968e840ad"
+  "fingerprint": "bdc82d1e3802",
+  "gold_fingerprint": "556e8f25acc8",
+  "content_sha256": "e5cba3a7e328c76516636dfc8dd0618bb43c54224a013d93b63769c27f15bc1a"
  },
  "thesis-heldout-006": {
   "split": "heldout",
@@ -313,9 +313,9 @@
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "2b8dc50bd8bb",
-  "gold_fingerprint": "802d66da2be8",
-  "content_sha256": "8cf303a8607b46c0b4a18623b58b2f4279596529709f854fdf7ece8f65894041"
+  "fingerprint": "d41bcdde785e",
+  "gold_fingerprint": "549434dc6ac9",
+  "content_sha256": "31ad0685e66a08aa4184d687e75f034f3fa78717fd5a7973e206ce9322ab4531"
  },
  "thesis-heldout-007": {
   "split": "heldout",
@@ -330,9 +330,9 @@
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "e558840e0474",
-  "gold_fingerprint": "e84369dcf9de",
-  "content_sha256": "792f81b226739e01b5b244f7994cfc12bf178f3017490ea016173ce8cd67731f"
+  "fingerprint": "20de67ec1ac7",
+  "gold_fingerprint": "ff4feabaa36d",
+  "content_sha256": "6dcd84f149b612d1b818a6c2c7e4ea2846255f979430d0cbdf8d1b39c636ae6a"
  },
  "thesis-heldout-008": {
   "split": "heldout",
@@ -347,9 +347,9 @@
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "c4d9baed8232",
-  "gold_fingerprint": "4eff998a286e",
-  "content_sha256": "759b1a6506c53c3f9ed420543eaa23a9bbb87a6c65f1a7643f7f26dd628b84e7"
+  "fingerprint": "17380c554d12",
+  "gold_fingerprint": "949236b0029a",
+  "content_sha256": "8e0465b09bfb98aaea5b44c3ecf453eca0a93dc3d04055d3d260a87e1593e422"
  },
  "thesis-heldout-009": {
   "split": "heldout",
@@ -364,9 +364,9 @@
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "68ab09f0910a",
-  "gold_fingerprint": "a19e8b5ddc06",
-  "content_sha256": "6e0538ac0d691ac6ec7127d63e5010c31e4114248561be3a4f8ca3c113dd7e04"
+  "fingerprint": "46184d167745",
+  "gold_fingerprint": "1f54acccf1ef",
+  "content_sha256": "259757608a61677ba96a754438f9f502be8d6cfe7fc20413c221829c31dccb29"
  },
  "thesis-heldout-010": {
   "split": "heldout",
@@ -381,9 +381,9 @@
    "ALK",
    "JBLU"
   ],
-  "fingerprint": "705e7d50ec3b",
-  "gold_fingerprint": "debad0286457",
-  "content_sha256": "f2631ad179728a2bd7fa81800bea7207d7c661634b48cc79318412d326c76dc4"
+  "fingerprint": "2f455b1dfc8f",
+  "gold_fingerprint": "73bf540d00ff",
+  "content_sha256": "3babe811c625fc1ae480699bcccefcb849bdb75c7e2e4a136c3cdf8b98ecaf36"
  },
  "thesis-heldout-control-01": {
   "split": "heldout",
@@ -400,7 +400,7 @@
   ],
   "fingerprint": "ae63b2948936",
   "gold_fingerprint": "9906b427cd9a",
-  "content_sha256": "f176d985892582c67616ef7c46696ab967a00e1ff4d8068259b0e687706ab30a"
+  "content_sha256": "3cb3230b2202f9bedd4469afc8c821a7de556dfb7a5bbb0072dae83ec8a9f131"
  },
  "thesis-heldout-control-02": {
   "split": "heldout",
@@ -417,7 +417,7 @@
   ],
   "fingerprint": "69a9e9e32fff",
   "gold_fingerprint": "ab49a4c5d41a",
-  "content_sha256": "d0a05e9399bcb72c55612a23cb7ab4e9e69d0e6a4dce8a42a355c92e52aca648"
+  "content_sha256": "28afb5342213e77ec9a6e45b4731f26ff58bc03e352962c9c44d183efc3ba311"
  },
  "thesis-train-001": {
   "split": "train",
@@ -433,9 +433,9 @@
    "LUV",
    "UAL"
   ],
-  "fingerprint": "cf2de583076b",
-  "gold_fingerprint": "0d389ca1e27c",
-  "content_sha256": "5a17b752550c6301cdc79cece4fc6425949ebe303a58601129f806d2c02dadb5"
+  "fingerprint": "114a79be3772",
+  "gold_fingerprint": "d1f6399bc046",
+  "content_sha256": "37417d508c256ae24b351d52a14023c8b9edff1fbb1f6382c4010397fa270a19"
  },
  "thesis-train-002": {
   "split": "train",
@@ -451,9 +451,9 @@
    "LUV",
    "UAL"
   ],
-  "fingerprint": "3fe2bcb57443",
-  "gold_fingerprint": "475a18a24984",
-  "content_sha256": "50e8d3e51bc5f829e75141cb61da7847829fd7d2632dee84c30be6d1e5b68619"
+  "fingerprint": "c61abb9df6e8",
+  "gold_fingerprint": "caf17127e47e",
+  "content_sha256": "282791e8a0a758708e1b7ca461ad0073e7d088f112f526b020de1f68a1560d45"
  },
  "thesis-train-003": {
   "split": "train",
@@ -469,9 +469,9 @@
    "LUV",
    "UAL"
   ],
-  "fingerprint": "58d11296fb9b",
-  "gold_fingerprint": "ba9ff56a174d",
-  "content_sha256": "485120e02f4541632f3565a72d1646c03ac081476517ef121836206547d64122"
+  "fingerprint": "a91fe9b3db57",
+  "gold_fingerprint": "ccfb4ba2b020",
+  "content_sha256": "b0dd33ab710a444a3f8f608b9f3d731527e6f72ba6e8eaf447b9f55013659b79"
  },
  "thesis-train-control-01": {
   "split": "train",
@@ -489,6 +489,6 @@
   ],
   "fingerprint": "21b2f74796ba",
   "gold_fingerprint": "8c468ce2fae4",
-  "content_sha256": "9d202cf65abec8e447c1a23a55c71de5d5b0e181bf8a75d99b7547218d9f8129"
+  "content_sha256": "10075f2a66f17c59ff4bc180644ff04efe43781354d33354f1ba8a30d6cfd840"
  }
 }

@@ -89,7 +89,7 @@ def make_variant(seed: int, control: bool, ctx):
         r_t, o_t, d_t = rng.choice(others, 3, replace=False)
         # (2) ticker-wide re-mapping jump inside the comparison window (all sources x5-10)
         r_day = y1_start + pd.Timedelta(days=int(rng.integers(380, 640)))
-        mult = float(rng.uniform(5, 10))
+        mult = round(float(rng.uniform(5, 10)), 4)   # rounded so arm64 and x86_64 builds match
         m = (df.ticker == r_t) & (df.date >= r_day)
         df.loc[m, 'ct'] = np.round(df.loc[m, 'ct'] * mult).astype(int); df.loc[m, 'amt'] *= mult
         traps['ticker_remap'] = dict(ticker=r_t, start=_fmt(r_day), mult=mult)

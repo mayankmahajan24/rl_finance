@@ -58,8 +58,8 @@ from lib import fingerprint, git  # noqa: E402
 
 HERE = pathlib.Path(__file__).resolve().parent
 
-# python:3.12-slim as of 2026-11-03. Change the digest deliberately: it changes every task's environment.
-BASE_IMAGE = "python:3.12-slim@sha256:b18b261e1b4974b4f321451ad5251ded85abb22c2b8b262da527dda1d031ab30"
+# python:3.14-slim as of 2026-11-10. Change the digest deliberately: it changes every task's environment.
+BASE_IMAGE = "python:3.14-slim@sha256:9aaa474097d094040649f2162a627c0049b408f52138d980916788d80f04802f"
 JUDGE_PIP = "anthropic==0.89.0"   # verifier-only: LLM judge / scorer client, installed by test.sh
 # Debian trixie's (the base image's) libfaketime; change it with the base image
 FAKETIME_DEB = "libfaketime=0.9.10+2024-06-05+gba9ed5b2-0.6"
@@ -67,7 +67,7 @@ FAKETIME_DEB = "libfaketime=0.9.10+2024-06-05+gba9ed5b2-0.6"
 VERIFIER_HOSTS = ["api.anthropic.com", "pypi.org", "files.pythonhosted.org"]
 
 DOCKERFILE = """FROM {base}
-RUN pip install --no-cache-dir pandas==2.2.3 numpy==2.1.3 scipy==1.14.1{extra}
+RUN pip install --no-cache-dir pandas==3.0.6 numpy==2.5.4 scipy==1.18.1{extra}
 WORKDIR /app
 COPY data /app/data
 {gunzip}{clock}RUN mkdir -p /app/output /app/solution
@@ -77,11 +77,11 @@ COPY data /app/data
 CLOCK = """RUN touch -d "{as_of} 12:00:00" /app/data/*
 RUN apt-get update && apt-get install -y --no-install-recommends {deb} && rm -rf /var/lib/apt/lists/* \\
     && ln -s /usr/lib/*/faketime/libfaketime.so.1 /usr/local/lib/libfaketime.so.1
-RUN mkdir /usr/local/faketime && for c in python python3 python3.12 date; do \\
+RUN mkdir /usr/local/faketime && for c in python python3 python3.14 date; do \\
         printf '#!/bin/sh\\nLD_PRELOAD=${{FAKETIME:+/usr/local/lib/libfaketime.so.1}} exec %s "$@"\\n' \\
             "$(command -v $c)" > /usr/local/faketime/$c && chmod +x /usr/local/faketime/$c; \\
     done
-ENV TZ=UTC TASK_AS_OF={as_of} FAKETIME="@{as_of} 12:00:00" FAKETIME_ONLY_CMDS=python,python3,python3.12,date \\
+ENV TZ=UTC TASK_AS_OF={as_of} FAKETIME="@{as_of} 12:00:00" FAKETIME_ONLY_CMDS=python,python3,python3.14,date \\
     FAKETIME_DISABLE_SHM=1 PATH=/usr/local/faketime:$PATH
 """
 

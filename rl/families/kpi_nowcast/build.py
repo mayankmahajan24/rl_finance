@@ -85,7 +85,7 @@ COPY_NOTE = {
              "its actuals are therefore real. Dollar levels, average ticket size (`amt` / `ct`) and dollar comparisons "
              "between companies are not."),
 }
-PIP = " statsmodels==0.14.4 scikit-learn==1.5.2 matplotlib==3.9.2"   # agent tooling close to code execution's
+PIP = " statsmodels==0.15.0 scikit-learn==1.9.1 matplotlib==3.11.2"   # agent tooling close to code execution's
 REFERENCE = HERE / "solutions" / "reference"
 
 # Target quarters. Calendar series end on the given dates; fiscal (Jan year-end) series use the

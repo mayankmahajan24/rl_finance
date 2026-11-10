@@ -1,16 +1,16 @@
-Transaction sensor panel
+Transaction panel
 Overview
-This is a small, partly simplified subset of a daily transaction panel. For each company or company segment it counts the number of transactions and the dollar amount spent per day, as reported by four anonymised data sources. Treat each source as a "sensor" that gives a timely read on the underlying company's trends. Sensors sometimes malfunction and give poor reads.
+This is a small, partly simplified subset of a daily transaction panel. For each company or company segment it counts the number of transactions and the dollar amount spent per day, as reported by four anonymised data sources. Each source gives a timely read on the underlying company's trends. Sources sometimes malfunction and give poor reads.
 Known issues with the data
-Anomalous values: a single datapoint can be too low when a sensor fails to transmit, or too high for a variety of reasons (double counting, contamination and so on).
-Level shifts: when a sensor changes how it behaves, its read can move persistently higher or lower, either for a period or permanently.
-Thin early history: a sensor's series can begin with very few transactions, so its first stretch may not be a usable read.
+Anomalous values: a single datapoint can be too low when a data source fails to report, or too high for a variety of reasons (double counting, contamination and so on).
+Level shifts: when a data source changes how it collects data, its read can move persistently higher or lower, either for a period or permanently.
+Thin early history: a data source's series can begin with very few transactions, so its first stretch may not be a usable read.
 A day with no reported transactions has no row; there are no zero rows.
 There is no ground truth. Past history and comparisons across series are the only guide to what is normal.
 Columns
 date: the day the transactions occurred
-ct: the number of transactions the sensor reported
+ct: the number of transactions the data source reported
 amt: the total dollar value of those transactions
 ticker: a company, or a company segment when the ticker contains an underscore
 industry: the company's industry; only two of many are included
-source_id: a unique id for each sensor; only four are included
+source_id: a unique id for each data source; only four are included

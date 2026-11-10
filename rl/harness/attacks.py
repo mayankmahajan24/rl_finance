@@ -19,7 +19,7 @@ gold pick (research_design compare, eval split). research_design review needs th
 it is not attacked offline. Network escape is the sandbox probe's job (sandbox_probe.py, in Docker).
 
 Per family and attack, the report compares the mean score with the good answers' mean, on the
-family's comparison metric (reward; kpi_nowcast: skill_vs_naive, -1 when missing). An attack fails
+family's comparison metric (reward). An attack fails
 the suite when it comes within MARGIN of the good mean, or crashes the verifier.
 
     python rl/harness/attacks.py --split bench                 # every attacked family, every task
@@ -168,10 +168,9 @@ class GrowthThesis(Format):
 class KpiNowcast(Format):
     outputs = ["output/answer.md"]
     prose = "output/answer.md"
-    metric = "skill_vs_naive"
 
     def forecast(self, app, meta, point, low, high, level=0.95, text="Estimate below."):
-        fc = {"target_period": meta["meta"]["target_period"].replace(" ", ""), "unit": "USD millions",
+        fc = {"target_period": meta["meta"]["target_period"].replace(" ", ""), "unit": "$ millions",
               "point": point, "low": low, "high": high, "interval_level": level, "in_sample": [],
               "vs_consensus": "no_consensus"}
         put(app / "output/answer.md", kpi_answer(fc, text))
@@ -329,7 +328,8 @@ def good(task: pathlib.Path, meta: dict) -> dict:
     if fam == "kpi_nowcast":
         a = gold["actual"]
         fc = {"target_period": gold["target_period"].replace(" ", ""), "unit": gold["unit"], "point": a,
-              "low": a * 0.98, "high": a * 1.02, "interval_level": 0.95, "in_sample": [], "vs_consensus": "no_consensus"}
+              "low": a * 0.98, "high": a * 1.02, "interval_level": 0.95, "in_sample": [], "vs_consensus": "no_consensus",
+              "metric_history": [{"period_end": e, "value": v[-1]} for e, v in gold["metric_history"].items()]}
         return grade(task, lambda app, tests: put(app / "output/answer.md", kpi_answer(fc)))
     flip = {"A": "B", "B": "A"}[gold["preference"]]
     return grade(task, lambda app, tests: put(app / "output/response.json", Compare().answer(gold["preference"], flip)))

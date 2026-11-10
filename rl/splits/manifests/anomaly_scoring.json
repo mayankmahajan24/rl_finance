@@ -17,7 +17,7 @@
   ],
   "fingerprint": "990cc72c44a0",
   "gold_fingerprint": "4d48da49f967",
-  "content_sha256": "78d6d2535aa46b58eaba95d5b2c6aebea3c02e033cd842e471c25a162a6c616f"
+  "content_sha256": "aab7d08c6f81fa06c837f5b91b3bf648e15eb7d89e12246454fce6e94a576b4d"
  },
  "anomaly-bench-002": {
   "split": "bench",
@@ -37,7 +37,7 @@
   ],
   "fingerprint": "abab0e5b398a",
   "gold_fingerprint": "7751bea8cdd1",
-  "content_sha256": "d0fbd9e8796e4bbbcfbc26ae781ebf45c2b6753de78e091ffc9c44a858d5b501"
+  "content_sha256": "766f9d1812ae42f6c72a904cfe3547f81bea34110fabf4ffde1972399158533e"
  },
  "anomaly-bench-003": {
   "split": "bench",
@@ -57,7 +57,7 @@
   ],
   "fingerprint": "0fab663ed528",
   "gold_fingerprint": "c88541ed2551",
-  "content_sha256": "33ebdf49fbb6d0173aa0d0bc9e3af7c9bcc9d7b01e8726e967aa8b7699843927"
+  "content_sha256": "91b8b35dbd4857b1231ab829608221799fef27f04888c694d9868518f99805b3"
  },
  "anomaly-bench-004": {
   "split": "bench",
@@ -77,7 +77,7 @@
   ],
   "fingerprint": "e6e92a89a37e",
   "gold_fingerprint": "ba8c815e4a75",
-  "content_sha256": "cb41b800d4374c5e40f644adda21b9903f2cbeeaa8e29e292cb73ed0f1ae104d"
+  "content_sha256": "8614c5f55308042963fd8c3a0e6dad1a8c9f520e2133f7fbb9aad4cee7f74a9e"
  },
  "anomaly-bench-005": {
   "split": "bench",
@@ -97,7 +97,7 @@
   ],
   "fingerprint": "7b3b9bf9d76b",
   "gold_fingerprint": "20d06b87b42d",
-  "content_sha256": "90151bc8cc1a3b1d3673fed362fb294c4e6b5f1e1b03aeaf85abe0270b04edd2"
+  "content_sha256": "422b56755fe9e10330667711955252d0786d52f798ad3b86b437b425cb4a8fe9"
  },
  "anomaly-bench-006": {
   "split": "bench",
@@ -117,7 +117,7 @@
   ],
   "fingerprint": "d133811f4543",
   "gold_fingerprint": "2fdd66bfd41b",
-  "content_sha256": "70cb913a78a5268886e165487f4a0231579046b5fc5484867219abb0587a17d2"
+  "content_sha256": "307c130559ba328be0a933f44b31c7ac8870ed447cca3878d16f4086ad5c1cdc"
  },
  "anomaly-bench-007": {
   "split": "bench",
@@ -137,7 +137,7 @@
   ],
   "fingerprint": "c4e64625739a",
   "gold_fingerprint": "bc523a929961",
-  "content_sha256": "de105956221c86de989a36dc811d07d5d4080263603a502dfcdc2de7c9f32140"
+  "content_sha256": "edb38d99beddfcfb46a85093dfb52e7105191aec3bbc18178e4abfdc1faf542f"
  },
  "anomaly-bench-008": {
   "split": "bench",
@@ -157,7 +157,7 @@
   ],
   "fingerprint": "e88ab077f853",
   "gold_fingerprint": "e7e729334f55",
-  "content_sha256": "8ace6f539f3427a3209642cb09f6d57811950dcbab83902ce392d040dd9c1029"
+  "content_sha256": "4b697a4a85a6bc236ce48c96a98b34e905f733ed39556b113ffeacee147b22f2"
  },
  "anomaly-bench-009": {
   "split": "bench",
@@ -177,7 +177,7 @@
   ],
   "fingerprint": "659414090ce2",
   "gold_fingerprint": "d2cb37716469",
-  "content_sha256": "a544eeb6557bb4f868f93d06db52052d699f77e5fc459efbc137af97b8faabc3"
+  "content_sha256": "04080e773a125e5148829b47813d5af3d619e29b535d5c63646bf62dbfa55b66"
  },
  "anomaly-bench-010": {
   "split": "bench",
@@ -197,7 +197,7 @@
   ],
   "fingerprint": "df43fc103347",
   "gold_fingerprint": "118645b39e85",
-  "content_sha256": "807587d713ea7869f77a22b0eacdb0a11d682a8f11708a097aa5d50d3f477923"
+  "content_sha256": "36e253b23a8fa6a28bdd428a7e8151f1c60775f7b68ddde3ba5888ca2ff2f06b"
  },
  "anomaly-bench-control-01": {
   "split": "bench",
@@ -217,7 +217,7 @@
   ],
   "fingerprint": "1c7371037ae2",
   "gold_fingerprint": "92dc68b5d5b9",
-  "content_sha256": "61bf8ebf109d4db93415dd6c5d001b6ed7a0255e845d4dec5d4c7a7cfcebab9c"
+  "content_sha256": "2c4726b3d7e5a45642dec84e735f39c67624bafef8e86d414b60d4340599a079"
  },
  "anomaly-bench-control-02": {
   "split": "bench",
@@ -237,7 +237,7 @@
   ],
   "fingerprint": "d94ffddc0f41",
   "gold_fingerprint": "2d9ea5a4f204",
-  "content_sha256": "bdc825928f234a1a376c99b2d36feba1463c54f5c06694c854bbc7d8a7f91ddd"
+  "content_sha256": "bdf5be84da29b86948a75f65343cf19b56eb4bc25d7000cde1b188f89d8e6c8b"
  },
  "anomaly-heldout-001": {
   "split": "heldout",
@@ -256,7 +256,7 @@
   ],
   "fingerprint": "3e9e4cdb55e5",
   "gold_fingerprint": "a9db99905683",
-  "content_sha256": "c1b865d1bbb000949ad5cb94dc17e20ebf9e6e5f95135f848846cb9396e7c537"
+  "content_sha256": "c7c3675f71ca97979f4d1795533c9ebb9862475363d403b80ba04a888e20a85c"
  },
  "anomaly-heldout-002": {
   "split": "heldout",
@@ -275,7 +275,7 @@
   ],
   "fingerprint": "2c9f17d20627",
   "gold_fingerprint": "38838095ab7c",
-  "content_sha256": "0f4e0f2606c9313ef290a3495716229ceed7b99bcacc6cba15b45b415e07748d"
+  "content_sha256": "417777a4e4f65fa8ad9fcd2743e4f57cb40f48e14cdae1f2f07f6f6a0d6bc058"
  },
  "anomaly-heldout-003": {
   "split": "heldout",
@@ -294,7 +294,7 @@
   ],
   "fingerprint": "5399abb194ba",
   "gold_fingerprint": "a0439dbde0d2",
-  "content_sha256": "a36b80e4dddbdbad5a06863eb404cd6ba950c9f8e39d75547b363ab54bacd68a"
+  "content_sha256": "61b13702c984050603544a7bfbad459ada9f8547c991d4dd835c55493417ee0c"
  },
  "anomaly-heldout-004": {
   "split": "heldout",
@@ -313,7 +313,7 @@
   ],
   "fingerprint": "b8be7a381a4f",
   "gold_fingerprint": "0abd39754960",
-  "content_sha256": "60f4e6a435cf09e617f5fbfa5c21d7e0d5f009b7b3b5ce6c9326600966d8d327"
+  "content_sha256": "e86a5852ab87c30f36debde1314fe3d71ca9148228e57b35e2026d231e0081ed"
  },
  "anomaly-heldout-005": {
   "split": "heldout",
@@ -332,7 +332,7 @@
   ],
   "fingerprint": "76038ac6fbb3",
   "gold_fingerprint": "2a07bcca2fa2",
-  "content_sha256": "361eafd117b2d8eb2208edf6cf85b9d0f3c58b68fc1c6c7f4161cd79f42def99"
+  "content_sha256": "bc6b797e1b55995f24ee80ea2a3e91a9d198926c8de31842ee40f67ad192fd51"
  },
  "anomaly-heldout-006": {
   "split": "heldout",
@@ -351,7 +351,7 @@
   ],
   "fingerprint": "18a4c7e8c777",
   "gold_fingerprint": "1c4cd1c6e56e",
-  "content_sha256": "ad1e0366335f6aad2fb433aabe9985dc1390d27a9a8646a38b2d0effe4831d21"
+  "content_sha256": "81b1db3834cecf49115a976a5128f70832bb58a408b9a3d88aa4309958ce2e9e"
  },
  "anomaly-heldout-007": {
   "split": "heldout",
@@ -370,7 +370,7 @@
   ],
   "fingerprint": "99b156f4b9b4",
   "gold_fingerprint": "f85a81a04f5e",
-  "content_sha256": "74b6d8e7bbea1bbc6871333e07f3e5e1b05d0e3931dab41fcda6e189af2063e1"
+  "content_sha256": "6dabc8afb0b6923a75195c56db39994e18c48f4d7d82ff7f683c32e8448b891b"
  },
  "anomaly-heldout-008": {
   "split": "heldout",
@@ -389,7 +389,7 @@
   ],
   "fingerprint": "c450df3a8002",
   "gold_fingerprint": "8cc166911667",
-  "content_sha256": "dee6e1c97e28dedfc0203243a3965b9d6fb31ea74c4892fa4245588f3faa96bf"
+  "content_sha256": "836bd0611cdb8b426cd4fbc92d4882592742c324d40a3603aaea16ae19957735"
  },
  "anomaly-heldout-009": {
   "split": "heldout",
@@ -408,7 +408,7 @@
   ],
   "fingerprint": "1ce81fdb95ed",
   "gold_fingerprint": "d279e672c76c",
-  "content_sha256": "3ecaafcace7abc3e8947ba983984000e8860445e2cafddd7bcf0f8a020a2590b"
+  "content_sha256": "937544f0ae7dcd57ba14ef2b99c6ec575833e0b0df619e50f705eeaa4869357b"
  },
  "anomaly-heldout-010": {
   "split": "heldout",
@@ -427,7 +427,7 @@
   ],
   "fingerprint": "3f51b8e3b863",
   "gold_fingerprint": "a74ba318829d",
-  "content_sha256": "95136c6b4442af8dd229ca7c1cc2a68654b8a5d4af7c924e1e1438479ab02326"
+  "content_sha256": "e959a6e5af5b66ea613f446d7716d26a7901a226e3793d6ef8c2d5e104ad2d73"
  },
  "anomaly-heldout-control-01": {
   "split": "heldout",
@@ -446,7 +446,7 @@
   ],
   "fingerprint": "f064806052a6",
   "gold_fingerprint": "d271c763d3a5",
-  "content_sha256": "311378ca3bcbdeb2ba4a7ef9bae16c12b9d5b37c0b83c03f68ce5af0a694860d"
+  "content_sha256": "c146debb72b91595dbf9a2b07479de1235ec58f92c86fc5b2683f02499a90be8"
  },
  "anomaly-heldout-control-02": {
   "split": "heldout",
@@ -465,7 +465,7 @@
   ],
   "fingerprint": "0980bcb3ae37",
   "gold_fingerprint": "b44b0796d2a0",
-  "content_sha256": "ef32c28120b1e0550c8cd49a038a0c7faf40ff896ae22f0c0b53018ad4e000db"
+  "content_sha256": "46b94e6e53c1c92ba27893397fdd516e7a3e7af54df096ca178b2a033c2c4013"
  },
  "anomaly-train-001": {
   "split": "train",
@@ -489,7 +489,7 @@
   ],
   "fingerprint": "df14bc2b85b9",
   "gold_fingerprint": "c8e06967b742",
-  "content_sha256": "4a8a214b958a4320e46648c9015d2cd7164faf8e3390fba640931adaae15efec"
+  "content_sha256": "d27821f9d5724fb3efd879704171c7842ba4d975b5ea2b7788dc5b37d4e85938"
  },
  "anomaly-train-002": {
   "split": "train",
@@ -513,7 +513,7 @@
   ],
   "fingerprint": "3a682f39578f",
   "gold_fingerprint": "d3d6b72bbb31",
-  "content_sha256": "f073e74425ea34873ef631a2f644bcc3a716470e82a0b0a1fccf7f69bc1e552d"
+  "content_sha256": "7845ad8cca9780495df494efd46b89f81236c0671bda9c66039c29669393a51a"
  },
  "anomaly-train-003": {
   "split": "train",
@@ -537,7 +537,7 @@
   ],
   "fingerprint": "363125c73d78",
   "gold_fingerprint": "c0b621640ad9",
-  "content_sha256": "1e9d3b673c2b36ab028961743fee3fbe328e6f5daff5b6f5ccb209cb07af2f7f"
+  "content_sha256": "cf4929ecd6f3a8ea0be873711e23191e963cba63c19470ae17693999377abfed"
  },
  "anomaly-train-control-01": {
   "split": "train",
@@ -561,6 +561,6 @@
   ],
   "fingerprint": "75bde78ed051",
   "gold_fingerprint": "1a38b73955b0",
-  "content_sha256": "914a8954a97495b014af6d4b1d16b35e6b5966e365da4206f6adcf6bd4ad88d8"
+  "content_sha256": "3618b47ce4cde335447e4955c457947b587f61f1cc126ed81196a5bcf5c8ec65"
  }
 }

@@ -152,14 +152,14 @@ DATED = "kn-produce-AIR02-2017Q4-anon"
 
 def test_dated_task_without_as_of(tree):
     d = tree(task=DATED)
-    edit(d, "task.toml", 'as_of = "2017-12-31"\n', "")
+    edit(d, "task.toml", 'as_of = "2018-01-15"\n', "")
     assert f"{DATED}: kpi_nowcast is dated but the task records no as_of" in problems()
 
 
 def test_dated_task_with_the_real_clock(tree):
     d = tree(task=DATED)
-    edit(d, "environment/Dockerfile", "TASK_AS_OF=2017-12-31 ", "TASK_AS_OF=2018-12-31 ")
-    assert f"{DATED}: as_of 2017-12-31 but its image does not pin the clock to it" in problems()
+    edit(d, "environment/Dockerfile", "TASK_AS_OF=2018-01-15 ", "TASK_AS_OF=2018-12-31 ")
+    assert f"{DATED}: as_of 2018-01-15 but its image does not pin the clock to it" in problems()
 
 
 def test_instruction_names_a_missing_file(tree):

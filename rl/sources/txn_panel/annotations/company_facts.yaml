@@ -1,6 +1,6 @@
 # Reporting-basis, structural and coverage facts per KPI series: what a careful analyst should
-# notice. GRADER-ONLY. kpi_nowcast's write-up judge uses them for C5 (reporting basis) and C12
-# (structural breaks); data-quality facts (C4) are computed per case from the panel.
+# notice. GRADER-ONLY. kpi_nowcast's write-up judge uses them for C9 (reporting basis) and C10
+# (structural breaks); data-quality facts (C8) are computed per case from the panel.
 #
 # public_from is the first date the fact was public and relevant; null means true for the whole
 # sample (e.g. a KPI definition or a sensor/KPI coverage mismatch). A case only gets facts public

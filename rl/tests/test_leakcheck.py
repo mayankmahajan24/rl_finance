@@ -56,7 +56,7 @@ def test_identity_and_allowlist(task):
     assert any("'benchmark task'" in x for x in p)
     d, m = task("bench", "kn-produce-AIR02-2017Q4-anon")
     brief = (d / "environment" / "data" / "data_brief.md").read_text()
-    assert "Transaction sensor panel" in brief and "replaced with codes" in brief and "underscore" not in brief
+    assert "Transaction panel" in brief and "sensor" not in brief and "replaced with codes" in brief and "underscore" not in brief
     assert leakcheck.task_problems(d, m) == []
 
 

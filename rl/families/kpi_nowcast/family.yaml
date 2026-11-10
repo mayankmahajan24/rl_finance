@@ -19,7 +19,7 @@ gold_file: gold.json
 reward: >-
   0 unless metric_history shows the task's metric (the gold KPI) was chosen; then skill_vs_naive clamped to
   [0, 1] (0 = no better than last year's seasonal step, 1 = exact; code), scaled by 0.5 + 0.5 x the
-  C1-C42 write-up score (LLM judge, over the brief and the methods note; 0 if a gate item fails: C35 brief contradicts
+  C1-C48 write-up score (LLM judge, over the brief and the methods note; 0 if a gate item fails: C35 brief contradicts
   the note, C36 numbers don't match the forecast JSON or the walk-forward errors computed from it, C38 look-ahead; halved if the brief is over
   300 words or the methods note over 2,500, excluding tables, code and charts; checked in code), so the
   write-up moves the reward by at most half and can't earn it alone. Accuracy only when the judge can't run (details say so). Diagnostics: abs % error, coverage,
@@ -31,7 +31,7 @@ rubric_visibility: partial  # the instruction states the fund's write-up convent
                             # benchmark when there is none; the brief agrees with the note, is succinct and leaves the metric choice and modelling
                             # detail to it; dollar figures as $m/$bn, to one decimal place like percentages; word limits; growth periods named; the gap to
                             # consensus or the naive estimate in points of y/y growth; an input-vs-actuals chart; consensus history on the Y/Y chart; chart colours (actuals black, consensus dotted green, model blue); $k/$m/$bn suffixes; look-ahead in the walk-forward disclosed with direction and size; low <= point <= high)
-                            # but not the judgment items (C3, C6-C7, C9-C16, C18-C24, C26-C32, C34, C38-C42; C37 only in part): models are graded on whether
+                            # but not the judgment items (C3, C6-C7, C9-C16, C18-C24, C26-C32, C34, C38-C48; C37 only in part): models are graded on whether
                             # they do what a careful analyst would, unprompted. Deliberate.
 judge:                   # the write-up judge (judge.md); pinned, part of the instrument (families/_shared/judge.py)
   model: claude-sonnet-5-5

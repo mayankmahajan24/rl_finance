@@ -4,7 +4,7 @@ Reads the brief and forecast from /app/output/answer.md and the methods note fro
 Writes reward.json: `reward`, accuracy_reward (skill_vs_naive clamped to [0, 1], gated on the metric)
 scaled by the write-up score (grader.py `blend`), and diagnostics: schema_ok, abs_pct_error,
 signed_pct_error, skill_vs_naive, covered, interval_score_pct (programmatic), and writeup_score plus
-w_C1..w_C42 from the family's pinned model judge (judge.md, judge.py, judge.json). When the judge
+w_C1..w_C48 from the family's pinned model judge (judge.md, judge.py, judge.json). When the judge
 can't run (no ANTHROPIC_API_KEY) or fails, the write-up metrics are left out, reward is
 accuracy_reward alone, and details say why.
 """

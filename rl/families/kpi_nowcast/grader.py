@@ -2,7 +2,7 @@
 
 Two parts from one agent's output:
   accuracy  programmatic: the forecast JSON block (end of the brief, answer.md) vs the task's tests/gold.json
-  writeup   LLM judge: rubric C1-C42 (judge.md), pass/fail/na per item, over the brief and the
+  writeup   LLM judge: rubric C1-C48 (judge.md), pass/fail/na per item, over the brief and the
             methods note (methods.md); each item grades the brief, the note, or both
 
 The agent chooses the metric to nowcast, and each task has one right metric (gold: the series' KPI).
@@ -29,7 +29,7 @@ import pathlib
 import re
 
 HERE = pathlib.Path(__file__).resolve().parent
-ITEMS = [f"C{i}" for i in range(1, 43)]
+ITEMS = [f"C{i}" for i in range(1, 49)]
 MATCH = 0.005          # a metric_history value matches a reported value within 0.5%
 INTERVAL_LEVEL = 0.95
 MAX_FIGURES = 4

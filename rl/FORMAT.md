@@ -150,7 +150,7 @@ TOML has no null: a field with no value is absent.
 |---|---|---|---|
 | research_design | review | `graders/review_issues.py` | blocking-issue recall − 0.1 × manufactured − 0.2 × contradicts-gold, clamped to [0, 1] |
 | research_design | compare | `graders/pairwise_pick.py` | the task shows both orderings and the agent answers `{"AB": {"winner": ...}, "BA": {...}}`; 1 only if both picks name gold's plan (always "A" scores 0) |
-| kpi_nowcast | produce | `grader.py` + `judge.md` | skill vs the naive forecast, clamped to [0, 1] (code); accuracy and the C1–C42 write-up rubric (LLM judge) as diagnostics |
+| kpi_nowcast | produce | `grader.py` + `judge.md` | skill vs the naive forecast, clamped to [0, 1] (code); accuracy and the C1–C48 write-up rubric (LLM judge) as diagnostics |
 | data_audit, anomaly_scoring | review / produce | `verifier/*.py` + `judge.md` | see each `family.yaml`; the W1–W9 write-up rubric (LLM judge, `_shared/writeup.py`) is a diagnostic, never in the reward |
 | growth_thesis | produce | `verifier/*.py` | see its `family.yaml` |
 

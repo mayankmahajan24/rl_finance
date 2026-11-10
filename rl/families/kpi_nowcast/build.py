@@ -508,8 +508,8 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                 gap_rule = ("State the gap as the difference between the two estimates' year-on-year growth, both measured "
                             f"against last year's reported figure for the quarter, in percentage points.")
                 bench_text = (f"Compare your estimate with the analyst consensus for {label} {c['line']}, published by "
-                              f"{c['provider']} on {c['published']}: ${cons_value:,.1f}m. {gap_rule} Say whether you expect "
-                              f"the reported figure to beat or miss the consensus, and how confident you are, and in your "
+                              f"{c['provider']} on {c['published']}: ${cons_value:,.1f}m. {gap_rule} Give your call on the "
+                              f"quarter against consensus, beat, miss or in line, and how confident you are, and in your "
                               f"track record say how the gap compares with your usual walk-forward miss."
                               if c else f"Compare your estimate with the naive benchmark's estimate for {label}. {gap_rule}")
                 cons_text = ("Set `vs_consensus` to `above` or `below`: whether you expect the reported figure to come in "
@@ -551,7 +551,7 @@ def build(family_id: str, split_names: list[str] | None = None, n: int | None = 
                     "output_schema": "families/kpi_nowcast/schema.json",
                     "grader": {"type": "kpi_nowcast", "module": "families/kpi_nowcast/grader.py",
                                "accuracy": "programmatic (metric gate on gold.metric_history, then forecast vs gold.actual)",
-                               "writeup": "LLM judge rubric C1-C42, over the brief and the methods note (families/kpi_nowcast/judge.md)"},
+                               "writeup": "LLM judge rubric C1-C48, over the brief and the methods note (families/kpi_nowcast/judge.md)"},
                     "sources": ["rl/sources/txn_panel/raw/sensor_panel.csv.gz", "rl/sources/txn_panel/raw/statement_facts.csv.gz",
                                 "rl/sources/txn_panel/grader_only/kpi_facts.csv",
                                 q["first_source"]],

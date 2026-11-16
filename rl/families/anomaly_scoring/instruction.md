@@ -4,7 +4,9 @@
 
 Build a model that scores every datapoint for how likely it is to be
 *bad data*: a one-day spike or drop from a malfunctioning source, or a period in which a source's level has shifted
-up or down relative to what it should read.
+up or down relative to what it should read. A shifted source is bad data on every day of the shift, from the day it
+moves until the day it returns to normal, however long that takes: it does not become correct by staying wrong. Once
+it is back to normal, its rows are good data again.
 
 {schema}
 
@@ -34,7 +36,15 @@ Requirements:
   and are not anomalies.
 * Each run must finish within 20 minutes on 2 CPUs. Python with pandas, numpy and scipy is available.
 
-You are scored on F1 against hidden labelled anomalies (one-day anomalies, and the first weeks of level shifts),
-multiplied by the share of rows you score, and set to zero if the no-foresight check fails. Some panels have nothing
-planted: on those, the F1 is replaced by 1 minus the share of rows you flag divided by 5%, floored at 0. The note is graded
-separately and does not change that score.
+How you are scored. A row is flagged if its score is above 0.5. The labelled anomalies are the planted one-day
+spikes and drops, and every day of each planted level shift; the first 7 days after a shift ends are not scored.
+Your score is the average of two parts:
+* **Row F1:** F1 of your flags against the labelled rows. Shift days are most of them, so this mostly rewards
+  flagging a shifted source for as long as it stays shifted, and not flagging it once it has recovered.
+* **Event F1:** F1 of the same row precision against event recall. Spikes and drops carry half of event recall, and
+  count if their day is flagged. Shifts carry the other half: a shift counts in full if flagged within 7 days of its
+  start, with the credit falling to nothing at 30 days.
+
+That average is multiplied by the share of rows you score, and set to zero if the no-foresight check fails. Some
+panels have nothing planted: on those, the score is 1 minus the share of rows you flag divided by 5%, floored at 0.
+The note is graded separately and does not change that score.

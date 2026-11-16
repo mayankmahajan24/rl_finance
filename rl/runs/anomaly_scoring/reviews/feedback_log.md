@@ -10,3 +10,4 @@ Disposition values: `open`, `rubric change`, `new programmatic check`, `case/gol
 |---|---|---|---|---|---|
 | 1 | 2026-11-16 | General (difficulty) | whats the difference bbetween the data audit stuff and the anomaly task? i am worried that the anomaly task will have similar results to the data audit where the models score very hihg | open | Opus smoke run on bench 001, 002 and control-01; see the review |
 | 2 | 2026-11-16 | General (frontier runs) | ok do this using my subscription | done | Run through the subscription CLI, ANTHROPIC_API_KEY unset |
+| 3 | 2026-11-16 | Instruction and grader (v2) | ok give this a shot | open | v2 proposed, awaiting approval: whole-shift labels, per-event scoring, shifts of 60-240 days that end in the scored window; see the review's v2 section |

@@ -15,9 +15,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "990cc72c44a0",
-  "gold_fingerprint": "4d48da49f967",
-  "content_sha256": "99cad8c06adfed7d529039b39c49bcb24a8bedb1ef99b143232160cbe27972de"
+  "fingerprint": "b5a40d0e36a3",
+  "gold_fingerprint": "a701a0b23645",
+  "content_sha256": "f7fa80f906ad3bc14b9492bff1c51fad623bb5ea67310aeabf82c534eefab2f9"
  },
  "anomaly-bench-002": {
   "split": "bench",
@@ -35,9 +35,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "abab0e5b398a",
-  "gold_fingerprint": "7751bea8cdd1",
-  "content_sha256": "4cd7d7fedeb3fdf8c6f12178557e624f131b1a084bfb0f649a3d9e4c4b67803a"
+  "fingerprint": "100389cefa46",
+  "gold_fingerprint": "31969bce77d4",
+  "content_sha256": "f96d4c1e51427a9c36c8bb91156229f7b2ce38908848060ffe32d6c5452f6ee6"
  },
  "anomaly-bench-003": {
   "split": "bench",
@@ -55,9 +55,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "0fab663ed528",
-  "gold_fingerprint": "c88541ed2551",
-  "content_sha256": "a4613c626a56d53b842cbe728bf222591c2bfc5aa9b962055ba10762bbaff254"
+  "fingerprint": "f780867f1218",
+  "gold_fingerprint": "ce89451e3993",
+  "content_sha256": "9a5b9d98582d329a5e7c1c7805458149d53c54c38dc3c4569d8e26e7e8b3bd49"
  },
  "anomaly-bench-004": {
   "split": "bench",
@@ -75,9 +75,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "e6e92a89a37e",
-  "gold_fingerprint": "ba8c815e4a75",
-  "content_sha256": "22d99f91bd1704b75c0c1c3d80cd287b1857bded080faad10617d16e487d1a08"
+  "fingerprint": "10d6c731d350",
+  "gold_fingerprint": "52448dad443e",
+  "content_sha256": "b0c56e77a9ef44c5528815e3dbf72755088b270fec55774fc34188b66127d5c8"
  },
  "anomaly-bench-005": {
   "split": "bench",
@@ -95,9 +95,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "7b3b9bf9d76b",
-  "gold_fingerprint": "20d06b87b42d",
-  "content_sha256": "a5f16b2c8c7f61c3e059566799d455b8cb2f6022bad6e20e3499b3ea1bc32af5"
+  "fingerprint": "435179180b83",
+  "gold_fingerprint": "c7f7fe6e82cf",
+  "content_sha256": "9ba1399f523b7c7cd48bb89f3604904a9aa98858e74294d65f7cec1ca47454c4"
  },
  "anomaly-bench-006": {
   "split": "bench",
@@ -115,9 +115,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "d133811f4543",
-  "gold_fingerprint": "2fdd66bfd41b",
-  "content_sha256": "b963721666818a64192330681ed9d203cacbc3246ac8761be131f62104723348"
+  "fingerprint": "ad22e5081d1f",
+  "gold_fingerprint": "373bb6045770",
+  "content_sha256": "f33b8fbff58817570a3c19870937738133b34f48de8664fd752baf2fe4f7af53"
  },
  "anomaly-bench-007": {
   "split": "bench",
@@ -135,9 +135,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "c4e64625739a",
-  "gold_fingerprint": "bc523a929961",
-  "content_sha256": "42e3c65b64c6985b0e274414d181b02b68af148a18709e7340ba23cbdc96a724"
+  "fingerprint": "10f83335051b",
+  "gold_fingerprint": "8defde6f2e97",
+  "content_sha256": "c1336936370fff493c959ed8e7d607d36d412f456e9196e5efc15841eec764f5"
  },
  "anomaly-bench-008": {
   "split": "bench",
@@ -155,9 +155,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "e88ab077f853",
-  "gold_fingerprint": "e7e729334f55",
-  "content_sha256": "ff505f76ed60bd1f6253f29d05fcbd835474fb0015c8f088c0c3b4ef761675d3"
+  "fingerprint": "5f7c80a8834c",
+  "gold_fingerprint": "39bdb1cf60ff",
+  "content_sha256": "1403fd16141b6b9ba3c5ef88d08c016ea48cea97fd56625e579bf31776f5730f"
  },
  "anomaly-bench-009": {
   "split": "bench",
@@ -175,9 +175,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "659414090ce2",
-  "gold_fingerprint": "d2cb37716469",
-  "content_sha256": "49162fe7beb09b1a6a820467d63c9440cf006c000ca2bd5c50915ac6d96e9fc8"
+  "fingerprint": "da9d1bda19cc",
+  "gold_fingerprint": "45c15b006a6a",
+  "content_sha256": "bdb3e8affd00e23dbf5e697490b1c60b2b047485875939485994de1f21aae181"
  },
  "anomaly-bench-010": {
   "split": "bench",
@@ -195,9 +195,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "df43fc103347",
-  "gold_fingerprint": "118645b39e85",
-  "content_sha256": "f27d05aa82adf4e63eb88beb7ae558b05e29d21a5c6b61e83452758cff835b64"
+  "fingerprint": "73bf0c4f19e9",
+  "gold_fingerprint": "aa76eb0d39db",
+  "content_sha256": "c13a15bdb0bc7833f77d2bf84bdf87399d116cb8105a38fc3153d88ca93e8987"
  },
  "anomaly-bench-control-01": {
   "split": "bench",
@@ -215,9 +215,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "1c7371037ae2",
-  "gold_fingerprint": "92dc68b5d5b9",
-  "content_sha256": "676db466382fc34cb9b9a9cd6e6b6ac9cbd40d896915afc62921a07e67226ac7"
+  "fingerprint": "495c1cd1ca8e",
+  "gold_fingerprint": "4b919b149743",
+  "content_sha256": "8a0a185092794ca52a55cbbd5eb80f31746ed8c017765d1cb91f950e010d5b7f"
  },
  "anomaly-bench-control-02": {
   "split": "bench",
@@ -235,9 +235,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "d94ffddc0f41",
-  "gold_fingerprint": "2d9ea5a4f204",
-  "content_sha256": "bb329421149dbdc94781c5357a2aee4b48f957922e3163d80b5657720eaf94a7"
+  "fingerprint": "2be4005db3e7",
+  "gold_fingerprint": "1a3eb4ed88cc",
+  "content_sha256": "a2039ca72a77ca32bca2f4c981ea5e6494a7012a9f0ed28925bc842a4f099a1f"
  },
  "anomaly-heldout-001": {
   "split": "heldout",

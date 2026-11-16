@@ -1,6 +1,6 @@
 id: anomaly_scoring
 task_prefix: anomaly
-description: Online (no-foresight) anomaly scoring of sensor data
+description: Panel quality, monitor mode - write a scorer that flags bad rows in new transaction data as they arrive, with no foresight
 version: 0.1.0          # bump when the family's tasks change in a way results can't be compared across
 authors:
   - name: Mayank Mahajan

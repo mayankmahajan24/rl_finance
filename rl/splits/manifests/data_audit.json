@@ -15,9 +15,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "eff7debcc5a3",
-  "gold_fingerprint": "95fc3fa577a7",
-  "content_sha256": "ed2a72489fb752049553e25eb6416662ecd6c13997273d74e6a8da15a3348783"
+  "fingerprint": "1df68518aa73",
+  "gold_fingerprint": "c9499eba492f",
+  "content_sha256": "c2c3d1b1f0c1404d76f1afc93168f7da67a8203ced9a2ba2829a6591584694d1"
  },
  "audit-bench-002": {
   "split": "bench",
@@ -35,9 +35,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "e4e62b190d0f",
-  "gold_fingerprint": "9bc98700846a",
-  "content_sha256": "24f84a935376d2754b8a5ddb38d75b87d286f037290731863fa52d4fc25e449d"
+  "fingerprint": "c6c87e51da4f",
+  "gold_fingerprint": "c6b5d6035877",
+  "content_sha256": "00a099d17437c38dcfda2595072acdeee44dcb9bbeae8357ab2dc03f13b81a65"
  },
  "audit-bench-003": {
   "split": "bench",
@@ -55,9 +55,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "a175230ca147",
-  "gold_fingerprint": "fc0e2bbf18ab",
-  "content_sha256": "68e73de79df0c64f3fdda9814bffdb0f371af5e6c266de7cc4b35ef0eca153e7"
+  "fingerprint": "693c1eca56da",
+  "gold_fingerprint": "3edfa0812999",
+  "content_sha256": "bb8b1ccbbcf221438d9e6f012953d52a4b374e4f9eeac740b0b0f8768f26a4cb"
  },
  "audit-bench-004": {
   "split": "bench",
@@ -75,9 +75,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "01feefaa6ed6",
-  "gold_fingerprint": "c516c26f94d0",
-  "content_sha256": "c072745a02c92f865516c1311ba0853d62c1b3cb93425648a6e6a7347a214145"
+  "fingerprint": "61d1ebab06fa",
+  "gold_fingerprint": "0e29385f8fab",
+  "content_sha256": "f7e30c90883895cb2d55f4fb21b822f50b5e7d97e938c0fbb901eee9934da771"
  },
  "audit-bench-005": {
   "split": "bench",
@@ -95,9 +95,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "7065ced35d3c",
-  "gold_fingerprint": "0ddc2c845434",
-  "content_sha256": "10b47425f998917de7380ffbd2e5cc7bd350066c7412f044490f4cf6e867f6c2"
+  "fingerprint": "a460a7b10a7b",
+  "gold_fingerprint": "6f68592b6597",
+  "content_sha256": "c11d779d13ff3543eb0c84abf4582b1f137cb868b187861f142ffaeff8cab0b3"
  },
  "audit-bench-006": {
   "split": "bench",
@@ -115,9 +115,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "9e3bfc1f79bd",
-  "gold_fingerprint": "3778e291f4ff",
-  "content_sha256": "f69e9dc2848e49ddab818d7e3196d60d4e56787cc0be53327d1a93109f079499"
+  "fingerprint": "9f6f9a575654",
+  "gold_fingerprint": "d0fa51fd1361",
+  "content_sha256": "2729fb76f5ba5d3ae62bda7b1d0c148a8a1271340b0574ab5ab4bcc218dc3cd3"
  },
  "audit-bench-007": {
   "split": "bench",
@@ -135,9 +135,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "6db811ec0137",
-  "gold_fingerprint": "89065b042fe6",
-  "content_sha256": "5625499a688cfe053618b7f975d8cad32e99791cec4d07053b061582d5e6dbec"
+  "fingerprint": "55311f0bb32f",
+  "gold_fingerprint": "b17ada6aed05",
+  "content_sha256": "3a296e469aebf32a6a5daeab7118919940013d55323a1d92d0ffe5268002e0ba"
  },
  "audit-bench-008": {
   "split": "bench",
@@ -155,9 +155,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "0a7372a8a11e",
-  "gold_fingerprint": "c17974ef69c9",
-  "content_sha256": "f39099279b336c415222108e45db76e6a2f0676d26afd170e26a5c93226a25a2"
+  "fingerprint": "bdd83279b182",
+  "gold_fingerprint": "ce52196c1056",
+  "content_sha256": "2b8dc019f7ec1ea5d25f66af5b81f8c4ad29b011ba38bc843b04ba81003bd0b6"
  },
  "audit-bench-009": {
   "split": "bench",
@@ -175,9 +175,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "06e1f542a5c4",
-  "gold_fingerprint": "955037668fb9",
-  "content_sha256": "27a2e51c19aad12193687123f599affbe7f2ce6412f51609be63f9b79ca457c6"
+  "fingerprint": "e47d55785544",
+  "gold_fingerprint": "efce9add7dba",
+  "content_sha256": "395ef91e8e85c31ea6fb4b2aa89208ebfe1837debf8c6e270cc59665c1f11ba5"
  },
  "audit-bench-010": {
   "split": "bench",
@@ -195,9 +195,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "82902d4a59d6",
-  "gold_fingerprint": "1109ece76493",
-  "content_sha256": "629b21980be69d309d94849dcca25bff0426f15a4f6452af3fddad6344dd783a"
+  "fingerprint": "7c9a7a224c54",
+  "gold_fingerprint": "6cc7f3f34730",
+  "content_sha256": "ffcab5fdd62e4b0352365cbdf13c2dcb874876416633fd3882b4bbf82a30ffca"
  },
  "audit-bench-control-01": {
   "split": "bench",
@@ -215,9 +215,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "50b032694bf5",
-  "gold_fingerprint": "d8351670a0f7",
-  "content_sha256": "3d35103d5eed28b1a45c324a0f99c2c633c82c348ae12b1a9129a043f61c065d"
+  "fingerprint": "52b4fbfcefa6",
+  "gold_fingerprint": "53aed824de53",
+  "content_sha256": "71a188fd1d0bc2a3611f02bae1553ce3f6b90231fed1e12c9ed316565f67b602"
  },
  "audit-bench-control-02": {
   "split": "bench",
@@ -235,9 +235,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "22d8fb5cce08",
-  "gold_fingerprint": "12fa8453ecb9",
-  "content_sha256": "29260919758e5f14735af5b2cf376c1563bc03fafa5893707513626be2f774c2"
+  "fingerprint": "b5f174106a1e",
+  "gold_fingerprint": "d552d41a5de9",
+  "content_sha256": "945a928fa1844ae65a442bbb7acdb937bb4a813787323a4bd3953bafb0b6e5f5"
  },
  "audit-heldout-001": {
   "split": "heldout",

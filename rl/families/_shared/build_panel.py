@@ -87,7 +87,8 @@ def write_task(dest: pathlib.Path, fam: dict, instruction: str, data: dict[str, 
                         metadata=dict(meta, fingerprint=fp), description=fam["description"],
                         keywords=["alt-data", "data-science", fam["task_prefix"]], verifier=verifier,
                         tests={verifier: fam_dir / fam["verifier"], **writeup, **truth.pop("hidden_files", {})}, gold=json.dumps(truth, indent=1, default=str),
-                        judged="judge" in fam, data=data, solution=solution)
+                        judged="judge" in fam, data=data, solution=solution,
+                        pip=fam.get("pip", ""))
 
 
 def build_split(fam_id: str, split: str, n: int | None, controls: int | None) -> dict:

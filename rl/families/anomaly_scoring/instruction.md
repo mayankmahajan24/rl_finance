@@ -1,9 +1,9 @@
-# Online anomaly scoring for sensor data
+# Online anomaly scoring for transaction data
 
 {firm}
 
 Build a model that scores every datapoint for how likely it is to be
-*bad data*: a one-day spike or drop from a malfunctioning sensor, or a period in which a sensor's level has shifted
+*bad data*: a one-day spike or drop from a malfunctioning source, or a period in which a source's level has shifted
 up or down relative to what it should read.
 
 {schema}
@@ -30,7 +30,7 @@ Requirements:
   dates and anomalies. It has to work on any file in this format, so a table of scores for the data above is worth nothing.
 * **No foresight.** The score for a row dated *t* may only depend on rows dated on or before *t*. This is checked
   by running your script on that panel truncated at hidden dates and comparing the scores with a run on the whole panel.
-* Real business events (holidays, Black Friday, weekly cycles, genuine growth) move every sensor of a company together
+* Real business events (holidays, Black Friday, weekly cycles, genuine growth) move every source of a company together
   and are not anomalies.
 * Each run must finish within 20 minutes on 2 CPUs. Python with pandas, numpy and scipy is available.
 

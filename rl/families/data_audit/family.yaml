@@ -1,12 +1,12 @@
 id: data_audit
 task_prefix: audit
-description: Audit an alt-data panel for planted data-quality problems
+description: Panel quality, audit mode - diagnose the data-quality problems in a transaction panel before it is used for research
 version: 0.1.0          # bump when the family's tasks change in a way results can't be compared across
 authors:
   - name: Mayank Mahajan
 role: [quant_researcher]
 workflow: [data_audit]
-mode: [review]             # find what is wrong with given material: issues.json + writeup.md
+mode: [review]             # find what is wrong with given material: issues.json + cleaned.csv + usability.json + writeup.md and chart
 world: [systematic_consumer]
 source: txn_panel
 format: harbor
@@ -16,14 +16,16 @@ verifier: verifier/audit_verify.py
 verifier_timeout_sec: 600
 gold_file: gold.json
 reward: >-
-  F1 of precision and recall against planted problems plus required natural breaks (code, no judge).
-  Never blended in: the W1-W9 write-up rubric (LLM judge; left out when the judge can't run)
-rubric_visibility: partial  # the instruction asks for the note but not the rubric's judgment items; draft rubric,
-                            # Mayank to confirm
+  (0.4 x soft F1 of reported problems against planted problems plus natural breaks, each match credited by
+  the generalized intersection over union of its dates, + 0.4 x the repair score of cleaned.csv against the
+  pre-injection panel, scaled down for damage to good days, + 0.2 x F1 on the not-usable series; code) x (0.5 +
+  0.5 x the W1-W9 note-and-chart rubric, LLM judge); the code score alone when the judge can't run
+rubric_visibility: full     # the instruction lists what the note and chart must contain and how they are scored
+pip: " matplotlib==3.11.2"  # the chart of flagged periods; same pin as kpi_nowcast
 judge:                   # the write-up judge (judge.md); pinned, part of the instrument (families/_shared/judge.py)
   model: claude-sonnet-5-5
   effort: medium
-  votes: 1
+  votes: 3               # the write-up scales the reward
   max_tokens: 8000
 gold_inputs:             # files its gold comes from; each has a provenance entry (rl/provenance.py)
   - sources/txn_panel/annotations/data_artifacts.yaml

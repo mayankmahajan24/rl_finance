@@ -58,7 +58,11 @@ def plant(rng, control: bool, ctx, n_tickers: int):
     req, opt = F.natural()
     excl = [dict(ticker=i['ticker'], source_id=i['source_id'], lo=i['start'],
                  hi=i['end'] or F.d(ctx.panel_end)) for i in req] + \
-           [dict(ticker=i['ticker'], source_id=i['source_id'], lo=i['lo'], hi=i['hi']) for i in opt]
+           [dict(ticker=i['ticker'], source_id=i['source_id'], lo=i['lo'],
+                 hi=F.d(ctx.panel_end) if i['source_id'] is not None else i['hi']) for i in opt]
+    # a real source-level artifact (a coverage ramp, an under-capture) can leave the source at a new level for good;
+    # a scorer told that a shift is bad until it returns to normal would flag it forever, and on day t no causal
+    # scorer can tell that from a long planted shift, so that series is not scored from the artifact to the end
     cutoffs = [_fmt(d0 + (d1 - d0) * f) for f in (0.45, 0.7)]
     truth = dict(family='anomaly', control=control, points=points, shifts=shifts,
                  exclusions=excl, ignore_series=F.low_volume_series(),

@@ -93,6 +93,12 @@ def chart(ev, truth, it, shift):
                 raw=raw, source=str(it['source_id']))
 
 
+def part(it: dict) -> dict:
+    """One alert inside a review item, with what explain.py needs to find it again in its task."""
+    return dict(task=it['task'], by=it['by'], start=str(it['start'].date()), end=str(it['end'].date()),
+                flagged_days=it['flagged_days'], task_ticker=it['task_ticker'], task_source=it['task_source'])
+
+
 def merge(items: list[dict]) -> list[dict]:
     """One item per original series and overlapping date range, across tasks."""
     out = []
@@ -104,10 +110,11 @@ def merge(items: list[dict]) -> list[dict]:
             last['tasks'] = sorted(set(last['tasks']) | {it['task']})
             last['by'] = sorted(set(last['by']) | {it['by']})
             last['flagged_days'] += it['flagged_days']
+            last['parts'].append(part(it))
             if len(it['chart']['dates']) > len(last['chart']['dates']):
                 last['chart'] = it['chart']
             continue
-        out.append(dict(it, tasks=[it['task']], by=[it['by']]))
+        out.append(dict(it, tasks=[it['task']], by=[it['by']], parts=[part(it)]))
     for i, it in enumerate(out, 1):
         it['id'] = f"{it['ticker']}-{it['source_id']}-{it['start'].date()}"
         it['start'], it['end'] = str(it['start'].date()), str(it['end'].date())

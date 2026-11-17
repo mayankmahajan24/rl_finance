@@ -58,6 +58,9 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid var(--focus); 
 .head h2 { font-size: 17px; margin: 0; font-weight: 600; }
 .meta { font: 13px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
 .known { font-size: 13px; color: var(--known-ink); }
+.why { margin: 0; padding: 10px 12px; background: var(--bg); border-radius: 6px; display: grid; gap: 6px; list-style: none; }
+.why li { font-size: 14px; line-height: 1.45; max-width: 80ch; }
+.why .who { font: 12px var(--mono); color: var(--muted); display: block; }
 svg { width: 100%; height: auto; display: block; }
 svg text { font: 11px var(--mono); fill: var(--muted); }
 .legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted); }
@@ -76,7 +79,8 @@ textarea { width: 100%; box-sizing: border-box; font: 14px var(--sans); color: v
 <div class="wrap">
   <header style="display:grid;gap:8px">
     <h1>Flag Review</h1>
-    <p class="lede">Each card is a run of flags the scorer raised that touches no planted problem. Decide whether the
+    <p class="lede">Each card is a run of flags a scorer raised that touches no planted problem, with why it flagged, taken from the
+    scorer's own workings on the first flagged day. Decide whether the
     source data is really off there. <b>Real</b> makes it labelled bad data in every task, <b>Not real</b> keeps it a
     false alarm, <b>Unsure</b> leaves it unscored. Lines are the source minus the median of the company's other
     sources, in log units, centred on the window; below them, this source's own daily count and dollars on a plain axis
@@ -175,7 +179,7 @@ function card(it) {
   div.className = 'card' + (v.verdict ? ' done' : ''); if (v.verdict) div.dataset.v = v.verdict;
   const days = it.start === it.end ? it.start : `${it.start} to ${it.end}`;
   div.innerHTML = `<div class="head"><h2></h2><span class="meta"></span></div>
-    <div class="meta days"></div><div class="known"></div><div class="chart"></div>
+    <div class="meta days"></div><div class="known"></div><ul class="why" aria-label="Why it was flagged"></ul><div class="chart"></div>
     <div class="legend"><span><i class="sw" style="background:var(--count)"></i>count</span>
       <span><i class="sw" style="background:var(--ticket)"></i>ticket size, dollars</span>
       <span><i class="sw" style="background:var(--flag)"></i>flagged day</span>
@@ -188,6 +192,16 @@ function card(it) {
   $('.head .meta', div).textContent = `${it.flagged_days} flagged day${it.flagged_days === 1 ? '' : 's'} · in ${it.tasks.length} of 4 tasks` + (it.by && it.by.filter(Boolean).length ? ` · flagged by ${it.by.filter(Boolean).join(' and ')}` : '');
   $('.days', div).textContent = days + `  ·  ${it.chart.sources} sources`;
   $('.known', div).textContent = it.chart.known.length ? 'In this window: ' + it.chart.known.map(k => `${k.kind.replace('decoy:', 'real event (decoy): ')} ${k.start}`).join('; ') : '';
+  const why = $('.why', div);
+  for (const p of it.parts || []) {
+    if (!p.why) continue;
+    const li = document.createElement('li'), who = document.createElement('span');
+    who.className = 'who';
+    who.textContent = `${p.by.replace('-run', ' run')} · task ${p.task.replace('anomhard-', '')} · ${p.start === p.end ? p.start : p.start + ' to ' + p.end}`;
+    li.append(who, document.createTextNode(p.why));
+    why.appendChild(li);
+  }
+  if (!why.children.length) why.remove();
   $('.chart', div).appendChild(chart(it));
   const vb = $('.verdict', div); vb.setAttribute('aria-label', `Verdict for ${it.ticker} source ${it.source_id}`);
   for (const key of ['real', 'not_real', 'unsure']) {

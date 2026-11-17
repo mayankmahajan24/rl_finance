@@ -79,7 +79,8 @@ textarea { width: 100%; box-sizing: border-box; font: 14px var(--sans); color: v
     <p class="lede">Each card is a run of flags the scorer raised that touches no planted problem. Decide whether the
     source data is really off there. <b>Real</b> makes it labelled bad data in every task, <b>Not real</b> keeps it a
     false alarm, <b>Unsure</b> leaves it unscored. Lines are the source minus the median of the company's other
-    sources, in log units, centred on the window.</p>
+    sources, in log units, centred on the window; below them, the plain daily count and dollars of this source and the
+    company's other sources, as they appear in the task's panel (each source carries its own hidden scale factor).</p>
   </header>
   <div class="bar">
     <div class="filters" role="group" aria-label="Show">
@@ -117,33 +118,51 @@ function el(tag, attrs = {}, parent) {
 }
 
 function chart(it) {
-  const c = it.chart, W = 720, H = 230, L = 44, R = 8, panelH = 92, gap = 22, T = 8;
+  const c = it.chart, W = 720, L = 52, R = 8, panelH = 104, gap = 18, T = 4, HEAD = 18;
+  const panels = [
+    { title: 'Count vs other sources (log ratio)', lines: [[c.count, 'var(--count)', 1.5]], flags: c.count },
+    { title: 'Ticket size vs other sources (log ratio)', lines: [[c.ticket, 'var(--ticket)', 1.5]], flags: c.ticket },
+    { title: 'Daily count, this source and the others (log scale)', log: true, raw: c.raw.ct, color: 'var(--count)' },
+    { title: 'Daily dollars, this source and the others (log scale)', log: true, raw: c.raw.amt, color: 'var(--ticket)' },
+  ];
+  for (const p of panels) if (p.raw) {
+    p.lines = Object.entries(p.raw).filter(([k]) => k !== c.source).map(([, v]) => [v, 'var(--muted)', 0.9, 0.55]);
+    p.lines.push([p.raw[c.source], p.color, 1.6, 1]);
+    p.flags = p.raw[c.source];
+  }
+  const H = T + panels.length * (panelH + gap) + 6;
   const n = c.dates.length, x = i => L + (W - L - R) * (n <= 1 ? 0 : i / (n - 1));
   const idx = d => { let i = c.dates.indexOf(d); if (i < 0) i = c.dates.findIndex(z => z >= d); return i < 0 ? n - 1 : i; };
   const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img',
-    'aria-label': `${it.ticker} source ${it.source_id}: count and ticket size against other sources, ${c.dates[0]} to ${c.dates[n - 1]}` });
-  const panels = [['count', 'Count vs others', 'var(--count)'], ['ticket', 'Ticket size vs others', 'var(--ticket)']];
-  panels.forEach(([key, title, color], p) => {
-    const top = T + p * (panelH + gap), vals = c[key].filter(v => v !== null);
-    let lo = Math.min(...vals, -0.2), hi = Math.max(...vals, 0.2);
-    const y = v => top + panelH - (v - lo) / (hi - lo) * panelH;
-    for (const k of c.known) {
-      const a = x(idx(k.start)), b = x(idx(k.end));
-      el('rect', { x: a - 2, y: top, width: Math.max(4, b - a + 4), height: panelH, fill: 'var(--known)' }, svg);
+    'aria-label': `${it.ticker} source ${it.source_id}: count and ticket size against other sources, and the daily count and dollars of every source, ${c.dates[0]} to ${c.dates[n - 1]}` });
+  const fmt = v => Math.abs(v) >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : Math.abs(v) >= 1e3 ? (v / 1e3).toFixed(1) + 'k' : v.toFixed(v < 10 ? 2 : 0);
+  panels.forEach((p, k) => {
+    const top0 = T + k * (panelH + gap), top = top0 + HEAD, ph = panelH - HEAD, tf = v => p.log ? Math.log10(Math.max(v, 0.01)) : v;
+    const vals = p.lines.flatMap(([v]) => v.filter(z => z !== null).map(tf));
+    let lo = Math.min(...vals), hi = Math.max(...vals);
+    if (!p.log) { lo = Math.min(lo, -0.2); hi = Math.max(hi, 0.2); }
+    if (hi - lo < 1e-9) { hi += 0.5; lo -= 0.5; }
+    const y = v => top + ph - (tf(v) - lo) / (hi - lo) * ph;
+    for (const kn of c.known) {
+      const a = x(idx(kn.start)), b = x(idx(kn.end));
+      el('rect', { x: a - 2, y: top, width: Math.max(4, b - a + 4), height: ph, fill: 'var(--known)' }, svg);
     }
     const a = x(idx(it.start)), b = x(idx(it.end));
-    el('rect', { x: a - 2, y: top, width: Math.max(4, b - a + 4), height: panelH, fill: 'var(--span)' }, svg);
-    el('line', { x1: L, x2: W - R, y1: y(0), y2: y(0), stroke: 'var(--line)', 'stroke-width': 1 }, svg);
+    el('rect', { x: a - 2, y: top, width: Math.max(4, b - a + 4), height: ph, fill: 'var(--span)' }, svg);
+    if (!p.log) el('line', { x1: L, x2: W - R, y1: y(0), y2: y(0), stroke: 'var(--line)', 'stroke-width': 1 }, svg);
     for (const v of [lo, hi]) {
-      const t = el('text', { x: L - 6, y: y(v) + (v === hi ? 9 : -2), 'text-anchor': 'end' }, svg); t.textContent = v.toFixed(2);
+      const t = el('text', { x: L - 6, y: top + ph - (v - lo) / (hi - lo) * ph + (v === hi ? 9 : -2), 'text-anchor': 'end' }, svg);
+      t.textContent = p.log ? fmt(10 ** v) : v.toFixed(2);
     }
-    const tt = el('text', { x: L + 4, y: top + 11 }, svg); tt.textContent = title;
-    let d = '';
-    c[key].forEach((v, i) => { if (v === null) return; d += (d && c[key][i - 1] !== null ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1); });
-    el('path', { d, fill: 'none', stroke: color, 'stroke-width': 1.5, 'stroke-linejoin': 'round' }, svg);
-    c.flags.forEach((f, i) => { if (f && c[key][i] !== null) el('circle', { cx: x(i), cy: y(c[key][i]), r: 2.6, fill: 'var(--flag)' }, svg); });
+    const tt = el('text', { x: L, y: top0 + 12 }, svg); tt.textContent = p.title;
+    for (const [v, color, w, op] of p.lines) {
+      let d = '';
+      v.forEach((z, i) => { if (z === null) return; d += (d && v[i - 1] !== null ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(z).toFixed(1); });
+      el('path', { d, fill: 'none', stroke: color, 'stroke-width': w, 'stroke-opacity': op ?? 1, 'stroke-linejoin': 'round' }, svg);
+    }
+    c.flags.forEach((f, i) => { if (f && p.flags[i] !== null) el('circle', { cx: x(i), cy: y(p.flags[i]), r: 2.6, fill: 'var(--flag)' }, svg); });
   });
-  const base = T + 2 * panelH + gap + 16;
+  const base = H - 2;
   [0, Math.floor((n - 1) / 2), n - 1].forEach((i, j) => {
     const t = el('text', { x: x(i), y: base, 'text-anchor': ['start', 'middle', 'end'][j] }, svg); t.textContent = c.dates[i];
   });
@@ -158,7 +177,8 @@ function card(it) {
   div.innerHTML = `<div class="head"><h2></h2><span class="meta"></span></div>
     <div class="meta days"></div><div class="known"></div><div class="chart"></div>
     <div class="legend"><span><i class="sw" style="background:var(--count)"></i>count</span>
-      <span><i class="sw" style="background:var(--ticket)"></i>ticket size</span>
+      <span><i class="sw" style="background:var(--ticket)"></i>ticket size, dollars</span>
+      <span><i class="sw" style="background:var(--muted)"></i>other sources</span>
       <span><i class="sw" style="background:var(--flag)"></i>flagged day</span>
       <span><i class="sw" style="background:var(--span)"></i>this alert</span>
       <span><i class="sw" style="background:var(--known)"></i>planted problem or real event in the window</span></div>

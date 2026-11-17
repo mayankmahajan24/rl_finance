@@ -58,7 +58,10 @@ def alerts_for(task: str, cache: pathlib.Path) -> list[dict]:
                               task_source=int(s), start=r.date.min() - shift, end=r.date.max() - shift,
                               flagged_days=len(r), max_score=round(float(r.anomaly_score.max()), 3)))
     for it in items:
+        cols = sorted(ev[ev.ticker == it['task_ticker']].source_id.unique())
+        it['source_map'] = {int(c): inv_s[int(c)] for c in cols}
         it['chart'] = chart(ev, truth, it, shift)
+        it.pop('source_map')
     return items
 
 
@@ -81,8 +84,13 @@ def chart(ev, truth, it, shift):
     lo_d, hi_d = str((a - shift).date()), str((b - shift).date())
     known = [k for k in known if k['end'] >= lo_d and k['start'] <= hi_d]
     r2 = lambda v: [None if pd.isna(z) else round(float(z), 3) for z in v]  # noqa: E731
+    raw = {k: {str(inv): r2(np.exp(frame[c].reindex(rc.index)).values) if k == 'ct' else
+               r2(x[x.source_id == c].set_index('date').amt.reindex(rc.index).values)
+               for c, inv in it['source_map'].items()}
+           for k, frame in (('ct', ct), ('amt', None))}
     return dict(dates=[str((dd - shift).date()) for dd in rc.index], count=r2(rc.values), ticket=r2(ra.values),
-                flags=[bool(z) for z in fl.values], sources=int(len(ct.columns)), known=known)
+                flags=[bool(z) for z in fl.values], sources=int(len(ct.columns)), known=known,
+                raw=raw, source=str(it['source_id']))
 
 
 def merge(items: list[dict]) -> list[dict]:

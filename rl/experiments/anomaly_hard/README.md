@@ -111,3 +111,21 @@ it holds fragmentation on three tasks (58-97% of its days) but misses it entirel
 avoid false alarms: 55-67% of its alerts touch no planted problem, and on 003-004 two thirds of its flagged
 rows are false. One run, so the spread is unmeasured. Next: check whether those false alerts are real
 unlabelled problems in the panel (that would be a grader ceiling, not model failure) before calling this hard.
+
+### Opus with the neutral instruction (2026-11-17)
+
+The instruction no longer lists the kinds of error ("flag everything that is actually off"). Same setup: anomhard-001's
+visible data only, subscription CLI, nothing read outside its folder. It finished on its own in 73 minutes.
+Its `score.py` on every task's hidden panel (v1 grader, before any review of real problems):
+
+| Task | Reward | Precision | Alert precision | Day recall | Event recall |
+|---|---|---|---|---|---|
+| 001 | 0.406 | 0.16 | 0.43 (9/21) | 0.59 | 0.83 |
+| 002 | 0.607 | 0.80 | 0.42 (8/19) | 0.59 | 0.75 |
+| 003 | 0.341 | 0.11 | 0.33 (10/30) | 0.70 | 0.90 |
+| 004 | 0.681 | 0.82 | 0.50 (8/16) | 0.71 | 0.75 |
+| control-01 | 0.977 | flags 0.11% of rows | | | |
+
+Mean 0.51 on the planted tasks (0.55 with the hinted instruction). Its unexplained alerts and the hinted run's,
+105 in all, merge into 47 review items (26 from this run only, 17 from the hinted run only, 4 from both) for review
+of whether they are real problems in the source data.

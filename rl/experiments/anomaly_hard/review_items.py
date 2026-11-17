@@ -6,7 +6,7 @@ overlap across tasks are merged (all tasks share the bench companies), and each 
 the task's hidden panel, in original dates: the source's log count and log ticket size against the median of the
 company's other sources, its flags, and any planted problem or decoy in the window.
 
-CACHE_DIR is grade.py's --cache folder for that task and scorer (it holds full.csv). Verdicts on the items go to
+Arguments are TASK=CACHE_DIR or TASK=CACHE_DIR@LABEL (LABEL names the scorer on the page). CACHE_DIR is grade.py's --cache folder for that task and scorer (it holds full.csv). Verdicts on the items go to
 reviewed.yaml, which build.py maps into every task.
 """
 from __future__ import annotations
@@ -23,7 +23,7 @@ TASKS = HERE.parents[1] / "tasks" / "proto" / "anomaly_hard"
 GAP, PAD = 2, 60
 
 
-def alerts_for(task: str, cache: pathlib.Path) -> list[dict]:
+def alerts_for(task: str, cache: pathlib.Path, label: str = '') -> list[dict]:
     d = TASKS / task
     truth = json.loads((d / 'tests' / 'gold.json').read_text())
     mp = json.loads((d / 'mapping.json').read_text())
@@ -56,7 +56,7 @@ def alerts_for(task: str, cache: pathlib.Path) -> list[dict]:
                 continue
             items.append(dict(task=task, ticker=inv_t[t], source_id=inv_s[int(s)], task_ticker=t,
                               task_source=int(s), start=r.date.min() - shift, end=r.date.max() - shift,
-                              flagged_days=len(r), max_score=round(float(r.anomaly_score.max()), 3)))
+                              flagged_days=len(r), max_score=round(float(r.anomaly_score.max()), 3), by=label))
     for it in items:
         cols = sorted(ev[ev.ticker == it['task_ticker']].source_id.unique())
         it['source_map'] = {int(c): inv_s[int(c)] for c in cols}
@@ -101,12 +101,13 @@ def merge(items: list[dict]) -> list[dict]:
         if last and (last['ticker'], last['source_id']) == (it['ticker'], it['source_id']) and \
                 it['start'] <= last['end'] + pd.Timedelta(days=GAP + 1):
             last['end'] = max(last['end'], it['end'])
-            last['tasks'].append(it['task'])
+            last['tasks'] = sorted(set(last['tasks']) | {it['task']})
+            last['by'] = sorted(set(last['by']) | {it['by']})
             last['flagged_days'] += it['flagged_days']
             if len(it['chart']['dates']) > len(last['chart']['dates']):
                 last['chart'] = it['chart']
             continue
-        out.append(dict(it, tasks=[it['task']]))
+        out.append(dict(it, tasks=[it['task']], by=[it['by']]))
     for i, it in enumerate(out, 1):
         it['id'] = f"{it['ticker']}-{it['source_id']}-{it['start'].date()}"
         it['start'], it['end'] = str(it['start'].date()), str(it['end'].date())
@@ -117,7 +118,8 @@ def merge(items: list[dict]) -> list[dict]:
 
 def main():
     dest, pairs = pathlib.Path(sys.argv[1]), [a.split('=', 1) for a in sys.argv[2:]]
-    items = [x for task, cache in pairs for x in alerts_for(task, pathlib.Path(cache))]
+    items = [x for task, rest in pairs for cache, _, label in [rest.partition('@')]
+             for x in alerts_for(task, pathlib.Path(cache), label)]
     merged = merge(items)
     dest.write_text(json.dumps(merged))
     print(len(items), 'unexplained alerts ->', len(merged), 'review items')

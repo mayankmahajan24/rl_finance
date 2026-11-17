@@ -185,7 +185,7 @@ function card(it) {
     <textarea rows="2" placeholder="Note (optional): what you see, or the dates if the real problem spans different days"></textarea>
     <span class="saved"></span>`;
   $('h2', div).textContent = `${it.ticker} · source ${it.source_id}`;
-  $('.head .meta', div).textContent = `${it.flagged_days} flagged day${it.flagged_days === 1 ? '' : 's'} · in ${it.tasks.length} of 4 tasks`;
+  $('.head .meta', div).textContent = `${it.flagged_days} flagged day${it.flagged_days === 1 ? '' : 's'} · in ${it.tasks.length} of 4 tasks` + (it.by && it.by.filter(Boolean).length ? ` · flagged by ${it.by.filter(Boolean).join(' and ')}` : '');
   $('.days', div).textContent = days + `  ·  ${it.chart.sources} sources`;
   $('.known', div).textContent = it.chart.known.length ? 'In this window: ' + it.chart.known.map(k => `${k.kind.replace('decoy:', 'real event (decoy): ')} ${k.start}`).join('; ') : '';
   $('.chart', div).appendChild(chart(it));

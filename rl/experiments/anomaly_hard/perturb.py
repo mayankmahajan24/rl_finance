@@ -17,6 +17,7 @@ import pandas as pd
 from families._shared.panel_perturb import _fmt
 
 DAY = pd.Timedelta(days=1)
+VISIBLE = 0.3        # smallest added share of a normal day that is labelled
 
 
 def _row(F, t, s, day):
@@ -84,7 +85,10 @@ def settlement_lag(F, t, s, day):
     w = [0.65, 0.35] if two else [1.0]
     for mi, wi in zip(nxt, w):
         _add(F, mi, ct * wi, amt * wi)
-    return [_ev('settlement_lag', t, s, day, day + (2 if two else 1) * DAY, moved=a)]
+    # a catch-up day that gained under 30% of a normal day (log 0.26, about 2 noise units) is not visible on its own,
+    # so it is left unscored rather than labelled
+    quiet = [_fmt(day + (i + 1) * DAY) for i, wi in enumerate(w) if a * wi < VISIBLE]
+    return [_ev('settlement_lag', t, s, day, day + (2 if two else 1) * DAY, moved=a, unscored_days=quiet)]
 
 
 def feed_dropout(F, t, s, day):

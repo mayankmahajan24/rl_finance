@@ -91,3 +91,23 @@ First grader (v0) -> current grader (v1):
 - **Spread across tasks is smaller under v1:** Opus B goes from 0.40-0.86 to 0.64-0.71, so tasks rank scorers more
   consistently.
 - **Weakest kinds for every scorer:** fragmentation (days held) and whale days.
+
+### A fresh Opus run on this task (2026-11-17)
+
+Opus 5.5, subscription CLI, `ANTHROPIC_API_KEY` unset, given anomhard-001's instruction and visible data only, in a
+folder outside the repo. It finished on its own in 22 minutes, wrote `score.py` and the note, and read nothing
+outside its folder. Its `score.py` graded on every task's hidden panel:
+
+| Task | v0 | v1 | Precision | Alert precision | Day recall | Event recall |
+|---|---|---|---|---|---|---|
+| 001 | 0.708 | 0.657 | 0.71 | 0.45 (9/20) | 0.77 | 0.81 |
+| 002 | 0.795 | 0.629 | 0.77 | 0.38 (8/21) | 0.74 | 0.75 |
+| 003 | 0.475 | 0.489 | 0.32 | 0.37 (10/27) | 0.76 | 0.92 |
+| 004 | 0.286 | 0.425 | 0.29 | 0.33 (8/24) | 0.67 | 0.67 |
+| control-01 | 0.962 | 0.962 | flags 0.19% of rows | | | |
+
+Mean 0.55 on the planted tasks, with no-foresight passing everywhere. Told what to look for, Opus finds most problems:
+it holds fragmentation on three tasks (58-97% of its days) but misses it entirely on 004. What it can't do is
+avoid false alarms: 55-67% of its alerts touch no planted problem, and on 003-004 two thirds of its flagged
+rows are false. One run, so the spread is unmeasured. Next: check whether those false alerts are real
+unlabelled problems in the panel (that would be a grader ceiling, not model failure) before calling this hard.

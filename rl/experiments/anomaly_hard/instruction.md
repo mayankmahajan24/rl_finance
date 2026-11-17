@@ -3,20 +3,10 @@
 {firm}
 
 Build a model that scores every datapoint for how likely it is to be *bad data*: a row where a source misreports
-what the company actually sold that day. The sources are separate reads on the same companies, so real business
-events (holidays, promotions, weekly cycles, storms that bring shoppers out early and then keep them home, a bank
-holiday that pushes settlement to the next day, genuine growth) move every source of a company together and are
-not anomalies. Bad data is a problem in one source. In this data it takes these forms:
-
-* **Count and value come apart.** A flood of tiny test transactions (the count jumps, the dollars barely move); a
-  day with a few unusually large tickets (the dollars jump, the count doesn't); or a change in how purchases are
-  split into transactions, where the count drifts up over weeks while the dollars don't.
-* **Volume lands on the wrong day.** Part of a day's batch settles late and turns up the next day or two; part of
-  the feed misses the cutoff for a few days and is sometimes backfilled in one go; or a batch is loaded twice.
-
-Every day a problem touches is bad data: the low day and the catch-up day, the missing days and the backfill day,
-and every day of a problem that persists, from when it starts until the source is back to normal. A source does not
-become correct by staying wrong.
+what the company actually did that day. Flag everything that is actually off. Real business events (holidays,
+promotions, weekly cycles, genuine growth) move every source of a company together and are not bad data. Every row a
+problem touches is bad data, and a problem that persists is bad data on every day until the source is back to normal:
+a source does not become correct by staying wrong.
 
 {schema}
 
@@ -46,15 +36,16 @@ Requirements:
   panel.
 * Each run must finish within 20 minutes on 2 CPUs. Python with pandas, numpy and scipy is available.
 
-How you are scored. A row is flagged if its score is above 0.5. The labelled rows are every day of each planted
-problem; for a problem that persists, the first 7 days after it ends are not scored. Your score is the average of
-two parts:
-* **Row F1:** F1 of your flags against the labelled rows.
-* **Event F1:** F1 of the same row precision against event recall. Each kind of problem above carries an equal share
-  of event recall. A problem lasting a few days counts if any of its days is flagged. A problem that persists counts
-  in full if flagged within 14 days of its labelled start, with the credit falling to nothing at 45 days.
+How you are scored. A row is flagged if its score is above 0.5. The panel's bad data is known to the grader: problems
+planted in it, and real problems in the source data that have been reviewed. Debatable rows are not scored, nor
+the first 7 days after a persisting problem ends. Your score is the average of two parts:
+* **Row F1:** precision of your flagged rows, against recall measured as the share of each problem's days you flag.
+  Problems of each kind weigh equally, so a problem lasting months counts the same as a one-day one.
+* **Event F1:** alert precision against event recall. An alert is a run of flagged days on one source (gaps of up
+  to 2 days joined), and it is correct if it touches bad data. A problem lasting a few days is caught if any of its
+  days is flagged; one that persists is caught in full if flagged within 14 days of its start, with the credit
+  falling to nothing at 45 days. Each kind of problem carries an equal share of event recall.
 
 That average is multiplied by the share of rows you score, and set to zero if the no-foresight check fails. Some
-panels have nothing planted: on those, the score is 1 minus the share of rows you flag divided by 5%, floored at 0.
-Known real problems in the source data are left out of scoring. The note is graded separately and does not
-change that score.
+panels have no known bad data: on those, the score is 1 minus the share of rows you flag divided by 5%, floored at 0.
+The note is graded separately and does not change that score.

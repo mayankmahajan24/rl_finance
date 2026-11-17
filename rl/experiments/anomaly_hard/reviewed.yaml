@@ -1,0 +1,8 @@
+# GRADER-ONLY. Verdicts on real problems in the source data (not planted), found by reviewing the flags scorers raise
+# that touch no planted problem. Original coordinates: real tickers, original source ids, real dates. build.py maps
+# each entry into every task built from that company:
+#   real      labelled bad data (event type `real`; 7+ days long is scored as a persisting problem)
+#   unsure    not scored
+#   not_real  stays good data, so a flag on it is a false alarm
+# Each entry: ticker, source_id, start, end, verdict, note, reviewed_by, reviewed_at.
+reviewed: []

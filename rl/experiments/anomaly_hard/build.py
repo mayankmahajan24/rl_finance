@@ -18,6 +18,7 @@ import sys
 
 import numpy as np
 import pandas as pd
+import yaml
 
 HERE = pathlib.Path(__file__).resolve().parent
 RL = HERE.parents[1]
@@ -27,6 +28,7 @@ from families._shared.panel_perturb import D, Frame, _fmt  # noqa: E402
 import perturb as P  # noqa: E402
 
 OUT = RL / "tasks" / "proto" / "anomaly_hard"
+REVIEWED = HERE / "reviewed.yaml"   # verdicts on real (unplanted) problems, in original coordinates; grader-only
 EVAL_START_DAYS, IGNORE_AFTER, MIN_RECOVERY = 545, 7, 60
 ONE_DAY = [P.card_testing, P.whale, P.settlement_lag, P.feed_dropout, P.duplicate_batch]   # 2 of each per panel
 REGIMES = [(P.fragmentation, (90, 200))]                                                      # 1 per panel
@@ -83,12 +85,31 @@ def plant(rng, control, ctx, n_tickers=8):
                  hi=i['end'] or F.d(ctx.panel_end)) for i in req] + \
            [dict(ticker=i['ticker'], source_id=i['source_id'], lo=i['lo'],
                  hi=F.d(ctx.panel_end) if i['source_id'] is not None else i['hi']) for i in opt]
+    not_real = []
+    for r in reviewed():                                      # real problems in the source data, as reviewed
+        t, s_ = F.t(r['ticker']), F.s(r['source_id'])
+        if t is None:
+            continue
+        x = dict(ticker=t, source_id=s_, start=F.d(r['start']), end=F.d(r['end']), note=r.get('note', ''))
+        if r['verdict'] == 'real':
+            events.append(dict(x, type='real', regime=(D(r['end']) - D(r['start'])).days >= 7))
+        elif r['verdict'] == 'unsure':
+            excl.append(dict(ticker=t, source_id=s_, lo=x['start'], hi=x['end']))
+        else:
+            not_real.append(x)
     truth = dict(family='anomaly_hard', control=control, events=events, decoys=decoys, exclusions=excl,
+                 reviewed_not_real=not_real,
                  ignore_series=F.low_volume_series(), eval_start=_fmt(d0 + pd.Timedelta(days=EVAL_START_DAYS)),
                  ignore_after_days=IGNORE_AFTER, threshold=0.5,
                  truncation_cutoffs=[_fmt(d0 + (d1 - d0) * f) for f in (0.45, 0.7)])
     df = F.df.sort_values(['date', 'ticker', 'source_id']).reset_index(drop=True)
-    return df, truth
+    mapping = dict(tickers={o: d for o, d in F.tmap.items() if d in set(df.ticker)}, sources=F.smap,
+                   shift_days=int(F.shift.days))
+    return df, truth, mapping
+
+
+def reviewed() -> list[dict]:
+    return (yaml.safe_load(REVIEWED.read_text()) or {}).get('reviewed', []) if REVIEWED.exists() else []
 
 
 def main():
@@ -103,8 +124,8 @@ def main():
     jobs = [(300000 + i, False, f'anomhard-{i:03d}') for i in range(1, a.n + 1)] + \
            [(390000 + i, True, f'anomhard-control-{i:02d}') for i in range(1, a.controls + 1)]
     for seed, control, tid in jobs:
-        shown, _ = plant(np.random.default_rng(seed), control, ctx)
-        hidden, truth = plant(np.random.default_rng([seed, 1]), control, ctx)
+        shown, _, _ = plant(np.random.default_rng(seed), control, ctx)
+        hidden, truth, mapping = plant(np.random.default_rng([seed, 1]), control, ctx)
         d = OUT / tid
         (d / 'environment' / 'data').mkdir(parents=True)
         (d / 'tests').mkdir()
@@ -113,6 +134,9 @@ def main():
             hidden.to_csv(index=False, date_format='%Y-%m-%d').encode(), mtime=0))
         (d / 'tests' / 'gold.json').write_text(json.dumps(dict(truth, seed=seed), indent=1))
         (d / 'instruction.md').write_text(text)
+        # the hidden panel's disguise (original -> task coordinates), outside tests/ and environment/: for turning
+        # review verdicts on this task's flags back into original coordinates
+        (d / 'mapping.json').write_text(json.dumps(mapping, indent=1))
         kinds = pd.Series([e['type'] for e in truth['events']]).value_counts().to_dict()
         print(tid, len(hidden), 'rows;', kinds, '; decoys', [x['kind'] for x in truth['decoys']])
 

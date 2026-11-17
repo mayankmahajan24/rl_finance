@@ -88,7 +88,7 @@ def score(truth: dict, data: pd.DataFrame, script: pathlib.Path, scheme: str = '
     for e in truth['events']:
         a, b = pd.Timestamp(e['start']), pd.Timestamp(e['end'])
         ser = (ev.ticker == e['ticker']) & (ev.source_id == e['source_id'])
-        m = ser & ev.date.between(a, b)
+        m = ser & ev.date.between(a, b) & (ev.date >= pd.Timestamp(truth['eval_start']))
         if e['regime']:
             ev.loc[ser & (ev.date > b) & (ev.date <= b + pd.Timedelta(days=truth['ignore_after_days'])), 'use'] = False
         ev.loc[m, 'label'] = True; ev.loc[m, 'use'] = True

@@ -79,8 +79,8 @@ textarea { width: 100%; box-sizing: border-box; font: 14px var(--sans); color: v
     <p class="lede">Each card is a run of flags the scorer raised that touches no planted problem. Decide whether the
     source data is really off there. <b>Real</b> makes it labelled bad data in every task, <b>Not real</b> keeps it a
     false alarm, <b>Unsure</b> leaves it unscored. Lines are the source minus the median of the company's other
-    sources, in log units, centred on the window; below them, the plain daily count and dollars of this source and the
-    company's other sources, as they appear in the task's panel (each source carries its own hidden scale factor).</p>
+    sources, in log units, centred on the window; below them, this source's own daily count and dollars on a plain axis
+    fitted to its range, as they appear in the task's panel (each source carries a hidden scale factor).</p>
   </header>
   <div class="bar">
     <div class="filters" role="group" aria-label="Show">
@@ -122,12 +122,11 @@ function chart(it) {
   const panels = [
     { title: 'Count vs other sources (log ratio)', lines: [[c.count, 'var(--count)', 1.5]], flags: c.count },
     { title: 'Ticket size vs other sources (log ratio)', lines: [[c.ticket, 'var(--ticket)', 1.5]], flags: c.ticket },
-    { title: 'Daily count, this source and the others (log scale)', log: true, raw: c.raw.ct, color: 'var(--count)' },
-    { title: 'Daily dollars, this source and the others (log scale)', log: true, raw: c.raw.amt, color: 'var(--ticket)' },
+    { title: 'Daily count, this source alone', plain: true, raw: c.raw.ct, color: 'var(--count)' },
+    { title: 'Daily dollars, this source alone', plain: true, raw: c.raw.amt, color: 'var(--ticket)' },
   ];
   for (const p of panels) if (p.raw) {
-    p.lines = Object.entries(p.raw).filter(([k]) => k !== c.source).map(([, v]) => [v, 'var(--muted)', 0.9, 0.55]);
-    p.lines.push([p.raw[c.source], p.color, 1.6, 1]);
+    p.lines = [[p.raw[c.source], p.color, 1.6, 1]];
     p.flags = p.raw[c.source];
   }
   const H = T + panels.length * (panelH + gap) + 6;
@@ -140,7 +139,8 @@ function chart(it) {
     const top0 = T + k * (panelH + gap), top = top0 + HEAD, ph = panelH - HEAD, tf = v => p.log ? Math.log10(Math.max(v, 0.01)) : v;
     const vals = p.lines.flatMap(([v]) => v.filter(z => z !== null).map(tf));
     let lo = Math.min(...vals), hi = Math.max(...vals);
-    if (!p.log) { lo = Math.min(lo, -0.2); hi = Math.max(hi, 0.2); }
+    if (!p.log && !p.plain) { lo = Math.min(lo, -0.2); hi = Math.max(hi, 0.2); }
+    if (p.plain) { const pad = (hi - lo) * 0.05; lo -= pad; hi += pad; }
     if (hi - lo < 1e-9) { hi += 0.5; lo -= 0.5; }
     const y = v => top + ph - (tf(v) - lo) / (hi - lo) * ph;
     for (const kn of c.known) {
@@ -149,10 +149,10 @@ function chart(it) {
     }
     const a = x(idx(it.start)), b = x(idx(it.end));
     el('rect', { x: a - 2, y: top, width: Math.max(4, b - a + 4), height: ph, fill: 'var(--span)' }, svg);
-    if (!p.log) el('line', { x1: L, x2: W - R, y1: y(0), y2: y(0), stroke: 'var(--line)', 'stroke-width': 1 }, svg);
+    if (!p.log && !p.plain) el('line', { x1: L, x2: W - R, y1: y(0), y2: y(0), stroke: 'var(--line)', 'stroke-width': 1 }, svg);
     for (const v of [lo, hi]) {
       const t = el('text', { x: L - 6, y: top + ph - (v - lo) / (hi - lo) * ph + (v === hi ? 9 : -2), 'text-anchor': 'end' }, svg);
-      t.textContent = p.log ? fmt(10 ** v) : v.toFixed(2);
+      t.textContent = p.log ? fmt(10 ** v) : p.plain ? fmt(v) : v.toFixed(2);
     }
     const tt = el('text', { x: L, y: top0 + 12 }, svg); tt.textContent = p.title;
     for (const [v, color, w, op] of p.lines) {
@@ -178,7 +178,6 @@ function card(it) {
     <div class="meta days"></div><div class="known"></div><div class="chart"></div>
     <div class="legend"><span><i class="sw" style="background:var(--count)"></i>count</span>
       <span><i class="sw" style="background:var(--ticket)"></i>ticket size, dollars</span>
-      <span><i class="sw" style="background:var(--muted)"></i>other sources</span>
       <span><i class="sw" style="background:var(--flag)"></i>flagged day</span>
       <span><i class="sw" style="background:var(--span)"></i>this alert</span>
       <span><i class="sw" style="background:var(--known)"></i>planted problem or real event in the window</span></div>

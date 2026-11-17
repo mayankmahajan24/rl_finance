@@ -235,7 +235,7 @@ function render() {
   for (const it of shown) list.appendChild(card(it));
   if (!shown.length) { const p = document.createElement('p'); p.className = 'lede';
     p.textContent = state.filter === 'todo' ? 'Everything has a verdict. Use All to look back over them.' : 'Nothing here yet.'; list.appendChild(p); }
-  const vs = Object.values(state.verdicts).map(v => v.verdict).filter(Boolean);
+  const vs = ITEMS.map(it => (state.verdicts[it.id] || {}).verdict).filter(Boolean);
   const n = k => vs.filter(v => v === k).length;
   $('#counts').textContent = `${vs.length} of ${ITEMS.length} reviewed · ${n('real')} real · ${n('not_real')} not real · ${n('unsure')} unsure`;
 }

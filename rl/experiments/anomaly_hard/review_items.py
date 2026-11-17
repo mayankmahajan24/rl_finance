@@ -1,7 +1,7 @@
 """Turn a scorer's unexplained alerts into review items: python review_items.py OUT.json TASK=CACHE_DIR ...
 
-An unexplained alert is a run of flags (gaps of up to 2 days joined) on a scored row that touches no labelled bad
-data. Each is mapped back to original coordinates with the task's mapping.json, alerts on the same series that
+An unexplained alert is a run of flagged days (gaps of up to 2 days joined) that are scored and not labelled bad
+data, wherever the run of flags around them started: flags that carry on after a planted problem ends show up too. Each is mapped back to original coordinates with the task's mapping.json, alerts on the same series that
 overlap across tasks are merged (all tasks share the bench companies), and each item carries a chart window from
 the task's hidden panel, in original dates: the source's log count and log ticket size against the median of the
 company's other sources, its flags, and any planted problem or decoy in the window.
@@ -43,20 +43,41 @@ def alerts_for(task: str, cache: pathlib.Path, label: str = '') -> list[dict]:
         if x['source_id'] is not None:
             m &= ev.source_id == x['source_id']
         use &= ~m
-    lab = pd.Series(False, index=ev.index)
+    lab, quiet, kind, after = pd.Series(False, index=ev.index), pd.Series(False, index=ev.index), {}, {}
     for e in truth['events']:
-        lab |= (ev.ticker == e['ticker']) & (ev.source_id == e['source_id']) & \
-            ev.date.between(pd.Timestamp(e['start']), pd.Timestamp(e['end']) + pd.Timedelta(days=7))
+        ser = (ev.ticker == e['ticker']) & (ev.source_id == e['source_id'])
+        a, b = pd.Timestamp(e['start']), pd.Timestamp(e['end'])
+        m = ser & ev.date.between(a, b)
+        lab |= m
+        for i in ev.index[m]:
+            kind[i] = e
+        if e.get('regime'):   # the days after a persisting problem ends are not scored
+            q = ser & (ev.date > b) & (ev.date <= b + pd.Timedelta(days=truth['ignore_after_days']))
+            quiet |= q
+            for i in ev.index[q]:
+                after[i] = e
     items = []
-    f = ev[ev.flag & use]
-    for (t, s), g in f.sort_values('date').groupby(['ticker', 'source_id']):
+    for (t, s), g in ev[ev.flag].sort_values('date').groupby(['ticker', 'source_id']):
+        # whole runs of flags, wherever they are: a card starts where the unexplained part of a run starts
         rid = (g.date.diff().dt.days.fillna(999) > GAP + 1).cumsum()
-        for _, r in g.groupby(rid):
-            if lab[r.index].any():
+        for _, run in g.groupby(rid):
+            bad = run[use[run.index] & ~lab[run.index] & ~quiet[run.index]]
+            if bad.empty:
                 continue
-            items.append(dict(task=task, ticker=inv_t[t], source_id=inv_s[int(s)], task_ticker=t,
-                              task_source=int(s), start=r.date.min() - shift, end=r.date.max() - shift,
-                              flagged_days=len(r), max_score=round(float(r.anomaly_score.max()), 3), by=label))
+            touched = [(kind[i], 'during') for i in run.index if i in kind] + \
+                [(after[i], 'after') for i in run.index if i in after]
+            sub = (bad.date.diff().dt.days.fillna(999) > GAP + 1).cumsum()
+            for _, r in bad.groupby(sub):
+                it = dict(task=task, ticker=inv_t[t], source_id=inv_s[int(s)], task_ticker=t, task_source=int(s),
+                          start=r.date.min() - shift, end=r.date.max() - shift, flagged_days=len(r),
+                          max_score=round(float(r.anomaly_score.max()), 3), by=label)
+                if run.date.min() < r.date.min():    # continues a run of flags that began earlier
+                    it['run_start'] = str((run.date.min() - shift).date())
+                    if touched:
+                        e, when = touched[0]
+                        it['run_planted'] = dict(kind=e['type'], start=str((pd.Timestamp(e['start']) - shift).date()),
+                                                 end=str((pd.Timestamp(e['end']) - shift).date()), when=when)
+                items.append(it)
     for it in items:
         cols = sorted(ev[ev.ticker == it['task_ticker']].source_id.unique())
         it['source_map'] = {int(c): inv_s[int(c)] for c in cols}
@@ -96,27 +117,40 @@ def chart(ev, truth, it, shift):
 def part(it: dict) -> dict:
     """One alert inside a review item, with what explain.py needs to find it again in its task."""
     return dict(task=it['task'], by=it['by'], start=str(it['start'].date()), end=str(it['end'].date()),
-                flagged_days=it['flagged_days'], task_ticker=it['task_ticker'], task_source=it['task_source'])
+                flagged_days=it['flagged_days'], task_ticker=it['task_ticker'], task_source=it['task_source'],
+                run_start=it.get('run_start'), run_planted=it.get('run_planted'))
 
 
 def merge(items: list[dict]) -> list[dict]:
-    """One item per original series and overlapping date range, across tasks."""
+    """One item per original series and stretch of days: alerts from different tasks or scorers share an item only
+    when they cover mostly the same days (overlap at least half of their combined span), so a long run in one task
+    does not swallow short, unrelated alerts from another."""
     out = []
     for it in sorted(items, key=lambda i: (i['ticker'], i['source_id'], i['start'])):
-        last = out[-1] if out else None
-        if last and (last['ticker'], last['source_id']) == (it['ticker'], it['source_id']) and \
-                it['start'] <= last['end'] + pd.Timedelta(days=GAP + 1):
-            last['end'] = max(last['end'], it['end'])
-            last['tasks'] = sorted(set(last['tasks']) | {it['task']})
-            last['by'] = sorted(set(last['by']) | {it['by']})
-            last['flagged_days'] += it['flagged_days']
-            last['parts'].append(part(it))
-            if len(it['chart']['dates']) > len(last['chart']['dates']):
-                last['chart'] = it['chart']
+        host = None
+        for cand in reversed(out):
+            if (cand['ticker'], cand['source_id']) != (it['ticker'], it['source_id']):
+                break
+            inter = (min(cand['end'], it['end']) - max(cand['start'], it['start'])).days + 1
+            union = (max(cand['end'], it['end']) - min(cand['start'], it['start'])).days + 1
+            if inter > 0 and inter / union >= 0.5:
+                host = cand
+                break
+        if host:
+            host['start'], host['end'] = min(host['start'], it['start']), max(host['end'], it['end'])
+            host['tasks'] = sorted(set(host['tasks']) | {it['task']})
+            host['by'] = sorted(set(host['by']) | {it['by']})
+            host['flagged_days'] += it['flagged_days']
+            host['parts'].append(part(it))
+            if len(it['chart']['dates']) > len(host['chart']['dates']):
+                host['chart'] = it['chart']
             continue
         out.append(dict(it, tasks=[it['task']], by=[it['by']], parts=[part(it)]))
+    seen = {}
     for i, it in enumerate(out, 1):
-        it['id'] = f"{it['ticker']}-{it['source_id']}-{it['start'].date()}"
+        base = f"{it['ticker']}-{it['source_id']}-{it['start'].date()}"
+        it['id'] = base if base not in seen else f"{base}-{seen[base] + 1}"
+        seen[base] = seen.get(base, 0) + 1
         it['start'], it['end'] = str(it['start'].date()), str(it['end'].date())
         for k in ('task', 'task_ticker', 'task_source'):
             it.pop(k)

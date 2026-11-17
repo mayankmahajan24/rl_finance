@@ -1,6 +1,7 @@
 """Add a short reason to every alert in a review items file: python explain.py ITEMS.json LABEL=SOLUTION_DIR ...
 
-The reason comes from the scorer's own internals at the alert's first flagged day, re-run on that task's hidden
+The reason comes from the scorer's own internals on the day its run of flags began (which can be before the
+alert, when the flags carry on from a planted problem), re-run on that task's hidden
 panel: which piece of evidence crossed the scorer's line and by how much, plus the plain size of the move (the
 source against the median of the other sources, compared with its previous 28 days) and how long the flag lasted.
 Only the two Opus scorers graded so far are understood: LABEL `hinted-run` (debug components) and `neutral-run`
@@ -161,9 +162,20 @@ def main():
             if gk not in groups:
                 d = panels[p['task']]
                 groups[gk] = d[d.ticker == p['task_ticker']].reset_index(drop=True)
-            g, t = groups[gk], pd.Timestamp(p['start']) + shift
+            onset = p.get('run_start') or p['start']
+            g, t = groups[gk], pd.Timestamp(onset) + shift
             fn = why_hinted if p['by'] == 'hinted-run' else why_neutral
-            p['why'] = fn(mods[p['by']], g, p['task_source'], t, p['flagged_days'], caches[p['by']])
+            txt = fn(mods[p['by']], g, p['task_source'], t, 1, caches[p['by']])
+            lead = ''
+            if p.get('run_start'):
+                pl = p.get('run_planted')
+                where = '' if not pl else (
+                    f", during a planted {pl['kind']} problem ({pl['start']} to {pl['end']})" if pl['when'] == 'during'
+                    else f", just after a planted {pl['kind']} problem ({pl['start']} to {pl['end']}) ended")
+                lead = (f"These flags continue a run that began on {p['run_start']}{where}."
+                        + (" The scorer kept flagging after that problem was over." if pl else '')
+                        + ' On the day the run began: ')
+            p['why'] = lead + txt + held(p['flagged_days'])
     items_path.write_text(json.dumps(items))
     print(sum(len(i['parts']) for i in items), 'alerts explained')
 

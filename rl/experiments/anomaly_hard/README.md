@@ -69,3 +69,25 @@ python rl/experiments/anomaly_hard/grade.py rl/tasks/proto/anomaly_hard/anomhard
 
 The tasks use the bench split's companies with their own seeds (300001-300004 planted, 390001 control), outside
 every family's seed ranges.
+
+## First results (2026-11-17)
+
+Existing code graded on 4 planted tasks and a control: the anomaly_scoring reference, and the two `score.py` files
+Opus wrote for anomaly_scoring v2 (A from its 001 run, B from its 002 run; neither was written for these problems).
+First grader (v0) -> current grader (v1):
+
+| Task | Reference | Opus A | Opus B |
+|---|---|---|---|
+| 001 | 0.599 -> 0.415 | 0.298 -> 0.438 | 0.412 -> 0.679 |
+| 002 | 0.119 -> 0.179 | 0.292 -> 0.401 | 0.855 -> 0.664 |
+| 003 | 0.493 -> 0.387 | 0.270 -> 0.407 | 0.442 -> 0.714 |
+| 004 | 0.267 -> 0.286 | 0.109 -> 0.333 | 0.401 -> 0.639 |
+| control-01 | 0.885 | 0.971 | 0.993 |
+
+- **v0's row recall was a fragmentation score:** fragmentation was 561 of 639 labelled days, so every scorer's
+  recall sat near 0.1. v1's day recall weighs each kind equally.
+- **The reference raises 92-104 alerts a panel, 86-88% of them false** (alert precision 0.13-0.14). v0 hid this
+  because the false runs are short. Opus B raises 12-18 alerts with 56-75% true.
+- **Spread across tasks is smaller under v1:** Opus B goes from 0.40-0.86 to 0.64-0.71, so tasks rank scorers more
+  consistently.
+- **Weakest kinds for every scorer:** fragmentation (days held) and whale days.

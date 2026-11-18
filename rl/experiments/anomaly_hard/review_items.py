@@ -18,6 +18,7 @@ import sys
 
 import numpy as np
 import pandas as pd
+import yaml
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from grade import SETTLE_DAYS, label_rows  # noqa: E402
@@ -163,6 +164,12 @@ def main():
     items = [x for task, rest in pairs for cache, _, label in [rest.partition('@')]
              for x in alerts_for(task, pathlib.Path(cache), label)]
     merged = merge(items)
+    # stretches already judged in reviewed.yaml are not asked about again
+    done = [(r['ticker'], int(r['source_id']), r['start'], r['end']) for r in
+            ((yaml.safe_load((HERE / 'reviewed.yaml').read_text()) or {}).get('reviewed') or [])]
+    merged = [it for it in merged if not any(t == it['ticker'] and s == it['source_id'] and a <= it['start']
+                                             and it['end'] <= b for t, s, a, b in done)]
+    merged.sort(key=lambda it: (-len(it['tasks']), -it['flagged_days']))   # recurring stretches first
     dest.write_text(json.dumps(merged))
     print(len(items), 'unexplained alerts ->', len(merged), 'review items')
 

@@ -81,3 +81,22 @@ Review loop: `review_items.py` collects distrusted runs the gold can't explain, 
 * v2-style anomaly flags, kinds listed in the instruction: Opus 0.55, then 0.51 with the kinds removed.
 * Lasting problems scored as changes (Option A) and a precision-minded instruction: Opus 0.75, 0.80 after the first
   review of its false alarms. Too easy; the task was redesigned to the current outputs (2026-11-18).
+
+## Opus on the current task (2026-11-18)
+
+anomhard-001's instruction and visible data only, subscription CLI, nothing read outside its folder; finished on its
+own in 21 minutes and passed every gate. Its `score.py` on every task's hidden panel (before reviewing its alerts):
+
+| Task | Reward | Confidence | Cleaned series | Precision | Alerts true | Clean gain | Damage penalty |
+|---|---|---|---|---|---|---|---|
+| 001 | 0.382 | 0.378 | 0.385 | 0.18 | 15/47 | 0.71 | 0.55 |
+| 002 | 0.425 | 0.398 | 0.452 | 0.27 | 13/47 | 0.54 | 0.84 |
+| 003 | 0.495 | 0.488 | 0.501 | 0.31 | 15/38 | 0.69 | 0.72 |
+| 004 | 0.450 | 0.314 | 0.586 | 0.14 | 14/53 | 0.67 | 0.87 |
+| control-01 | 0.511 | 0.044 | 0.978 | | | | |
+
+Mean 0.44. It catches and imputes every point anomaly well (cleaned gain 0.84-0.99, except count floods on two tasks).
+It fails at level shifts: it distrusts a shifted source for months after the change (most of its false rows, 54-296
+days a task, sit around planted shifts) and does not rescale a shifted stretch back to the old basis (ramp gain 0.0-0.6,
+step gain 0.0-0.7), and imputing its false alarms moves good rows 0.6-2.3% on average. The real-event decoys are left
+alone (0-7 days). The 60 unexplained alerts are on the review page, recurring ones first.

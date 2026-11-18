@@ -5,4 +5,15 @@
 #   unsure    not scored
 #   not_real  stays good data, so a flag on it is a false alarm
 # Each entry: ticker, source_id, start, end, verdict, note, reviewed_by, reviewed_at.
-reviewed: []
+reviewed:
+- {ticker: M_M, source_id: 1, start: '2015-08-04', end: '2015-08-04', verdict: real, note: 'flagged by both Opus runs in all 4 tasks', reviewed_by: Mayank, reviewed_at: '2026-11-18'}
+- {ticker: M_M, source_id: 1, start: '2015-12-25', end: '2015-12-25', verdict: real, note: 'Christmas Day; count far off the other sources', reviewed_by: Mayank, reviewed_at: '2026-11-18'}
+- {ticker: M_M, source_id: 1, start: '2016-12-25', end: '2016-12-25', verdict: real, note: 'Christmas Day; count far off the other sources', reviewed_by: Mayank, reviewed_at: '2026-11-18'}
+- {ticker: M_M, source_id: 4, start: '2018-08-28', end: '2018-08-28', verdict: not_real, note: '', reviewed_by: Mayank, reviewed_at: '2026-11-18'}
+- {ticker: DAL, source_id: 2, start: '2016-12-17', end: '2016-12-17', verdict: real, note: 'the weekly dip in counts did not show up this week', reviewed_by: Mayank, reviewed_at: '2026-11-18'}
+- {ticker: DAL, source_id: 2, start: '2016-12-04', end: '2016-12-04', verdict: not_real, note: '', reviewed_by: Mayank, reviewed_at: '2026-11-18'}
+- {ticker: DAL, source_id: 2, start: '2017-07-23', end: '2017-07-23', verdict: not_real, note: '', reviewed_by: Mayank, reviewed_at: '2026-11-18'}
+- {ticker: DAL, source_id: 2, start: '2017-09-21', end: '2017-10-01', verdict: not_real, note: 'raw series look fine', reviewed_by: Mayank, reviewed_at: '2026-11-18'}
+- {ticker: DAL, source_id: 2, start: '2017-10-06', end: '2017-10-06', verdict: not_real, note: 'raw series look fine', reviewed_by: Mayank, reviewed_at: '2026-11-18'}
+- {ticker: DAL, source_id: 2, start: '2017-10-16', end: '2017-10-28', verdict: not_real, note: 'raw series look fine', reviewed_by: Mayank, reviewed_at: '2026-11-18'}
+- {ticker: DAL, source_id: 2, start: '2017-01-29', end: '2017-02-15', verdict: not_real, note: '', reviewed_by: Mayank, reviewed_at: '2026-11-18'}

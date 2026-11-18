@@ -170,3 +170,7 @@ lasting change becomes the new normal, it raises 3-4 false rows a task. What it 
 drift (fragmentation: 0-19 of 28 labelled days, onset caught on 2 of 4 tasks), one task's feed dropouts, and half
 the dollars-only days. Its 4 unexplained alerts are on the review page; two of them were also flagged by the earlier
 run in 3-4 tasks.
+
+After review (reviewed.yaml: 4 real problems, 8 false alarms), the same run: 0.759, 0.745, 0.846, 0.846 (mean 0.80),
+precision 0.91-0.97, 1-2 false rows a task. The reviewed real problems also sit on the control panel, which is no
+longer free of bad data (0.75: it caught 3 of the 4).

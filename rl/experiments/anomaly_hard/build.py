@@ -5,7 +5,9 @@ rl/tasks/proto/anomaly_hard/ (gitignored). It uses the bench split's companies, 
 results, and its own seeds (300001.., 390001.. for controls), outside every family's ranges.
 
 Like anomaly_scoring, each task has a visible panel (environment/data/transactions.csv) and a hidden panel
-(tests/eval_panel.csv.gz) built with a different random stream, plus the gold (tests/gold.json).
+(tests/eval_panel.csv.gz) built with a different random stream, plus the gold (tests/gold.json) and the hidden
+panel as it was before the problems were planted (tests/truth_panel.csv.gz: real events included), which is what
+the cleaned series is scored against.
 """
 from __future__ import annotations
 
@@ -24,14 +26,13 @@ HERE = pathlib.Path(__file__).resolve().parent
 RL = HERE.parents[1]
 sys.path[:0] = [str(RL), str(HERE)]
 from families._shared import build_panel  # noqa: E402
-from families._shared.panel_perturb import D, Frame, _fmt  # noqa: E402
+from families._shared.panel_perturb import Frame, _fmt  # noqa: E402
 import perturb as P  # noqa: E402
 
 OUT = RL / "tasks" / "proto" / "anomaly_hard"
 REVIEWED = HERE / "reviewed.yaml"   # verdicts on real (unplanted) problems, in original coordinates; grader-only
-EVAL_START_DAYS, IGNORE_AFTER, MIN_RECOVERY = 545, 7, 60
-ONE_DAY = [P.card_testing, P.whale, P.feed_dropout, P.duplicate_batch]   # 2 of each per panel
-REGIMES = [(P.fragmentation, (90, 200))]                                                      # 1 per panel
+EVAL_START_DAYS = 545
+N_POINTS, SHIFTS = 2, [('step', 2), ('ramp', 2)]   # per panel: 2 of each point kind, 2 step and 2 ramp level shifts
 
 
 def plant(rng, control, ctx, n_tickers=8):
@@ -42,43 +43,44 @@ def plant(rng, control, ctx, n_tickers=8):
     span = (d1 - d0).days
     req, opt = F.natural()
     art_series = {(i['ticker'], i['source_id']) for i in opt if i['source_id'] is not None}
-    events, decoys, busy = [], [], []      # busy: (ticker, lo, hi) windows already used, so problems don't overlap
+    events, decoys, busy = [], [], []      # busy: (key, lo, hi) windows already used, so problems don't overlap
 
-    def free(t, lo, hi, pad=20):
-        return all(not (b[0] == t and lo - pd.Timedelta(days=pad) <= b[2] and b[1] <= hi + pd.Timedelta(days=pad))
+    def free(key, lo, hi, pad=20):
+        return all(not (b[0] == key and lo - pd.Timedelta(days=pad) <= b[2] and b[1] <= hi + pd.Timedelta(days=pad))
                    for b in busy)
 
     def day(lo, hi):
         return d0 + pd.Timedelta(days=int(rng.integers(int(span * lo), int(span * hi))))
 
+    for f in P.DECOYS:                       # real events first: they are part of what the sources should report
+        for _ in range(200):
+            t, x = F.t(tks[int(rng.integers(len(tks)))]), day(0.32, 0.9)
+            if free(t, x, x + pd.Timedelta(days=30)):
+                decoys.append(f(F, t, x)); busy.append((t, x, x + pd.Timedelta(days=30)))
+                break
+    truth_df = F.df.copy()
     if not control:
         cands = F.candidates(exclude_series=art_series)
-        order = [cands[i] for i in rng.permutation(len(cands))]
-        jobs = [(f, None) for f in ONE_DAY for _ in range(2)] + list(REGIMES)
-        for f, lengths in jobs:
-            for _ in range(200):
-                t, s = order[int(rng.integers(len(order)))]
-                if lengths:
-                    start, length = day(0.3, 0.7), int(rng.integers(*lengths))
-                    lo, hi = start, start + pd.Timedelta(days=length)
-                else:
+        jobs = [(f, None) for f in P.POINTS for _ in range(N_POINTS)] + [(mode, None) for mode, n in SHIFTS
+                                                                        for _ in range(n)]
+        for f, _ in jobs:
+            for _ in range(500):
+                t, s = cands[int(rng.integers(len(cands)))]
+                if callable(f):
                     lo = hi = day(0.32, 0.95)
-                if not free(t, lo, hi):
+                    hi = lo + pd.Timedelta(days=3)
+                else:
+                    permanent = bool(rng.random() < 0.5)
+                    lo = day(0.3, 0.8 if permanent else 0.7)
+                    length = None if permanent else int(rng.integers(60, 241))
+                    hi = d1 if permanent else lo + pd.Timedelta(days=length + 45)
+                if not free((t, s), lo, hi) or not free(t, lo, lo + pd.Timedelta(days=3)):
                     continue
-                ev = f(F, t, s, lo, length) if lengths else f(F, t, s, lo)
+                ev = f(F, t, s, lo) if callable(f) else P.level_shift(F, t, s, lo, f, length, d1)
                 if ev:
                     events += ev
-                    busy.append((t, lo, D(ev[-1]['end'])))
+                    busy.append(((t, s), lo, hi))
                     break
-        for e in events:
-            if e['regime']:
-                assert D(e['end']) + pd.Timedelta(days=IGNORE_AFTER + MIN_RECOVERY) <= d1, e
-    for f in (P.pantry_loading,):                          # real events: every source
-        for _ in range(200):
-            t, x = F.t(tks[int(rng.integers(len(tks)))]), day(0.32, 0.95)
-            if free(t, x, x + pd.Timedelta(days=10)):
-                decoys.append(f(F, t, x)); busy.append((t, x, x + pd.Timedelta(days=10)))
-                break
     excl = [dict(ticker=i['ticker'], source_id=i['source_id'], lo=i['start'],
                  hi=i['end'] or F.d(ctx.panel_end)) for i in req] + \
            [dict(ticker=i['ticker'], source_id=i['source_id'], lo=i['lo'],
@@ -98,12 +100,14 @@ def plant(rng, control, ctx, n_tickers=8):
     truth = dict(family='anomaly_hard', control=control, events=events, decoys=decoys, exclusions=excl,
                  reviewed_not_real=not_real,
                  ignore_series=F.low_volume_series(), eval_start=_fmt(d0 + pd.Timedelta(days=EVAL_START_DAYS)),
-                 ignore_after_days=IGNORE_AFTER, threshold=0.5,
+                 threshold=0.5, thin_ct=10,
                  truncation_cutoffs=[_fmt(d0 + (d1 - d0) * f) for f in (0.45, 0.7)])
     df = F.df.sort_values(['date', 'ticker', 'source_id']).reset_index(drop=True)
+    truth_df = truth_df.sort_values(['date', 'ticker', 'source_id']).reset_index(drop=True)
+    assert len(truth_df) == len(df) and (truth_df[['date', 'ticker', 'source_id']] == df[['date', 'ticker', 'source_id']]).all().all()
     mapping = dict(tickers={o: d for o, d in F.tmap.items() if d in set(df.ticker)}, sources=F.smap,
                    shift_days=int(F.shift.days))
-    return df, truth, mapping
+    return df, truth, mapping, truth_df
 
 
 def reviewed() -> list[dict]:
@@ -122,14 +126,16 @@ def main():
     jobs = [(300000 + i, False, f'anomhard-{i:03d}') for i in range(1, a.n + 1)] + \
            [(390000 + i, True, f'anomhard-control-{i:02d}') for i in range(1, a.controls + 1)]
     for seed, control, tid in jobs:
-        shown, _, _ = plant(np.random.default_rng(seed), control, ctx)
-        hidden, truth, mapping = plant(np.random.default_rng([seed, 1]), control, ctx)
+        shown, _, _, _ = plant(np.random.default_rng(seed), control, ctx)
+        hidden, truth, mapping, clean = plant(np.random.default_rng([seed, 1]), control, ctx)
         d = OUT / tid
         (d / 'environment' / 'data').mkdir(parents=True)
         (d / 'tests').mkdir()
         shown.to_csv(d / 'environment' / 'data' / 'transactions.csv', index=False, date_format='%Y-%m-%d')
         (d / 'tests' / 'eval_panel.csv.gz').write_bytes(gzip.compress(
             hidden.to_csv(index=False, date_format='%Y-%m-%d').encode(), mtime=0))
+        (d / 'tests' / 'truth_panel.csv.gz').write_bytes(gzip.compress(
+            clean.to_csv(index=False, date_format='%Y-%m-%d').encode(), mtime=0))
         (d / 'tests' / 'gold.json').write_text(json.dumps(dict(truth, seed=seed), indent=1))
         (d / 'instruction.md').write_text(text)
         # the hidden panel's disguise (original -> task coordinates), outside tests/ and environment/: for turning

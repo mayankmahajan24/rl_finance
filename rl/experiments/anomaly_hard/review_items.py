@@ -37,7 +37,11 @@ def alerts_for(task: str, cache: pathlib.Path, label: str = '') -> list[dict]:
     data = pd.read_csv(d / 'tests' / 'eval_panel.csv.gz', parse_dates=['date'])
     out = pd.read_csv(cache / 'full.csv', parse_dates=['date'])
     ev = data.merge(out, on=['date', 'ticker', 'source_id'], how='left')
-    ev['flag'] = ev.anomaly_score.fillna(0) > truth['threshold']
+    if 'confidence' in ev:                       # current outputs: a row is flagged when it is distrusted
+        ev['flag'] = ev.confidence.fillna(1) < truth['threshold']
+        ev['anomaly_score'] = 1 - ev.confidence
+    else:
+        ev['flag'] = ev.anomaly_score.fillna(0) > truth['threshold']
     label_rows(truth, ev)                      # the grader's own labels: ev.label (bad data), ev.use (scored)
     use, lab = ev.use, ev.label
     zones = []                                 # each planted problem and the days after it the grader treats specially

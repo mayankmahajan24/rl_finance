@@ -17,7 +17,6 @@ import pandas as pd
 from families._shared.panel_perturb import _fmt
 
 DAY = pd.Timedelta(days=1)
-VISIBLE = 0.3        # smallest added share of a normal day that is labelled
 
 
 def _row(F, t, s, day):
@@ -73,26 +72,7 @@ def fragmentation(F, t, s, start, length):
                 settle=_fmt(start + pd.Timedelta(days=ramp + 14)))]
 
 
-# ---------------------------------------------------------------- one source: volume moved between days
-def settlement_lag(F, t, s, day):
-    """Part of a day's batch settles late: 50-90% of (count, dollars) moves to the next day, or the next two."""
-    m0 = _row(F, t, s, day)
-    nxt = [_row(F, t, s, day + DAY), _row(F, t, s, day + 2 * DAY)]
-    if m0 is None or nxt[0] is None:
-        return []
-    a = float(F.rng.uniform(0.5, 0.9))
-    two = nxt[1] is not None and F.rng.random() < 0.5
-    ct, amt = float(F.df.loc[m0, 'ct'].iloc[0]) * a, float(F.df.loc[m0, 'amt'].iloc[0]) * a
-    _add(F, m0, -ct, -amt)
-    w = [0.65, 0.35] if two else [1.0]
-    for mi, wi in zip(nxt, w):
-        _add(F, mi, ct * wi, amt * wi)
-    # a catch-up day that gained under 30% of a normal day (log 0.26, about 2 noise units) is not visible on its own,
-    # so it is left unscored rather than labelled
-    quiet = [_fmt(day + (i + 1) * DAY) for i, wi in enumerate(w) if a * wi < VISIBLE]
-    return [_ev('settlement_lag', t, s, day, day + (2 if two else 1) * DAY, moved=a, unscored_days=quiet)]
-
-
+# ---------------------------------------------------------------- one source: volume up or down
 def feed_dropout(F, t, s, day):
     """One upstream feed misses the cutoff: count and dollars x(0.4-0.65) for 2-4 days, ticket size normal;
     half the time the missing volume is backfilled on the next day."""
@@ -122,23 +102,6 @@ def duplicate_batch(F, t, s, day):
     return [_ev('duplicate_batch', t, s, day, gamma=g, lag_days=tau)]
 
 
-def day_cut_shift(F, t, s, start, length):
-    """The source moves its day boundary (local to UTC): 50-75% of each day's volume lands on the next date.
-    Weekly totals barely change; the weekly cycle smears and moves a day. Every day of the regime is labelled.
-    Smaller bleeds (15-45%) move the weekly profile by 0.08-0.16 log against 8-week noise of 0.12: not detectable
-    within the scoring's 45 days, so not fair to label. Only planted on series with a clear weekly cycle."""
-    b = float(F.rng.uniform(0.5, 0.75))
-    end = start + pd.Timedelta(days=length)
-    ser = F.df[F.mask(t, s, start - DAY, end)].set_index('date')[['ct', 'amt']].astype(float)
-    ser = ser.reindex(pd.date_range(start - DAY, end), fill_value=0.0)
-    new = (1 - b) * ser + b * ser.shift(1)
-    m = F.mask(t, s, start, end)
-    idx = F.df.loc[m, 'date']
-    F.df.loc[m, 'ct'] = np.maximum(np.round(new.loc[idx, 'ct'].to_numpy()), 1).astype(int)
-    F.df.loc[m, 'amt'] = np.maximum(new.loc[idx, 'amt'].to_numpy(), 0.01).round(2)
-    return [_ev('day_cut_shift', t, s, start, end, regime=True, bleed=b)]
-
-
 # ---------------------------------------------------------------- every source of one company: real events (decoys)
 PANTRY = [0.6, 0.4, -0.25, -0.20, -0.15, -0.15, -0.10, -0.10, -0.05]   # sums to 0: demand pulled forward
 
@@ -150,15 +113,3 @@ def pantry_loading(F, t, day):
         F.df.loc[m, 'ct'] = np.maximum(np.round(F.df.loc[m, 'ct'] * (1 + w)), 1).astype(int)
         F.df.loc[m, 'amt'] = (F.df.loc[m, 'amt'] * (1 + w)).round(2)
     return dict(kind='pantry_loading', ticker=t, start=_fmt(day), end=_fmt(day + (len(PANTRY) - 1) * DAY))
-
-
-def holiday_settlement(F, t, day):
-    """A bank holiday: 40-90% of the day's volume settles the next day, in every source of the company."""
-    a = float(F.rng.uniform(0.4, 0.9))
-    for s in sorted(F.df.loc[F.df.ticker == t, 'source_id'].unique()):
-        m0, m1 = _row(F, t, s, day), _row(F, t, s, day + DAY)
-        if m0 is None or m1 is None:
-            continue
-        c, v = float(F.df.loc[m0, 'ct'].iloc[0]) * a, float(F.df.loc[m0, 'amt'].iloc[0]) * a
-        _add(F, m0, -c, -v); _add(F, m1, c, v)
-    return dict(kind='holiday_settlement', ticker=t, start=_fmt(day), end=_fmt(day + DAY), moved=round(a, 3))

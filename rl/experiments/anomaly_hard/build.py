@@ -30,10 +30,8 @@ import perturb as P  # noqa: E402
 OUT = RL / "tasks" / "proto" / "anomaly_hard"
 REVIEWED = HERE / "reviewed.yaml"   # verdicts on real (unplanted) problems, in original coordinates; grader-only
 EVAL_START_DAYS, IGNORE_AFTER, MIN_RECOVERY = 545, 7, 60
-ONE_DAY = [P.card_testing, P.whale, P.settlement_lag, P.feed_dropout, P.duplicate_batch]   # 2 of each per panel
+ONE_DAY = [P.card_testing, P.whale, P.feed_dropout, P.duplicate_batch]   # 2 of each per panel
 REGIMES = [(P.fragmentation, (90, 200))]                                                      # 1 per panel
-# P.day_cut_shift is left out: at any realistic bleed it moves a source's weekly profile and day-to-day noise by
-# less than they vary naturally over the 45 days the scoring allows, so labelling it would grade guessing
 
 
 def plant(rng, control, ctx, n_tickers=8):
@@ -75,7 +73,7 @@ def plant(rng, control, ctx, n_tickers=8):
         for e in events:
             if e['regime']:
                 assert D(e['end']) + pd.Timedelta(days=IGNORE_AFTER + MIN_RECOVERY) <= d1, e
-    for f in (P.pantry_loading, P.holiday_settlement):                          # real events: every source
+    for f in (P.pantry_loading,):                          # real events: every source
         for _ in range(200):
             t, x = F.t(tks[int(rng.integers(len(tks)))]), day(0.32, 0.95)
             if free(t, x, x + pd.Timedelta(days=10)):

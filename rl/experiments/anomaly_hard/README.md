@@ -129,3 +129,25 @@ Its `score.py` on every task's hidden panel (v1 grader, before any review of rea
 Mean 0.51 on the planted tasks (0.55 with the hinted instruction). Its unexplained alerts and the hinted run's,
 105 in all, merge into 47 review items (26 from this run only, 17 from the hinted run only, 4 from both) for review
 of whether they are real problems in the source data.
+
+### Option A: a lasting problem is a change (2026-11-18)
+
+Feedback log #9. A persisting problem (planted `fragmentation`, or a long reviewed one) is scored as a time series
+monitor sees it: its first 14 days are bad data (event: onset), the days up to 45 from its start are unscored while a
+scorer decides whether the new level is normal, and after that the shifted level is the normal level, so flags there are
+false alarms; the return is labelled the same way (event: return). `grade.label_rows` holds the rule; the review tool
+uses it too. The instruction now says this, with one example (a one-day spike or drop) and no list of error kinds.
+
+The neutral run re-graded (it was written for the earlier "bad until normal" instruction, so this is a lower bound):
+
+| Task | Before | Option A |
+|---|---|---|
+| 001 | 0.406 | 0.514 |
+| 002 | 0.607 | 0.401 |
+| 003 | 0.341 | 0.283 |
+| 004 | 0.681 | 0.459 |
+| control-01 | 0.977 | 0.977 |
+
+002 and 004 drop because it held the fragmentation flag for its whole 128-145 days; 003 because it flagged the
+fragmentation's return for 315 days. The review page now leaves off flags around planted problems (the grader decides
+those) and takes a "worth flagging, but flagged too long" verdict with the days that were bad.

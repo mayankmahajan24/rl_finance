@@ -1,7 +1,8 @@
 """Write the review page for review_items.py's output: python review_page.py ITEMS.json OUT.html
 
-The page shows each unexplained alert against its company's other sources and takes a verdict (real, not real,
-unsure) and a note, kept in the artifact's database (collection `verdicts`, one document per item id), plus one
+The page shows each unexplained alert against its company's other sources and takes a verdict (real: data is bad on
+the days marked; too_long: worth flagging but flagged too long, with the days that were bad; not_real; unsure), the
+bad days as bad_start/bad_end, and a note, kept in the artifact's database (collection `verdicts`, one document per item id), plus one
 note on anything missed (`notes/missed`). Publish OUT.html with capabilities {db: {}}; read the verdicts back with
 ArtifactData and write them to reviewed.yaml.
 """
@@ -21,7 +22,7 @@ PAGE = r"""<title>Flag Review</title>
   --bg: #f6f7f5; --panel: #ffffff; --ink: #1b1f1d; --muted: #5d6762; --line: #dfe3e0;
   --count: #2a6fb8; --ticket: #b0601f; --flag: #c23b3b; --span: rgba(194, 59, 59, .10);
   --known: rgba(60, 130, 90, .16); --known-ink: #2f7a50;
-  --real: #2f7a50; --notreal: #8a3b3b; --unsure: #8a6d1f; --focus: #2a6fb8;
+  --real: #2f7a50; --toolong: #2b6f86; --notreal: #8a3b3b; --unsure: #8a6d1f; --focus: #2a6fb8; --badspan: #2f7a50;
   --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
@@ -29,12 +30,12 @@ PAGE = r"""<title>Flag Review</title>
   --bg: #121513; --panel: #1a1e1c; --ink: #e6ebe8; --muted: #9aa49f; --line: #2c322f;
   --count: #6aa6e6; --ticket: #e0965a; --flag: #ef7171; --span: rgba(239, 113, 113, .14);
   --known: rgba(110, 200, 150, .16); --known-ink: #7fd0a2;
-  --real: #7fd0a2; --notreal: #ef8f8f; --unsure: #e3c06a; --focus: #6aa6e6; color-scheme: dark } }
+  --real: #7fd0a2; --toolong: #7cc6dd; --notreal: #ef8f8f; --unsure: #e3c06a; --focus: #6aa6e6; --badspan: #7fd0a2; color-scheme: dark } }
 :root[data-theme="dark"] {
   --bg: #121513; --panel: #1a1e1c; --ink: #e6ebe8; --muted: #9aa49f; --line: #2c322f;
   --count: #6aa6e6; --ticket: #e0965a; --flag: #ef7171; --span: rgba(239, 113, 113, .14);
   --known: rgba(110, 200, 150, .16); --known-ink: #7fd0a2;
-  --real: #7fd0a2; --notreal: #ef8f8f; --unsure: #e3c06a; --focus: #6aa6e6; color-scheme: dark }
+  --real: #7fd0a2; --toolong: #7cc6dd; --notreal: #ef8f8f; --unsure: #e3c06a; --focus: #6aa6e6; --badspan: #7fd0a2; color-scheme: dark }
 body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--sans); }
 .wrap { max-width: 920px; margin: 0 auto; padding-block: 28px 64px;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
@@ -54,6 +55,12 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid var(--focus); 
 .card[data-v="real"] { border-left-color: var(--real); }
 .card[data-v="not_real"] { border-left-color: var(--notreal); }
 .card[data-v="unsure"] { border-left-color: var(--unsure); }
+.card[data-v="too_long"] { border-left-color: var(--toolong); }
+.verdict button[aria-pressed="true"][data-v="too_long"] { background: var(--toolong); border-color: var(--toolong); color: var(--panel); }
+.span { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; font-size: 14px; }
+.span input { font: 14px var(--mono); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; }
+.span .hint { font-size: 12px; color: var(--muted); }
+.chart svg.pick { cursor: crosshair; }
 .head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; align-items: baseline; }
 .head h2 { font-size: 17px; margin: 0; font-weight: 600; }
 .meta { font: 13px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -79,19 +86,23 @@ textarea { width: 100%; box-sizing: border-box; font: 14px var(--sans); color: v
 <div class="wrap">
   <header style="display:grid;gap:8px">
     <h1>Flag Review</h1>
-    <p class="lede">Each card is a run of flags a scorer raised that touches no planted problem, with why it flagged, taken from the
-    scorer's own workings on the first flagged day. Decide whether the
-    source data is really off there. <b>Real</b> makes it labelled bad data in every task, <b>Not real</b> keeps it a
-    false alarm, <b>Unsure</b> leaves it unscored. Lines are the source minus the median of the company's other
-    sources, in log units, centred on the window; below them, this source's own daily count and dollars on a plain axis
-    fitted to its range, as they appear in the task's panel (each source carries a hidden scale factor).</p>
+    <p class="lede">Each card is a run of flagged days that the grader does not count as bad data, with why the scorer
+    flagged it. Decide whether the source data is really off there. <b>Data is bad</b> and <b>Worth flagging, but
+    flagged too long</b> both ask for the days that really were bad: only those become bad data in every task, and flags
+    outside them stay false alarms. <b>Data is fine</b> keeps the whole run a false alarm; <b>Unsure</b> leaves it
+    unscored.</p>
+    <p class="lede">A change that lasts is graded as a time series monitor sees it: the first two weeks of a change, and
+    of the return to normal, are bad data; after about six weeks the new level is the normal level, so flags there are
+    false alarms. Top panels: the source against the median of the company's other sources (log units). Bottom
+    panels: this source's own daily count and dollars, on an axis fitted to its range.</p>
   </header>
   <div class="bar">
     <div class="filters" role="group" aria-label="Show">
       <button type="button" data-f="todo" aria-pressed="true">To review</button>
       <button type="button" data-f="all" aria-pressed="false">All</button>
-      <button type="button" data-f="real" aria-pressed="false">Real</button>
-      <button type="button" data-f="not_real" aria-pressed="false">Not real</button>
+      <button type="button" data-f="real" aria-pressed="false">Data is bad</button>
+      <button type="button" data-f="too_long" aria-pressed="false">Flagged too long</button>
+      <button type="button" data-f="not_real" aria-pressed="false">False alarm</button>
       <button type="button" data-f="unsure" aria-pressed="false">Unsure</button>
     </div>
     <span class="counts" id="counts"></span>
@@ -112,7 +123,9 @@ const ITEMS = JSON.parse(document.getElementById('items').textContent);
 const state = { verdicts: {}, filter: 'todo', db: null };
 const $ = (s, el = document) => el.querySelector(s);
 const NS = 'http://www.w3.org/2000/svg';
-const LABEL = { real: 'Real', not_real: 'Not real', unsure: 'Unsure' };
+const LABEL = { real: 'Data is bad on these days', too_long: 'Worth flagging, but flagged too long',
+  not_real: 'Data is fine (false alarm)', unsure: 'Unsure' };
+const SPAN = new Set(['real', 'too_long']);
 
 function el(tag, attrs = {}, parent) {
   const e = document.createElementNS(NS, tag);
@@ -121,7 +134,7 @@ function el(tag, attrs = {}, parent) {
   return e;
 }
 
-function chart(it) {
+function chart(it, v) {
   const c = it.chart, W = 720, L = 52, R = 8, panelH = 104, gap = 18, T = 4, HEAD = 18;
   const panels = [
     { title: 'Count vs other sources (log ratio)', lines: [[c.count, 'var(--count)', 1.5]], flags: c.count },
@@ -153,6 +166,11 @@ function chart(it) {
     }
     const a = x(idx(it.start)), b = x(idx(it.end));
     el('rect', { x: a - 2, y: top, width: Math.max(4, b - a + 4), height: ph, fill: 'var(--span)' }, svg);
+    if (v && SPAN.has(v.verdict) && v.bad_start && v.bad_end) {
+      const p0 = x(idx(v.bad_start)), p1 = x(idx(v.bad_end));
+      el('rect', { x: p0 - 2, y: top + 1, width: Math.max(4, p1 - p0 + 4), height: ph - 2, fill: 'none',
+        stroke: 'var(--badspan)', 'stroke-width': 2, 'stroke-dasharray': '5 3' }, svg);
+    }
     if (!p.log && !p.plain) el('line', { x1: L, x2: W - R, y1: y(0), y2: y(0), stroke: 'var(--line)', 'stroke-width': 1 }, svg);
     for (const v of [lo, hi]) {
       const t = el('text', { x: L - 6, y: top + ph - (v - lo) / (hi - lo) * ph + (v === hi ? 9 : -2), 'text-anchor': 'end' }, svg);
@@ -166,6 +184,10 @@ function chart(it) {
     }
     c.flags.forEach((f, i) => { if (f && p.flags[i] !== null) el('circle', { cx: x(i), cy: y(p.flags[i]), r: 2.6, fill: 'var(--flag)' }, svg); });
   });
+  svg.dateAt = clientX => {
+    const r = svg.getBoundingClientRect(), vx = (clientX - r.left) / r.width * W;
+    return c.dates[Math.max(0, Math.min(n - 1, Math.round((vx - L) / (W - L - R) * (n - 1))))];
+  };
   const base = H - 2;
   [0, Math.floor((n - 1) / 2), n - 1].forEach((i, j) => {
     const t = el('text', { x: x(i), y: base, 'text-anchor': ['start', 'middle', 'end'][j] }, svg); t.textContent = c.dates[i];
@@ -184,8 +206,11 @@ function card(it) {
       <span><i class="sw" style="background:var(--ticket)"></i>ticket size, dollars</span>
       <span><i class="sw" style="background:var(--flag)"></i>flagged day</span>
       <span><i class="sw" style="background:var(--span)"></i>this alert</span>
-      <span><i class="sw" style="background:var(--known)"></i>planted problem or real event in the window</span></div>
+      <span><i class="sw" style="background:var(--known)"></i>planted problem or real event in the window</span>
+      <span><i class="sw" style="background:transparent;outline:2px dashed var(--badspan);outline-offset:-2px"></i>days you marked bad</span></div>
     <div class="verdict" role="group"></div>
+    <div class="span" hidden><span>Bad from</span><input type="date" class="s0" aria-label="First bad day"><span>to</span>
+      <input type="date" class="s1" aria-label="Last bad day"><span class="hint">Click the chart to set the last bad day; shift-click sets the first. Flags outside these days count as false alarms.</span></div>
     <textarea rows="2" placeholder="Note (optional): what you see, or the dates if the real problem spans different days"></textarea>
     <span class="saved"></span>`;
   $('h2', div).textContent = `${it.ticker} · source ${it.source_id}`;
@@ -202,20 +227,46 @@ function card(it) {
     why.appendChild(li);
   }
   if (!why.children.length) why.remove();
-  $('.chart', div).appendChild(chart(it));
+  const svg = chart(it, v);
+  $('.chart', div).appendChild(svg);
   const vb = $('.verdict', div); vb.setAttribute('aria-label', `Verdict for ${it.ticker} source ${it.source_id}`);
-  for (const key of ['real', 'not_real', 'unsure']) {
+  for (const key of ['real', 'too_long', 'not_real', 'unsure']) {
     const b = document.createElement('button'); b.type = 'button'; b.dataset.v = key; b.textContent = LABEL[key];
     b.setAttribute('aria-pressed', String(v.verdict === key));
-    b.addEventListener('click', () => save(it, { verdict: v.verdict === key ? null : key }, div));
+    b.addEventListener('click', () => {
+      if (v.verdict === key) return save(it, { verdict: null });
+      const patch = { verdict: key };
+      if (SPAN.has(key) && !(v.bad_start && v.bad_end)) {
+        patch.bad_start = it.start;
+        patch.bad_end = key === 'real' ? it.end : it.start;   // too long: start from the first day, then widen
+      }
+      save(it, patch);
+    });
     vb.appendChild(b);
   }
+  if (SPAN.has(v.verdict)) {
+    const row = $('.span', div), s0 = $('.s0', row), s1 = $('.s1', row);
+    row.hidden = false;
+    const lo = it.chart.dates[0], hi = it.chart.dates[it.chart.dates.length - 1];
+    for (const inp of [s0, s1]) { inp.min = lo; inp.max = hi; }
+    s0.id = 's0-' + it.id; s1.id = 's1-' + it.id;
+    s0.value = v.bad_start || it.start; s1.value = v.bad_end || it.end;
+    const fix = (a, b) => a <= b ? [a, b] : [b, a];
+    s0.addEventListener('change', () => { const [a, b] = fix(s0.value, s1.value); save(it, { bad_start: a, bad_end: b }); });
+    s1.addEventListener('change', () => { const [a, b] = fix(s0.value, s1.value); save(it, { bad_start: a, bad_end: b }); });
+    svg.classList.add('pick');
+    svg.addEventListener('click', e => {
+      const d = svg.dateAt(e.clientX), cur0 = v.bad_start || it.start, cur1 = v.bad_end || it.end;
+      const [a, b] = e.shiftKey ? fix(d, cur1) : fix(cur0, d);
+      save(it, { bad_start: a, bad_end: b });
+    });
+  }
   const ta = $('textarea', div); ta.id = 'note-' + it.id; ta.value = v.note || '';
-  ta.addEventListener('change', () => save(it, { note: ta.value.trim() }, div));
+  ta.addEventListener('change', () => save(it, { note: ta.value.trim() }));
   return div;
 }
 
-async function save(it, patch, div) {
+async function save(it, patch) {
   const cur = state.verdicts[it.id] || {};
   const next = { ...cur, ...patch, ticker: it.ticker, source_id: it.source_id, start: it.start, end: it.end, updated_at: new Date().toISOString() };
   state.verdicts[it.id] = next; render();
@@ -237,7 +288,7 @@ function render() {
     p.textContent = state.filter === 'todo' ? 'Everything has a verdict. Use All to look back over them.' : 'Nothing here yet.'; list.appendChild(p); }
   const vs = ITEMS.map(it => (state.verdicts[it.id] || {}).verdict).filter(Boolean);
   const n = k => vs.filter(v => v === k).length;
-  $('#counts').textContent = `${vs.length} of ${ITEMS.length} reviewed · ${n('real')} real · ${n('not_real')} not real · ${n('unsure')} unsure`;
+  $('#counts').textContent = `${vs.length} of ${ITEMS.length} reviewed · ${n('real')} bad · ${n('too_long')} flagged too long · ${n('not_real')} false alarm · ${n('unsure')} unsure`;
 }
 
 document.querySelectorAll('.filters button').forEach(b => b.addEventListener('click', () => {

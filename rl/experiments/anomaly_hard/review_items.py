@@ -1,7 +1,8 @@
 """Turn a scorer's unexplained alerts into review items: python review_items.py OUT.json TASK=CACHE_DIR ...
 
 An unexplained alert is a run of flagged days (gaps of up to 2 days joined) that are scored and not labelled bad
-data, wherever the run of flags around them started: flags that carry on after a planted problem ends show up too. Each is mapped back to original coordinates with the task's mapping.json, alerts on the same series that
+data, wherever the run of flags around them started. Runs that touch a planted problem or the weeks after it are
+left off: the grader already decides those days (flags past a change's settling period are false alarms). Each is mapped back to original coordinates with the task's mapping.json, alerts on the same series that
 overlap across tasks are merged (all tasks share the bench companies), and each item carries a chart window from
 the task's hidden panel, in original dates: the source's log count and log ticket size against the median of the
 company's other sources, its flags, and any planted problem or decoy in the window.
@@ -17,6 +18,9 @@ import sys
 
 import numpy as np
 import pandas as pd
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from grade import SETTLE_DAYS, label_rows  # noqa: E402
 
 HERE = pathlib.Path(__file__).resolve().parent
 TASKS = HERE.parents[1] / "tasks" / "proto" / "anomaly_hard"
@@ -34,38 +38,29 @@ def alerts_for(task: str, cache: pathlib.Path, label: str = '') -> list[dict]:
     out = pd.read_csv(cache / 'full.csv', parse_dates=['date'])
     ev = data.merge(out, on=['date', 'ticker', 'source_id'], how='left')
     ev['flag'] = ev.anomaly_score.fillna(0) > truth['threshold']
-    use = ev.date >= pd.Timestamp(truth['eval_start'])
-    for i in truth['ignore_series']:
-        use &= ~((ev.ticker == i['ticker']) & (ev.source_id == i['source_id']))
-    for x in truth['exclusions']:
-        m = (ev.ticker == x['ticker']) & ev.date.between(pd.Timestamp(x['lo']) - pd.Timedelta(days=14),
-                                                        pd.Timestamp(x['hi']) + pd.Timedelta(days=30))
-        if x['source_id'] is not None:
-            m &= ev.source_id == x['source_id']
-        use &= ~m
-    lab, quiet, kind, after = pd.Series(False, index=ev.index), pd.Series(False, index=ev.index), {}, {}
+    label_rows(truth, ev)                      # the grader's own labels: ev.label (bad data), ev.use (scored)
+    use, lab = ev.use, ev.label
+    zones = []                                 # each planted problem and the days after it the grader treats specially
     for e in truth['events']:
         ser = (ev.ticker == e['ticker']) & (ev.source_id == e['source_id'])
         a, b = pd.Timestamp(e['start']), pd.Timestamp(e['end'])
-        m = ser & ev.date.between(a, b)
-        lab |= m
-        for i in ev.index[m]:
-            kind[i] = e
-        if e.get('regime'):   # the days after a persisting problem ends are not scored
-            q = ser & (ev.date > b) & (ev.date <= b + pd.Timedelta(days=truth['ignore_after_days']))
-            quiet |= q
-            for i in ev.index[q]:
-                after[i] = e
-    items = []
+        zones.append((e, ser & ev.date.between(a, b), ser & ev.date.between(b + pd.Timedelta(days=1),
+                                                                            b + pd.Timedelta(days=SETTLE_DAYS))))
+    items, skipped = [], []
     for (t, s), g in ev[ev.flag].sort_values('date').groupby(['ticker', 'source_id']):
         # whole runs of flags, wherever they are: a card starts where the unexplained part of a run starts
         rid = (g.date.diff().dt.days.fillna(999) > GAP + 1).cumsum()
         for _, run in g.groupby(rid):
-            bad = run[use[run.index] & ~lab[run.index] & ~quiet[run.index]]
+            bad = run[use[run.index] & ~lab[run.index]]
             if bad.empty:
                 continue
-            touched = [(kind[i], 'during') for i in run.index if i in kind] + \
-                [(after[i], 'after') for i in run.index if i in after]
+            touched = [(e, 'during') for e, dm, _ in zones if dm[run.index].any()] + \
+                [(e, 'after') for e, _, am in zones if am[run.index].any()]
+            if touched:
+                # flags on a planted problem's series around it (held through it, or past its return): the grader
+                # already knows these days, so a reviewer has nothing to decide; they stay scored as false alarms
+                skipped.append(len(bad))
+                continue
             sub = (bad.date.diff().dt.days.fillna(999) > GAP + 1).cumsum()
             for _, r in bad.groupby(sub):
                 it = dict(task=task, ticker=inv_t[t], source_id=inv_s[int(s)], task_ticker=t, task_source=int(s),
@@ -83,6 +78,8 @@ def alerts_for(task: str, cache: pathlib.Path, label: str = '') -> list[dict]:
         it['source_map'] = {int(c): inv_s[int(c)] for c in cols}
         it['chart'] = chart(ev, truth, it, shift)
         it.pop('source_map')
+    if skipped:
+        print(f'{task}: {sum(skipped)} false flagged days around planted problems left off the review')
     return items
 
 

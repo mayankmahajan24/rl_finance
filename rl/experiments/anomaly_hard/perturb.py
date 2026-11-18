@@ -59,8 +59,9 @@ def whale(F, t, s, day):
 
 def fragmentation(F, t, s, start, length):
     """Purchases start being split into instalments: count drifts up to x1.3-1.5 over 30-60 days while dollars
-    don't, holds, then snaps back. Labelled from the day the count is 15% high (log 0.14, about 1.5x the 90-day
-    ticket-size drift at the 90th percentile) to the end."""
+    don't, holds, then snaps back. Starts from the day the count is 15% high (log 0.14, about 1.5x the 90-day
+    ticket-size drift at the 90th percentile). Scored as a change of level (grade.label_rows); `settle` keeps the
+    new level unscored until two weeks after the ramp ends."""
     kmax, ramp = float(F.rng.uniform(1.3, 1.5)), int(F.rng.integers(30, 61))
     end = start + pd.Timedelta(days=length)
     m = F.mask(t, s, start, end)
@@ -68,7 +69,8 @@ def fragmentation(F, t, s, start, length):
     k = 1 + (kmax - 1) * np.minimum(days / ramp, 1.0)
     F.df.loc[m, 'ct'] = np.maximum(np.round(F.df.loc[m, 'ct'] * k), 1).astype(int)
     lab = start + pd.Timedelta(days=int(np.ceil(ramp * 0.15 / (kmax - 1))))
-    return [_ev('fragmentation', t, s, lab, end, regime=True, kmax=kmax, ramp_days=ramp, drift_start=_fmt(start))]
+    return [_ev('fragmentation', t, s, lab, end, regime=True, kmax=kmax, ramp_days=ramp, drift_start=_fmt(start),
+                settle=_fmt(start + pd.Timedelta(days=ramp + 14)))]
 
 
 # ---------------------------------------------------------------- one source: volume moved between days

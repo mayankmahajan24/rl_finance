@@ -3,10 +3,13 @@
 {firm}
 
 Build a model that scores every datapoint for how likely it is to be *bad data*: a row where a source misreports
-what the company actually did that day. Flag everything that is actually off. Real business events (holidays,
-promotions, weekly cycles, genuine growth) move every source of a company together and are not bad data. Every row a
-problem touches is bad data, and a problem that persists is bad data on every day until the source is back to normal:
-a source does not become correct by staying wrong.
+what the company actually did that day, such as a one-day spike or drop in one source. Flag everything that is
+actually off, and nothing that isn't: researchers look into every flag. Real business events (holidays,
+promotions, weekly cycles, genuine growth) move every source of a company together and are not bad data.
+
+A problem that lasts is a change in a source's level. The change is bad data, and so is the source's return to its
+old level. Once a changed level has held long enough to be the source's new normal, judge the source against that
+new normal: deciding when that is, from the data so far, is part of the job.
 
 {schema}
 
@@ -37,14 +40,17 @@ Requirements:
 * Each run must finish within 20 minutes on 2 CPUs. Python with pandas, numpy and scipy is available.
 
 How you are scored. A row is flagged if its score is above 0.5. The panel's bad data is known to the grader: problems
-planted in it, and real problems in the source data that have been reviewed. Debatable rows are not scored, nor
-the first 7 days after a persisting problem ends. Your score is the average of two parts:
-* **Row F1:** precision of your flagged rows, against recall measured as the share of each problem's days you flag.
-  Problems of each kind weigh equally, so a problem lasting months counts the same as a one-day one.
+planted in it, and real problems in the source data that have been reviewed. A problem that lasts is labelled as a
+change: its first 14 days are bad data, the days after that up to 45 days from its start are not scored, and after
+that its level is the normal level, so flags there are false alarms; its return is labelled the same way (the first
+14 days after it ends are bad data, then not scored up to 45 days after it ends). Debatable rows are not scored. Your
+score is the average of two parts:
+* **Row F1:** precision of your flagged rows, against recall measured as the share of each problem's labelled days
+  you flag. Problems of each kind weigh equally.
 * **Event F1:** alert precision against event recall. An alert is a run of flagged days on one source (gaps of up
-  to 2 days joined), and it is correct if it touches bad data. A problem lasting a few days is caught if any of its
-  days is flagged; one that persists is caught in full if flagged within 14 days of its start, with the credit
-  falling to nothing at 45 days. Each kind of problem carries an equal share of event recall.
+  to 2 days joined), and it is correct if it touches bad data. A short problem is caught if any of its days is
+  flagged; a change or a return is caught in full if flagged within 14 days, with the credit falling to nothing at
+  45 days. Each kind of problem carries an equal share of event recall.
 
 That average is multiplied by the share of rows you score, and set to zero if the no-foresight check fails. Some
 panels have no known bad data: on those, the score is 1 minus the share of rows you flag divided by 5%, floored at 0.

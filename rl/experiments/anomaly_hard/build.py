@@ -92,7 +92,7 @@ def plant(rng, control, ctx, n_tickers=8):
             continue
         x = dict(ticker=t, source_id=s_, start=F.d(r['start']), end=F.d(r['end']), note=r.get('note', ''))
         if r['verdict'] == 'real':
-            events.append(dict(x, type='real', regime=(D(r['end']) - D(r['start'])).days >= 7))
+            events.append(dict(x, type='real', regime=False))   # the days the reviewer marked bad, as marked
         elif r['verdict'] == 'unsure':
             excl.append(dict(ticker=t, source_id=s_, lo=x['start'], hi=x['end']))
         else:

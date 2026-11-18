@@ -5,7 +5,8 @@ alert, when the flags carry on from a planted problem), re-run on that task's hi
 panel: which piece of evidence crossed the scorer's line and by how much, plus the plain size of the move (the
 source against the median of the other sources, compared with its previous 28 days) and how long the flag lasted.
 Only the two Opus scorers graded so far are understood: LABEL `hinted-run` (debug components) and `neutral-run`
-(per-channel trace). Writes the reasons into each item's parts, in place.
+(per-channel trace); any other scorer, given as LABEL=-, gets the plain size of the move. Writes the reasons into
+each item's parts, in place.
 """
 from __future__ import annotations
 
@@ -21,6 +22,7 @@ import pandas as pd
 HERE = pathlib.Path(__file__).resolve().parent
 TASKS = HERE.parents[1] / "tasks" / "proto" / "anomaly_hard"
 CH = {'ct': 'count', 'amt': 'dollars', 'tkt': 'ticket size'}
+GENERIC: set[str] = set()   # labels given as LABEL=- : described by the plain size of the move only
 
 
 def load(path: pathlib.Path, name: str):
@@ -142,16 +144,25 @@ def why_neutral(mod, g, src, t, n, cache):
     return txt + held(n)
 
 
+def why_generic(g, src, t):
+    """For a scorer whose internals aren't traced: the plain size of the move on its first flagged day."""
+    pl = plain(g, src, t)
+    return (f"(This scorer's workings aren't traced.) On the first flagged day, against its usual relation to the other "
+            f"sources over the previous 4 weeks: count {pct(pl['ct'])}, dollars {pct(pl['amt'])}, ticket size "
+            f"{pct(pl['tkt'])}.")
+
+
 def main():
     warnings.filterwarnings('ignore')
     items_path = pathlib.Path(sys.argv[1])
     sols = dict(a.split('=', 1) for a in sys.argv[2:])
-    mods = {lab: load(pathlib.Path(p), 'score_' + lab.replace('-', '_')) for lab, p in sols.items()}
+    GENERIC.update(lab for lab, p in sols.items() if p == '-')
+    mods = {lab: load(pathlib.Path(p), 'score_' + lab.replace('-', '_')) for lab, p in sols.items() if p != '-'}
     items = json.loads(items_path.read_text())
-    panels, groups, caches = {}, {}, {lab: {} for lab in mods}
+    panels, groups, caches = {}, {}, {lab: {} for lab in sols}
     for it in items:
         for p in it['parts']:
-            if p['by'] not in mods:
+            if p['by'] not in mods and p['by'] not in GENERIC:
                 p['why'] = ''
                 continue
             mp = json.loads((TASKS / p['task'] / 'mapping.json').read_text())
@@ -164,8 +175,11 @@ def main():
                 groups[gk] = d[d.ticker == p['task_ticker']].reset_index(drop=True)
             onset = p.get('run_start') or p['start']
             g, t = groups[gk], pd.Timestamp(onset) + shift
-            fn = why_hinted if p['by'] == 'hinted-run' else why_neutral
-            txt = fn(mods[p['by']], g, p['task_source'], t, 1, caches[p['by']])
+            if p['by'] in GENERIC:
+                txt = why_generic(g, p['task_source'], t)
+            else:
+                fn = why_hinted if p['by'] == 'hinted-run' else why_neutral
+                txt = fn(mods[p['by']], g, p['task_source'], t, 1, caches[p['by']])
             lead = ''
             if p.get('run_start'):
                 pl = p.get('run_planted')

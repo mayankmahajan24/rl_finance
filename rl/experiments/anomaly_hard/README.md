@@ -151,3 +151,22 @@ The neutral run re-graded (it was written for the earlier "bad until normal" ins
 002 and 004 drop because it held the fragmentation flag for its whole 128-145 days; 003 because it flagged the
 fragmentation's return for 315 days. The review page now leaves off flags around planted problems (the grader decides
 those) and takes a "worth flagging, but flagged too long" verdict with the days that were bad.
+
+### Opus on the Option A instruction (2026-11-18)
+
+Same setup, the instruction as it stands now (no list of error kinds, one example, the change/new-normal rule, "every
+flag costs a researcher time"). Finished on its own in 28 minutes, nothing read outside its folder.
+
+| Task | Reward | Precision | Alert precision | Day recall | Event recall |
+|---|---|---|---|---|---|
+| 001 | 0.716 | 0.82 | 0.73 (8/11) | 0.67 | 0.67 |
+| 002 | 0.661 | 0.86 | 0.67 (8/12) | 0.53 | 0.67 |
+| 003 | 0.817 | 0.84 | 0.79 (11/14) | 0.74 | 0.92 |
+| 004 | 0.814 | 0.81 | 0.79 (11/14) | 0.76 | 0.92 |
+| control-01 | 0.996 | flags 0.02% of rows | | | |
+
+Mean 0.75, up from 0.41 for the run written for the old instruction. Told plainly that flags cost time and that a
+lasting change becomes the new normal, it raises 3-4 false rows a task. What it still misses: the gradual count
+drift (fragmentation: 0-19 of 28 labelled days, onset caught on 2 of 4 tasks), one task's feed dropouts, and half
+the dollars-only days. Its 4 unexplained alerts are on the review page; two of them were also flagged by the earlier
+run in 3-4 tasks.

@@ -73,7 +73,10 @@ python rl/experiments/anomaly_hard/build.py --n 4 --controls 1     # rl/tasks/pr
 python rl/experiments/anomaly_hard/grade.py rl/tasks/proto/anomaly_hard/anomhard-001 path/to/solution
 ```
 
-Review loop: `review_items.py` collects distrusted runs the gold can't explain, `explain.py` describes them,
+Review loop: `review_items.py` collects distrusted runs the gold can't explain; `trace_scorer.py` re-runs the scorer
+instrumented and gives each card the scorer's own workings over the full history it had seen when it set the alert
+(expected vs actual, residuals against the one-day line, drift evidence against the alarm, confidence, shift runs and
+accepted new normals) and a reason from that state (`explain.py` is the fallback for scorers it doesn't understand);
 `review_page.py` writes the verdict page; verdicts go to `reviewed.yaml`.
 
 ## History

@@ -23,6 +23,7 @@ PAGE = r"""<title>Flag Review</title>
   --count: #2a6fb8; --ticket: #b0601f; --flag: #c23b3b; --span: rgba(194, 59, 59, .10);
   --known: rgba(60, 130, 90, .16); --known-ink: #2f7a50;
   --real: #2f7a50; --toolong: #2b6f86; --notreal: #8a3b3b; --unsure: #8a6d1f; --focus: #2a6fb8; --badspan: #2f7a50;
+  --clean: #7a4fc4; --run: rgba(176, 120, 20, .14); --acc: #2f7a50;
   --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
@@ -30,12 +31,14 @@ PAGE = r"""<title>Flag Review</title>
   --bg: #121513; --panel: #1a1e1c; --ink: #e6ebe8; --muted: #9aa49f; --line: #2c322f;
   --count: #6aa6e6; --ticket: #e0965a; --flag: #ef7171; --span: rgba(239, 113, 113, .14);
   --known: rgba(110, 200, 150, .16); --known-ink: #7fd0a2;
-  --real: #7fd0a2; --toolong: #7cc6dd; --notreal: #ef8f8f; --unsure: #e3c06a; --focus: #6aa6e6; --badspan: #7fd0a2; color-scheme: dark } }
+  --real: #7fd0a2; --toolong: #7cc6dd; --notreal: #ef8f8f; --unsure: #e3c06a; --focus: #6aa6e6; --badspan: #7fd0a2;
+  --clean: #b79bf0; --run: rgba(227, 192, 106, .16); --acc: #7fd0a2; color-scheme: dark } }
 :root[data-theme="dark"] {
   --bg: #121513; --panel: #1a1e1c; --ink: #e6ebe8; --muted: #9aa49f; --line: #2c322f;
   --count: #6aa6e6; --ticket: #e0965a; --flag: #ef7171; --span: rgba(239, 113, 113, .14);
   --known: rgba(110, 200, 150, .16); --known-ink: #7fd0a2;
-  --real: #7fd0a2; --toolong: #7cc6dd; --notreal: #ef8f8f; --unsure: #e3c06a; --focus: #6aa6e6; --badspan: #7fd0a2; color-scheme: dark }
+  --real: #7fd0a2; --toolong: #7cc6dd; --notreal: #ef8f8f; --unsure: #e3c06a; --focus: #6aa6e6; --badspan: #7fd0a2;
+  --clean: #b79bf0; --run: rgba(227, 192, 106, .16); --acc: #7fd0a2; color-scheme: dark }
 body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--sans); }
 .wrap { max-width: 920px; margin: 0 auto; padding-block: 28px 64px;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
@@ -61,6 +64,10 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid var(--focus); 
 .span input { font: 14px var(--mono); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; }
 .span .hint { font-size: 12px; color: var(--muted); }
 .chart svg.pick { cursor: crosshair; }
+.span[hidden] { display: none; }
+.zoom { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); }
+.zoom button { font: 500 12px var(--sans); border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 6px; padding: 3px 9px; cursor: pointer; }
+.zoom button[aria-pressed="true"] { border-color: var(--ink); }
 .head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; align-items: baseline; }
 .head h2 { font-size: 17px; margin: 0; font-weight: 600; }
 .meta { font: 13px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -195,6 +202,84 @@ function chart(it, v) {
   return svg;
 }
 
+const ZOOM = new Set();   // cards shown at the last 120 days (per viewer, not saved)
+function zoomed(it) {
+  const c = it.chart;
+  if (!ZOOM.has(it.id) || c.dates.length <= 120) return c;
+  const i0 = c.dates.length - 120, cut = a => a.slice(i0);
+  return { ...c, dates: cut(c.dates), flags: cut(c.flags), panels: c.panels.map(p => ({ ...p,
+    lines: p.lines.map(l => ({ ...l, v: cut(l.v) })), runs: p.runs && cut(p.runs), accepted: p.accepted && cut(p.accepted) })) };
+}
+
+const COLOR = { count: 'var(--count)', ticket: 'var(--ticket)', muted: 'var(--muted)', clean: 'var(--clean)', ink: 'var(--ink)' };
+
+// The scorer's own workings over the full history it had seen when it set the alert (trace_scorer.py)
+function algoChart(it, v) {
+  const c = zoomed(it), W = 720, L = 52, R = 8, panelH = 96, gap = 14, T = 4, HEAD = 18, AX = 16;
+  const n = c.dates.length, x = i => L + (W - L - R) * (n <= 1 ? 0 : i / (n - 1));
+  const idx = d => { let i = c.dates.indexOf(d); if (i < 0) i = c.dates.findIndex(z => z >= d); return i < 0 ? n - 1 : i; };
+  const H = T + c.panels.length * (panelH + gap) + AX;
+  const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img',
+    'aria-label': `${it.ticker} source ${it.source_id}: the scorer's count and ticket-size model, residuals, drift evidence and confidence, ${c.dates[0]} to ${c.dates[n - 1]}` });
+  const fmt = v => Math.abs(v) >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : Math.abs(v) >= 1e3 ? (v / 1e3).toFixed(1) + 'k' : Math.abs(v) >= 10 ? v.toFixed(0) : v.toFixed(2);
+  c.panels.forEach((p, k) => {
+    const top0 = T + k * (panelH + gap), top = top0 + HEAD, ph = panelH - HEAD;
+    const clip = z => (z === null ? null : p.clip ? Math.max(-p.clip, Math.min(p.clip, z)) : z);
+    const vals = p.lines.flatMap(l => l.v.filter(z => z !== null).map(clip)).concat(p.hlines || []);
+    let lo = p.lo ?? Math.min(...vals), hi = p.hi ?? Math.max(...vals);
+    if (p.floor !== undefined) lo = Math.min(lo, p.floor);
+    if (p.lo === undefined) { const pad = (hi - lo) * 0.05 || 0.5; lo -= pad; hi += pad; }
+    if (p.positive) lo = Math.max(lo, 0);
+    const y = z => top + ph - (clip(z) - lo) / (hi - lo) * ph;
+    if (p.runs) p.runs.forEach((r, i) => { if (r) el('rect', { x: x(i) - 0.6, y: top, width: Math.max(1.2, (W - L - R) / n + 0.2), height: ph, fill: 'var(--run)' }, svg); });
+    for (const kn of c.known) {
+      if (kn.marker) { const a = x(idx(kn.start)); el('line', { x1: a, x2: a, y1: top, y2: top + ph, stroke: 'var(--known-ink)', 'stroke-width': 1, 'stroke-dasharray': '2 2' }, svg); continue; }
+      const a = x(idx(kn.start)), b = x(idx(kn.end));
+      el('rect', { x: a - 1, y: top, width: Math.max(2, b - a + 2), height: ph, fill: 'var(--known)' }, svg);
+    }
+    const a = x(idx(it.start)), b = x(idx(it.end));
+    el('rect', { x: a - 2, y: top, width: Math.max(4, b - a + 4), height: ph, fill: 'var(--span)' }, svg);
+    if (v && SPAN.has(v.verdict) && v.bad_start && v.bad_end) {
+      const p0 = x(idx(v.bad_start)), p1 = x(idx(v.bad_end));
+      el('rect', { x: p0 - 2, y: top + 1, width: Math.max(4, p1 - p0 + 4), height: ph - 2, fill: 'none', stroke: 'var(--badspan)', 'stroke-width': 2, 'stroke-dasharray': '5 3' }, svg);
+    }
+    if (p.zero && lo < 0 && hi > 0) el('line', { x1: L, x2: W - R, y1: y(0), y2: y(0), stroke: 'var(--line)', 'stroke-width': 1 }, svg);
+    for (const hl of p.hlines || []) el('line', { x1: L, x2: W - R, y1: y(hl), y2: y(hl), stroke: 'var(--flag)', 'stroke-width': 1, 'stroke-dasharray': '4 3', opacity: 0.7 }, svg);
+    for (const val of [lo, hi]) {
+      const t = el('text', { x: L - 6, y: top + ph - (val - lo) / (hi - lo) * ph + (val === hi ? 9 : -2), 'text-anchor': 'end' }, svg);
+      t.textContent = fmt(val);
+    }
+    const tt = el('text', { x: L, y: top0 + 12 }, svg); tt.textContent = p.title;
+    for (const l of p.lines) {
+      let d = '';
+      l.v.forEach((z, i) => { if (z === null) return; d += (d && l.v[i - 1] !== null ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(z).toFixed(1); });
+      const at = { d, fill: 'none', stroke: COLOR[l.color] || l.color, 'stroke-width': l.w, 'stroke-linejoin': 'round' };
+      if (l.dash) at['stroke-dasharray'] = '3 2';
+      el('path', at, svg);
+    }
+    if (p.accepted) p.accepted.forEach((acc, i) => { if (acc && (i === 0 || !p.accepted[i - 1])) {
+      el('line', { x1: x(i), x2: x(i), y1: top, y2: top + ph, stroke: 'var(--acc)', 'stroke-width': 1.5 }, svg);
+      const t = el('text', { x: x(i) + 3, y: top + 9 }, svg); t.textContent = 'new normal accepted'; } });
+    const first = p.lines[0].v;
+    c.flags.forEach((f, i) => { if (f && first[i] !== null) el('circle', { cx: x(i), cy: y(first[i]), r: 1.9, fill: 'var(--flag)' }, svg); });
+  });
+  // date axis: first day, each 1 January, last day
+  const ticks = [0];
+  c.dates.forEach((d, i) => { if (i > 0 && d.slice(0, 4) !== c.dates[i - 1].slice(0, 4)) ticks.push(i); });
+  ticks.push(n - 1);
+  let lastX = -99;
+  ticks.forEach((i, j) => {
+    const xx = x(i); if (xx - lastX < 52 && j !== ticks.length - 1) return; lastX = xx;
+    const t = el('text', { x: xx, y: H - 3, 'text-anchor': j === 0 ? 'start' : j === ticks.length - 1 ? 'end' : 'middle' }, svg);
+    t.textContent = j === 0 || j === ticks.length - 1 ? c.dates[i] : c.dates[i].slice(0, 4);
+  });
+  svg.dateAt = clientX => {
+    const r = svg.getBoundingClientRect(), vx = (clientX - r.left) / r.width * W;
+    return c.dates[Math.max(0, Math.min(n - 1, Math.round((vx - L) / (W - L - R) * (n - 1))))];
+  };
+  return svg;
+}
+
 function card(it) {
   const v = state.verdicts[it.id] || {};
   const div = document.createElement('article');
@@ -215,7 +300,7 @@ function card(it) {
     <span class="saved"></span>`;
   $('h2', div).textContent = `${it.ticker} · source ${it.source_id}`;
   $('.head .meta', div).textContent = `${it.flagged_days} flagged day${it.flagged_days === 1 ? '' : 's'} · in ${it.tasks.length} of 4 tasks` + (it.by && it.by.filter(Boolean).length ? ` · flagged by ${it.by.filter(Boolean).join(' and ')}` : '');
-  $('.days', div).textContent = days + `  ·  ${it.chart.sources} sources`;
+  $('.days', div).textContent = days + (it.chart.algo ? `  ·  history shown: ${it.chart.dates[0]} to ${it.chart.dates[it.chart.dates.length - 1]}, everything the scorer had seen when it set this alert` : `  ·  ${it.chart.sources} sources`);
   $('.known', div).textContent = it.chart.known.length ? 'In this window: ' + it.chart.known.map(k => `${k.kind.replace('decoy:', 'real event (decoy): ')} ${k.start}`).join('; ') : '';
   const why = $('.why', div);
   for (const p of it.parts || []) {
@@ -227,7 +312,27 @@ function card(it) {
     why.appendChild(li);
   }
   if (!why.children.length) why.remove();
-  const svg = chart(it, v);
+  const svg = it.chart.algo ? algoChart(it, v) : chart(it, v);
+  if (it.chart.algo) {
+    const z = document.createElement('div'); z.className = 'zoom';
+    z.append('Show: ');
+    for (const [lab, on] of [['Full history', false], ['Last 120 days', true]]) {
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = lab;
+      b.setAttribute('aria-pressed', String(ZOOM.has(it.id) === on));
+      b.addEventListener('click', () => { on ? ZOOM.add(it.id) : ZOOM.delete(it.id); render(); });
+      z.append(b);
+    }
+    $('.chart', div).before(z);
+  }
+  if (it.chart.algo) div.querySelector('.legend').innerHTML = `<span><i class="sw" style="background:var(--count)"></i>count</span>
+      <span><i class="sw" style="background:var(--ticket)"></i>ticket size</span>
+      <span><i class="sw" style="background:transparent;border-top:2px dashed var(--muted);height:0"></i>model's expected value</span>
+      <span><i class="sw" style="background:var(--clean)"></i>cleaned value (where it differs)</span>
+      <span><i class="sw" style="background:var(--flag)"></i>distrusted day / a threshold</span>
+      <span><i class="sw" style="background:var(--span)"></i>this alert</span>
+      <span><i class="sw" style="background:var(--run)"></i>in a shift run</span>
+      <span><i class="sw" style="background:var(--known)"></i>planted problem (dashed line: company-wide real event)</span>
+      <span><i class="sw" style="background:transparent;outline:2px dashed var(--badspan);outline-offset:-2px"></i>days you marked bad</span>`;
   $('.chart', div).appendChild(svg);
   const vb = $('.verdict', div); vb.setAttribute('aria-label', `Verdict for ${it.ticker} source ${it.source_id}`);
   for (const key of ['real', 'too_long', 'not_real', 'unsure']) {

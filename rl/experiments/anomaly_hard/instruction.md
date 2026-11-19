@@ -47,23 +47,29 @@ python /app/solution/score.py --input IN.csv --output OUT.csv
   with very few transactions), as long as the rule is in the code so it would scale.
 * **New data.** Your script is graded on a different panel of the same kind, with its own tickers, dates and
   problems. Each run must finish within 20 minutes on 2 CPUs.
+* **Your own output as input.** The script must also run on a file of its own cleaned series in the input format.
 
 ## How you are scored
 
 The grader knows which rows misreport (problems planted in the hidden panel, and real problems in the source data
 that have been reviewed) and what each source would have reported had it been working normally.
 
-* **Confidence (half).** Rows scored below 0.5 are compared with the rows that cannot be trusted: F1 of those rows
+* **Confidence (40%).** Rows scored below 0.5 are compared with the rows that cannot be trusted: F1 of those rows
   (recall counted per problem, each kind of problem weighing the same), and F1 of alerts (a run of distrusted days on
   one source; correct if it touches an untrustworthy row) against problems caught, with credit falling the longer a
   problem goes uncaught.
-* **Cleaned series (half).** On rows a problem affected, how much of the gap between the raw value and what the
+* **Cleaned series (40%).** On rows a problem affected, how much of the gap between the raw value and what the
   source should have reported your cleaned value closes (in log terms, count and dollars, each kind of problem
   weighing the same), multiplied by a penalty for changing rows that were fine (it reaches zero when those rows move
-  5% on average, in log terms). A blank cleaned value on a scored row
-  counts as the raw value, so a row left blank where it should have been imputed earns nothing.
+  5% on average, in log terms). A blank cleaned value on a scored row counts as the raw value, so a row left blank
+  where it should have been imputed earns nothing.
+* **Self-consistency (20%).** Your script is run again on its own cleaned series (same columns; counts may not be
+  whole numbers) and on clean data. Its score is the share of untrustworthy rows that your first run distrusted and
+  that the run on the cleaned series trusts, multiplied by the average of two checks: the cleaned series is not
+  distrusted more often than clean data (the check falls to zero at one percentage point more), and cleaning the
+  cleaned series again changes it as little as possible (the check falls to zero at a 5% average change).
 
-That sum is set to zero if the outputs are malformed, if the point-in-time check fails, if the code imports or shells
+The total is set to zero if the outputs are malformed, if the point-in-time check fails, if the code imports or shells
 out to a model or network client, or if the write-up is missing.
 Rows on thin stretches of a source (fewer than about ten transactions a day) and debatable rows are not scored. The
 write-up is also graded on its own, separately from this score.

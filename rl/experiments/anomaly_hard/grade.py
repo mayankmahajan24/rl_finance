@@ -9,19 +9,20 @@ Gates (reward 0 if any fails): output format (one row per input row; confidence 
 blank or non-negative), the point-in-time check on all three columns, no model or network calls in the code, and a
 write-up (default SOLUTION_DIR/../output/writeup.md).
 
-Reward = 0.5 x confidence score + 0.5 x cleaned-series score.
+Reward = W_CONF x confidence score + W_CLEAN x cleaned-series score + W_CONS x self-consistency score.
   Scored rows: from eval_start, not on low-volume series, not on thin stretches (truth count's 28-day median under
   thin_ct), not near known natural artifacts. Untrustworthy rows (label_rows): every day of a point anomaly or
   reviewed real problem. A level shift is a change, as a time series monitor sees it: its first CHANGE_DAYS days are
   untrustworthy (event: onset); then not scored up to SETTLE_DAYS from its start (or two weeks after a ramp ends) while
-  the code decides whether the new level is the new normal; after that the new level is trusted; a temporary shift's
-  return is labelled the same way (event: return).
+  the code decides whether the new level is the new normal; after that the new level is trusted (and the cleaned series
+  should rescale it). When a temporary shift ends the data is right again: the next SETTLE_DAYS are not scored, and
+  after that the source must be trusted.
   Confidence score: 0.5 x row F1 + 0.5 x event F1 of the rows scored below 0.5 (distrusted).
     row F1:   row precision vs day recall (share of each event's labelled days distrusted, averaged within each kind,
               then over kinds)
     event F1: alert precision (runs of distrusted days on a series, gaps of up to ALERT_GAP days joined, that touch an
               untrustworthy row) vs event recall (mean over kinds of the kind's mean credit; a point event counts if
-              any of its days is distrusted, an onset or return in full if first distrusted within 14 days, nothing
+              any of its days is distrusted, a level shift's onset in full if first distrusted within 14 days, nothing
               at 45)
     A panel with no untrustworthy rows: 1 - share of scored rows distrusted / 5%, floored at 0.
   Cleaned-series score: gain x damage penalty, against the truth panel (the hidden panel before the problems were
@@ -30,6 +31,14 @@ Reward = 0.5 x confidence score + 0.5 x cleaned-series score.
     gain: for each planted problem, 1 - (cleaned error / raw error) summed over the scored rows it changed, floored at
           0; averaged within each kind, then over kinds (reviewed real problems have no truth and are left out)
     damage penalty: max(0, 1 - mean cleaned error on scored rows no problem changed / DAMAGE_TOL)
+  Self-consistency score: score.py run again, once on its own cleaned series (rows it left blank dropped) and once on
+  the truth panel (genuinely clean data, its own baseline). fixed x (0.5 x no new alarms + 0.5 x idempotent):
+    fixed:         share of the planted untrustworthy scored rows that the first run distrusted and the run on the
+                   cleaned series trusts (caught, and repaired so well the code no longer objects)
+    no new alarms: max(0, 1 - excess / NEW_ALARM_TOL), excess = share of scored rows distrusted on the cleaned series
+                   minus the share distrusted on the truth panel, floored at 0
+    idempotent:    max(0, 1 - mean |log change| of the cleaned series when cleaned again / DAMAGE_TOL)
+    If the run on its own cleaned series fails, the score is 0.
   The write-up's quality is judged separately (not in this reward).
 """
 from __future__ import annotations
@@ -53,6 +62,8 @@ FULL_DAYS, ZERO_DAYS = 14, 45
 CHANGE_DAYS, SETTLE_DAYS = 14, 45
 ALERT_GAP = 2
 DAMAGE_TOL = 0.05
+NEW_ALARM_TOL = 0.01
+W_CONF, W_CLEAN, W_CONS = 0.4, 0.4, 0.2
 # imports or shell calls that reach a model or the network
 NO_AI = re.compile(r'\b(anthropic|openai|google\.generativeai|google\.genai|mistralai|cohere|ollama|litellm|langchain|'
                    r'transformers|requests|httpx|aiohttp|urllib\.request|urllib3|http\.client|socket|websocket|'
@@ -120,7 +131,7 @@ def scan_no_ai(sol: pathlib.Path) -> list[str]:
 
 def label_rows(truth: dict, ev: pd.DataFrame, clean_truth: pd.DataFrame | None = None) -> list[tuple[dict, pd.Series]]:
     """Set ev['label'] (untrustworthy) and ev['use'] (scored), and return the scored events with their labelled rows:
-    point problems as they are, each level shift as an onset and, if temporary, a return."""
+    point problems as they are, each level shift as its onset."""
     D = lambda n: pd.Timedelta(days=n)  # noqa: E731
     ev['label'] = False
     ev['use'] = ev.date >= pd.Timestamp(truth['eval_start'])
@@ -148,10 +159,9 @@ def label_rows(truth: dict, ev: pd.DataFrame, clean_truth: pd.DataFrame | None =
         quiet |= ser & (ev.date > on_end) & (ev.date <= min(settle, b))
         parts.append((dict(e, part='onset', end=str(on_end.date())), ser & ev.date.between(a, on_end)))
         if not e.get('permanent'):
-            back = b + D(1)
-            quiet |= ser & (ev.date > back + D(CHANGE_DAYS - 1)) & (ev.date <= back + D(SETTLE_DAYS - 1))
-            parts.append((dict(e, part='return', start=str(back.date()), end=str((back + D(CHANGE_DAYS - 1)).date())),
-                          ser & ev.date.between(back, back + D(CHANGE_DAYS - 1))))
+            # back on its old level: the data is right again, so distrusting the return is neither required nor
+            # penalised for SETTLE_DAYS; after that the source must be trusted
+            quiet |= ser & (ev.date > b) & (ev.date <= b + D(SETTLE_DAYS))
     ev['use'] &= ~quiet
     scored = []
     for e, m in parts:
@@ -275,9 +285,48 @@ def score(truth: dict, data: pd.DataFrame, clean_truth: pd.DataFrame, sol: pathl
     scored = label_rows(truth, ev, clean_truth)
     conf, conf_d = confidence_score(ev, scored)
     cln, cln_d = clean_score(truth, ev, stretches)
-    reward = (0.5 * conf + 0.5 * cln) * all(gates.values())
+    cons, cons_d = consistency_score(truth, sol, data, clean_truth, full, ev, stretches, c_)
+    reward = (W_CONF * conf + W_CLEAN * cln + W_CONS * cons) * all(gates.values())
     return reward, dict(gates=gates, ai_hits=hits, changed_on_truncation=leaks, rows_scored=int(ev.use.sum()),
-                        confidence_score=round(conf, 3), clean_score=round(cln, 3), confidence=conf_d, clean=cln_d)
+                        confidence_score=round(conf, 3), clean_score=round(cln, 3), consistency_score=round(cons, 3),
+                        confidence=conf_d, clean=cln_d, consistency=cons_d)
+
+
+def consistency_score(truth, sol, data, clean_truth, full, ev, stretches, c_):
+    """Run the code on its own cleaned series and on the truth panel; see the module docstring."""
+    lg = lambda x: np.log(np.maximum(x.astype(float), 0.01))  # noqa: E731
+    cleaned = data.drop(columns=['ct', 'amt']).merge(
+        full[KEYS + ['clean_ct', 'clean_amt']].rename(columns={'clean_ct': 'ct', 'clean_amt': 'amt'}), on=KEYS)
+    cleaned = cleaned.dropna(subset=['ct', 'amt'])[data.columns]
+    try:
+        again = run(sol / 'score.py', cleaned, c_('self'))
+        base = run(sol / 'score.py', clean_truth[data.columns], c_('truthrun'))
+    except GateError as e:
+        return 0.0, dict(error=str(e)[-500:])
+    k = ev[KEYS].copy()
+    k = k.merge(again.rename(columns={c: c + '2' for c in OUT_COLS}), on=KEYS, how='left')
+    k = k.merge(base[KEYS + ['confidence']].rename(columns={'confidence': 'confidence_t'}), on=KEYS, how='left')
+    real = pd.Series(False, index=ev.index)
+    for e in truth['events']:
+        if e['type'] == 'real':
+            real |= (ev.ticker == e['ticker']) & (ev.source_id == e['source_id']) & \
+                ev.date.between(pd.Timestamp(e['start']), pd.Timestamp(e['end']))
+    bad = (ev.use & ev.label & ~real).to_numpy()
+    trusted2 = (k.confidence2 >= 0.5).to_numpy()       # a row missing from the second run is not trusted
+    fixed = float((bad & ev.flag.to_numpy() & trusted2).sum() / bad.sum()) if bad.any() else 1.0
+    sc = stretches.to_numpy() & k.confidence2.notna().to_numpy()
+    rate_c = float((k.confidence2[sc] < 0.5).mean()) if sc.any() else 0.0
+    rate_t = float((k.confidence_t[sc] < 0.5).mean()) if sc.any() else 0.0
+    no_new = max(0.0, 1 - max(0.0, rate_c - rate_t) / NEW_ALARM_TOL)
+    c1ct, c1amt = ev.clean_ct.where(ev.clean_ct.notna(), ev.ct), ev.clean_amt.where(ev.clean_amt.notna(), ev.amt)
+    c2ct, c2amt = k.clean_ct2.where(k.clean_ct2.notna(), c1ct), k.clean_amt2.where(k.clean_amt2.notna(), c1amt)
+    change = 0.5 * ((lg(c2ct) - lg(c1ct)).abs() + (lg(c2amt) - lg(c1amt)).abs())
+    moved = float(change[sc].mean()) if sc.any() else 0.0
+    idem = max(0.0, 1 - moved / DAMAGE_TOL)
+    return fixed * (0.5 * no_new + 0.5 * idem), dict(
+        fixed=round(fixed, 3), planted_bad_rows=int(bad.sum()), distrusted_share_cleaned=round(rate_c, 4),
+        distrusted_share_truth=round(rate_t, 4), no_new_alarms=round(no_new, 3), recleaning_change=round(moved, 4),
+        idempotent=round(idem, 3))
 
 
 def alerts(e_: pd.DataFrame) -> tuple[int, int]:

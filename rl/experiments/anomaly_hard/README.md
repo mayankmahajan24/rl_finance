@@ -50,13 +50,18 @@ cycles, holiday shifts, quarter-end surges, settlement lags).
 ## The grader (`grade.py`)
 
 Gates, reward 0 if any fails: output format, the point-in-time check on all three columns, no model or network
-client in the code (import scan; the run has no network), the write-up present. Then:
+client in the code (import scan; the runs have no network), the write-up present. Then, in three parts:
 
-* **Confidence (half):** rows below 0.5 are distrusted. Untrustworthy rows: every day of a point anomaly or reviewed
-  real problem; for a level shift, its first 14 days and the first 14 after a temporary one ends; the following days
-  up to 45 are unscored while the code settles on the new level, after which the new level is trusted.
-  0.5 x row F1 (precision vs per-problem day recall) + 0.5 x event F1 (alert precision vs problems caught).
-* **Cleaned series (half):** for each planted problem, the share of the raw value's log error (vs the truth panel)
+* **Confidence (40%):** rows below 0.5 are distrusted. Untrustworthy rows: every day of a point anomaly or reviewed
+  real problem, and a level shift's first 14 days; the following days up to 45 are unscored while the code settles on
+  the new level, after which the new level is trusted. When a temporary shift ends the data is right again: the next
+  45 days are unscored, then the source must be trusted. 0.5 x row F1 (precision vs per-problem day recall) + 0.5 x
+  event F1 (alert precision vs problems caught).
+* **Self-consistency (20%):** `score.py` run again on its own cleaned series and on the truth panel. Fixed (share of
+  planted untrustworthy rows the first run distrusted and the run on the cleaned series trusts) x (0.5 x no new alarms
+  (falls to zero when the cleaned series is distrusted on 1 point more of rows than the truth panel) + 0.5 x
+  idempotent (falls to zero when re-cleaning moves the cleaned series 5% on average)).
+* **Cleaned series (40%):** for each planted problem, the share of the raw value's log error (vs the truth panel)
   that the cleaned value closes, averaged within and then across kinds; times a damage penalty that reaches zero when
   rows no problem touched move 5% on average.
 * Unscored: before the warm-up ends, low-volume series, thin stretches (truth count's 28-day median under 10), near
@@ -103,3 +108,8 @@ It fails at level shifts: it distrusts a shifted source for months after the cha
 days a task, sit around planted shifts) and does not rescale a shifted stretch back to the old basis (ramp gain 0.0-0.6,
 step gain 0.0-0.7), and imputing its false alarms moves good rows 0.6-2.3% on average. The real-event decoys are left
 alone (0-7 days). The 60 unexplained alerts are on the review page, recurring ones first.
+
+Self-consistency added (2026-11-19): the same Opus scorer, re-graded: 0.412, 0.349, 0.443, 0.430 (mean 0.41;
+control 0.609). On its own cleaned series it distrusts fewer rows than on the truth panel (0.04-0.09% vs 0.19-0.31%)
+and re-cleaning moves it 0.01-0.02%, so its consistency score (0.24-0.67) is set by "fixed": the level-shift onsets
+it never caught. Confidence fell (0.25-0.39) because distrusting a return to normal no longer earns credit.

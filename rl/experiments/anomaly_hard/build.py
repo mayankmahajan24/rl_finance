@@ -26,7 +26,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 RL = HERE.parents[1]
 sys.path[:0] = [str(RL), str(HERE)]
 from families._shared import build_panel  # noqa: E402
-from families._shared.panel_perturb import Frame, _fmt  # noqa: E402
+from families._shared.panel_perturb import D, Frame, _fmt  # noqa: E402
 import perturb as P  # noqa: E402
 
 OUT = RL / "tasks" / "proto" / "anomaly_hard"
@@ -85,7 +85,7 @@ def plant(rng, control, ctx, n_tickers=8):
                  hi=i['end'] or F.d(ctx.panel_end)) for i in req] + \
            [dict(ticker=i['ticker'], source_id=i['source_id'], lo=i['lo'],
                  hi=F.d(ctx.panel_end) if i['source_id'] is not None else i['hi']) for i in opt]
-    not_real = []
+    not_real, recurring = [], []
     for r in reviewed():                                      # real problems in the source data, as reviewed
         t, s_ = F.t(r['ticker']), F.s(r['source_id'])
         if t is None:
@@ -93,12 +93,19 @@ def plant(rng, control, ctx, n_tickers=8):
         x = dict(ticker=t, source_id=s_, start=F.d(r['start']), end=F.d(r['end']), note=r.get('note', ''))
         if r['verdict'] == 'real':
             events.append(dict(x, type='real', regime=False))   # the days the reviewer marked bad, as marked
+        elif r['verdict'] == 'recurring':
+            # a pattern the source shows every year is normal: the first time it appears in the data it is not scored
+            # (distrusting it then is understandable); every later year it must be trusted and left as it is
+            first = recurring_first(F, t, s_, r)
+            if first:
+                excl.append(dict(ticker=t, source_id=s_, lo=first[0], hi=first[1], kind='recurring_first'))
+            recurring.append(dict(x, first=first))
         elif r['verdict'] == 'unsure':
             excl.append(dict(ticker=t, source_id=s_, lo=x['start'], hi=x['end']))
         else:
             not_real.append(x)
     truth = dict(family='anomaly_hard', control=control, events=events, decoys=decoys, exclusions=excl,
-                 reviewed_not_real=not_real,
+                 reviewed_not_real=not_real, reviewed_recurring=recurring,
                  ignore_series=F.low_volume_series(), eval_start=_fmt(d0 + pd.Timedelta(days=EVAL_START_DAYS)),
                  threshold=0.5, thin_ct=10,
                  truncation_cutoffs=[_fmt(d0 + (d1 - d0) * f) for f in (0.45, 0.7)])
@@ -108,6 +115,21 @@ def plant(rng, control, ctx, n_tickers=8):
     mapping = dict(tickers={o: d for o, d in F.tmap.items() if d in set(df.ticker)}, sources=F.smap,
                    shift_days=int(F.shift.days))
     return df, truth, mapping, truth_df
+
+
+def recurring_first(F, t, s, r, slack=3):
+    """The first year a reviewed recurring pattern's calendar window (same month and day, +-slack days) falls inside the
+    source's data, in task coordinates, or None."""
+    a, b = D(r['start']), D(r['end'])
+    have = F.df[(F.df.ticker == t) & (F.df.source_id == s)].date
+    if have.empty:
+        return None
+    first_day = have.min() - F.shift                     # original coordinates
+    for k in range(-10, 11):
+        lo, hi = a + pd.DateOffset(years=k) - pd.Timedelta(days=slack), b + pd.DateOffset(years=k) + pd.Timedelta(days=slack)
+        if lo >= first_day:
+            return [F.d(lo), F.d(hi)]
+    return None
 
 
 def reviewed() -> list[dict]:

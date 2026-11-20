@@ -4,6 +4,8 @@
 #   real      labelled bad data on exactly start..end (event type `real`): the days the reviewer marked
 #   unsure    not scored
 #   not_real  stays good data, so a flag on it is a false alarm
+#   recurring the source does this every year (same calendar window): normal. The first year it appears in the data is
+#             not scored; every later year must be trusted and left as it is in the cleaned series
 # Each entry: ticker, source_id, start, end, verdict, note, reviewed_by, reviewed_at.
 reviewed:
 - {ticker: M_M, source_id: 1, start: '2015-08-04', end: '2015-08-04', verdict: real, note: 'flagged by both Opus runs in all 4 tasks', reviewed_by: Mayank, reviewed_at: '2026-11-18'}
@@ -17,3 +19,16 @@ reviewed:
 - {ticker: DAL, source_id: 2, start: '2017-10-06', end: '2017-10-06', verdict: not_real, note: 'raw series look fine', reviewed_by: Mayank, reviewed_at: '2026-11-18'}
 - {ticker: DAL, source_id: 2, start: '2017-10-16', end: '2017-10-28', verdict: not_real, note: 'raw series look fine', reviewed_by: Mayank, reviewed_at: '2026-11-18'}
 - {ticker: DAL, source_id: 2, start: '2017-01-29', end: '2017-02-15', verdict: not_real, note: '', reviewed_by: Mayank, reviewed_at: '2026-11-18'}
+- {ticker: DAL, source_id: 3, start: '2015-10-19', end: '2015-10-28', verdict: not_real, note: '', reviewed_by: Mayank, reviewed_at: '2026-11-20'}
+- {ticker: DAL, source_id: 3, start: '2016-12-30', end: '2017-01-05', verdict: not_real, note: '', reviewed_by: Mayank, reviewed_at: '2026-11-20'}
+- {ticker: DAL, source_id: 3, start: '2017-04-12', end: '2017-04-13', verdict: not_real, note: '', reviewed_by: Mayank, reviewed_at: '2026-11-20'}
+- {ticker: DAL, source_id: 3, start: '2017-12-30', end: '2017-12-30', verdict: real, note: '', reviewed_by: Mayank, reviewed_at: '2026-11-20'}
+- {ticker: DAL, source_id: 3, start: '2018-01-05', end: '2018-01-05', verdict: not_real, note: '', reviewed_by: Mayank, reviewed_at: '2026-11-20'}
+- {ticker: DAL, source_id: 4, start: '2017-12-19', end: '2017-12-19', verdict: real, note: '', reviewed_by: Mayank, reviewed_at: '2026-11-20'}
+- {ticker: DDS, source_id: 1, start: '2016-04-05', end: '2016-04-05', verdict: real, note: '', reviewed_by: Mayank, reviewed_at: '2026-11-20'}
+- {ticker: DDS, source_id: 1, start: '2017-01-24', end: '2017-01-27', verdict: real, note: '', reviewed_by: Mayank, reviewed_at: '2026-11-20'}
+- {ticker: M_M, source_id: 1, start: '2015-07-05', end: '2015-07-05', verdict: real, note: '', reviewed_by: Mayank, reviewed_at: '2026-11-20'}
+- {ticker: M_M, source_id: 1, start: '2017-03-21', end: '2017-03-22', verdict: real, note: 'bad days precede the alert (2017-03-23 to 03-24)', reviewed_by: Mayank, reviewed_at: '2026-11-20'}
+- {ticker: M_M, source_id: 1, start: '2017-03-23', end: '2017-03-24', verdict: not_real, note: 'the alert came after the bad days', reviewed_by: Mayank, reviewed_at: '2026-11-20'}
+- {ticker: M_M, source_id: 4, start: '2018-02-01', end: '2018-02-01', verdict: real, note: '', reviewed_by: Mayank, reviewed_at: '2026-11-20'}
+- {ticker: M_M, source_id: 4, start: '2018-12-18', end: '2018-12-18', verdict: not_real, note: '', reviewed_by: Mayank, reviewed_at: '2026-11-20'}

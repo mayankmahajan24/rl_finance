@@ -59,12 +59,26 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid var(--focus); 
 .card[data-v="not_real"] { border-left-color: var(--notreal); }
 .card[data-v="unsure"] { border-left-color: var(--unsure); }
 .card[data-v="too_long"] { border-left-color: var(--toolong); }
+.card[data-v="recurring"] { border-left-color: var(--real); }
+.verdict button[aria-pressed="true"][data-v="recurring"] { background: var(--muted); border-color: var(--muted); color: var(--panel); }
 .verdict button[aria-pressed="true"][data-v="too_long"] { background: var(--toolong); border-color: var(--toolong); color: var(--panel); }
 .span { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; font-size: 14px; }
 .span input { font: 14px var(--mono); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; }
 .span .hint { font-size: 12px; color: var(--muted); }
 .chart svg.pick { cursor: crosshair; }
 .span[hidden] { display: none; }
+.group { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: grid; gap: 10px; min-width: 0; }
+.group h3 { margin: 0; font-size: 16px; font-weight: 600; }
+.group .rule { margin: 0; color: var(--muted); font-size: 14px; max-width: 80ch; }
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+.thumb { border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; display: grid; gap: 3px; font-size: 12px; min-width: 0; }
+.thumb.out { opacity: .45; }
+.thumb .t1 { font-weight: 600; } .thumb .t2 { color: var(--muted); font: 11px var(--mono); }
+.thumb label { display: flex; gap: 5px; align-items: center; color: var(--muted); }
+.thumb a { color: var(--muted); }
+.gapply { font: 500 13px var(--sans); border: 1px solid var(--ink); background: var(--ink); color: var(--panel); border-radius: 6px; padding: 7px 14px; cursor: pointer; justify-self: start; }
+.listhead { font-size: 17px; margin: 8px 0 0; }
+.chip { font: 11px var(--mono); color: var(--muted); }
 .zoom { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); }
 .zoom button { font: 500 12px var(--sans); border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 6px; padding: 3px 9px; cursor: pointer; }
 .zoom button[aria-pressed="true"] { border-color: var(--ink); }
@@ -110,6 +124,7 @@ textarea { width: 100%; box-sizing: border-box; font: 14px var(--sans); color: v
       <button type="button" data-f="real" aria-pressed="false">Data is bad</button>
       <button type="button" data-f="too_long" aria-pressed="false">Flagged too long</button>
       <button type="button" data-f="not_real" aria-pressed="false">False alarm</button>
+      <button type="button" data-f="recurring" aria-pressed="false">Recurs yearly</button>
       <button type="button" data-f="unsure" aria-pressed="false">Unsure</button>
     </div>
     <span class="counts" id="counts"></span>
@@ -121,6 +136,8 @@ textarea { width: 100%; box-sizing: border-box; font: 14px var(--sans); color: v
     <textarea id="missed-note" rows="3" placeholder="e.g. DAL source 2, 2016-03-01 to 2016-04-15, count drops but no flags"></textarea>
     <span class="saved" id="missed-saved"></span>
   </section>
+  <section id="groups" style="display:grid;gap:16px"></section>
+  <h2 class="listhead" id="listhead">Every card (the ones above included)</h2>
   <div id="list" style="display:grid;gap:16px"></div>
 </div>
 
@@ -131,7 +148,16 @@ const state = { verdicts: {}, filter: 'todo', db: null };
 const $ = (s, el = document) => el.querySelector(s);
 const NS = 'http://www.w3.org/2000/svg';
 const LABEL = { real: 'Data is bad on these days', too_long: 'Worth flagging, but flagged too long',
-  not_real: 'Data is fine (false alarm)', unsure: 'Unsure' };
+  not_real: 'Data is fine (false alarm)', recurring: 'Normal: recurs every year', unsure: 'Unsure' };
+const GROUPS = {
+  recurring: { title: 'Happened at the same time last year', verdict: 'recurring',
+    rule: 'The same source moved the same way within a week of the same date one or two years earlier. Suggested: normal, recurs every year (the first year it appears is not scored; later years must be trusted and left as they are).' },
+  ticket: { title: 'One-day ticket-size moves within the source\'s own noise', verdict: 'not_real',
+    rule: 'Flagged for ticket size on a single day, but the move is under 6 times this source\'s own day-to-day ticket noise (after its weekday pattern). Suggested: false alarm.' },
+  small: { title: 'Small moves against the source\'s own history', verdict: 'not_real',
+    rule: 'Nothing beyond 6 times the source\'s own noise in count or ticket size: it differs from the other sources, but looks normal against its own history. Suggested: false alarm.' },
+};
+const EXCLUDE = new Set();   // cards ticked out of a group (per viewer, not saved)
 const SPAN = new Set(['real', 'too_long']);
 
 function el(tag, attrs = {}, parent) {
@@ -282,7 +308,7 @@ function algoChart(it, v) {
 
 function card(it) {
   const v = state.verdicts[it.id] || {};
-  const div = document.createElement('article');
+  const div = document.createElement('article'); div.id = 'c-' + it.id;
   div.className = 'card' + (v.verdict ? ' done' : ''); if (v.verdict) div.dataset.v = v.verdict;
   const days = it.start === it.end ? it.start : `${it.start} to ${it.end}`;
   div.innerHTML = `<div class="head"><h2></h2><span class="meta"></span></div>
@@ -335,7 +361,7 @@ function card(it) {
       <span><i class="sw" style="background:transparent;outline:2px dashed var(--badspan);outline-offset:-2px"></i>days you marked bad</span>`;
   $('.chart', div).appendChild(svg);
   const vb = $('.verdict', div); vb.setAttribute('aria-label', `Verdict for ${it.ticker} source ${it.source_id}`);
-  for (const key of ['real', 'too_long', 'not_real', 'unsure']) {
+  for (const key of ['real', 'too_long', 'not_real', 'recurring', 'unsure']) {
     const b = document.createElement('button'); b.type = 'button'; b.dataset.v = key; b.textContent = LABEL[key];
     b.setAttribute('aria-pressed', String(v.verdict === key));
     b.addEventListener('click', () => {
@@ -382,7 +408,65 @@ async function save(it, patch) {
 
 function setStatus(t) { $('#status').textContent = t; }
 
+function thumb(it) {
+  const c = it.chart, n = c.dates.length, k = Math.min(120, n), i0 = n - k, W = 180, H = 46;
+  const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `${it.ticker} source ${it.source_id}, last ${k} days to the alert` });
+  const x = i => (W - 2) * (i - i0) / Math.max(1, k - 1) + 1;
+  const a = c.dates.indexOf(it.start) >= i0 ? c.dates.indexOf(it.start) : n - 1;
+  el('rect', { x: x(a) - 2, y: 0, width: Math.max(4, x(n - 1) - x(a) + 4), height: H, fill: 'var(--span)' }, svg);
+  const rec = (it.triage && it.triage.recurs) || [];
+  [[c.panels[0].lines[0].v, 'var(--count)', 2, 21], [c.panels[3].lines[0].v, 'var(--ticket)', 24, 21]].forEach(([v, col, top, h]) => {
+    const s = v.slice(i0).filter(z => z !== null); if (!s.length) return;
+    const lo = Math.min(...s), hi = Math.max(...s) || lo + 1;
+    let d = ''; v.slice(i0).forEach((z, j) => { if (z === null) return; const yy = top + h - (z - lo) / ((hi - lo) || 1) * h; d += (d ? 'L' : 'M') + x(i0 + j).toFixed(1) + ' ' + yy.toFixed(1); });
+    el('path', { d, fill: 'none', stroke: col, 'stroke-width': 1 }, svg);
+  });
+  return svg;
+}
+
+function renderGroups() {
+  const box = $('#groups'); box.textContent = '';
+  for (const [g, G] of Object.entries(GROUPS)) {
+    const its = ITEMS.filter(it => it.triage && it.triage.group === g);
+    if (!its.length) continue;
+    const open = its.filter(it => !(state.verdicts[it.id] || {}).verdict);
+    const sec = document.createElement('section'); sec.className = 'group';
+    sec.innerHTML = '<h3></h3><p class="rule"></p><div class="thumbs"></div>';
+    $('h3', sec).textContent = `${G.title} · ${its.length} alert${its.length === 1 ? '' : 's'}${open.length < its.length ? ` (${its.length - open.length} already judged)` : ''}`;
+    $('.rule', sec).textContent = G.rule;
+    const th = $('.thumbs', sec);
+    for (const it of its) {
+      const t = document.createElement('div'); const done = (state.verdicts[it.id] || {}).verdict;
+      t.className = 'thumb' + (EXCLUDE.has(it.id) || done ? ' out' : '');
+      const tr = it.triage, rec = tr.recurs && tr.recurs[0];
+      t.innerHTML = '<span class="t1"></span><span class="t2"></span>';
+      $('.t1', t).textContent = `${it.ticker} · source ${it.source_id}`;
+      $('.t2', t).textContent = `${it.start}${it.end !== it.start ? ' → ' + it.end : ''} · ${tr.channel} ${tr.move_pct > 0 ? '+' : ''}${tr.move_pct}% (${Math.max(tr.noise_units.ct, tr.noise_units.tkt)}× own noise)` + (rec ? ` · same move ${rec.date}` : '');
+      t.appendChild(thumb(it));
+      const lab = document.createElement('label'); const cb = document.createElement('input'); cb.type = 'checkbox';
+      cb.checked = !EXCLUDE.has(it.id) && !done; cb.disabled = !!done; cb.id = 'g-' + it.id;
+      cb.addEventListener('change', () => { cb.checked ? EXCLUDE.delete(it.id) : EXCLUDE.add(it.id); renderGroups(); });
+      lab.append(cb, done ? `already judged: ${LABEL[done]}` : 'include');
+      const go = document.createElement('a'); go.href = '#c-' + it.id; go.textContent = 'open card';
+      t.append(lab, go); th.appendChild(t);
+    }
+    const take = open.filter(it => !EXCLUDE.has(it.id));
+    if (take.length) {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'gapply';
+      b.textContent = `Mark ${take.length} as “${LABEL[G.verdict]}”`;
+      b.addEventListener('click', async () => {
+        b.disabled = true;
+        for (const it of take) await save(it, { verdict: G.verdict, group: g });
+        setStatus(`Saved ${take.length} verdicts.`);
+      });
+      sec.appendChild(b);
+    }
+    box.appendChild(sec);
+  }
+}
+
 function render() {
+  renderGroups();
   const list = $('#list'); list.textContent = '';
   const shown = ITEMS.filter(it => {
     const v = (state.verdicts[it.id] || {}).verdict;
@@ -393,7 +477,7 @@ function render() {
     p.textContent = state.filter === 'todo' ? 'Everything has a verdict. Use All to look back over them.' : 'Nothing here yet.'; list.appendChild(p); }
   const vs = ITEMS.map(it => (state.verdicts[it.id] || {}).verdict).filter(Boolean);
   const n = k => vs.filter(v => v === k).length;
-  $('#counts').textContent = `${vs.length} of ${ITEMS.length} reviewed · ${n('real')} bad · ${n('too_long')} flagged too long · ${n('not_real')} false alarm · ${n('unsure')} unsure`;
+  $('#counts').textContent = `${vs.length} of ${ITEMS.length} reviewed · ${n('real')} bad · ${n('too_long')} flagged too long · ${n('not_real')} false alarm · ${n('recurring')} recurs yearly · ${n('unsure')} unsure`;
 }
 
 document.querySelectorAll('.filters button').forEach(b => b.addEventListener('click', () => {

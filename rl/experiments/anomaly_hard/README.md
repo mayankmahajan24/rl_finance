@@ -113,3 +113,9 @@ Self-consistency added (2026-11-19): the same Opus scorer, re-graded: 0.412, 0.3
 control 0.609). On its own cleaned series it distrusts fewer rows than on the truth panel (0.04-0.09% vs 0.19-0.31%)
 and re-cleaning moves it 0.01-0.02%, so its consistency score (0.24-0.67) is set by "fixed": the level-shift onsets
 it never caught. Confidence fell (0.25-0.39) because distrusting a return to normal no longer earns credit.
+
+Feedback #11-13 applied (2026-11-20): 13 more card verdicts in reviewed.yaml; planted one-day problems at least 6x the
+source's own weekday-adjusted noise and single-measure shifts 3x; a `recurring` verdict (first year unscored, later
+years trusted). The same Opus scorer re-graded: 0.549, 0.491, 0.453, 0.493 (mean 0.50; control 0.688), oracle 1.0.
+Review is now by pattern (`triage.py`): of its 48 unexplained alerts, 8 recur a year earlier, 8 are one-day ticket
+moves within the source's own noise, 31 are small against the source's own history, 1 (a sustained move) needs a card.

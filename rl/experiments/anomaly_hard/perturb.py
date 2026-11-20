@@ -16,7 +16,10 @@ Each injector edits F.df (a panel_perturb.Frame) in place and returns event dict
     plus the parameters drawn.
 Sizes are set against the real panel's noise, measured on the bench control panels, log units, source vs the
 median of its company's other sources: daily count 0.13 (worst series 0.26), daily ticket size 0.135 (0.27),
-ticket-size drift over 90 days 0.09 at the 90th percentile (0.25), count drift over 120 days 0.15 (0.5).
+ticket-size drift over 90 days 0.09 at the 90th percentile (0.25), count drift over 120 days 0.15 (0.5). And against
+each source's own noise (own_noise: day-to-day, after its weekday pattern and a 28-day running median): a one-day
+problem is at least POINT_K times it, a single-measure level shift at least SHIFT_K times, so nothing planted is
+within what that source normally does.
 """
 from __future__ import annotations
 
@@ -27,6 +30,19 @@ from families._shared.panel_perturb import _fmt
 
 DAY = pd.Timedelta(days=1)
 VISIBLE = 0.14   # log size from which a ramping shift is labelled: about the 90th-percentile slow drift
+POINT_K, SHIFT_K = 6.0, 3.0   # a one-day problem is at least 6x the source's own day-to-day noise; a level shift 3x
+
+
+def own_noise(F, t, s):
+    """The source's own day-to-day noise (log units) in count and in ticket size, after its weekday pattern and a
+    28-day running median are removed: what "obviously off for this source" is measured against."""
+    x = F.df[(F.df.ticker == t) & (F.df.source_id == s)].set_index('date').sort_index()
+    out = {}
+    for k, v in (('ct', np.log(x.ct)), ('tkt', np.log(x.amt / x.ct))):
+        v = v - v.groupby(v.index.dayofweek).transform('median')
+        r = (v - v.rolling(28, center=True, min_periods=7).median()).dropna()
+        out[k] = float(1.4826 * (r - r.median()).abs().median()) if len(r) else 0.1
+    return out
 
 
 def _rows(F, t, s, a, b):
@@ -49,6 +65,7 @@ def _ev(type_, t, s, start, end, regime=False, **kw):
 def volume_spike(F, t, s, day):
     """A batch loaded twice, or a settlement dump: count and dollars x2-5 for 1-3 days."""
     k, mult = int(F.rng.integers(1, 4)), float(F.rng.uniform(2, 5))
+    mult = max(mult, float(np.exp(POINT_K * own_noise(F, t, s)['ct'])))
     m = _rows(F, t, s, day, day + (k - 1) * DAY)
     if m is None:
         return []
@@ -71,10 +88,13 @@ def count_flood(F, t, s, day):
     m = _rows(F, t, s, day, day)
     if m is None:
         return []
-    ct = float(F.df.loc[m, 'ct'].iloc[0])
+    ct, amt = float(F.df.loc[m, 'ct'].iloc[0]), float(F.df.loc[m, 'amt'].iloc[0])
+    u, need = F.rng.uniform(0.5, 2.0), POINT_K * own_noise(F, t, s)['tkt']
     dn = float(F.rng.poisson(ct * F.rng.uniform(2, 6)))
+    while abs(np.log((amt + dn * u) / (ct + dn)) - np.log(amt / ct)) < need and dn < 50 * ct:
+        dn = dn * 1.5 + 1                        # the ticket must fall clearly beyond this source's own noise
     F.df.loc[m, 'ct'] = int(round(ct + dn))
-    F.df.loc[m, 'amt'] = (F.df.loc[m, 'amt'] + dn * F.rng.uniform(0.5, 2.0)).round(2)
+    F.df.loc[m, 'amt'] = round(amt + dn * u, 2)
     return [_ev('count_flood', t, s, day, day, ct_mult=(ct + dn) / ct)]
 
 
@@ -83,7 +103,7 @@ def dollar_spike(F, t, s, day):
     m = _rows(F, t, s, day, day)
     if m is None:
         return []
-    mult = float(F.rng.uniform(1.8, 3.0))
+    mult = max(float(F.rng.uniform(1.8, 3.0)), float(np.exp(POINT_K * own_noise(F, t, s)['tkt'])))
     _scale(F, m, 1.0, mult)
     return [_ev('dollar_spike', t, s, day, day, amt_mult=mult)]
 
@@ -110,6 +130,12 @@ def level_shift(F, t, s, start, mode, length, d1):
         cm, am = float(F.rng.uniform(*MEASURES['count'][0])), 1.0
     else:
         cm, am = 1.0, float(F.rng.uniform(*MEASURES['dollars'][1]))
+    sig = own_noise(F, t, s)
+    floor = SHIFT_K * (sig['ct'] if measure != 'dollars' else sig['tkt'])
+    if measure == 'count' and np.log(cm) < floor:
+        cm = float(np.exp(floor))
+    if measure == 'dollars' and -np.log(am) < floor:
+        am = float(np.exp(-floor))
     ramp = int(F.rng.integers(14, 57)) if mode == 'ramp' else 0
     end = d1 if length is None else start + pd.Timedelta(days=length)
     m = F.mask(t, s, start, end)

@@ -202,11 +202,11 @@ function chart(it, v) {
   return svg;
 }
 
-const ZOOM = new Set();   // cards shown at the last 120 days (per viewer, not saved)
+const ZOOM = new Map();   // card id -> days shown (per viewer, not saved); absent: full history
 function zoomed(it) {
-  const c = it.chart;
-  if (!ZOOM.has(it.id) || c.dates.length <= 120) return c;
-  const i0 = c.dates.length - 120, cut = a => a.slice(i0);
+  const c = it.chart, k = ZOOM.get(it.id);
+  if (!k || c.dates.length <= k) return c;
+  const i0 = c.dates.length - k, cut = a => a.slice(i0);
   return { ...c, dates: cut(c.dates), flags: cut(c.flags), panels: c.panels.map(p => ({ ...p,
     lines: p.lines.map(l => ({ ...l, v: cut(l.v) })), runs: p.runs && cut(p.runs), accepted: p.accepted && cut(p.accepted) })) };
 }
@@ -316,10 +316,10 @@ function card(it) {
   if (it.chart.algo) {
     const z = document.createElement('div'); z.className = 'zoom';
     z.append('Show: ');
-    for (const [lab, on] of [['Full history', false], ['Last 120 days', true]]) {
+    for (const [lab, k] of [['Full history', 0], ['Last 400 days', 400], ['Last 120 days', 120]]) {
       const b = document.createElement('button'); b.type = 'button'; b.textContent = lab;
-      b.setAttribute('aria-pressed', String(ZOOM.has(it.id) === on));
-      b.addEventListener('click', () => { on ? ZOOM.add(it.id) : ZOOM.delete(it.id); render(); });
+      b.setAttribute('aria-pressed', String((ZOOM.get(it.id) || 0) === k));
+      b.addEventListener('click', () => { k ? ZOOM.set(it.id, k) : ZOOM.delete(it.id); render(); });
       z.append(b);
     }
     $('.chart', div).before(z);

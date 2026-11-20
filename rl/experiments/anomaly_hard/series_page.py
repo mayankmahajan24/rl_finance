@@ -22,6 +22,7 @@ import yaml
 
 HERE = pathlib.Path(__file__).resolve().parent
 SMALL_K = 6.0
+THIN_CT = 20      # build.THIN_CT: thinner stretches are not scored, so not reviewed
 
 
 def suggest(c: dict, s: dict) -> tuple[str, str]:
@@ -48,6 +49,15 @@ def main():
     for s in pool['series']:
         idx = sorted({i for k in ('own_point', 'peer_point') for i in s['flags'].get(k, [])})   # strong one-day moves only
         s['_flag_dates'] = [pd.Timestamp(s['dates'][i]) for i in idx]
+    for s in pool['series']:                       # thin stretches (28-day median count under THIN_CT): not scored
+        ct = pd.Series(s['ct'], dtype=float)
+        thin = (ct.rolling(28, min_periods=1, center=True).median() < THIN_CT).to_numpy()
+        s['thin'] = [i for i, t in enumerate(thin) if t]
+    thin_days = {(s['ticker'], s['source_id']): {s['dates'][i] for i in s['thin']} for s in pool['series']}
+    dropped = [c for c in pool['candidates'] if all(
+        d in thin_days[(c['ticker'], c['source_id'])] for d in pd.date_range(c['start'], c['end']).strftime('%Y-%m-%d'))]
+    pool['candidates'] = [c for c in pool['candidates'] if c not in dropped]
+    print(len(dropped), 'candidates dropped: entirely on thin stretches')
     for c in pool['candidates']:
         c['suggest'], c['why'] = suggest(c, by[(c['ticker'], c['source_id'])])
     for s in pool['series']:
@@ -69,18 +79,18 @@ PAGE = r"""<title>Series Review</title>
 :root {
   --bg: #f6f7f5; --panel: #ffffff; --ink: #1b1f1d; --muted: #5d6762; --line: #dfe3e0;
   --count: #2a6fb8; --ticket: #b0601f; --flag: #c23b3b; --bad: rgba(194, 59, 59, .16); --fine: rgba(93, 103, 98, .14);
-  --rec: rgba(42, 111, 184, .14); --sel: #2f7a50; --focus: #2a6fb8;
+  --rec: rgba(42, 111, 184, .14); --sel: #2f7a50; --focus: #2a6fb8; --thin: rgba(93, 103, 98, .22);
   --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #121513; --panel: #1a1e1c; --ink: #e6ebe8; --muted: #9aa49f; --line: #2c322f;
   --count: #6aa6e6; --ticket: #e0965a; --flag: #ef7171; --bad: rgba(239, 113, 113, .2); --fine: rgba(154, 164, 159, .16);
-  --rec: rgba(106, 166, 230, .18); --sel: #7fd0a2; --focus: #6aa6e6; color-scheme: dark } }
+  --rec: rgba(106, 166, 230, .18); --sel: #7fd0a2; --focus: #6aa6e6; --thin: rgba(154, 164, 159, .2); color-scheme: dark } }
 :root[data-theme="dark"] {
   --bg: #121513; --panel: #1a1e1c; --ink: #e6ebe8; --muted: #9aa49f; --line: #2c322f;
   --count: #6aa6e6; --ticket: #e0965a; --flag: #ef7171; --bad: rgba(239, 113, 113, .2); --fine: rgba(154, 164, 159, .16);
-  --rec: rgba(106, 166, 230, .18); --sel: #7fd0a2; --focus: #6aa6e6; color-scheme: dark }
+  --rec: rgba(106, 166, 230, .18); --sel: #7fd0a2; --focus: #6aa6e6; --thin: rgba(154, 164, 159, .2); color-scheme: dark }
 body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--sans); }
 .wrap { max-width: 980px; margin: 0 auto; padding-block: 24px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 16px; }
@@ -164,6 +174,7 @@ function chart(s, wrap) {
         if (b.end !== b.start) el('line', { x1: x(e), x2: x(e), y1: top, y2: top + ph, stroke: 'var(--flag)', 'stroke-width': 2, 'stroke-dasharray': '3 2' }, svg); continue; }
       el('rect', { x: x(a) - 1, y: top, width: Math.max(2, x(e) - x(a) + 2), height: ph, fill: b.verdict === 'real' ? 'var(--bad)' : b.verdict === 'recurring' ? 'var(--rec)' : 'var(--fine)' }, svg);
     }
+    for (const i of s.thin) if (i >= i0 && i <= i1) el('rect', { x: x(i) - 0.6, y: top, width: Math.max(1.2, (W - L - R) / n + 0.2), height: ph, fill: 'var(--thin)' }, svg);
     if (st.sel) { const a = Math.max(idxOf(st.sel[0]), i0), e = Math.min(idxOf(st.sel[1]), i1);
       if (e >= i0 && a <= i1) el('rect', { x: x(a) - 1, y: top, width: Math.max(2, x(e) - x(a) + 2), height: ph, fill: 'none', stroke: 'var(--sel)', 'stroke-width': 1.5, 'stroke-dasharray': '4 2' }, svg); }
     // last year, shifted 364 days so weekdays line up: the value the same source reported 52 weeks earlier
@@ -236,7 +247,7 @@ function show() {
   p.appendChild(z);
   const cw = document.createElement('div'); chart(s, cw); p.appendChild(cw);
   const lg = document.createElement('div'); lg.className = 'legend';
-  lg.innerHTML = `<span><i class="sw" style="background:var(--count)"></i>count</span><span><i class="sw" style="background:var(--ticket)"></i>dollars, ticket size</span><span><i class="sw" style="background:transparent;border-top:2px dotted var(--muted);height:0"></i>same source 364 days earlier</span><span><i class="sw" style="background:var(--flag)"></i>a detector flagged that day</span><span><i class="sw" style="background:var(--bad)"></i>marked bad</span><span><i class="sw" style="background:var(--fine)"></i>marked fine</span><span><i class="sw" style="background:var(--rec)"></i>recurs yearly</span><span><i class="sw" style="background:transparent;border-left:2px solid var(--flag)"></i>level change starts (dashed: returns)</span><span><i class="sw" style="outline:1.5px dashed var(--sel);outline-offset:-2px"></i>your selection</span>`;
+  lg.innerHTML = `<span><i class="sw" style="background:var(--count)"></i>count</span><span><i class="sw" style="background:var(--ticket)"></i>dollars, ticket size</span><span><i class="sw" style="background:transparent;border-top:2px dotted var(--muted);height:0"></i>same source 364 days earlier</span><span><i class="sw" style="background:var(--flag)"></i>a detector flagged that day</span><span><i class="sw" style="background:var(--bad)"></i>marked bad</span><span><i class="sw" style="background:var(--fine)"></i>marked fine</span><span><i class="sw" style="background:var(--rec)"></i>recurs yearly</span><span><i class="sw" style="background:var(--thin)"></i>too thin to trust (under 20 a day): not scored</span><span><i class="sw" style="background:transparent;border-left:2px solid var(--flag)"></i>level change starts (dashed: returns)</span><span><i class="sw" style="outline:1.5px dashed var(--sel);outline-offset:-2px"></i>your selection</span>`;
   p.appendChild(lg);
   const sb = document.createElement('div'); sb.className = 'selbox';
   if (st.sel) {

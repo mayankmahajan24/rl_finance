@@ -32,6 +32,7 @@ import perturb as P  # noqa: E402
 OUT = RL / "tasks" / "proto" / "anomaly_hard"
 REVIEWED = HERE / "reviewed.yaml"   # verdicts on real (unplanted) problems, in original coordinates; grader-only
 EVAL_START_DAYS = 545
+THIN_CT = 20   # a stretch whose 28-day median count is under this is too thin to trust: not scored (feedback #18)
 N_POINTS, SHIFTS = 2, [('step', 2), ('ramp', 2)]   # per panel: 2 of each point kind, 2 step and 2 ramp level shifts
 
 
@@ -115,7 +116,7 @@ def plant(rng, control, ctx, n_tickers=8):
     truth = dict(family='anomaly_hard', control=control, events=events, decoys=decoys, exclusions=excl,
                  reviewed_not_real=not_real, reviewed_recurring=recurring, reviewed_series=full,
                  ignore_series=F.low_volume_series(), eval_start=_fmt(d0 + pd.Timedelta(days=EVAL_START_DAYS)),
-                 threshold=0.5, thin_ct=10,
+                 threshold=0.5, thin_ct=THIN_CT,
                  truncation_cutoffs=[_fmt(d0 + (d1 - d0) * f) for f in (0.45, 0.7)])
     df = F.df.sort_values(['date', 'ticker', 'source_id']).reset_index(drop=True)
     truth_df = truth_df.sort_values(['date', 'ticker', 'source_id']).reset_index(drop=True)

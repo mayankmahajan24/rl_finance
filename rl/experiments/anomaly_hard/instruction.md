@@ -71,5 +71,5 @@ that have been reviewed) and what each source would have reported had it been wo
 
 The total is set to zero if the outputs are malformed, if the point-in-time check fails, if the code imports or shells
 out to a model or network client, or if the write-up is missing.
-Rows on thin stretches of a source (fewer than about ten transactions a day) and debatable rows are not scored. The
+Rows on thin stretches of a source (fewer than about twenty transactions a day) and debatable rows are not scored. The
 write-up is also graded on its own, separately from this score.

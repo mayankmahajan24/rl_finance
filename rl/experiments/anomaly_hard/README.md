@@ -141,3 +141,6 @@ Reviewing one model's alerts only ever finds what that model flagged. Instead th
 
 The current Opus scorer: strict 0.549, 0.491, 0.453, 0.493 (mean 0.50); lenient 0.577, 0.535, 0.530, 0.545 (mean
 0.55). Missing labels move its score by about 0.05: the task is not hard because the answer key is incomplete.
+
+Thin bar raised to 20 transactions a day (feedback #18): 8% of rows unscored. Opus: strict 0.576, 0.513, 0.473, 0.511
+(mean 0.52), lenient mean 0.57; oracle 1.0.

@@ -148,7 +148,7 @@ def label_rows(truth: dict, ev: pd.DataFrame, clean_truth: pd.DataFrame | None =
     if clean_truth is not None:                     # thin stretches: the truth count's 28-day median under thin_ct
         ct = clean_truth.sort_values('date')
         med = ct.groupby(['ticker', 'source_id']).ct.transform(lambda x: x.rolling(28, min_periods=1, center=True).median())
-        thin = ct.assign(thin=(med < truth.get('thin_ct', 10)).to_numpy())[KEYS + ['thin']]
+        thin = ct.assign(thin=(med < truth.get('thin_ct', 20)).to_numpy())[KEYS + ['thin']]
         ev['use'] &= ~ev[KEYS].merge(thin, on=KEYS, how='left').thin.fillna(False).astype(bool).to_numpy()
     parts, quiet = [], pd.Series(False, index=ev.index)
     for e in truth['events']:

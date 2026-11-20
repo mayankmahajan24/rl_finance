@@ -29,7 +29,12 @@ Reward = W_CONF x confidence score + W_CLEAN x cleaned-series score + W_CONS x s
   planted; real events kept). Error = mean over count and dollars of |log value - log truth|; a blank cleaned value
   counts as the raw value.
     gain: for each planted problem, 1 - (cleaned error / raw error) summed over the scored rows it changed, floored at
-          0; averaged within each kind, then over kinds (reviewed real problems have no truth and are left out)
+          0; averaged within each kind, then over kinds. Reviewed real problems have no truth panel value (the truth
+          panel is the real data, problems included), so they are scored the same way against a hindsight reference
+          built from the full hidden series (hindsight_ref): the source's relation to the median of its company's
+          other sources (log count, log ticket), taken from REF_DAYS either side of the problem (other reviewed
+          problems left out) for a one-off problem, or from the REF_DAYS before it for a lasting change (the old
+          basis, as for a planted shift); errors within the source's own noise in that relation are not counted
     damage penalty: max(0, 1 - mean cleaned error on scored rows no problem changed / DAMAGE_TOL)
   Self-consistency score: score.py run again, once on its own cleaned series (rows it left blank dropped) and once on
   the truth panel (genuinely clean data, its own baseline). fixed x (0.5 x no new alarms + 0.5 x idempotent):
@@ -63,7 +68,8 @@ OUT_COLS = ['confidence', 'clean_ct', 'clean_amt']
 FULL_DAYS, ZERO_DAYS = 14, 45
 CHANGE_DAYS, SETTLE_DAYS = 14, 45
 ALERT_GAP = 2
-REAL_TYPES = {'real', 'real_change'}   # reviewed problems in the source data (no truth for cleaning)
+REAL_TYPES = {'real', 'real_change'}   # reviewed problems in the source data (cleaned against hindsight_ref)
+REF_DAYS = 56
 DAMAGE_TOL = 0.05
 NEW_ALARM_TOL = 0.01
 W_CONF, W_CLEAN, W_CONS = 0.4, 0.4, 0.2
@@ -209,7 +215,47 @@ def confidence_score(ev, scored):
         events=table)
 
 
-def clean_score(truth, ev, scored_rows):
+def hindsight_ref(truth: dict, panel: pd.DataFrame) -> pd.DataFrame:
+    """What each reviewed real problem's rows should have read, from the full series (panel = the hidden truth panel,
+    which still has the real problems in it): KEYS + ref_ct, ref_amt, tol_ct, tol_amt (log-units noise allowance),
+    one row per day of each real problem (for a lasting change, from its start to its end)."""
+    real = [e for e in truth['events'] if e['type'] in REAL_TYPES]
+    out = []
+    if not real:
+        return pd.DataFrame(columns=KEYS + ['ref_ct', 'ref_amt', 'tol_ct', 'tol_amt'])
+    mad = lambda x: float(1.4826 * (x - x.median()).abs().median()) if len(x) > 5 else np.nan  # noqa: E731
+    for tk in sorted({e['ticker'] for e in real}):
+        g = panel[panel.ticker == tk]
+        lc = np.log(g.pivot(index='date', columns='source_id', values='ct').clip(lower=0.01))
+        lt = np.log(g.pivot(index='date', columns='source_id', values='amt').clip(lower=0.01)) - lc
+        for s in sorted({e['source_id'] for e in real if e['ticker'] == tk}):
+            peers = [c for c in lc.columns if c != s]
+            if not peers:
+                continue
+            rc, rt = lc[s] - lc[peers].median(axis=1), lt[s] - lt[peers].median(axis=1)
+            mine = [e for e in real if e['ticker'] == tk and e['source_id'] == s]
+            bad = pd.Series(False, index=lc.index)
+            for e in mine:
+                bad |= (lc.index >= pd.Timestamp(e['start'])) & (lc.index <= pd.Timestamp(e['end']))
+            for e in mine:
+                a, b = pd.Timestamp(e['start']), pd.Timestamp(e['end'])
+                pre = (lc.index >= a - pd.Timedelta(days=REF_DAYS)) & (lc.index < a)
+                post = (lc.index > b) & (lc.index <= b + pd.Timedelta(days=REF_DAYS))
+                win = (pre | (post if e['type'] == 'real' else False)) & ~bad & rc.notna() & rt.notna()
+                if win.sum() < 10:
+                    continue
+                span = (lc.index >= a) & (lc.index <= b)
+                d = lc.index[span]
+                ref_lc = lc.loc[d, peers].median(axis=1) + rc[win].median()
+                ref_lt = lt.loc[d, peers].median(axis=1) + rt[win].median()
+                tc, tt = mad(rc[win]), mad(rt[win])
+                out.append(pd.DataFrame(dict(date=d, ticker=tk, source_id=s, ref_ct=np.exp(ref_lc).to_numpy(),
+                                             ref_amt=np.exp(ref_lc + ref_lt).to_numpy(), tol_ct=tc,
+                                             tol_amt=float(np.hypot(tc, tt)))))
+    return pd.concat(out, ignore_index=True) if out else pd.DataFrame(columns=KEYS + ['ref_ct', 'ref_amt', 'tol_ct', 'tol_amt'])
+
+
+def clean_score(truth, ev, scored_rows, ref=None):
     """ev carries raw ct/amt, truth tct/tamt and the cleaned values (blank = raw); scored_rows is the scored mask
     before label_rows forced labelled rows in (the cleaned series is scored on the same stretches)."""
     lg = lambda x: np.log(np.maximum(x.astype(float), 0.01))  # noqa: E731
@@ -223,8 +269,22 @@ def clean_score(truth, ev, scored_rows):
     for e in truth['events']:
         ser = (ev.ticker == e['ticker']) & (ev.source_id == e['source_id'])
         span = ser & ev.date.between(pd.Timestamp(e.get('shift_start', e['start'])), pd.Timestamp(e['end']))
-        if e['type'] in REAL_TYPES:          # real problems have no truth for the cleaned series: left out
+        if e['type'] in REAL_TYPES:          # real problems: against the hindsight reference, net of its noise
             real |= span
+            if ref is None or not ev.ref_ct.notna().any():
+                continue
+            rc, ra = ev.ref_ct, ev.ref_amt
+            er = 0.5 * (((lg(ev.ct) - lg(rc)).abs() - ev.tol_ct).clip(lower=0)
+                        + ((lg(ev.amt) - lg(ra)).abs() - ev.tol_amt).clip(lower=0))
+            ec = 0.5 * (((lg(cc) - lg(rc)).abs() - ev.tol_ct).clip(lower=0)
+                        + ((lg(ca) - lg(ra)).abs() - ev.tol_amt).clip(lower=0))
+            m = span & scored_rows & rc.notna() & (er > 1e-6)
+            if not m.any():
+                continue
+            g = max(0.0, 1 - ec[m].sum() / er[m].sum())
+            gains.append(dict(type=e['type'], ticker=e['ticker'], source_id=e['source_id'], start=e['start'],
+                              rows=int(m.sum()), raw_error=round(float(er[m].mean()), 3),
+                              clean_error=round(float(ec[m].mean()), 3), gain=round(g, 3)))
             continue
         m = span & changed & scored_rows
         if not m.any():
@@ -284,10 +344,12 @@ def score(truth: dict, data: pd.DataFrame, clean_truth: pd.DataFrame, sol: pathl
     ev = data[KEYS + ['ct', 'amt']].merge(full, on=KEYS, how='left')
     ev = ev.merge(clean_truth[KEYS + ['ct', 'amt']].rename(columns={'ct': 'tct', 'amt': 'tamt'}), on=KEYS, how='left')
     ev['flag'] = ev.confidence < 0.5
+    ref = hindsight_ref(truth, clean_truth)
+    ev = ev.merge(ref, on=KEYS, how='left')
     stretches = scored_stretches(truth, ev, clean_truth)
     scored = label_rows(truth, ev, clean_truth)
     conf, conf_d = confidence_score(ev, scored)
-    cln, cln_d = clean_score(truth, ev, stretches)
+    cln, cln_d = clean_score(truth, ev, stretches, ref)
     cons, cons_d = consistency_score(truth, sol, data, clean_truth, full, ev, stretches, c_)
     reward = (W_CONF * conf + W_CLEAN * cln + W_CONS * cons) * all(gates.values())
     # unknowns: distrusted rows on real data nobody has judged. The reward counts them as false alarms (strict);

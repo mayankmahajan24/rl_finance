@@ -61,7 +61,7 @@ client in the code (import scan; the runs have no network), the write-up present
   planted untrustworthy rows the first run distrusted and the run on the cleaned series trusts) x (0.5 x no new alarms
   (falls to zero when the cleaned series is distrusted on 1 point more of rows than the truth panel) + 0.5 x
   idempotent (falls to zero when re-cleaning moves the cleaned series 5% on average)).
-* **Cleaned series (40%):** for each planted problem, the share of the raw value's log error (vs the truth panel)
+* **Cleaned series (40%):** for each planted problem (and each reviewed real problem, against a hindsight reference from the full series), the share of the raw value's log error (vs the truth panel)
   that the cleaned value closes, averaged within and then across kinds; times a damage penalty that reaches zero when
   rows no problem touched move 5% on average.
 * Unscored: before the warm-up ends, low-volume series, thin stretches (truth count's 28-day median under 10), near
@@ -147,3 +147,11 @@ Thin bar raised to 20 transactions a day (feedback #18): 8% of rows unscored. Op
 
 SAVE Series Review verdicts merged (10 spans; SAVE-2, -3, -4 reviewed end to end; 5 of 20 series now done): 56
 reviewed entries. Opus strict unchanged (0.576, 0.513, 0.473, 0.511), lenient mean 0.56; control strict 0.786; oracle 1.0.
+
+Reviewed real problems in the cleaned-series score (feedback #19): against a hindsight reference from the full hidden
+series (`hindsight_ref`: the source's relation to its company's other sources, from 56 days either side of the
+problem, or the 56 days before a lasting change; errors within the source's own noise in that relation not counted).
+Oracle 1.0. Opus strict 0.560, 0.507, 0.473, 0.511 (mean 0.51), lenient mean 0.55; control strict 0.566 (was 0.786):
+on the control the real problems are the only ones, and Opus leaves several (M_M-1's Christmas dropouts, 3-4
+transactions against about 17 and 59 expected) unrepaired. DAL-1's level change sits inside the known-artifact
+exclusion (from 2016-05-04), so it is not scored.

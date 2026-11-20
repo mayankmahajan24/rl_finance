@@ -26,7 +26,8 @@ python /app/solution/score.py --input IN.csv --output OUT.csv
 * `clean_ct`, `clean_amt`: a cleaned series for the row's ticker and source that is comparable like for like with
   that source's own history: what the source would have reported had it kept working the way it normally does.
   Where a row is fine, it equals the raw value. Where a row cannot be trusted, impute it, so the cleaned series has a
-  value on every row except those you throw out as junk, which you may leave blank.
+  value on every row except those you throw out as junk, which you may leave blank. A stretch where a source is too
+  thin to trust (fewer than about twenty transactions a day) is junk: distrust it and leave it blank.
 
 2. **`/app/output/writeup.md`** (under 600 words): how the confidence score and the cleaned series are built and why,
    how you checked them, which open-source packages you used and why (or that you used none), and what a researcher
@@ -71,5 +72,7 @@ that have been reviewed) and what each source would have reported had it been wo
 
 The total is set to zero if the outputs are malformed, if the point-in-time check fails, if the code imports or shells
 out to a model or network client, or if the write-up is missing.
-Rows on thin stretches of a source (fewer than about twenty transactions a day) and debatable rows are not scored. The
+Thin stretches count as problems in both scores: distrusting them earns credit in the confidence score, and leaving
+them blank earns credit in the cleaned-series score. Rows near the twenty-a-day line, the first two weeks of a thin
+stretch, the two weeks after it ends, and other debatable rows are not scored. The
 write-up is also graded on its own, separately from this score.

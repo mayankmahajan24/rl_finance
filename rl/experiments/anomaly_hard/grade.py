@@ -10,8 +10,11 @@ blank or non-negative), the point-in-time check on all three columns, no model o
 write-up (default SOLUTION_DIR/../output/writeup.md).
 
 Reward = W_CONF x confidence score + W_CLEAN x cleaned-series score + W_CONS x self-consistency score.
-  Scored rows: from eval_start, not on low-volume series, not on thin stretches (truth count's 28-day median under
-  thin_ct), not near known natural artifacts. Untrustworthy rows (label_rows): every day of a point anomaly or
+  Scored rows: from eval_start, not on low-volume series, not near known natural artifacts. Thin stretches (the truth
+  count's centred 28-day median under THIN_LO x thin_ct, after their first THIN_EDGE days) are untrustworthy and should
+  be dropped: distrusted (kind `thin` in the confidence score) and left blank (kind `thin` in the cleaned-series gain:
+  the share of its rows blank). Borderline rows (median between THIN_LO and THIN_HI x thin_ct) and the THIN_EDGE days
+  either side of a thin stretch's start and end are not scored. Untrustworthy rows (label_rows): every day of a point anomaly or
   reviewed real problem. A level shift is a change, as a time series monitor sees it: its first CHANGE_DAYS days are
   untrustworthy (event: onset); then not scored up to SETTLE_DAYS from its start (or two weeks after a ramp ends) while
   the code decides whether the new level is the new normal; after that the new level is trusted (and the cleaned series
@@ -70,6 +73,9 @@ CHANGE_DAYS, SETTLE_DAYS = 14, 45
 ALERT_GAP = 2
 REAL_TYPES = {'real', 'real_change'}   # reviewed problems in the source data (cleaned against hindsight_ref)
 REF_DAYS = 56
+THIN_LO, THIN_HI, THIN_EDGE = 0.8, 1.25, 14   # thin: truth count's 28-day median under THIN_LO x thin_ct must be
+# dropped (distrusted, left blank); between THIN_LO and THIN_HI x thin_ct, and the first THIN_EDGE days of a thin
+# stretch and the THIN_EDGE days after it, are not scored (the code cannot tell yet, point in time)
 DAMAGE_TOL = 0.05
 NEW_ALARM_TOL = 0.01
 W_CONF, W_CLEAN, W_CONS = 0.4, 0.4, 0.2
@@ -151,11 +157,36 @@ def label_rows(truth: dict, ev: pd.DataFrame, clean_truth: pd.DataFrame | None =
         if x['source_id'] is not None:
             m &= ev.source_id == x['source_id']
         ev['use'] &= ~m
-    if clean_truth is not None:                     # thin stretches: the truth count's 28-day median under thin_ct
-        ct = clean_truth.sort_values('date')
-        med = ct.groupby(['ticker', 'source_id']).ct.transform(lambda x: x.rolling(28, min_periods=1, center=True).median())
-        thin = ct.assign(thin=(med < truth.get('thin_ct', 20)).to_numpy())[KEYS + ['thin']]
-        ev['use'] &= ~ev[KEYS].merge(thin, on=KEYS, how='left').thin.fillna(False).astype(bool).to_numpy()
+    ev['thin'] = False
+    thin_parts = []
+    if clean_truth is not None:                     # thin stretches, from the truth count's centred 28-day median
+        bar = truth.get('thin_ct', 20)
+        ct = clean_truth.sort_values('date').copy()
+        ct['med'] = ct.groupby(['ticker', 'source_id']).ct.transform(
+            lambda x: x.rolling(28, min_periods=1, center=True).median())
+        ct['core'] = False
+        ct['grey'] = (ct.med >= THIN_LO * bar) & (ct.med < THIN_HI * bar)
+        runs = []
+        for (tk, s), g in ct.groupby(['ticker', 'source_id']):
+            low = (g.med < THIN_LO * bar).to_numpy()
+            if not low.any():
+                continue
+            rid = np.cumsum(np.r_[True, low[1:] != low[:-1]])
+            for r in np.unique(rid[low]):
+                d = g.date[rid == r]
+                a, b = d.min(), d.max()
+                near = (g.date >= a - D(THIN_EDGE)) & (g.date < a + D(THIN_EDGE)) | \
+                       (g.date > b - D(THIN_EDGE)) & (g.date <= b + D(THIN_EDGE))
+                ct.loc[near[near].index, 'grey'] = True
+                core = g.index[(rid == r) & ~near.to_numpy()]
+                ct.loc[core, 'core'] = True
+                runs.append((tk, s, core))
+        k = ev[KEYS].merge(ct[KEYS + ['core', 'grey']], on=KEYS, how='left')
+        core = k.core.fillna(False).astype(bool).to_numpy()
+        ev['use'] &= ~(core | k.grey.fillna(False).astype(bool).to_numpy())
+        for tk, s, idx in runs:
+            m = (ev.ticker == tk) & (ev.source_id == s) & ev.date.isin(set(ct.loc[idx, 'date']))
+            thin_parts.append((tk, s, m))
     parts, quiet = [], pd.Series(False, index=ev.index)
     for e in truth['events']:
         a, b = pd.Timestamp(e['start']), pd.Timestamp(e['end'])
@@ -172,6 +203,13 @@ def label_rows(truth: dict, ev: pd.DataFrame, clean_truth: pd.DataFrame | None =
             # penalised for SETTLE_DAYS; after that the source must be trusted
             quiet |= ser & (ev.date > b) & (ev.date <= b + D(SETTLE_DAYS))
     ev['use'] &= ~quiet
+    for tk, s, m in thin_parts:           # thin stretches not excluded for another reason: untrustworthy, drop them
+        m = m & ~excluded_thin(truth, ev, tk, s)
+        if m.any():
+            ev.loc[m, 'thin'] = True
+            d = ev.date[m]
+            parts.append((dict(type='thin', ticker=tk, source_id=s, start=str(d.min().date()), end=str(d.max().date()),
+                               regime=False), m))
     scored = []
     for e, m in parts:
         m = m & (ev.date >= pd.Timestamp(truth['eval_start']))
@@ -179,6 +217,19 @@ def label_rows(truth: dict, ev: pd.DataFrame, clean_truth: pd.DataFrame | None =
         if m.any():
             scored.append((e, m))
     return scored
+
+
+def excluded_thin(truth, ev, tk, s):
+    """Rows of series (tk, s) that are not scored for a reason other than being thin."""
+    D = lambda n: pd.Timedelta(days=n)  # noqa: E731
+    out = ev.date < pd.Timestamp(truth['eval_start'])
+    for i in truth['ignore_series']:
+        if i['ticker'] == tk and i['source_id'] == s:
+            out |= True
+    for x in truth['exclusions']:
+        if x['ticker'] == tk and x['source_id'] in (None, s):
+            out |= ev.date.between(pd.Timestamp(x['lo']) - D(14), pd.Timestamp(x['hi']) + D(30))
+    return out
 
 
 def confidence_score(ev, scored):
@@ -269,6 +320,8 @@ def clean_score(truth, ev, scored_rows, ref=None):
     for e in truth['events']:
         ser = (ev.ticker == e['ticker']) & (ev.source_id == e['source_id'])
         span = ser & ev.date.between(pd.Timestamp(e.get('shift_start', e['start'])), pd.Timestamp(e['end']))
+        if e['type'] == 'thin':
+            continue
         if e['type'] in REAL_TYPES:          # real problems: against the hindsight reference, net of its noise
             real |= span
             if ref is None or not ev.ref_ct.notna().any():
@@ -278,7 +331,7 @@ def clean_score(truth, ev, scored_rows, ref=None):
                         + ((lg(ev.amt) - lg(ra)).abs() - ev.tol_amt).clip(lower=0))
             ec = 0.5 * (((lg(cc) - lg(rc)).abs() - ev.tol_ct).clip(lower=0)
                         + ((lg(ca) - lg(ra)).abs() - ev.tol_amt).clip(lower=0))
-            m = span & scored_rows & rc.notna() & (er > 1e-6)
+            m = span & scored_rows & rc.notna() & (er > 1e-6) & ~ev.thin          # a thin stretch is dropped, not repaired
             if not m.any():
                 continue
             g = max(0.0, 1 - ec[m].sum() / er[m].sum())
@@ -286,17 +339,22 @@ def clean_score(truth, ev, scored_rows, ref=None):
                               rows=int(m.sum()), raw_error=round(float(er[m].mean()), 3),
                               clean_error=round(float(ec[m].mean()), 3), gain=round(g, 3)))
             continue
-        m = span & changed & scored_rows
+        m = span & changed & scored_rows & ~ev.thin
         if not m.any():
             continue
         g = max(0.0, 1 - err_cln[m].sum() / err_raw[m].sum())
         gains.append(dict(type=e['type'], ticker=e['ticker'], source_id=e['source_id'], start=e['start'],
                           rows=int(m.sum()), raw_error=round(float(err_raw[m].mean()), 3),
                           clean_error=round(float(err_cln[m].mean()), 3), gain=round(g, 3)))
-    ok = scored_rows & ~changed & ~real
+    thin = ev.thin & scored_rows
+    for (tk, s), g in ev[thin].groupby(['ticker', 'source_id']):
+        blank = (g.clean_ct.isna() & g.clean_amt.isna())
+        gains.append(dict(type='thin', ticker=tk, source_id=int(s), start=str(g.date.min().date()), rows=len(g),
+                          raw_error=None, clean_error=None, gain=round(float(blank.mean()), 3)))
+    ok = scored_rows & ~changed & ~real & ~ev.thin
     damage = float(err_cln[ok].mean()) if ok.any() else 0.0
     penalty = max(0.0, 1 - damage / DAMAGE_TOL)
-    blank = int((scored_rows & (ev.clean_ct.isna() | ev.clean_amt.isna())).sum())
+    blank = int((scored_rows & ~ev.thin & (ev.clean_ct.isna() | ev.clean_amt.isna())).sum())
     if gains:
         g = pd.DataFrame(gains)
         gain = float(g.groupby('type').gain.mean().mean())
@@ -385,9 +443,13 @@ def consistency_score(truth, sol, data, clean_truth, full, ev, stretches, c_):
         if e['type'] in REAL_TYPES:
             real |= (ev.ticker == e['ticker']) & (ev.source_id == e['source_id']) & \
                 ev.date.between(pd.Timestamp(e['start']), pd.Timestamp(e['end']))
-    bad = (ev.use & ev.label & ~real).to_numpy()
+    bad = (ev.use & ev.label & ~real & ~ev.thin).to_numpy()   # thin rows are dropped, not repaired
     trusted2 = (k.confidence2 >= 0.5).to_numpy()       # a row missing from the second run is not trusted
-    fixed = float((bad & ev.flag.to_numpy() & trusted2).sum() / bad.sum()) if bad.any() else 1.0
+    if bad.any():
+        fixed = float((bad & ev.flag.to_numpy() & trusted2).sum() / bad.sum())
+    else:                     # nothing planted (a control): the share of the labelled problems the first run distrusted
+        lab = (ev.use & ev.label).to_numpy()
+        fixed = float((lab & ev.flag.to_numpy()).sum() / lab.sum()) if lab.any() else 1.0
     sc = stretches.to_numpy() & k.confidence2.notna().to_numpy()
     rate_c = float((k.confidence2[sc] < 0.5).mean()) if sc.any() else 0.0
     rate_t = float((k.confidence_t[sc] < 0.5).mean()) if sc.any() else 0.0

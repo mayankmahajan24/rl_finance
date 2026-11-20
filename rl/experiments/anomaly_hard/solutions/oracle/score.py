@@ -2,7 +2,8 @@
 grader labels untrustworthy (grade.label_rows) where the input actually differs from the truth panel, and on reviewed
 real problems; 1 elsewhere. The cleaned series is the truth panel, with reviewed real problems
 replaced by the grader's hindsight reference. Run on its own cleaned series (the truth) it
-distrusts only the real problems, as on the truth panel. It should score 1.0 everywhere."""
+distrusts only the real problems, as on the truth panel. Thin stretches are distrusted and left blank. It should score 1.0
+everywhere."""
 import argparse
 import json
 import os
@@ -31,6 +32,7 @@ real = pd.Series(False, index=df.index)
 for e in gold['events']:
     if e['type'] in ('real', 'real_change'):
         real |= (df.ticker == e['ticker']) & (df.source_id == e['source_id']) & df.date.between(e['start'], e['end'])
-df['confidence'] = 1.0 - (df.label & (differs | real)).astype(float)
+df['confidence'] = 1.0 - (df.label & (differs | real | df.thin)).astype(float)
+df.loc[df.thin, ['clean_ct', 'clean_amt']] = np.nan          # thin stretches are dropped
 df['date'] = df.date.dt.strftime('%Y-%m-%d')
 df[KEYS + ['confidence', 'clean_ct', 'clean_amt']].to_csv(a.output, index=False)

@@ -160,3 +160,8 @@ Feedback #20: reviewed series (end to end, or with a level change) are no longer
 known-artifact list, so DAL-1's level change is graded (Opus's cleaned series closes about 0.83 of its error); M_M-1
 Christmas is a recurring pattern. Oracle 1.0. Opus strict 0.557, 0.522, 0.465, 0.510 (mean 0.51), lenient mean 0.55;
 control strict 0.670.
+
+Thin stretches graded (feedback #21): under 16 transactions a day (28-day median of the truth count) a source must be
+distrusted and left blank; 16-25 a day and two weeks either side of a thin stretch's edges are not scored. Opus trusts
+and imputes nearly every thin day (day recall 0-1%, none left blank). Oracle 1.0, naive 0.0 on all five tasks. Opus
+strict 0.523, 0.492, 0.436, 0.486 (mean 0.48), lenient mean 0.51; control strict 0.410.

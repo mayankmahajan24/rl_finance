@@ -6,6 +6,10 @@ You have a daily panel of card transactions: several independent data sources (s
 daily transaction count and dollar total. Sources sometimes misreport. Build code that says, for every row, whether
 it can be trusted, and that produces a cleaned version of every series.
 
+The point is a usable, like-for-like series for every source with as much of its history as possible. Some segments
+of the data carry too little signal to be worth keeping, and those may be discarded; everything else should be kept,
+repaired where it needs repair.
+
 {schema}
 
 {copy_note}
@@ -25,9 +29,8 @@ python /app/solution/score.py --input IN.csv --output OUT.csv
   reported or after your adjustment? High means trust it; below 0.5 means do not.
 * `clean_ct`, `clean_amt`: a cleaned series for the row's ticker and source that is comparable like for like with
   that source's own history: what the source would have reported had it kept working the way it normally does.
-  Where a row is fine, it equals the raw value. Where a row cannot be trusted, impute it, so the cleaned series has a
-  value on every row except those you throw out as junk, which you may leave blank. A stretch where a source is too
-  thin to trust (fewer than about twenty transactions a day) is junk: distrust it and leave it blank.
+  Where a row is fine, it equals the raw value. Where a row cannot be trusted, impute it. Leave a row blank only when
+  it belongs to a segment you discard for low signal (and give it low confidence).
 
 2. **`/app/output/writeup.md`** (under 600 words): how the confidence score and the cleaned series are built and why,
    how you checked them, which open-source packages you used and why (or that you used none), and what a researcher
@@ -44,8 +47,9 @@ python /app/solution/score.py --input IN.csv --output OUT.csv
   obviously wrong datapoints automatically. Encode every judgment in the code, not in a list of dates or tickers.
 * **Simple is fine.** Use complexity only where it clearly helps. Python with pandas, numpy, scipy, statsmodels and
   scikit-learn is available; use any of them, or none.
-* **Junk data.** You may throw out data that carries no usable signal (for instance the leading portion of a source
-  with very few transactions), as long as the rule is in the code so it would scale.
+* **Low-signal data.** Segments that carry no usable signal (for instance a stretch where a source has too few
+  transactions for its daily numbers to mean much) may be discarded, as long as the rule is in the code so it would
+  scale. Discard as little as you can: history is valuable.
 * **New data.** Your script is graded on a different panel of the same kind, with its own tickers, dates and
   problems. Each run must finish within 20 minutes on 2 CPUs.
 * **Your own output as input.** The script must also run on a file of its own cleaned series in the input format.
@@ -62,8 +66,9 @@ that have been reviewed) and what each source would have reported had it been wo
 * **Cleaned series (40%).** On rows a problem affected, how much of the gap between the raw value and what the
   source should have reported your cleaned value closes (in log terms, count and dollars, each kind of problem
   weighing the same), multiplied by a penalty for changing rows that were fine (it reaches zero when those rows move
-  5% on average, in log terms). A blank cleaned value on a scored row counts as the raw value, so a row left blank
-  where it should have been imputed earns nothing.
+  5% on average, in log terms), and by a penalty for discarding history (it reaches zero when 5% of the rows that
+  should be kept are left blank). A blank cleaned value on a row with a problem counts as the raw value, so a row left
+  blank where it should have been imputed earns nothing.
 * **Self-consistency (20%).** Your script is run again on its own cleaned series (same columns; counts may not be
   whole numbers) and on clean data. Its score is the share of untrustworthy rows that your first run distrusted and
   that the run on the cleaned series trusts, multiplied by the average of two checks: the cleaned series is not
@@ -72,7 +77,7 @@ that have been reviewed) and what each source would have reported had it been wo
 
 The total is set to zero if the outputs are malformed, if the point-in-time check fails, if the code imports or shells
 out to a model or network client, or if the write-up is missing.
-Thin stretches count as problems in both scores: distrusting them earns credit in the confidence score, and leaving
-them blank earns credit in the cleaned-series score. Rows near the twenty-a-day line, the first two weeks of a thin
-stretch, the two weeks after it ends, and other debatable rows are not scored. The
+A stretch where a source reports fewer than about twenty transactions a day is low signal: distrusting it earns
+credit in the confidence score, and leaving it blank earns credit in the cleaned-series score. Rows near that line,
+the first two weeks of such a stretch, the two weeks after it ends, and other debatable rows are not scored. The
 write-up is also graded on its own, separately from this score.

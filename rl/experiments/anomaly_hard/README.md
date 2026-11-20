@@ -165,3 +165,8 @@ Thin stretches graded (feedback #21): under 16 transactions a day (28-day median
 distrusted and left blank; 16-25 a day and two weeks either side of a thin stretch's edges are not scored. Opus trusts
 and imputes nearly every thin day (day recall 0-1%, none left blank). Oracle 1.0, naive 0.0 on all five tasks. Opus
 strict 0.523, 0.492, 0.436, 0.486 (mean 0.48), lenient mean 0.51; control strict 0.410.
+
+Feedback #22: the instruction states the goal (a usable like-for-like series, maximum history; low-signal segments
+may be discarded). Cleaned-series score x history kept (`BLANK_TOL` 5% of rows that should be kept left blank).
+Opus blanks nothing, so its scores are unchanged (strict mean 0.48); oracle 1.0, naive 0.0; the oracle with every
+10th day blanked scores 0.19.

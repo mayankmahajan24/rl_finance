@@ -28,7 +28,7 @@ Reward = W_CONF x confidence score + W_CLEAN x cleaned-series score + W_CONS x s
               any of its days is distrusted, a level shift's onset in full if first distrusted within 14 days, nothing
               at 45)
     A panel with no untrustworthy rows: 1 - share of scored rows distrusted / 5%, floored at 0.
-  Cleaned-series score: gain x damage penalty, against the truth panel (the hidden panel before the problems were
+  Cleaned-series score: gain x damage penalty x history kept, against the truth panel (the hidden panel before the problems were
   planted; real events kept). Error = mean over count and dollars of |log value - log truth|; a blank cleaned value
   counts as the raw value.
     gain: for each planted problem, 1 - (cleaned error / raw error) summed over the scored rows it changed, floored at
@@ -39,6 +39,7 @@ Reward = W_CONF x confidence score + W_CLEAN x cleaned-series score + W_CONS x s
           problems left out) for a one-off problem, or from the REF_DAYS before it for a lasting change (the old
           basis, as for a planted shift); errors within the source's own noise in that relation are not counted
     damage penalty: max(0, 1 - mean cleaned error on scored rows no problem changed / DAMAGE_TOL)
+    history kept:   max(0, 1 - share of scored rows outside thin stretches left blank / BLANK_TOL)
   Self-consistency score: score.py run again, once on its own cleaned series (rows it left blank dropped) and once on
   the truth panel (genuinely clean data, its own baseline). fixed x (0.5 x no new alarms + 0.5 x idempotent):
     fixed:         share of the planted untrustworthy scored rows that the first run distrusted and the run on the
@@ -77,6 +78,7 @@ THIN_LO, THIN_HI, THIN_EDGE = 0.8, 1.25, 14   # thin: truth count's 28-day media
 # dropped (distrusted, left blank); between THIN_LO and THIN_HI x thin_ct, and the first THIN_EDGE days of a thin
 # stretch and the THIN_EDGE days after it, are not scored (the code cannot tell yet, point in time)
 DAMAGE_TOL = 0.05
+BLANK_TOL = 0.05   # history-kept penalty: zero when this share of the rows that should be kept is blank
 NEW_ALARM_TOL = 0.01
 W_CONF, W_CLEAN, W_CONS = 0.4, 0.4, 0.2
 # imports or shell calls that reach a model or the network
@@ -354,7 +356,10 @@ def clean_score(truth, ev, scored_rows, ref=None):
     ok = scored_rows & ~changed & ~real & ~ev.thin
     damage = float(err_cln[ok].mean()) if ok.any() else 0.0
     penalty = max(0.0, 1 - damage / DAMAGE_TOL)
-    blank = int((scored_rows & ~ev.thin & (ev.clean_ct.isna() | ev.clean_amt.isna())).sum())
+    keep = scored_rows & ~ev.thin
+    blank = int((keep & (ev.clean_ct.isna() | ev.clean_amt.isna())).sum())
+    blank_share = blank / int(keep.sum()) if keep.any() else 0.0
+    kept = max(0.0, 1 - blank_share / BLANK_TOL)
     if gains:
         g = pd.DataFrame(gains)
         gain = float(g.groupby('type').gain.mean().mean())
@@ -363,8 +368,8 @@ def clean_score(truth, ev, scored_rows, ref=None):
         by_kind = by_kind.round(3).reset_index().to_dict('records')
     else:
         gain, by_kind = 1.0, []
-    return gain * penalty, dict(gain=round(gain, 3), damage=round(damage, 4), damage_penalty=round(penalty, 3),
-                                blank_scored_rows=blank, by_kind=by_kind, events=gains)
+    return gain * penalty * kept, dict(gain=round(gain, 3), damage=round(damage, 4), damage_penalty=round(penalty, 3),
+                                blank_scored_rows=blank, blank_share=round(blank_share, 4), history_kept=round(kept, 3), by_kind=by_kind, events=gains)
 
 
 def scored_stretches(truth, ev, clean_truth):

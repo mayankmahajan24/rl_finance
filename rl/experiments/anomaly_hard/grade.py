@@ -39,6 +39,8 @@ Reward = W_CONF x confidence score + W_CLEAN x cleaned-series score + W_CONS x s
                    minus the share distrusted on the truth panel, floored at 0
     idempotent:    max(0, 1 - mean |log change| of the cleaned series when cleaned again / DAMAGE_TOL)
     If the run on its own cleaned series fails, the score is 0.
+  Unknowns: distrusted rows on real data nobody has judged (not planted, not a real event, not in a reviewed stretch,
+  not on a series reviewed end to end). The reward counts them as false alarms; reward_lenient leaves them unscored.
   The write-up's quality is judged separately (not in this reward).
 """
 from __future__ import annotations
@@ -287,7 +289,16 @@ def score(truth: dict, data: pd.DataFrame, clean_truth: pd.DataFrame, sol: pathl
     cln, cln_d = clean_score(truth, ev, stretches)
     cons, cons_d = consistency_score(truth, sol, data, clean_truth, full, ev, stretches, c_)
     reward = (W_CONF * conf + W_CLEAN * cln + W_CONS * cons) * all(gates.values())
+    # unknowns: distrusted rows on real data nobody has judged. The reward counts them as false alarms (strict);
+    # the lenient reward leaves them unscored. The gap is how much the score still rests on missing labels.
+    unknown = ev.use & ev.flag & ~ev.label & ~known_rows(truth, ev)
+    lev = ev.copy()
+    lev.loc[unknown, 'use'] = False
+    lconf, _ = confidence_score(lev, [(e, m) for e, m in scored])
+    lreward = (W_CONF * lconf + W_CLEAN * cln + W_CONS * cons) * all(gates.values())
     return reward, dict(gates=gates, ai_hits=hits, changed_on_truncation=leaks, rows_scored=int(ev.use.sum()),
+                        reward_lenient=round(lreward, 3), unknown_flagged_rows=int(unknown.sum()),
+                        unknown_alerts=alerts(ev[unknown].assign(label=True))[0] if unknown.any() else 0,
                         confidence_score=round(conf, 3), clean_score=round(cln, 3), consistency_score=round(cons, 3),
                         confidence=conf_d, clean=cln_d, consistency=cons_d)
 
@@ -327,6 +338,29 @@ def consistency_score(truth, sol, data, clean_truth, full, ev, stretches, c_):
         fixed=round(fixed, 3), planted_bad_rows=int(bad.sum()), distrusted_share_cleaned=round(rate_c, 4),
         distrusted_share_truth=round(rate_t, 4), no_new_alarms=round(no_new, 3), recleaning_change=round(moved, 4),
         idempotent=round(idem, 3))
+
+
+def known_rows(truth: dict, ev: pd.DataFrame) -> pd.Series:
+    """Rows whose status is known without a label: changed by a planted problem (raw differs from the truth panel),
+    inside a real-event decoy, inside a reviewed fine or recurring stretch, on a series reviewed end to end, or in a run
+    of distrusted days that touches any of those or a labelled problem."""
+    k = (np.abs(np.log(ev.ct.astype(float)) - np.log(ev.tct.astype(float))) > 1e-9) | \
+        (np.abs(np.log(ev.amt.astype(float)) - np.log(ev.tamt.astype(float))) > 1e-9)
+    for x in truth.get('decoys', []):
+        k |= (ev.ticker == x['ticker']) & ev.date.between(pd.Timestamp(x['start']), pd.Timestamp(x['end']) + pd.Timedelta(days=14))
+    for x in truth.get('reviewed_not_real', []) + truth.get('reviewed_recurring', []):
+        k |= (ev.ticker == x['ticker']) & (ev.source_id == x['source_id']) & \
+            ev.date.between(pd.Timestamp(x['start']), pd.Timestamp(x['end']))
+    for x in truth.get('reviewed_series', []):
+        k |= (ev.ticker == x['ticker']) & (ev.source_id == x['source_id'])
+    # a run of distrusted days that touches a planted or labelled problem is that problem's (over-)flagging: known
+    f = ev[ev.flag].sort_values('date')
+    for _, g in f.groupby(['ticker', 'source_id']):
+        rid = (g.date.diff().dt.days.fillna(999) > ALERT_GAP + 1).cumsum()
+        for _, r in g.groupby(rid):
+            if (k[r.index] | ev.label[r.index]).any():
+                k[r.index] = True
+    return k
 
 
 def alerts(e_: pd.DataFrame) -> tuple[int, int]:

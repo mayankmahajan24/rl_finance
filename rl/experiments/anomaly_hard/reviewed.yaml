@@ -4,6 +4,9 @@
 #   real      labelled bad data on exactly start..end (event type `real`): the days the reviewer marked
 #   unsure    not scored
 #   not_real  stays good data, so a flag on it is a false alarm
+#   change    a real lasting change in the source starting on `start` (scored like a planted level shift: its first
+#             two weeks untrustworthy, then the new level is normal); it returns to the old level after `end`, unless
+#             end == start, when it lasts
 #   recurring the source does this every year (same calendar window): normal. The first year it appears in the data is
 #             not scored; every later year must be trusted and left as it is in the cleaned series
 # Each entry: ticker, source_id, start, end, verdict, note, reviewed_by, reviewed_at.

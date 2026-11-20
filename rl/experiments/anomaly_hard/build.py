@@ -93,6 +93,12 @@ def plant(rng, control, ctx, n_tickers=8):
         x = dict(ticker=t, source_id=s_, start=F.d(r['start']), end=F.d(r['end']), note=r.get('note', ''))
         if r['verdict'] == 'real':
             events.append(dict(x, type='real', regime=False))   # the days the reviewer marked bad, as marked
+        elif r['verdict'] == 'change':
+            # a real lasting change in the source, scored like a planted level shift (grade.label_rows): its first
+            # days are untrustworthy, then the new level is normal; it returns after `end` unless end == start
+            lasts = r['end'] == r['start']
+            events.append(dict(x, type='real_change', regime=True, permanent=lasts,
+                               end=F.d(ctx.panel_end) if lasts else x['end'], settle=x['start']))
         elif r['verdict'] == 'recurring':
             # a pattern the source shows every year is normal: the first time it appears in the data it is not scored
             # (distrusting it then is understandable); every later year it must be trusted and left as it is
@@ -104,8 +110,10 @@ def plant(rng, control, ctx, n_tickers=8):
             excl.append(dict(ticker=t, source_id=s_, lo=x['start'], hi=x['end']))
         else:
             not_real.append(x)
+    full = [dict(ticker=F.t(x['ticker']), source_id=F.s(int(x['source_id']))) for x in reviewed_series()
+            if F.t(x['ticker']) is not None]
     truth = dict(family='anomaly_hard', control=control, events=events, decoys=decoys, exclusions=excl,
-                 reviewed_not_real=not_real, reviewed_recurring=recurring,
+                 reviewed_not_real=not_real, reviewed_recurring=recurring, reviewed_series=full,
                  ignore_series=F.low_volume_series(), eval_start=_fmt(d0 + pd.Timedelta(days=EVAL_START_DAYS)),
                  threshold=0.5, thin_ct=10,
                  truncation_cutoffs=[_fmt(d0 + (d1 - d0) * f) for f in (0.45, 0.7)])
@@ -132,8 +140,13 @@ def recurring_first(F, t, s, r, slack=3):
     return None
 
 
+def reviewed_series() -> list[dict]:
+    """Series the reviewer has gone through end to end: every day not marked on them is confirmed fine."""
+    return (yaml.safe_load(REVIEWED.read_text()) or {}).get('reviewed_series') or [] if REVIEWED.exists() else []
+
+
 def reviewed() -> list[dict]:
-    return (yaml.safe_load(REVIEWED.read_text()) or {}).get('reviewed', []) if REVIEWED.exists() else []
+    return (yaml.safe_load(REVIEWED.read_text()) or {}).get('reviewed') or [] if REVIEWED.exists() else []
 
 
 def main():

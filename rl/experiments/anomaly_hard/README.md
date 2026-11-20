@@ -119,3 +119,24 @@ source's own weekday-adjusted noise and single-measure shifts 3x; a `recurring` 
 years trusted). The same Opus scorer re-graded: 0.549, 0.491, 0.453, 0.493 (mean 0.50; control 0.688), oracle 1.0.
 Review is now by pattern (`triage.py`): of its 48 unexplained alerts, 8 recur a year earlier, 8 are one-day ticket
 moves within the source's own noise, 31 are small against the source's own history, 1 (a sustained move) needs a card.
+
+## Labelling the real data once (2026-11-20)
+
+Reviewing one model's alerts only ever finds what that model flagged. Instead the real data (the bench companies'
+20 series, original coordinates) is labelled once and every task inherits it:
+
+1. `pool.py` pools independent detectors over the raw panel: three simple baselines (one-day move against the source's
+   own history, one-day move against the other sources, slow drift against them) and any scorers given (the three Opus
+   scorers so far). It found 224 candidate stretches: 161 raised by one detector, 63 by two or more.
+2. `series_page.py` writes the Series Review page: per series, its whole history, a strip per detector, the verdicts
+   already made, the candidates with a suggestion from the standing rules (sustained -> look; recurs a year earlier ->
+   recurring; one detector and under 6x own noise -> fine), free marking on the chart, and a "reviewed end to end"
+   tick. Verdicts: bad, level change (scored like a planted shift: onset untrustworthy, then the new normal),
+   fine, recurs yearly, unsure.
+3. `apply_reviews.py` merges the page's verdicts into reviewed.yaml; `build.py` maps them into every task.
+4. The grader reports two rewards: `reward` counts distrusted rows on unjudged real data as false alarms;
+   `reward_lenient` leaves them unscored. Known rows: planted changes, real events, judged stretches, series reviewed
+   end to end, and runs of flags that touch any of those.
+
+The current Opus scorer: strict 0.549, 0.491, 0.453, 0.493 (mean 0.50); lenient 0.577, 0.535, 0.530, 0.545 (mean
+0.55). Missing labels move its score by about 0.05: the task is not hard because the answer key is incomplete.

@@ -98,7 +98,7 @@ def plant(rng, control, ctx, n_tickers=8):
             # days are untrustworthy, then the new level is normal; it returns after `end` unless end == start
             lasts = r['end'] == r['start']
             events.append(dict(x, type='real_change', regime=True, permanent=lasts,
-                               end=F.d(ctx.panel_end) if lasts else x['end'], settle=x['start']))
+                               end=F.d(ctx.panel_end) if lasts else x['end'], settle=F.d(r.get('settle', r['start']))))
         elif r['verdict'] == 'recurring':
             # a pattern the source shows every year is normal: the first time it appears in the data it is not scored
             # (distrusting it then is understandable); every later year it must be trusted and left as it is

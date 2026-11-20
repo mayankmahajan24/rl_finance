@@ -24,7 +24,7 @@ df = df.merge(truth[KEYS + ['ct', 'amt']].rename(columns={'ct': 'clean_ct', 'amt
 differs = ~np.isclose(df.ct, df.clean_ct, rtol=1e-6) | ~np.isclose(df.amt, df.clean_amt, rtol=1e-6)
 real = pd.Series(False, index=df.index)
 for e in gold['events']:
-    if e['type'] == 'real':
+    if e['type'] in ('real', 'real_change'):
         real |= (df.ticker == e['ticker']) & (df.source_id == e['source_id']) & df.date.between(e['start'], e['end'])
 df['confidence'] = 1.0 - (df.label & (differs | real)).astype(float)
 df['date'] = df.date.dt.strftime('%Y-%m-%d')

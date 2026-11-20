@@ -37,9 +37,15 @@ def main():
     cur = yaml.safe_load(REVIEWED.read_text()) or {}
     rows = {(r['ticker'], int(r['source_id']), str(r['start']), str(r['end'])): r for r in cur.get('reviewed') or []}
     for s in spans:
-        k = (s['ticker'], int(s['source_id']), s['start'], s['end'])
-        rows[k] = dict(ticker=s['ticker'], source_id=int(s['source_id']), start=s['start'], end=s['end'],
-                       verdict=s['verdict'], note=s.get('note', ''), reviewed_by=a.by, reviewed_at=a.date)
+        start, end = s['start'], s['end']
+        extra = {}
+        if s['verdict'] == 'change' and s.get('candidate'):
+            # marked from the candidate table: a lasting change from the start; the candidate's end is where the
+            # detectors stopped, kept as the day the new level had settled (a return is marked on the chart instead)
+            end, extra = start, dict(settle=s['end'])
+        k = (s['ticker'], int(s['source_id']), start, end)
+        rows[k] = dict(ticker=s['ticker'], source_id=int(s['source_id']), start=start, end=end,
+                       verdict=s['verdict'], **extra, note=s.get('note', ''), reviewed_by=a.by, reviewed_at=a.date)
     done = {(x['ticker'], int(x['source_id'])) for x in cur.get('reviewed_series') or []}
     for s in series:
         tk, src = s['_id'].rsplit('-', 1)          # document id: TICKER-SOURCE

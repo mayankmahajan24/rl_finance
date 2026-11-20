@@ -132,7 +132,8 @@ const D = JSON.parse(document.getElementById('data').textContent);
 const NS = 'http://www.w3.org/2000/svg';
 const $ = (s, e = document) => e.querySelector(s);
 const V = { real: 'Bad', change: 'Level change', not_real: 'Fine', recurring: 'Recurs yearly', unsure: 'Unsure' };
-const st = { cur: 0, spans: {}, series: {}, sel: null, zoom: 'all', db: null };
+const st = { cur: 0, spans: {}, series: {}, sel: null, zoom: 'all', db: null, lastYear: true };
+function minus364(d) { const t = new Date(d + 'T00:00:00Z'); t.setUTCDate(t.getUTCDate() - 364); return t.toISOString().slice(0, 10); }
 const key = s => `${s.ticker}-${s.source_id}`;
 function el(t, a = {}, p) { const e = document.createElementNS(NS, t); for (const [k, v] of Object.entries(a)) e.setAttribute(k, v); if (p) p.appendChild(e); return e; }
 function setStatus(t) { $('#status').textContent = t; }
@@ -165,9 +166,15 @@ function chart(s, wrap) {
     }
     if (st.sel) { const a = Math.max(idxOf(st.sel[0]), i0), e = Math.min(idxOf(st.sel[1]), i1);
       if (e >= i0 && a <= i1) el('rect', { x: x(a) - 1, y: top, width: Math.max(2, x(e) - x(a) + 2), height: ph, fill: 'none', stroke: 'var(--sel)', 'stroke-width': 1.5, 'stroke-dasharray': '4 2' }, svg); }
-    const vals = v.slice(i0, i1 + 1).filter(z => z !== null); const lo = Math.max(0, Math.min(...vals)), hi = Math.max(...vals);
+    // last year, shifted 364 days so weekdays line up: the value the same source reported 52 weeks earlier
+    const di = s._di || (s._di = new Map(s.dates.map((d, i) => [d, i])));
+    const prev = st.lastYear ? s.dates.map(d => { const j = di.get(minus364(d)); return j === undefined ? null : v[j]; }) : null;
+    const vals = v.slice(i0, i1 + 1).concat(prev ? prev.slice(i0, i1 + 1) : []).filter(z => z !== null);
+    const lo = Math.max(0, Math.min(...vals)), hi = Math.max(...vals);
     const y = z => top + ph - (z - lo) / ((hi - lo) || 1) * ph;
     let d = ''; for (let i = i0; i <= i1; i++) { const z = v[i]; if (z === null) continue; d += (d && v[i - 1] !== null ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(z).toFixed(1); }
+    if (prev) { let pd = ''; for (let i = i0; i <= i1; i++) { const z = prev[i]; if (z === null) { continue; } pd += (pd && prev[i - 1] !== null ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(z).toFixed(1); }
+      el('path', { d: pd, fill: 'none', stroke: 'var(--muted)', 'stroke-width': 1, 'stroke-dasharray': '2 2', opacity: 0.8 }, svg); }
     el('path', { d, fill: 'none', stroke: col, 'stroke-width': 1, 'stroke-linejoin': 'round' }, svg);
     const t = el('text', { x: L, y: top - 3 }, svg); t.textContent = title;
     const fmt = z => z >= 1e6 ? (z / 1e6).toFixed(1) + 'M' : z >= 1e3 ? (z / 1e3).toFixed(1) + 'k' : z.toFixed(0);
@@ -219,13 +226,16 @@ function show() {
   p.appendChild(head);
   const z = document.createElement('div'); z.className = 'row';
   const years = [...new Set(s.dates.map(d => d.slice(0, 4)))];
+  const ly = document.createElement('button'); ly.type = 'button'; ly.className = 'btn'; ly.textContent = st.lastYear ? 'Hide last year' : 'Show last year';
+  ly.addEventListener('click', () => { st.lastYear = !st.lastYear; show(); });
   for (const y of ['all', ...years]) { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = y === 'all' ? 'All years' : y;
     b.setAttribute('aria-pressed', String(st.zoom === y)); if (st.zoom === y) b.style.borderColor = 'var(--ink)';
     b.addEventListener('click', () => { st.zoom = y; show(); }); z.appendChild(b); }
+  z.appendChild(ly);
   p.appendChild(z);
   const cw = document.createElement('div'); chart(s, cw); p.appendChild(cw);
   const lg = document.createElement('div'); lg.className = 'legend';
-  lg.innerHTML = `<span><i class="sw" style="background:var(--count)"></i>count</span><span><i class="sw" style="background:var(--ticket)"></i>dollars, ticket size</span><span><i class="sw" style="background:var(--flag)"></i>a detector flagged that day</span><span><i class="sw" style="background:var(--bad)"></i>marked bad</span><span><i class="sw" style="background:var(--fine)"></i>marked fine</span><span><i class="sw" style="background:var(--rec)"></i>recurs yearly</span><span><i class="sw" style="background:transparent;border-left:2px solid var(--flag)"></i>level change starts (dashed: returns)</span><span><i class="sw" style="outline:1.5px dashed var(--sel);outline-offset:-2px"></i>your selection</span>`;
+  lg.innerHTML = `<span><i class="sw" style="background:var(--count)"></i>count</span><span><i class="sw" style="background:var(--ticket)"></i>dollars, ticket size</span><span><i class="sw" style="background:transparent;border-top:2px dotted var(--muted);height:0"></i>same source 364 days earlier</span><span><i class="sw" style="background:var(--flag)"></i>a detector flagged that day</span><span><i class="sw" style="background:var(--bad)"></i>marked bad</span><span><i class="sw" style="background:var(--fine)"></i>marked fine</span><span><i class="sw" style="background:var(--rec)"></i>recurs yearly</span><span><i class="sw" style="background:transparent;border-left:2px solid var(--flag)"></i>level change starts (dashed: returns)</span><span><i class="sw" style="outline:1.5px dashed var(--sel);outline-offset:-2px"></i>your selection</span>`;
   p.appendChild(lg);
   const sb = document.createElement('div'); sb.className = 'selbox';
   if (st.sel) {
@@ -252,6 +262,7 @@ function show() {
     tr.children[3].textContent = (c.suggest === 'review' ? 'Look: ' : V[c.suggest] + ': ') + c.why;
     for (const k of ['real', 'change', 'not_real', 'recurring', 'unsure']) { const b = document.createElement('button'); b.type = 'button'; b.className = 'vbtn'; b.textContent = V[k];
       b.setAttribute('aria-pressed', String(sv === k));
+      if (k === 'change') b.title = 'A lasting change from the first day (the detectors\' last day is kept as when it settled). To mark a return, select the stretch on the chart.';
       b.addEventListener('click', () => saveSpan(c.id, { ticker: c.ticker, source_id: c.source_id, start: c.start, end: c.end, verdict: sv === k ? null : k, candidate: true })); tr.children[4].appendChild(b); }
     const go = document.createElement('button'); go.type = 'button'; go.className = 'vbtn'; go.textContent = 'Show';
     go.addEventListener('click', () => { st.zoom = c.start.slice(0, 4); st.sel = [c.start, c.end]; st.selStarted = true; show(); });

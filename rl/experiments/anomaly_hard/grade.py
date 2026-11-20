@@ -63,6 +63,7 @@ OUT_COLS = ['confidence', 'clean_ct', 'clean_amt']
 FULL_DAYS, ZERO_DAYS = 14, 45
 CHANGE_DAYS, SETTLE_DAYS = 14, 45
 ALERT_GAP = 2
+REAL_TYPES = {'real', 'real_change'}   # reviewed problems in the source data (no truth for cleaning)
 DAMAGE_TOL = 0.05
 NEW_ALARM_TOL = 0.01
 W_CONF, W_CLEAN, W_CONS = 0.4, 0.4, 0.2
@@ -222,7 +223,7 @@ def clean_score(truth, ev, scored_rows):
     for e in truth['events']:
         ser = (ev.ticker == e['ticker']) & (ev.source_id == e['source_id'])
         span = ser & ev.date.between(pd.Timestamp(e.get('shift_start', e['start'])), pd.Timestamp(e['end']))
-        if e['type'] == 'real':
+        if e['type'] in REAL_TYPES:          # real problems have no truth for the cleaned series: left out
             real |= span
             continue
         m = span & changed & scored_rows
@@ -319,7 +320,7 @@ def consistency_score(truth, sol, data, clean_truth, full, ev, stretches, c_):
     k = k.merge(base[KEYS + ['confidence']].rename(columns={'confidence': 'confidence_t'}), on=KEYS, how='left')
     real = pd.Series(False, index=ev.index)
     for e in truth['events']:
-        if e['type'] == 'real':
+        if e['type'] in REAL_TYPES:
             real |= (ev.ticker == e['ticker']) & (ev.source_id == e['source_id']) & \
                 ev.date.between(pd.Timestamp(e['start']), pd.Timestamp(e['end']))
     bad = (ev.use & ev.label & ~real).to_numpy()

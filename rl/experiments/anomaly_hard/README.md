@@ -126,8 +126,9 @@ Reviewing one model's alerts only ever finds what that model flagged. Instead th
 20 series, original coordinates) is labelled once and every task inherits it:
 
 1. `pool.py` pools independent detectors over the raw panel: three simple baselines (one-day move against the source's
-   own history, one-day move against the other sources, slow drift against them) and any scorers given (the three Opus
-   scorers so far). It found 224 candidate stretches: 161 raised by one detector, 63 by two or more.
+   own history, one-day move against the other sources, slow drift against them) and any scorers given: only the
+   latest task's solutions (now the current Opus scorer). It found 221 candidate stretches: 165 raised by one
+   detector, 56 by two or more.
 2. `series_page.py` writes the Series Review page: per series, its whole history, a strip per detector, the verdicts
    already made, the candidates with a suggestion from the standing rules (sustained -> look; recurs a year earlier ->
    recurring; one detector and under 6x own noise -> fine), free marking on the chart, and a "reviewed end to end"

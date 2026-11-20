@@ -211,6 +211,7 @@ async function saveSeries(k, reviewed) {
   try { await st.db.collection('series').doc(k).set(st.series[k]); setStatus('Saved.'); } catch (e) { setStatus('Not saved. Try again in a moment.'); }
 }
 
+function render() { show(); }
 function show() {
   const pk = $('#picker'); pk.textContent = '';
   D.series.forEach((s, i) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = `${s.ticker}·${s.source_id}`;
@@ -270,6 +271,35 @@ function show() {
     tb.tBodies[0].appendChild(tr);
   }
   tw.appendChild(tb); p.appendChild(tw);
+  // every stretch you have marked on this series (from the table or the chart), each with an undo
+  const mine = Object.entries(st.spans).filter(([, m]) => m.ticker === s.ticker && m.source_id === s.source_id && m.verdict)
+    .sort((a, b) => a[1].start.localeCompare(b[1].start));
+  const saved = D.known.filter(k => k.ticker === s.ticker && k.source_id === s.source_id);
+  if (mine.length || saved.length) {
+    const box = document.createElement('div'); box.className = 'tbl';
+    const t2 = document.createElement('table');
+    t2.innerHTML = '<thead><tr><th>Your marks on this series</th><th>Verdict</th><th></th></tr></thead><tbody></tbody>';
+    for (const [id, m] of mine) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td class="num"></td><td></td><td></td>';
+      tr.children[0].textContent = m.start === m.end ? m.start : `${m.start} → ${m.end}`;
+      tr.children[1].textContent = V[m.verdict] + (m.candidate ? '' : ' (marked on the chart)');
+      const show = document.createElement('button'); show.type = 'button'; show.className = 'vbtn'; show.textContent = 'Show';
+      show.addEventListener('click', () => { st.zoom = m.start.slice(0, 4); st.sel = [m.start, m.end]; st.selStarted = true; window.scrollTo(0, 0); render(); });
+      const undo = document.createElement('button'); undo.type = 'button'; undo.className = 'vbtn'; undo.textContent = 'Undo';
+      undo.addEventListener('click', () => saveSpan(id, { verdict: null, undone: true }));
+      tr.children[2].append(show, undo);
+      t2.tBodies[0].appendChild(tr);
+    }
+    for (const k of saved) {
+      const tr = document.createElement('tr'); tr.innerHTML = '<td class="num"></td><td></td><td class="sugg"></td>';
+      tr.children[0].textContent = k.start === k.end ? k.start : `${k.start} → ${k.end}`;
+      tr.children[1].textContent = (V[k.verdict] || k.verdict);
+      tr.children[2].textContent = 'already in the grader (an earlier review): to undo it, mark the same days again here, or ask Claude';
+      t2.tBodies[0].appendChild(tr);
+    }
+    box.appendChild(t2); p.appendChild(box);
+  }
   const fin = document.createElement('div'); fin.className = 'row';
   const sugOpen = cands.filter(c => c.suggest !== 'review' && !(st.spans[c.id] || {}).verdict);
   if (sugOpen.length) { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn';

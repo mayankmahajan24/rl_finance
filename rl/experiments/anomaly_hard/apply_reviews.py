@@ -2,8 +2,8 @@
 
 EXPORT_DIR holds the series review page's database, saved by ArtifactData's list action with out_dir: spans/*.json
 (ticker, source_id, start, end, verdict) and series/*.json (reviewed). Each span with a verdict becomes a reviewed
-entry (replacing an entry for the same series and dates), and each series ticked as reviewed is added to
-reviewed_series. Then rebuild the tasks (build.py) so every task's gold picks them up.
+entry (replacing an entry for the same series and dates), a span cleared with Undo removes its entry, and each
+series ticked as reviewed is added to reviewed_series. Then rebuild the tasks (build.py) so every task's gold picks them up.
 """
 from __future__ import annotations
 
@@ -31,7 +31,9 @@ def main():
     ap.add_argument('export'); ap.add_argument('--by', default='Mayank'); ap.add_argument('--date', required=True)
     a = ap.parse_args()
     root = pathlib.Path(a.export)
-    spans = [s for s in load(root / 'spans') if s.get('verdict') in VERDICTS]
+    allspans = load(root / 'spans')
+    spans = [s for s in allspans if s.get('verdict') in VERDICTS]
+    undone = [s for s in allspans if not s.get('verdict') and s.get('undone')]
     series = [s for s in load(root / 'series') if s.get('reviewed')]
     header = REVIEWED.read_text().split('\nreviewed:')[0]
     cur = yaml.safe_load(REVIEWED.read_text()) or {}
@@ -46,6 +48,10 @@ def main():
         k = (s['ticker'], int(s['source_id']), start, end)
         rows[k] = dict(ticker=s['ticker'], source_id=int(s['source_id']), start=start, end=end,
                        verdict=s['verdict'], **extra, note=s.get('note', ''), reviewed_by=a.by, reviewed_at=a.date)
+    for s in undone:                           # a verdict cleared with Undo: drop what it had saved
+        for k in [k for k in rows if k[0] == s['ticker'] and k[1] == int(s['source_id']) and k[2] == s['start']
+                  and (k[3] == s['end'] or k[3] == s['start'])]:
+            rows.pop(k)
     done = {(x['ticker'], int(x['source_id'])) for x in cur.get('reviewed_series') or []}
     for s in series:
         tk, src = s['_id'].rsplit('-', 1)          # document id: TICKER-SOURCE
@@ -54,7 +60,7 @@ def main():
                                reviewed_series=[dict(ticker=t, source_id=s) for t, s in sorted(done)]),
                           sort_keys=False, width=120)
     REVIEWED.write_text(header + '\n' + body)
-    print(f'{len(spans)} spans merged, {len(series)} series ticked; reviewed.yaml has {len(rows)} entries, '
+    print(f'{len(spans)} spans merged, {len(undone)} undone, {len(series)} series ticked; reviewed.yaml has {len(rows)} entries, '
           f'{len(done)} series reviewed end to end')
 
 

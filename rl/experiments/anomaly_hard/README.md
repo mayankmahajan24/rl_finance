@@ -170,3 +170,16 @@ Feedback #22: the instruction states the goal (a usable like-for-like series, ma
 may be discarded). Cleaned-series score x history kept (`BLANK_TOL` 5% of rows that should be kept left blank).
 Opus blanks nothing, so its scores are unchanged (strict mean 0.48); oracle 1.0, naive 0.0; the oracle with every
 10th day blanked scores 0.19.
+
+## Reference solution and fresh Opus runs (2026-11-20, work in progress)
+
+`solutions/reference/` is an honest scorer (reads only its input) built from the reviewer's rules; tuned on tasks
+001-002, reported on 003, 004 and the control. Strict: 001 0.601, 002 0.493 (tuning); 003 0.475, 004 0.318,
+control 0.582 (held out). Its weak points: slow ramps, a missed temporary ramp's return taken for a change, and DDS
+(three usable sources, one genuinely halved for years and not reviewed) where a healthy source gets blamed (004:
+damage 9.7%, cleaned-series score 0).
+
+Fresh Opus runs on the current instruction (subscription CLI, each from one task's instruction and visible data),
+graded on all five tasks, strict: run on 001: 0.594, 0.581, 0.666, 0.582, control 0.721; run on 004: 0.572, 0.567,
+0.610, 0.515, control 0.585. Both discard and blank every thin stretch and barely touch good rows (damage under
+0.1%). Neither honest solution passes about 0.67: the ceiling for point-in-time code is well under 1.0.

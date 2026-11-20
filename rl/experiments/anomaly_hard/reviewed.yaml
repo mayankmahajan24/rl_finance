@@ -328,16 +328,16 @@ reviewed:
   source_id: 1
   start: '2015-12-25'
   end: '2015-12-25'
-  verdict: real
-  note: Christmas Day; count far off the other sources
+  verdict: recurring
+  note: Christmas Day; count far off the other sources; a yearly pattern (Mayank, 2026-11-20)
   reviewed_by: Mayank
   reviewed_at: '2026-11-18'
 - ticker: M_M
   source_id: 1
   start: '2016-12-25'
   end: '2016-12-25'
-  verdict: real
-  note: Christmas Day; count far off the other sources
+  verdict: recurring
+  note: Christmas Day; count far off the other sources; a yearly pattern (Mayank, 2026-11-20)
   reviewed_by: Mayank
   reviewed_at: '2026-11-18'
 - ticker: M_M

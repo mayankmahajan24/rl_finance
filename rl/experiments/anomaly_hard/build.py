@@ -82,10 +82,15 @@ def plant(rng, control, ctx, n_tickers=8):
                     events += ev
                     busy.append(((t, s), lo, hi))
                     break
+    # a series reviewed end to end, or with a reviewed level change, is judged by the review, not by the shared
+    # panel's list of known source artifacts (which would leave it unscored from the artifact to the panel end)
+    judged = {(F.t(x['ticker']), F.s(int(x['source_id']))) for x in reviewed_series()} | \
+             {(F.t(r['ticker']), F.s(int(r['source_id']))) for r in reviewed() if r['verdict'] == 'change'}
     excl = [dict(ticker=i['ticker'], source_id=i['source_id'], lo=i['start'],
                  hi=i['end'] or F.d(ctx.panel_end)) for i in req] + \
            [dict(ticker=i['ticker'], source_id=i['source_id'], lo=i['lo'],
-                 hi=F.d(ctx.panel_end) if i['source_id'] is not None else i['hi']) for i in opt]
+                 hi=F.d(ctx.panel_end) if i['source_id'] is not None else i['hi']) for i in opt
+            if (i['ticker'], i['source_id']) not in judged]
     not_real, recurring = [], []
     for r in reviewed():                                      # real problems in the source data, as reviewed
         t, s_ = F.t(r['ticker']), F.s(r['source_id'])

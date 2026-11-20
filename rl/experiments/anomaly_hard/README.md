@@ -155,3 +155,8 @@ Oracle 1.0. Opus strict 0.560, 0.507, 0.473, 0.511 (mean 0.51), lenient mean 0.5
 on the control the real problems are the only ones, and Opus leaves several (M_M-1's Christmas dropouts, 3-4
 transactions against about 17 and 59 expected) unrepaired. DAL-1's level change sits inside the known-artifact
 exclusion (from 2016-05-04), so it is not scored.
+
+Feedback #20: reviewed series (end to end, or with a level change) are no longer dropped by the shared panel's
+known-artifact list, so DAL-1's level change is graded (Opus's cleaned series closes about 0.83 of its error); M_M-1
+Christmas is a recurring pattern. Oracle 1.0. Opus strict 0.557, 0.522, 0.465, 0.510 (mean 0.51), lenient mean 0.55;
+control strict 0.670.

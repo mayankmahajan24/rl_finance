@@ -40,3 +40,10 @@ real; M_M-1-2016-12-25 real; M_M-4-2018-08-28 not real.
 
 Verdicts without a note (page): DAL-2-2016-12-04 not real; DAL-2-2017-07-23 not real; DAL-2-2017-01-29 not real (a
 hinted-run card, no longer on the page, not used).
+
+Series Review verdicts without a note, 2026-11-20, merged after "is all of this feedback added to the grader?": SAVE-1
+2014-03-29, 2014-09-11, 2014-10-25, 2014-12-11, 2014-12-22 to 12-23, 2018-04-26 unsure (the 2014 ones fall in the
+thin stretch, already unscored); SAVE-2 2016-08-21, 2018-06-02, 2018-10-26 not real; SAVE-4 2017-08-27 not real;
+SAVE-4 late 2018 (2018-11-09 to 12-28, 2018-12-03 to 12-28, 2018-12-19) marked then undone, so not used. SAVE-2,
+SAVE-3 and SAVE-4 reviewed end to end. Still not in the grader: DAL-2 2016-04-08 and 2016-09-26 (Flag Review, notes
+say the alerts over-flagged; kept out) and the two possible conflicts with #12 above.

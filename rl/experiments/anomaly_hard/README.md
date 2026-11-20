@@ -144,3 +144,6 @@ The current Opus scorer: strict 0.549, 0.491, 0.453, 0.493 (mean 0.50); lenient 
 
 Thin bar raised to 20 transactions a day (feedback #18): 8% of rows unscored. Opus: strict 0.576, 0.513, 0.473, 0.511
 (mean 0.52), lenient mean 0.57; oracle 1.0.
+
+SAVE Series Review verdicts merged (10 spans; SAVE-2, -3, -4 reviewed end to end; 5 of 20 series now done): 56
+reviewed entries. Opus strict unchanged (0.576, 0.513, 0.473, 0.511), lenient mean 0.56; control strict 0.786; oracle 1.0.

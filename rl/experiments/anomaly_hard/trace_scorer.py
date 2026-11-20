@@ -8,7 +8,7 @@ It runs a copy of that scorer, instrumented to record each day's state, on the t
 card the full history the scorer had seen when it set the alert: from the source's first row to the alert's last day.
 
 Each card's chart: dates, the alert, known problems and real events in that history, and panels: count (actual,
-expected, cleaned), count z, ticket size (actual, expected, cleaned), ticket z, drift evidence (CUSUM, both channels)
+expected, cleaned), count z, dollars (actual, expected = expected count x expected ticket, cleaned), ticket size (actual, expected, cleaned), ticket z, drift evidence (CUSUM, both channels)
 and confidence (with the days in a shift run and the days a new normal was accepted). Each card's reason is rewritten
 from the same state on the day the alert began.
 """
@@ -84,6 +84,10 @@ def card_chart(f: pd.DataFrame, shift: pd.Timedelta, a_end: pd.Timestamp, known,
             dict(v=r3(h.clean_ct.where((h.clean_ct - h.ct).abs() > 1e-6)), color='clean', w=1.6)]),
         dict(title=f'Count residual in noise units (one-day flag beyond ±{zp:g})', key='z', lines=[
             dict(v=r3(h.c_r / h.c_sd), color='count', w=1)], hlines=[zp, -zp], zero=True, clip=10),
+        dict(title='Daily dollars: actual, expected (expected count x expected ticket size), and cleaned', key='dollars',
+             positive=True, lines=[
+            dict(v=r3(h.amt), color='ticket', w=1.4), dict(v=r3(np.exp(h.c_exp + h.k_exp)), color='muted', w=1, dash=True),
+            dict(v=r3(h.clean_amt.where((h.clean_amt - h.amt).abs() > 1e-6)), color='clean', w=1.6)]),
         dict(title='Ticket size ($ per transaction): actual, expected, and cleaned', key='ticket', positive=True, lines=[
             dict(v=r3(np.exp(tk)), color='ticket', w=1.4), dict(v=r3(np.exp(h.k_exp)), color='muted', w=1, dash=True),
             dict(v=r3(np.exp(ctk).where((ctk - tk).abs() > 1e-6)), color='clean', w=1.6)]),

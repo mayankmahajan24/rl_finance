@@ -325,7 +325,7 @@ function card(it) {
     $('.chart', div).before(z);
   }
   if (it.chart.algo) div.querySelector('.legend').innerHTML = `<span><i class="sw" style="background:var(--count)"></i>count</span>
-      <span><i class="sw" style="background:var(--ticket)"></i>ticket size</span>
+      <span><i class="sw" style="background:var(--ticket)"></i>dollars, ticket size</span>
       <span><i class="sw" style="background:transparent;border-top:2px dashed var(--muted);height:0"></i>model's expected value</span>
       <span><i class="sw" style="background:var(--clean)"></i>cleaned value (where it differs)</span>
       <span><i class="sw" style="background:var(--flag)"></i>distrusted day / a threshold</span>

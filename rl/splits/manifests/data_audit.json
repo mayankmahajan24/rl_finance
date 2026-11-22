@@ -487,9 +487,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "5227c9315202",
-  "gold_fingerprint": "ca76dd1afe23",
-  "content_sha256": "cbdf1564514fa14b6c1da59783fc3c5a1da02ea6687560885281e3362d561ddb"
+  "fingerprint": "bec1d79c1bea",
+  "gold_fingerprint": "11c10de67c73",
+  "content_sha256": "86f15d4b18e74147177040274bd625482260a22ab7ed0967665165225320dd3e"
  },
  "audit-train-002": {
   "split": "train",
@@ -511,9 +511,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "434e3f1eb834",
-  "gold_fingerprint": "06b3e919686c",
-  "content_sha256": "22296e02efa1bba9c3024adb84eca0ddf9946a60dcf48b0b6c7c15f6e2acc0f1"
+  "fingerprint": "18479be75071",
+  "gold_fingerprint": "ee7d7cecfede",
+  "content_sha256": "f69aa6f2833fab7bd453fafba4325bf5a8af2b58000ebb9f20cb0ca8212c1357"
  },
  "audit-train-003": {
   "split": "train",
@@ -535,9 +535,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "35b3cede7272",
-  "gold_fingerprint": "7a2e01aef87d",
-  "content_sha256": "f3e91476d370e1c93a93541928f1acd9a567e74ed235658b202be3455ac2835c"
+  "fingerprint": "b3c4a5f15152",
+  "gold_fingerprint": "ea2f632f0a48",
+  "content_sha256": "ecc485c6c33c0e4fd92fb51cf5f22b65f6892f246e846f5b0a5591009c797e13"
  },
  "audit-train-control-01": {
   "split": "train",
@@ -559,8 +559,8 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "a98bf9a7490d",
-  "gold_fingerprint": "1d0c65b3f113",
-  "content_sha256": "9e5a09fd293bfb38969fe142090e0f19d32ac279ed09e662087fdf0cc68f6cb0"
+  "fingerprint": "1a125f62cb7b",
+  "gold_fingerprint": "449d4f35912c",
+  "content_sha256": "834c9b257464d98bf67766c30b827629328b092f1b5b5b959bc30a5cef61d301"
  }
 }

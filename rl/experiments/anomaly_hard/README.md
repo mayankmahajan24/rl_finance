@@ -267,3 +267,7 @@ reference an untyped empty table, which broke the oracle's merge.
 Feedback #26: #24 reverted. Known source-level quirks are graded by what they did in the data (`build.quirk_event`):
 a lasting change against the source's peers (0.15 or more, count or ticket) is a real_change to flag and rescale,
 anything smaller is normal data; excluded only without two usable peers. Company-wide natural breaks stay excluded.
+
+Feedback #27: scoring starts after one year of warm-up (was 545 days). The airline source-1 ramp is a lasting change
+to rescale; its window is widened here to 2014-12-01..2017-06-30 (data_audit review G4) so the measured change
+(+0.9 to +1.5 against peers) and onset match the data.

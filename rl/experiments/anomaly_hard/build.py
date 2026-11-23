@@ -32,7 +32,7 @@ import perturb as P  # noqa: E402
 
 OUT = RL / "tasks" / "proto" / "anomaly_hard"
 REVIEWED = HERE / "reviewed.yaml"   # verdicts on real (unplanted) problems, in original coordinates; grader-only
-EVAL_START_DAYS = 545
+EVAL_START_DAYS = 365   # one year of warm-up: enough history for levels, noise and a yearly pattern (feedback #27)
 THIN_CT = 20   # a stretch whose 28-day median count is under this is too thin to trust: not scored (feedback #18)
 N_POINTS, SHIFTS = 2, [('step', 2), ('ramp', 2)]   # per panel: 2 of each point kind, 2 step and 2 ramp level shifts
 
@@ -146,6 +146,9 @@ def plant(rng, control, ctx, n_tickers=8):
 
 
 QUIRK_MIN = 0.15        # a known source quirk that moved the source less than this (log) did nothing to grade
+# windows on the shared artifact list that are narrower than the effect in the data, widened here (not in the shared
+# list, which is also data_audit's gold): days added before lo and after hi
+QUIRK_WIDEN = {'source-1 airline panel ramp': (517, 150)}   # 2016-05-01..2017-01-31 -> 2014-12-01..2017-06-30 (data_audit review G4)
 
 
 def quirk_event(df, it, d1):
@@ -157,6 +160,8 @@ def quirk_event(df, it, d1):
     relation later (then until it does). 'unrecoverable' when the source has fewer than two other usable sources."""
     t, s = it['ticker'], it['source_id']
     lo, hi = pd.Timestamp(it['lo']), pd.Timestamp(it['hi'])
+    before, after_ = QUIRK_WIDEN.get(it.get('note', ''), (0, 0))
+    lo, hi = lo - pd.Timedelta(days=before), hi + pd.Timedelta(days=after_)
     g = df[df.ticker == t]
     ct = g.pivot(index='date', columns='source_id', values='ct').astype(float)
     if s not in ct.columns or ct.shape[1] < 3:

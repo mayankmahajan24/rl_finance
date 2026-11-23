@@ -26,7 +26,7 @@ Reward = W_CONF x confidence score + W_CLEAN x cleaned-series score + W_CONS x s
     row F1:   row precision vs day recall (share of each event's labelled days distrusted, averaged within each kind,
               then over kinds)
     event F1: alert precision (runs of distrusted days on a series, gaps of up to ALERT_GAP days joined, that touch an
-              untrustworthy row) vs event recall (mean over kinds of the kind's mean credit; a point event counts if
+              untrustworthy row; each alert weighted min(1, days / ALERT_FULL_DAYS), true or false alike) vs event recall (mean over kinds of the kind's mean credit; a point event counts if
               any of its days is distrusted, a level shift's onset in full if first distrusted within 14 days, nothing
               at 45)
     A panel with no untrustworthy rows: 1 - share of scored rows distrusted / 5%, floored at 0.
@@ -74,6 +74,7 @@ OUT_COLS = ['confidence', 'clean_ct', 'clean_amt']
 FULL_DAYS, ZERO_DAYS = 14, 45
 CHANGE_DAYS, SETTLE_DAYS = 14, 45
 ALERT_GAP = 2
+ALERT_FULL_DAYS = 7   # an alert this long or longer counts fully in alert precision; shorter ones pro rata
 REAL_TYPES = {'real', 'real_change'}   # reviewed problems in the source data (cleaned against hindsight_ref)
 REF_DAYS = 56
 THIN_ESTABLISHED = 90    # a source is established once its median has held at thin_ct or more this many days running
@@ -272,7 +273,8 @@ def confidence_score(ev, scored):
                                     distrusted_days=('distrusted_days', 'sum'), day_recall=('day_recall', 'mean'))
     ev_rec, day_rec = float(by_kind.credit.mean()), float(by_kind.day_recall.mean())
     n_alerts, true_alerts = alerts(e_)
-    alert_prec = true_alerts / n_alerts if n_alerts else 0.0
+    w_all, w_true = alerts(e_, weighted=True)
+    alert_prec = w_true / w_all if w_all else 0.0       # weighted by alert length (see alerts)
     row_f1, event_f1 = f1(prec, day_rec), f1(alert_prec, ev_rec)
     return 0.5 * row_f1 + 0.5 * event_f1, dict(
         precision=round(prec, 3), day_recall=round(day_rec, 3), row_f1=round(row_f1, 3), alerts=n_alerts,
@@ -506,14 +508,16 @@ def known_rows(truth: dict, ev: pd.DataFrame) -> pd.Series:
     return k
 
 
-def alerts(e_: pd.DataFrame) -> tuple[int, int]:
+def alerts(e_: pd.DataFrame, weighted: bool = False) -> tuple[float, float]:
     """Runs of distrusted scored days on a series (gaps of up to ALERT_GAP days joined), and how many touch an
-    untrustworthy row."""
-    n = hit = 0
+    untrustworthy row. weighted: each alert counts min(1, its days / ALERT_FULL_DAYS), true or false alike, so a
+    one-day blip weighs less than a sustained alert (alert precision is then a weighted share)."""
+    n = hit = 0.0
     for _, g in e_[e_.flag].sort_values('date').groupby(['ticker', 'source_id']):
         run_id = (g.date.diff().dt.days.fillna(999) > ALERT_GAP + 1).cumsum()
-        runs = g.groupby(run_id).label.any()
-        n += len(runs); hit += int(runs.sum())
+        r = g.groupby(run_id).agg(true=('label', 'any'), days=('date', 'size'))
+        w = np.minimum(1.0, r.days / ALERT_FULL_DAYS) if weighted else pd.Series(1.0, index=r.index)
+        n += float(w.sum()); hit += float(w[r.true].sum())
     return n, hit
 
 

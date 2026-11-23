@@ -61,7 +61,8 @@ that have been reviewed) and what each source would have reported had it been wo
 
 * **Confidence (40%).** Rows scored below 0.5 are compared with the rows that cannot be trusted: F1 of those rows
   (recall counted per problem, each kind of problem weighing the same), and F1 of alerts (a run of distrusted days on
-  one source; correct if it touches an untrustworthy row) against problems caught, with credit falling the longer a
+  one source; correct if it touches an untrustworthy row; an alert shorter than a week counts for less, true or
+  false) against problems caught, with credit falling the longer a
   problem goes uncaught.
 * **Cleaned series (40%).** On rows a problem affected, how much of the gap between the raw value and what the
   source should have reported your cleaned value closes (in log terms, count and dollars, each kind of problem

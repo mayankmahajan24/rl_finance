@@ -1,21 +1,33 @@
-"""Reference solution for anomaly_hard (work in progress): confidence and a like-for-like cleaned series, point in time.
+"""Reference solution for anomaly_hard: per-row confidence and a like-for-like cleaned series, point in time.
 
     python score.py --input IN.csv --output OUT.csv
 
-Honest: reads only its input (no gold, no truth panel). Built from the reviewer's rules:
+Honest: reads only its input. One model, run separately on log count and log ticket size (dollars per transaction):
 
-* Each source is read against the median of its company's other sources (put on a common level first), in log count
-  and log ticket size, so company-wide moves cancel. Two passes: the second compares against the peers as corrected by
-  the first, so a source whose peers are broken is not blamed for them.
-* Size is judged against the source's own noise (trailing robust spread of its residuals, with its weekday pattern).
-* A one-to-three-day move beyond POINT_K units is a bad point: distrusted and imputed from the peers.
-* A move that persists past MAX_POINT_DAYS, or a drift a CUSUM picks up, goes pending: distrusted, cleaned to the old
-  level. If it comes back it is cancelled; if it lasts CONFIRM_DAYS and the source moved against most of its peers
-  one by one, it is committed as an offset: trusted after SETTLE_DAYS, and removed from the cleaned series for as long
-  as it lasts (a later change back removes it).
-* A move on the same dates a year or two earlier is recurring: trusted and left as reported.
-* Low-signal stretches (trailing 28-day median count under THIN_CT) are discarded: confidence 0, blank.
-Each series is walked forward one day at a time, so every output for day t uses only rows dated t or earlier.
+    x[s, t] = m[t] + L[s] + w[s, weekday] + noise
+
+m is the company's move that day (median over its other usable sources, each less its own level), L the source's
+level (trailing median of its cleaned relation to the company), w its weekday pattern. Residuals are measured in the
+source's own noise (trailing robust spread). Every company's sources are walked forward together, one day at a time,
+so every output for day t uses only rows dated t or earlier.
+
+* Bad point: |z| > POINT_K. Distrusted; the cleaned value is the model's expectation. A peer that is itself an outlier
+  today is left out of the company move.
+* Level change: more than MAX_POINT_DAYS outliers of one sign in a row, or a CUSUM (k=CUSUM_K, h=CUSUM_H) firing,
+  opens an episode with offset delta (the median residual since it began). Rows become raw - delta, so the cleaned
+  series stays on the source's old basis for as long as the change lasts; delta follows a running 14-day median (a ramp
+  keeps growing it); the episode closes when the 5-day median residual against the old basis is back near zero. Rows
+  are distrusted until SETTLE_DAYS after the change began, then trusted (the new level is the new normal).
+  Safeguards: a change must be at least SHIFT_MIN and SHIFT_K noise units; the source must have moved against most of
+  its peers one by one (all of them when it has two or fewer); at most half a company's usable sources may be in an
+  episode at once (more is a company-wide move: all reset); on upheaval days (the company's move against the same
+  weekday in recent weeks is over UPHEAVAL log units: holidays, closures) noise is widened and no episode opens; a jump
+  back to a level the source held in the past year is a recovery from a problem that was missed, so the baseline is
+  re-anchored instead of opening an episode.
+* Recurring: an outlier on dates where the same source moved the same way a year (or two) earlier is trusted and kept.
+* Low signal: until a source is established (its trailing 28-day median count has held THIN_CT for ESTABLISHED days
+  running) it is discarded (confidence 0, blank) while thin, with hysteresis: kept from KEEP_CT, dropped again under
+  DROP_CT. A source that never gets there stays discarded; one that dips later is kept.
 """
 from __future__ import annotations
 
@@ -24,170 +36,228 @@ import argparse
 import numpy as np
 import pandas as pd
 
-THIN_CT = 20            # discard below this trailing 28-day median count
-WARMUP = 28             # days of history before a series is judged
-BASE_DAYS = 56          # trailing window for the source's relation to its peers
-NOISE_DAYS = 120        # trailing window for the source's own noise
-POINT_K = 5.0           # a day beyond this many noise units is a bad point
-MAX_POINT_DAYS = 3      # outliers on more consecutive days than this are a level change
-CUSUM_K, CUSUM_H = 1.0, 10.0   # drift detector, in noise units
-SHIFT_MIN, SHIFT_MIN_K = 0.15, 2.0   # a level change must be at least this big (log units, and noise units)
-SETTLE_DAYS = 30        # from a level change's start, days distrusted before the new level is trusted
-CONFIRM_DAYS = 21       # a pending change that lasts this long is committed
-CALM_DAYS, CALM_SHARE = 5, 0.4   # a pending change is cancelled when the median of its last 5 days is back within
-# 40% of the move that set it off
-RECUR_SLACK = 3         # days of slack when matching the same dates a year earlier
-NOISE_FLOOR = 0.02
-PASSES = 2              # walks per company: later ones compare against peers as corrected by the previous
-WD_WEEKS = 8            # same-weekday history for the source's weekday pattern
+THIN_CT, ESTABLISHED = 20, 90
+KEEP_CT, DROP_CT = 25, 16   # before a source is established: keep from KEEP_CT, drop again under DROP_CT
+LEVEL_OBS, NOISE_OBS, WD_WEEKS = 42, 90, 8
+WARMUP = 28
+GAP_RESET = 60          # a source back after this many days without usable data starts its warm-up again
+POINT_K, MAX_POINT_DAYS = 4.5, 3
+CUSUM_K, CUSUM_H = 1.0, 7.0
+SHIFT_MIN, SHIFT_K = 0.15, 2.0
+SETTLE_DAYS = 30
+UPHEAVAL = 1.0
+RECUR_SLACK = 3
+NOISE_FLOOR = 0.03
 
 
-def mad(x: np.ndarray) -> float:
-    x = x[np.isfinite(x)]
-    if len(x) < 8:
-        return np.nan
-    return float(1.4826 * np.median(np.abs(x - np.median(x))))
+def mad(v) -> float:
+    v = np.asarray(v, float)
+    v = v[np.isfinite(v)]
+    return float(1.4826 * np.median(np.abs(v - np.median(v)))) if len(v) >= 8 else np.nan
 
 
-def walk(dates: pd.DatetimeIndex, rel: np.ndarray, thin: np.ndarray, pairs: np.ndarray | None = None):
-    """One channel of one series: rel is the source's log value minus its peers' median. Walks forward one day at a
-    time. Returns per day (state, offset, expected): state 0 ok, 1 bad point, 2 settling after a committed level
-    change, 3 recurring, 4 thin or warm-up, 5 pending level change; offset is the source's committed shift from its old basis (removed in the cleaned
-    series); expected is the old-basis relation the cleaned series falls back to on distrusted days. pairs (days x
-    peers) is the source against each peer on its own: a level change is only put on this source if it moved against
-    most of its peers one by one (all of them when it has two or fewer), not just against their median."""
-    n = len(rel)
-    state = np.zeros(n, int)
-    offset = np.zeros(n)
-    expected = np.full(n, np.nan)
-    bhist = np.full(n, np.nan)       # the baseline each day, so a drift is measured from before it began
-    zhist = np.full(n, np.nan)       # residuals in noise units, for the recurring check
-    adj = np.full(n, np.nan)         # rel - offset on accepted days: the old-basis relation the baseline is built from
-    day_idx = {d: i for i, d in enumerate(dates)}
-    O, run, seen, cp, cn, cp_start, cn_start = 0.0, [], 0, 0.0, 0.0, 0, 0
-    pend = None                      # (start index, frozen baseline, frozen noise) while a change is pending
-    prs = []                         # residuals since a change went pending
-    settle_until = -1
+class Channel:
+    """State of one channel (log count or log ticket) of one source."""
 
-    wdcache = {}
+    def __init__(self, n):
+        self.rel = []            # (day, cleaned relation to the company) on trusted days, for the level L
+        self.res = []            # residuals on ok days, for the noise
+        self.wd = {}             # weekday -> recent residual-from-level values
+        self.z = np.full(n, np.nan)
+        self.delta = 0.0         # current episode offset (0: none)
+        self.peak = 0.0          # the largest offset the current episode has reached
+        self.ep_start = None     # day index the current change began
+        self.ep_res = []         # residuals against the old basis during the episode
+        self.cp = self.cn = 0.0
+        self.cp0 = self.cn0 = 0
+        self.run = []            # consecutive outlier days (index, residual)
+        self.seen = 0
 
-    def wd_term(i, b0):
-        # the source's own weekday pattern against its peers: median over the last WD_WEEKS same weekdays
-        vals = []
-        for w in range(1, WD_WEEKS + 1):
-            j = day_idx.get(dates[i] - pd.Timedelta(days=7 * w))
-            if j is not None and np.isfinite(adj[j]):
-                vals.append(adj[j])
-        t = float(np.median(vals)) - b0 if len(vals) >= 3 else 0.0
-        wdcache[i] = t
-        return t
+    def level(self):
+        v = [r for _, r in self.rel[-LEVEL_OBS:]]
+        return float(np.median(v)) if len(v) >= 5 else np.nan
 
-    def agree(p0, i, d):
-        if pairs is None or pairs.shape[1] == 0:
-            return True
-        pre = pairs[max(0, p0 - 28):p0]
-        post = pairs[max(p0, i - 13):i + 1]
-        votes = []
-        for k in range(pairs.shape[1]):
-            a, b_ = pre[:, k], post[:, k]
-            a, b_ = a[np.isfinite(a)], b_[np.isfinite(b_)]
-            if len(a) >= 7 and len(b_) >= 3:
-                sh = float(np.median(b_) - np.median(a))
-                votes.append(np.sign(sh) == np.sign(d) and abs(sh) >= abs(d) / 2)
-        if not votes:
-            return True
-        need = len(votes) if len(votes) <= 2 else int(np.ceil(2 * len(votes) / 3))
-        return sum(votes) >= need
+    def weekday(self, wd):
+        v = self.wd.get(wd, [])[-WD_WEEKS:]
+        return float(np.median(v)) if len(v) >= 3 else 0.0
 
-    def recurs(i, z):
-        for yrs in (1, 2):
-            for k in range(-RECUR_SLACK, RECUR_SLACK + 1):
-                j = day_idx.get(dates[i] - pd.Timedelta(days=364 * yrs + k))
-                if j is not None and np.isfinite(zhist[j]) and abs(zhist[j]) > POINT_K / 2 \
-                        and np.sign(zhist[j]) == np.sign(z):
-                    return True
+    def noise(self):
+        s = mad(self.res[-NOISE_OBS:])
+        return max(s if np.isfinite(s) else 0.15, NOISE_FLOOR)
+
+
+def walk_company(dates, X, usable):
+    """X: days x sources log values of one channel (nan where missing); usable: days x sources (not discarded).
+    Returns state (0 ok, 1 bad point, 2 episode distrusted, 3 recurring, 4 warm-up/discarded), cleaned log values."""
+    n, S = X.shape
+    ch = [Channel(n) for _ in range(S)]
+    state = np.full((n, S), 4, int)
+    clean = X.copy()
+    comp = np.full(n, np.nan)            # the company's move each day, for the upheaval test
+    idx = {d: i for i, d in enumerate(dates)}
+    wdays = dates.dayofweek.to_numpy()
+    last_seen = [None] * S
+    for t in range(n):
+        live = [s for s in range(S) if usable[t, s] and np.isfinite(X[t, s])]
+        L = {s: ch[s].level() for s in live}
+        W = {s: ch[s].weekday(wdays[t]) for s in live}
+        base = {s: X[t, s] - ch[s].delta - L[s] - W[s] for s in live if np.isfinite(L[s])}
+        if base:
+            comp[t] = float(np.median(list(base.values())))
+        prior = [comp[j] for j in (idx.get(dates[t] - pd.Timedelta(days=7 * k)) for k in range(1, 5)) if j is not None]
+        prior = [v for v in prior if np.isfinite(v)]
+        upheaval = bool(prior) and np.isfinite(comp[t]) and abs(comp[t] - np.median(prior)) > UPHEAVAL
+
+        def move(s, drop=()):
+            v = [base[p] for p in base if p != s and p not in drop]
+            return float(np.median(v)) if v else (0.0 if S == 1 else np.nan)
+
+        # stage 1: company move from all peers; stage 2: without peers that are outliers today
+        z1 = {}
+        for s in base:
+            m = move(s)
+            if np.isfinite(m):
+                z1[s] = (X[t, s] - ch[s].delta - L[s] - W[s] - m) / ch[s].noise()
+        out = {s for s, z in z1.items() if abs(z) > POINT_K}
+        n_live = max(len(live), 1)
+        for s in live:
+            if last_seen[s] is not None and t - last_seen[s] > GAP_RESET:
+                ch[s] = Channel(n)                        # back after a long gap: its old level is stale, start over
+            last_seen[s] = t
+            c = ch[s]
+            c.seen += 1
+            if s not in base or c.seen <= WARMUP:
+                m = move(s) if s in base else np.nan
+                if np.isfinite(L.get(s, np.nan)) and np.isfinite(m):
+                    c.rel.append((t, X[t, s] - c.delta - m))
+                elif np.isfinite(X[t, s]):
+                    c.rel.append((t, X[t, s] - (comp[t] if np.isfinite(comp[t]) else 0.0)))
+                state[t, s] = 4
+                continue
+            m = move(s, out - {s})
+            if not np.isfinite(m):
+                m = move(s)
+            sig = c.noise() * (3.0 if upheaval else 1.0)
+            exp_old = m + L[s] + W[s]                     # expectation on the source's old basis
+            r = X[t, s] - c.delta - exp_old               # residual after the current episode's offset
+            z = r / sig
+            c.z[t] = z
+            st = 0
+            if c.delta != 0.0:
+                # in an episode: follow the offset, close it when the source is back on its old basis
+                c.ep_res.append(X[t, s] - exp_old)
+                # back on the old basis (against the largest offset the episode reached, so a gradual return closes)
+                if len(c.ep_res) >= 5 and abs(np.median(c.ep_res[-5:])) < 0.4 * c.peak:
+                    c.delta, c.ep_start, c.ep_res, c.peak = 0.0, None, [], 0.0
+                else:
+                    c.delta = float(np.median(c.ep_res[-14:]))
+                    c.peak = max(c.peak, abs(c.delta))
+                    r = X[t, s] - c.delta - exp_old
+                    z = r / sig
+                    c.z[t] = z
+                    if t - c.ep_start < SETTLE_DAYS:
+                        st = 2
+            if abs(z) > POINT_K and st == 0:
+                if recurs(c, dates, idx, t, z):
+                    st = 3
+                else:
+                    c.run.append((t, r))
+                    st = 1
+                    signs = {np.sign(v) for _, v in c.run}
+                    if len(c.run) > MAX_POINT_DAYS and len(signs) == 1 and not upheaval:
+                        d = float(np.median([v for _, v in c.run]))
+                        if opens(c, s, X, usable, t, c.run[0][0], d, sig, base):
+                            start_episode(c, c.run[0][0], d, X, t, s, exp_old, state)
+                            st = 2
+                        c.run = []
+            else:
+                c.run = []
+            if st == 0 and c.delta == 0.0:
+                if c.cp == 0:
+                    c.cp0 = t
+                if c.cn == 0:
+                    c.cn0 = t
+                zc = float(np.clip(z, -POINT_K, POINT_K))
+                c.cp, c.cn = max(0.0, c.cp + zc - CUSUM_K), max(0.0, c.cn - zc - CUSUM_K)
+                if (c.cp > CUSUM_H or c.cn > CUSUM_H) and not upheaval:
+                    j0 = c.cp0 if c.cp > CUSUM_H else c.cn0
+                    d = float(np.median([v for v in (X[j, s] - clean_rel_exp(ch[s], j) for j in range(max(j0, t - 13), t + 1))
+                                         if np.isfinite(v)] or [r]))
+                    c.cp = c.cn = 0.0
+                    if opens(c, s, X, usable, t, j0, d, sig, base):
+                        start_episode(c, j0, d, X, t, s, exp_old, state)
+                        st = 2
+            # cleaned value and the state the next days learn from
+            if st == 1:
+                clean[t, s] = exp_old
+            else:
+                clean[t, s] = X[t, s] - c.delta
+            if st in (0, 2, 3):
+                c.rel.append((t, clean[t, s] - m))
+                c.wd.setdefault(wdays[t], []).append(clean[t, s] - m - L[s])
+            if st == 0:
+                c.res.append(r)
+            c.exp = getattr(c, 'exp', {})
+            c.exp[t] = exp_old
+            state[t, s] = st
+        # at most half the usable sources may be in an episode: more is a company-wide move
+        in_ep = [s for s in live if ch[s].delta != 0.0]
+        if len(in_ep) > max(1, n_live // 2):
+            for s in in_ep:
+                ch[s].delta, ch[s].ep_start, ch[s].ep_res, ch[s].peak = 0.0, None, [], 0.0
+                clean[t, s] = X[t, s]
+                state[t, s] = 0
+    return state, clean
+
+
+def clean_rel_exp(c, j):
+    return getattr(c, 'exp', {}).get(j, np.nan)
+
+
+def recurs(c, dates, idx, t, z):
+    for yrs in (1, 2):
+        for k in range(-RECUR_SLACK, RECUR_SLACK + 1):
+            j = idx.get(dates[t] - pd.Timedelta(days=364 * yrs + k))
+            if j is not None and np.isfinite(c.z[j]) and abs(c.z[j]) > POINT_K / 2 and np.sign(c.z[j]) == np.sign(z):
+                return True
+    return False
+
+
+def opens(c, s, X, usable, t, j0, d, sig, base):
+    """Whether a candidate change of size d (begun at j0) on source s should open an episode."""
+    # big enough: against the noise of a median over the days it has lasted, not of one day
+    n_days = max(1, t - j0 + 1)
+    if abs(d) < max(SHIFT_MIN, SHIFT_K * sig * 1.25 / np.sqrt(n_days)):
         return False
+    # the source moved against most of its peers one by one
+    votes = []
+    for p in range(X.shape[1]):
+        if p == s:
+            continue
+        pre = [X[j, s] - X[j, p] for j in range(max(0, j0 - 28), j0) if usable[j, p] and np.isfinite(X[j, p])]
+        post = [X[j, s] - X[j, p] for j in range(j0, t + 1) if usable[j, p] and np.isfinite(X[j, p])]
+        pre, post = [v for v in pre if np.isfinite(v)], [v for v in post if np.isfinite(v)]
+        if len(pre) >= 7 and len(post) >= 2:
+            sh = float(np.median(post) - np.median(pre))
+            votes.append(np.sign(sh) == np.sign(d) and abs(sh) >= abs(d) / 2)
+    if votes:
+        need = len(votes) if len(votes) <= 2 else int(np.ceil(2 * len(votes) / 3))
+        if sum(votes) < need:
+            return False
+    # recovery: the jump takes the source back to a relation it held in the past year (a missed problem ending)
+    past = [r for j, r in c.rel if t - 365 <= j < t - 90]
+    recent = [r for j, r in c.rel if j >= t - 28]
+    if len(past) >= 60 and recent:
+        before, now, held = float(np.median(recent)), float(np.median(recent)) + d, float(np.median(past))
+        # it had been well away from that relation, and the jump lands close to it
+        if abs(before - held) >= 0.75 * abs(d) and abs(now - held) < 0.25 * abs(d):
+            c.rel = [(j, r + d) for j, r in c.rel if j >= t - LEVEL_OBS]      # re-anchor the level instead
+            return False
+    return True
 
-    for i in range(n):
-        offset[i] = O
-        if not np.isfinite(rel[i]) or thin[i]:
-            state[i] = 4
-            continue
-        seen += 1
-        hist = adj[max(0, i - BASE_DAYS):i]
-        hist = hist[np.isfinite(hist)]
-        if seen <= WARMUP or len(hist) < 7:
-            adj[i] = rel[i] - O
-            expected[i] = adj[i]
-            state[i] = 4
-            continue
-        if pend is not None:
-            p0, b0, sig, d0 = pend
-            b = b0 + wd_term(i, b0)
-        else:
-            b0 = float(np.median(hist))
-            b = b0 + wd_term(i, b0)
-            lo = max(0, i - NOISE_DAYS)
-            res = adj[lo:i] - b0 - np.array([wdcache.get(j, 0.0) for j in range(lo, i)])
-            sig = mad(res)
-            sig = max(sig if np.isfinite(sig) else 0.1, NOISE_FLOOR)
-        expected[i] = b
-        bhist[i] = b0
-        r = rel[i] - O - b
-        z = r / sig
-        zhist[i] = z
-        if pend is not None:
-            # a change is pending: hold the old basis until it either comes back (cancel) or lasts (commit)
-            state[i] = 5
-            prs.append(r)
-            if len(prs) >= CALM_DAYS and abs(np.median(prs[-CALM_DAYS:])) < CALM_SHARE * abs(d0):
-                pend = None
-                adj[i] = rel[i] - O
-            elif i - p0 >= CONFIRM_DAYS:
-                seg = [rel[j] - O - expected[j] for j in range(i - 13, i + 1) if np.isfinite(expected[j])]
-                d = float(np.median(seg)) if seg else 0.0
-                if abs(d) >= max(SHIFT_MIN, 2 * sig) and agree(p0, i, d):
-                    O += d
-                    offset[i] = O
-                    settle_until = p0 + SETTLE_DAYS
-                pend = None
-                adj[i] = rel[i] - O
-            continue
-        if abs(z) > POINT_K:
-            if recurs(i, z):
-                state[i] = 3
-                run = []
-                continue
-            run.append(i)
-            state[i] = 1
-            if len(run) > MAX_POINT_DAYS and len({np.sign(zhist[j]) for j in run}) == 1:
-                pend, prs = (run[0], b0, sig, float(np.median([zhist[j] for j in run])) * sig), []
-                state[run] = 5
-                run = []
-            continue
-        run = []
-        # drift: a CUSUM in noise units; when it fires, the shift is measured from the baseline before it started
-        if cp == 0:
-            cp_start = i
-        if cn == 0:
-            cn_start = i
-        cp = max(0.0, cp + min(z, POINT_K) - CUSUM_K)
-        cn = max(0.0, cn - max(z, -POINT_K) - CUSUM_K)
-        if cp > CUSUM_H or cn > CUSUM_H:
-            j0 = cp_start if cp > CUSUM_H else cn_start
-            bref = bhist[j0] if np.isfinite(bhist[j0]) else b0
-            seg = [rel[j] - offset[j] - (expected[j] - bhist[j] + bref) for j in range(max(j0, i - 6), i + 1)
-                   if np.isfinite(expected[j]) and np.isfinite(bhist[j]) and state[j] in (0, 2)]
-            d = float(np.median(seg)) if seg else 0.0
-            cp = cn = 0.0
-            if abs(d) >= max(SHIFT_MIN, SHIFT_MIN_K * sig) and not recurs(i, d / sig):
-                pend, prs = (j0, bref, sig, d), []
-                state[i] = 5
-                continue
-        adj[i] = rel[i] - O
-        if i <= settle_until:
-            state[i] = 2
-    return state, offset, expected
+
+def start_episode(c, j0, d, X, t, s, exp_old, state):
+    c.delta, c.ep_start, c.ep_res, c.peak = d, j0, [d], abs(d)
 
 
 def score(df: pd.DataFrame) -> pd.DataFrame:
@@ -198,59 +268,34 @@ def score(df: pd.DataFrame) -> pd.DataFrame:
         ct = g.pivot(index='date', columns='source_id', values='ct').astype(float)
         amt = g.pivot(index='date', columns='source_id', values='amt').astype(float)
         dates, srcs = ct.index, list(ct.columns)
-        lc = np.log(ct.clip(lower=0.01))
-        lt = np.log(amt.clip(lower=0.01)) - lc
-        thin = (ct.rolling(28, min_periods=1).median() < THIN_CT) | ct.isna()    # trailing: point in time
-
-        def common(x, use):
-            # peers on a common level: each source's log value less its trailing one-year relation to the company
-            # average (sources have their own scales; without this the median would jump between sources)
-            avg = x.where(use).mean(axis=1)
-            rel = x.sub(avg, axis=0).where(use)
-            return x - rel.rolling(365, min_periods=28).median().shift(1)
-
-        # PASSES walks: the first compares each source with its peers as reported; later ones with its peers as
-        # corrected by the previous pass (their committed offsets removed, their distrusted days left out), so a source
-        # whose peers are themselves broken is not mistaken for the broken one. Each pass is point in time.
-        oc = pd.DataFrame(0.0, index=dates, columns=srcs)
-        ot = pd.DataFrame(0.0, index=dates, columns=srcs)
-        bad = pd.DataFrame(False, index=dates, columns=srcs)
-        for _ in range(PASSES):
-            use = ~thin & ~bad
-            nc, nt = common(lc - oc, use), common(lt - ot, use)
-            res = {}
-            for s in srcs:
-                peers = [c for c in srcs if c != s]
-                if peers:
-                    pc = nc[peers].where(use[peers]).median(axis=1)
-                    pt = nt[peers].where(use[peers]).median(axis=1)
-                else:                       # a single source: judged against its own history only
-                    pc = pt = pd.Series(0.0, index=dates)
-                th = thin[s].to_numpy()
-                pair_c = (lc[s].to_numpy()[:, None] - nc[peers].where(use[peers]).to_numpy()) if peers else None
-                pair_t = (lt[s].to_numpy()[:, None] - nt[peers].where(use[peers]).to_numpy()) if peers else None
-                res[s] = (pc, pt, walk(dates, (lc[s] - pc).to_numpy(), th, pair_c),
-                          walk(dates, (lt[s] - pt).to_numpy(), th, pair_t))
-            for s, (pc, pt, (sc, o_c, _), (st, o_t, _)) in res.items():
-                oc[s], ot[s] = o_c, o_t
-                bad[s] = np.isin(sc, (1, 5)) | np.isin(st, (1, 5))
-        for s, (pc, pt, (sc, o_c, ec), (st, o_t, et)) in res.items():
+        med = ct.rolling(28, min_periods=14).median()        # needs two weeks of data to count
+        held = (med >= THIN_CT).astype(int).rolling(ESTABLISHED, min_periods=ESTABLISHED).sum() >= ESTABLISHED
+        established = held.cummax()                      # once established, always (point in time)
+        # a source's thin beginning is dropped; with hysteresis (start keeping at KEEP_CT, drop again under DROP_CT
+        # until established) so a median hovering at the line doesn't leave a patchy series
+        discard = np.zeros(ct.shape, bool)
+        for k, s in enumerate(srcs):
+            dropping = True
+            for i, (mv, est, has) in enumerate(zip(med[s].to_numpy(), established[s].to_numpy(), ct[s].notna().to_numpy())):
+                if est or (np.isfinite(mv) and mv >= KEEP_CT):
+                    dropping = False
+                elif not est and np.isfinite(mv) and mv < DROP_CT:
+                    dropping = True
+                discard[i, k] = dropping and has and not est
+        usable = ct.notna().to_numpy() & ~discard
+        lc = np.log(ct.clip(lower=0.01)).to_numpy()
+        lt = (np.log(amt.clip(lower=0.01)) - np.log(ct.clip(lower=0.01))).to_numpy()
+        sc, cc = walk_company(dates, lc, usable)
+        st, ctk = walk_company(dates, lt, usable)
+        for k, s in enumerate(srcs):
             has = ct[s].notna().to_numpy()
-            bad_pt_c, bad_pt_t = sc == 1, st == 1
-            # distrusted days (bad points, pending changes) fall back to the old-basis expectation; the rest keep the
-            # raw value less any committed offset. Count and ticket are handled apart, so a problem in one keeps the other.
-            imp_c = (bad_pt_c | (sc == 5)) & np.isfinite(pc.to_numpy() + ec)
-            imp_t = (bad_pt_t | (st == 5)) & np.isfinite(pt.to_numpy() + et)
-            clc = np.where(imp_c, pc.to_numpy() + ec, lc[s].to_numpy() - o_c)
-            clt = np.where(imp_t, pt.to_numpy() + et, lt[s].to_numpy() - o_t)
             conf = np.ones(len(dates))
-            conf[np.isin(sc, (2, 5)) | np.isin(st, (2, 5))] = 0.3
-            conf[bad_pt_c | bad_pt_t] = 0.05
-            discard = thin[s].to_numpy() & has
-            conf[discard] = 0.0
-            cct, camt = np.exp(clc), np.exp(clc + clt)
-            cct[discard] = np.nan
-            camt[discard] = np.nan
+            conf[(sc[:, k] == 2) | (st[:, k] == 2)] = 0.3
+            conf[(sc[:, k] == 1) | (st[:, k] == 1)] = 0.05
+            conf[discard[:, k]] = 0.0
+            cct, camt = np.exp(cc[:, k]), np.exp(cc[:, k] + ctk[:, k])
+            cct[discard[:, k]] = np.nan
+            camt[discard[:, k]] = np.nan
             o = pd.DataFrame(dict(date=dates, ticker=tk, source_id=s, confidence=conf, clean_ct=cct, clean_amt=camt))
             out.append(o[has])
     res = pd.concat(out, ignore_index=True)
@@ -264,8 +309,7 @@ def main():
     ap.add_argument('--input', required=True)
     ap.add_argument('--output', required=True)
     a = ap.parse_args()
-    df = pd.read_csv(a.input)
-    res = score(df)
+    res = score(pd.read_csv(a.input))
     res['date'] = res.date.dt.strftime('%Y-%m-%d')
     res.to_csv(a.output, index=False, float_format='%.6g')
 

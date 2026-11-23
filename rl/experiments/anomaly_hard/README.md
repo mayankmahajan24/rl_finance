@@ -206,3 +206,9 @@ problems are caught on the day only above 3 sigma; level changes once their trai
 So the reachable range is about 0.76-0.83, not 1.0: Opus (0.53) is at about 70% of it and the reference (0.47) at 62%.
 What still caps the ceiling: event F1's alert precision (every short false alert counts as much as a true one), the
 consistency score's "fixed" (a missed problem also fails "fixed", so misses count twice), and ramps caught late.
+
+Feedback #24: alert precision weights each alert by min(1, days / 7). Strict planted means: ceiling 0.81 (control
+0.86), Opus runs 0.588, 0.508, 0.520, 0.573 (0.55), oracle 1.0, naive 0.0. Reference rebuilt (one model per channel,
+the safeguards Opus's write-up described, plus the peer vote): 0.590, 0.493 (tuning), 0.440, 0.491 (held out),
+control 0.574; mean 0.50, up from 0.47. Its losses: damage from wrong offsets (penalty 0.36-0.98), "fixed" 0.39-0.45,
+slow ramps.

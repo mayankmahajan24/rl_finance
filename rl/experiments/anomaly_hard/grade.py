@@ -17,9 +17,11 @@ Reward = W_CONF x confidence + W_CLEAN x cleaned series x stability.
   that median is under THIN_LO x thin_ct, after their first THIN_EDGE days, must be dropped (the gate above) and are
   otherwise not scored; borderline rows (median between THIN_LO and THIN_HI x thin_ct) and THIN_EDGE days either side
   of a thin stretch's edges are not scored; a source that thins after it was established is kept (scored for the
-  cleaned series). Untrustworthy rows (label_rows): every day of a one-day problem (planted, or reviewed real); a level
-  change (planted, reviewed, or a known source quirk measured in the data) is untrustworthy for its first CHANGE_DAYS
-  days, then not scored up to SETTLE_DAYS from its start (or its settle date) while the code decides whether the new
+  cleaned series). What a point-in-time scorer could see (build.annotate_events, in the gold): a level change is
+  scored from the day it became visible (its deviation reached 3x the source's own noise; earlier days not scored), and
+  a change that never did, or a reviewed one-day problem under 6x that noise, is not scored at all. Untrustworthy rows
+  (label_rows): every day of a one-day problem (planted, or reviewed real); a level change (planted, reviewed, or a
+  known source quirk measured in the data) is untrustworthy for its first CHANGE_DAYS days from when it became visible, then not scored up to SETTLE_DAYS from its start (or its settle date) while the code decides whether the new
   level is the new normal; after that the new level is trusted (and the cleaned series should rescale it). When a
   temporary change ends, the next SETTLE_DAYS are not scored, and after that the source must be trusted.
   Confidence: row F1 of the rows scored below 0.5 (distrusted): row precision vs day recall (share of each problem's
@@ -28,7 +30,9 @@ Reward = W_CONF x confidence + W_CLEAN x cleaned series x stability.
   Cleaned series: gain x intact x kept, against the truth panel (the hidden panel before the problems were planted;
     real events kept). Error = mean over count and dollars of |log value - log truth|; a blank cleaned value counts as
     the raw value.
-    gain:   for each problem, 1 - (cleaned error / raw error) summed over the scored rows it changed, floored at 0;
+    gain:   for each problem, 1 - (cleaned error / raw error) summed over the scored rows it changed, each error
+            counted only beyond the source's own noise (own_noise; dollars: the count and ticket noises combined),
+            floored at 0;
             averaged within each kind, then over kinds. Reviewed real problems and known quirks have no truth panel
             value (the truth panel is the real data), so they are scored against a hindsight reference built from the
             full hidden series (hindsight_ref): the source's relation to the median of its company's other sources (log
@@ -208,6 +212,14 @@ def label_rows(truth: dict, ev: pd.DataFrame, clean_truth: pd.DataFrame | None =
     for e in truth['events']:
         a, b = pd.Timestamp(e['start']), pd.Timestamp(e['end'])
         ser = (ev.ticker == e['ticker']) & (ev.source_id == e['source_id'])
+        first = pd.Timestamp(e.get('shift_start', e['start']))
+        if e.get('unscored'):              # too small for any point-in-time scorer to see: not scored at all
+            quiet |= ser & ev.date.between(min(first, a), b + D(SETTLE_DAYS if e['regime'] else 0))
+            continue
+        if e.get('visible'):               # scored from the day the change became visible; before that, not scored
+            v = pd.Timestamp(e['visible'])
+            quiet |= ser & (ev.date >= min(first, a)) & (ev.date < v)
+            a = v
         if not e['regime']:
             parts.append((e, ser & ev.date.between(a, b)))
             continue
@@ -345,9 +357,18 @@ def clean_score(truth, ev, scored_rows, ref=None):
     changed = err_raw > 1e-6
     real = pd.Series(False, index=ev.index)
     gains = []
+    sig_a = np.hypot(ev.sig_c, ev.sig_t)              # dollars = count x ticket: their noises add
+    beyond = lambda d, s: (d.abs() - s).clip(lower=0)  # noqa: E731   error beyond the source's own noise
     for e in truth['events']:
         ser = (ev.ticker == e['ticker']) & (ev.source_id == e['source_id'])
-        span = ser & ev.date.between(pd.Timestamp(e.get('shift_start', e['start'])), pd.Timestamp(e['end']))
+        first = pd.Timestamp(e.get('shift_start', e['start']))
+        span = ser & ev.date.between(first, pd.Timestamp(e['end']))
+        if e.get('unscored'):
+            real |= span                                  # not scored, and not counted as untouched rows either
+            continue
+        if e.get('visible'):                              # before it was visible, it is not scored
+            real |= span & (ev.date < pd.Timestamp(e['visible']))
+            span &= ev.date >= pd.Timestamp(e['visible'])
         if e['type'] in REAL_TYPES:          # real problems: against the hindsight reference, net of its noise
             real |= span
             if ref is None or not ev.ref_ct.notna().any():
@@ -365,13 +386,15 @@ def clean_score(truth, ev, scored_rows, ref=None):
                               start=e['start'], rows=int(m.sum()), raw_error=round(float(er[m].mean()), 3),
                               clean_error=round(float(ec[m].mean()), 3), gain=round(g, 3)))
             continue
-        m = span & changed & scored_rows & ~ev.thin
+        er = 0.5 * (beyond(lg(ev.ct) - lg(ev.tct), ev.sig_c) + beyond(lg(ev.amt) - lg(ev.tamt), sig_a))
+        ec = 0.5 * (beyond(lg(cc) - lg(ev.tct), ev.sig_c) + beyond(lg(ca) - lg(ev.tamt), sig_a))
+        m = span & changed & scored_rows & ~ev.thin & (er > 1e-6)
         if not m.any():
             continue
-        g = max(0.0, 1 - err_cln[m].sum() / err_raw[m].sum())
+        g = max(0.0, 1 - ec[m].sum() / er[m].sum())
         gains.append(dict(type=e['type'], kind=kind(e['type']), ticker=e['ticker'], source_id=e['source_id'],
-                          start=e['start'], rows=int(m.sum()), raw_error=round(float(err_raw[m].mean()), 3),
-                          clean_error=round(float(err_cln[m].mean()), 3), gain=round(g, 3)))
+                          start=e['start'], rows=int(m.sum()), raw_error=round(float(er[m].mean()), 3),
+                          clean_error=round(float(ec[m].mean()), 3), gain=round(g, 3)))
     # rows no problem touched should be left as they are: intact = within the source's own noise of the truth
     ok = scored_rows & ~changed & ~real & ~ev.thin
     dc, dt = (lg(cc) - lg(ev.tct)).abs(), ((lg(ca) - lg(cc)) - (lg(ev.tamt) - lg(ev.tct))).abs()

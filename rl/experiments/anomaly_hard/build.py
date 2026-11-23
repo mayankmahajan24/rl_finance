@@ -28,6 +28,7 @@ RL = HERE.parents[1]
 sys.path[:0] = [str(RL), str(HERE)]
 from families._shared import build_panel  # noqa: E402
 from families._shared.panel_perturb import D, Frame, _fmt  # noqa: E402
+import grade  # noqa: E402
 import perturb as P  # noqa: E402
 
 OUT = RL / "tasks" / "proto" / "anomaly_hard"
@@ -143,7 +144,67 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
     assert len(truth_df) == len(df) and (truth_df[['date', 'ticker', 'source_id']] == df[['date', 'ticker', 'source_id']]).all().all()
     mapping = dict(tickers={o: d for o, d in F.tmap.items() if d in set(df.ticker)}, sources=F.smap,
                    shift_days=int(F.shift.days))
+    annotate_events(truth, df, truth_df)
     return df, truth, mapping, truth_df
+
+
+def annotate_events(truth, df, truth_df):
+    """What a point-in-time scorer could see (feedback #31), written into each event: a level change becomes
+    `visible` on the first day its deviation (planted: the exact planted move, raw against the truth panel; real: the
+    raw value against the hindsight reference, trailing 7-day median) reaches P.SHIFT_K times the source's own noise,
+    in count or ticket; its onset is scored from then (earlier days unscored). A change that never gets there, and a
+    reviewed one-day problem that never reaches P.POINT_K times that noise against the hindsight reference, are
+    `unscored`. The noise is the source's own day-to-day noise, defined as for the planted sizes."""
+    # the source's own day-to-day noise as the planted sizes are defined (perturb.own_noise: weekday pattern and a
+    # 28-day running median removed), on the truth panel
+    rows = []
+    for (t, s_), x in truth_df.groupby(['ticker', 'source_id']):
+        x = x.set_index('date').sort_index()
+        n = {}
+        for k, v in (('sig_c', np.log(x.ct.clip(lower=0.01))), ('sig_t', np.log(x.amt.clip(lower=0.01) / x.ct.clip(lower=0.01)))):
+            v = v - v.groupby(v.index.dayofweek).transform('median')
+            r = (v - v.rolling(28, center=True, min_periods=7).median()).dropna()
+            n[k] = max(float(1.4826 * (r - r.median()).abs().median()), 0.01) if len(r) else 0.1
+        rows.append(dict(ticker=t, source_id=s_, **n))
+    sig = pd.DataFrame(rows).set_index(['ticker', 'source_id'])
+    ref = grade.hindsight_ref(truth, truth_df).set_index(grade.KEYS)
+    raw = df.set_index(grade.KEYS)[['ct', 'amt']]
+    tru = truth_df.set_index(grade.KEYS)[['ct', 'amt']]
+    lg = lambda x: np.log(np.maximum(x.astype(float), 0.01))  # noqa: E731
+    for e in truth['events']:
+        key = (e['ticker'], e['source_id'])
+        if key not in sig.index:
+            continue
+        sc, st = sig.loc[key, 'sig_c'], sig.loc[key, 'sig_t']
+        a = pd.Timestamp(e.get('shift_start', e['start'])) - (pd.Timedelta(days=60) if e['type'] in grade.REAL_TYPES else pd.Timedelta(0))
+        b = pd.Timestamp(e['end'])
+        r = raw.xs((e['ticker'], e['source_id']), level=('ticker', 'source_id'))
+        r = r[(r.index >= a) & (r.index <= b)]
+        if e['type'] in grade.REAL_TYPES:
+            x = ref.xs((e['ticker'], e['source_id']), level=('ticker', 'source_id'))[['ref_ct', 'ref_amt']] \
+                if (e['ticker'], e['source_id']) in set(zip(ref.index.get_level_values(1), ref.index.get_level_values(2))) else None
+            if x is None or x.empty:
+                continue
+            x = x.rename(columns={'ref_ct': 'ct', 'ref_amt': 'amt'})
+        else:
+            x = tru.xs((e['ticker'], e['source_id']), level=('ticker', 'source_id'))
+        j = r.join(x, rsuffix='_x', how='inner')
+        if j.empty:
+            continue
+        dc = lg(j.ct) - lg(j.ct_x)
+        dt = (lg(j.amt) - lg(j.ct)) - (lg(j.amt_x) - lg(j.ct_x))
+        if e['type'] == 'real':                       # a reviewed one-day problem: does it stand out at all?
+            if float(np.maximum(dc.abs() / sc, dt.abs() / st).max()) < P.POINT_K:
+                e['unscored'] = True
+            continue
+        if not e.get('regime'):
+            continue
+        z = np.maximum(dc.rolling(7, min_periods=1).median().abs() / sc, dt.rolling(7, min_periods=1).median().abs() / st)
+        seen = z[z >= P.SHIFT_K]
+        if seen.empty:
+            e['unscored'] = True
+        else:
+            e['visible'] = _fmt(seen.index.min())
 
 
 # windows on the shared artifact list that are narrower than the effect in the data, widened here (not in the shared

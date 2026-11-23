@@ -146,7 +146,6 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
     return df, truth, mapping, truth_df
 
 
-QUIRK_MIN = 0.15        # a known source quirk that moved the source less than this (log) did nothing to grade
 # windows on the shared artifact list that are narrower than the effect in the data, widened here (not in the shared
 # list, which is also data_audit's gold): days added before lo and after hi
 QUIRK_WIDEN = {'source-1 airline panel ramp': (517, 150)}   # 2016-05-01..2017-01-31 -> 2014-12-01..2017-06-30 (data_audit review G4)
@@ -155,7 +154,8 @@ QUIRK_WIDEN = {'source-1 airline panel ramp': (517, 150)}   # 2016-05-01..2017-0
 def quirk_event(df, it, d1):
     """What a known source-level quirk (artifact list: lo..hi, one source) did to that source in this data: its
     relation to the median of its company's other sources, in log count and log ticket, over the 90 days before lo
-    against the 90 days after hi. Under QUIRK_MIN: None (normal data). Otherwise a real_change event (scored like a
+    against the 90 days after hi. A change smaller than P.SHIFT_K times the source's own noise in that relation (the
+    size planted shifts must reach) is normal data: None. Otherwise a real_change event (scored like a
     reviewed level change): onset = first day the 14-day median relation is a third of the way to the new level,
     settled = first day it is within a quarter of it, lasting to the panel end unless the source returns to its old
     relation later (then until it does). 'unrecoverable' when the source has fewer than two other usable sources."""
@@ -180,11 +180,13 @@ def quirk_event(df, it, d1):
         if len(pre) < 30 or len(post) < 30:
             continue
         sh = float(post.median() - pre.median())
-        if best is None or abs(sh) > abs(best[1]):
-            best = (name, sh, rel, float(pre.median()))
-    if best is None or abs(best[1]) < QUIRK_MIN:
+        r = (rel - rel.rolling(28, min_periods=7, center=True).median()).dropna()
+        noise = max(float(1.4826 * (r - r.median()).abs().median()), 0.02)      # its own noise in that relation
+        if abs(sh) >= P.SHIFT_K * noise and (best is None or abs(sh) / noise > abs(best[1]) / best[4]):
+            best = (name, sh, rel, float(pre.median()), noise)
+    if best is None:
         return None
-    name, sh, rel, base = best
+    name, sh, rel, base, noise = best
     sm = rel.rolling(14, min_periods=7, center=True).median()
     dev = (sm - base) * np.sign(sh)
     win = dev[(dev.index >= lo - pd.Timedelta(days=30)) & (dev.index <= hi + pd.Timedelta(days=30))]
@@ -197,7 +199,7 @@ def quirk_event(df, it, d1):
     end = back.min() if len(back) and (after.loc[back.min():] < abs(sh) / 3).mean() > 0.8 else d1
     return dict(type='real_change', regime=True, ticker=t, source_id=s, start=_fmt(onset), end=_fmt(end),
                 permanent=bool(end == d1), settle=_fmt(settle if not pd.isna(settle) else hi), origin='quirk',
-                note=f"{it.get('note', 'known source quirk')}: {name} {sh:+.2f} against peers")
+                note=f"{it.get('note', 'known source quirk')}: {name} {sh:+.2f} against peers ({abs(sh) / noise:.1f}x its noise)")
 
 
 # the disguise, as this task describes it: the companies are named (feedback #28); codes, sources, dates and levels

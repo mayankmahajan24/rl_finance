@@ -77,7 +77,9 @@ that have been reviewed) and what each source would have reported had it been wo
 
 The total is set to zero if the outputs are malformed, if the point-in-time check fails, if the code imports or shells
 out to a model or network client, or if the write-up is missing.
-A stretch where a source reports fewer than about twenty transactions a day is low signal: distrusting it earns
-credit in the confidence score, and leaving it blank earns credit in the cleaned-series score. Rows near that line,
-the first two weeks of such a stretch, the two weeks after it ends, and other debatable rows are not scored. The
+A source that reports fewer than about twenty transactions a day before it has built up steady coverage (its early
+history, or all of it) is low signal: distrusting that stretch earns credit in the confidence score, and leaving it
+blank earns credit in the cleaned-series score. A source that dips that low after it was established is kept: those
+rows count in the cleaned-series score, so blanking them costs history. Rows near the twenty-a-day line, the two weeks
+either side of a low-signal stretch's edges, and other debatable rows are not scored. The
 write-up is also graded on its own, separately from this score.

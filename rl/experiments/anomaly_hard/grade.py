@@ -11,8 +11,10 @@ write-up (default SOLUTION_DIR/../output/writeup.md).
 
 Reward = W_CONF x confidence score + W_CLEAN x cleaned-series score + W_CONS x self-consistency score.
   Scored rows: from eval_start, not on low-volume series, not near known natural artifacts. Thin stretches (the truth
-  count's centred 28-day median under THIN_LO x thin_ct, after their first THIN_EDGE days) are untrustworthy and should
-  be dropped: distrusted (kind `thin` in the confidence score) and left blank (kind `thin` in the cleaned-series gain:
+  count's centred 28-day median under THIN_LO x thin_ct, after their first THIN_EDGE days) before the source is
+  established (its median held at thin_ct or more for THIN_ESTABLISHED days) are untrustworthy and should be dropped;
+  thin stretches after that are kept (not scored for confidence; scored for the cleaned series, so blanking them costs
+  history). Dropped: distrusted (kind `thin` in the confidence score) and left blank (kind `thin` in the cleaned-series gain:
   the share of its rows blank). Borderline rows (median between THIN_LO and THIN_HI x thin_ct) and the THIN_EDGE days
   either side of a thin stretch's start and end are not scored. Untrustworthy rows (label_rows): every day of a point anomaly or
   reviewed real problem. A level shift is a change, as a time series monitor sees it: its first CHANGE_DAYS days are
@@ -74,6 +76,7 @@ CHANGE_DAYS, SETTLE_DAYS = 14, 45
 ALERT_GAP = 2
 REAL_TYPES = {'real', 'real_change'}   # reviewed problems in the source data (cleaned against hindsight_ref)
 REF_DAYS = 56
+THIN_ESTABLISHED = 90    # a source is established once its median has held at thin_ct or more this many days running
 THIN_LO, THIN_HI, THIN_EDGE = 0.8, 1.25, 14   # thin: truth count's 28-day median under THIN_LO x thin_ct must be
 # dropped (distrusted, left blank); between THIN_LO and THIN_HI x thin_ct, and the first THIN_EDGE days of a thin
 # stretch and the THIN_EDGE days after it, are not scored (the code cannot tell yet, point in time)
@@ -160,6 +163,7 @@ def label_rows(truth: dict, ev: pd.DataFrame, clean_truth: pd.DataFrame | None =
             m &= ev.source_id == x['source_id']
         ev['use'] &= ~m
     ev['thin'] = False
+    ev['midthin'] = False       # thin after the source was established: keep it (scored for the cleaned series only)
     thin_parts = []
     if clean_truth is not None:                     # thin stretches, from the truth count's centred 28-day median
         bar = truth.get('thin_ct', 20)
@@ -169,23 +173,32 @@ def label_rows(truth: dict, ev: pd.DataFrame, clean_truth: pd.DataFrame | None =
         ct['core'] = False
         ct['grey'] = (ct.med >= THIN_LO * bar) & (ct.med < THIN_HI * bar)
         runs = []
+        ct['mid'] = False
         for (tk, s), g in ct.groupby(['ticker', 'source_id']):
             low = (g.med < THIN_LO * bar).to_numpy()
             if not low.any():
                 continue
+            held = (g.med >= bar).astype(int).rolling(THIN_ESTABLISHED).sum().to_numpy() >= THIN_ESTABLISHED
+            est = g.date.iloc[int(np.argmax(held))] - D(THIN_ESTABLISHED - 1) if held.any() else None
             rid = np.cumsum(np.r_[True, low[1:] != low[:-1]])
             for r in np.unique(rid[low]):
                 d = g.date[rid == r]
                 a, b = d.min(), d.max()
+                if est is not None and a > est:
+                    # thin in the middle of an established source: its history should be kept, not dropped
+                    ct.loc[d.index, 'mid'] = True
+                    continue
                 near = (g.date >= a - D(THIN_EDGE)) & (g.date < a + D(THIN_EDGE)) | \
                        (g.date > b - D(THIN_EDGE)) & (g.date <= b + D(THIN_EDGE))
                 ct.loc[near[near].index, 'grey'] = True
                 core = g.index[(rid == r) & ~near.to_numpy()]
                 ct.loc[core, 'core'] = True
                 runs.append((tk, s, core))
-        k = ev[KEYS].merge(ct[KEYS + ['core', 'grey']], on=KEYS, how='left')
+        k = ev[KEYS].merge(ct[KEYS + ['core', 'grey', 'mid']], on=KEYS, how='left')
         core = k.core.fillna(False).astype(bool).to_numpy()
-        ev['use'] &= ~(core | k.grey.fillna(False).astype(bool).to_numpy())
+        mid = k.mid.fillna(False).astype(bool).to_numpy()
+        ev['midthin'] = mid & ev.use.to_numpy()
+        ev['use'] &= ~(core | mid | k.grey.fillna(False).astype(bool).to_numpy())
         for tk, s, idx in runs:
             m = (ev.ticker == tk) & (ev.source_id == s) & ev.date.isin(set(ct.loc[idx, 'date']))
             thin_parts.append((tk, s, m))
@@ -379,7 +392,7 @@ def scored_stretches(truth, ev, clean_truth):
     tmp['date'] = ev.date
     probe = dict(truth, events=[])
     label_rows(probe, tmp, clean_truth)
-    return tmp.use
+    return tmp.use | tmp.midthin          # thin stretches of an established source are kept: the cleaned series counts
 
 
 def score(truth: dict, data: pd.DataFrame, clean_truth: pd.DataFrame, sol: pathlib.Path,

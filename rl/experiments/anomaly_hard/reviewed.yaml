@@ -293,6 +293,16 @@ reviewed:
   reviewed_by: Mayank
   reviewed_at: '2026-11-20'
 - ticker: DDS
+  source_id: 3
+  start: '2015-10-16'
+  end: '2015-10-16'
+  verdict: change
+  settle: '2015-11-15'
+  note: falls to about 40% of its level against DDS-2 from 2015-10-16 and never recovers (to 2018-12); a real level
+    change, scored like DAL-1 (Mayank, 2026-11-23)
+  reviewed_by: Mayank
+  reviewed_at: '2026-11-23'
+- ticker: DDS
   source_id: 1
   start: '2016-04-05'
   end: '2016-04-05'

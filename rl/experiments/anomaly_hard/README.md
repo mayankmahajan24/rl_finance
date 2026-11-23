@@ -187,3 +187,7 @@ graded on all five tasks, strict: run on 001: 0.594, 0.581, 0.666, 0.582, contro
 All four fresh Opus runs (2026-11-23; each written on one task, graded on all four planted tasks), strict mean:
 0.606, 0.506, 0.518, 0.566 (overall 0.55; lenient 0.57); controls 0.48-0.72. Every gate passed. Confidence 0.40-0.67,
 cleaned series 0.53-0.73, self-consistency 0.43-0.60.
+
+Feedback #23: DDS-3's fall from 2015-10-16 is a reviewed lasting level change (scored like DAL-1). Thin data must be
+dropped only before a source is established (median at 20 or more for 90 days running) or when it never is; a source
+that thins later is kept (cleaned series scored, confidence not).

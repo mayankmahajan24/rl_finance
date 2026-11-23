@@ -34,6 +34,8 @@ LONG_K = 3.0           # ... at least this many times the source's own noise, on
 WANDER_K = 3.0         # a level change must also be this many times the source's usual month-to-month wander
 YOUNG_DAYS = 120       # days after a source is first kept before it helps set the company's move
 LAG = 14               # most recent observations left out of the level baseline
+SEASON_SLACK = 14      # days of slack when matching a drift alarm to the same dates a year earlier
+FRESH = 90             # an episode younger than this counts toward the at-most-half-the-sources rule
 SETTLE = 14            # days after a level change is detected before its new level is trusted
 BASE_N = 42            # observations in a source's level baseline
 SCALE_N = 120          # observations in a source's noise scale
@@ -92,6 +94,11 @@ def wander(hist) -> float:
     return float(1.4826 * np.median(np.abs(dif - np.median(dif))))
 
 
+def seasonal(fires, t):
+    """Did the drift detector fire on this source within SEASON_SLACK days of the same date a year or two earlier?"""
+    return any(abs(t - f - 364 * y) <= SEASON_SLACK for f in fires for y in (1, 2))
+
+
 def moved_alone(Y, t, s, d):
     """The source moved by d against most of its peers one by one (all of them when it has two or fewer): its relation to
     each peer now (last LONG_NOW days) against 6-12 months ago."""
@@ -131,6 +138,7 @@ def detect(Y, valid, channel, want=None):
     age = np.full((T, S), -1)          # days since the current level-change episode opened (-1: none)
     zabs = np.zeros((T, S))
     zsig = np.zeros((T, S))
+    fired = [[] for _ in range(S)]     # days the drift detector fired on each source
     long_prev = np.zeros(S)            # last weekly slow-drift reading that passed the bar (0: none)
     long_open = np.zeros(S, bool)      # current episode was opened by the slow-drift check            # signed residual (noise units) on judged days, for the recurring test
     mode = np.zeros(S, int)            # 0 normal, 1 shift
@@ -171,8 +179,9 @@ def detect(Y, valid, channel, want=None):
         # guardrail: shifts are a minority phenomenon. If most usable sources look
         # shifted, the company itself moved: drop all open episodes.
         usable = avail & np.isfinite(L)
-        if usable.sum() >= 2 and 2 * (mode[usable] == 1).sum() > usable.sum():
-            for j in np.where(mode == 1)[0]:
+        fresh = (mode == 1) & (nep < FRESH)          # changes happening now (old, settled ones do not count)
+        if usable.sum() >= 2 and 2 * fresh[usable].sum() > usable.sum():
+            for j in np.where(fresh)[0]:
                 mode[j] = 0
                 delta[j] = peak[j] = 0.0
                 nep[j] = 0
@@ -268,8 +277,10 @@ def detect(Y, valid, channel, want=None):
                             and sn[s] <= CUSUM_H):
                         h = np.fromiter(lt[s], float)
                         d = float(np.median(h[-LONG_NOW:]) - np.median(h[-LONG_HI:-LONG_LO]))
-                        room = 2 * ((mode[use] == 1).sum() + 1) <= n
-                        big = abs(d) >= LONG_K * sig[s] and abs(d) > max(min_shift, WANDER_K * wander(Y[:t + 1, s] - M[:t + 1]))
+                        room = 2 * (((mode == 1) & (nep < FRESH))[use].sum() + 1) <= n
+                        # against the noise of the two medians compared (not of one day)
+                        sd = 1.25 * sig[s] * np.sqrt(1 / LONG_NOW + 1 / (LONG_HI - LONG_LO))
+                        big = abs(d) >= LONG_K * sd and abs(d) > max(min_shift, WANDER_K * wander(Y[:t + 1, s] - M[:t + 1]))
                         same = big and np.sign(d) == np.sign(long_prev[s])
                         long_prev[s] = d if big else 0.0
                         if same and room and moved_alone(Y, t, s, d):
@@ -284,9 +295,14 @@ def detect(Y, valid, channel, want=None):
                             lv[s].extend(base)
                             sp[s] = sn[s] = 0.0
                             run[s] = []
+                    if (sp[s] > CUSUM_H or sn[s] > CUSUM_H) and seasonal(fired[s], t):
+                        fired[s].append(t)                 # this source's own season: no episode
+                        sp[s] = sn[s] = 0.0
+                        run[s] = []
                     if sp[s] > CUSUM_H or sn[s] > CUSUM_H:
+                        fired[s].append(t)
                         d = float(np.median(run[s]))
-                        room = 2 * ((mode[use] == 1).sum() + 1) <= n
+                        room = 2 * (((mode == 1) & (nep < FRESH))[use].sum() + 1) <= n
                         # a jump back to where the source sat a few months ago is a
                         # recovery from a problem we missed, not a new problem
                         recov = seen_before(lt[s], L[s], d)
@@ -309,7 +325,7 @@ def detect(Y, valid, channel, want=None):
                         sp[s] = sn[s] = 0.0
                         run[s] = []
                 if mode[s] == 0:
-                    if is_spike:
+                    if is_spike and not settling:            # a source still growing into coverage is left as it is
                         clean[t, s] = yhat_spike
                         flag[t, s] = True
                     else:
@@ -325,6 +341,8 @@ def detect(Y, valid, channel, want=None):
                 off = abs(u) / se > SPIKE_Z and abs(u) > min_spike
                 clean[t, s] = yhat if off else y - delta[s]
                 flag[t, s] = True
+                if not off:
+                    age[t, s] = SETTLE if long_open[s] else nep[s]     # a settled change is trusted on these days too
                 zabs[t, s] = abs(delta[s]) / se
                 continue
             if not entered:
@@ -472,8 +490,13 @@ def process_ticker(g):
     # one-day moves far outside the source's own history that also stand out against its peers: bad points
     oz_y, ox_y = own_spikes(LY, ct_ok & ~low)
     oz_k, ox_k = own_spikes(LK, tk_ok & ~low)
-    add_y = (oz_y > OWN_Z) & (zy > PEER_Z) & ~fy & np.isfinite(ox_y) & ~yearly(oz_y)
-    add_k = (oz_k > OWN_Z) & (zk > PEER_Z) & ~fk & np.isfinite(ox_k) & ~yearly(oz_k)
+    young = np.zeros_like(low)                     # a source's first YOUNG_DAYS after it is first kept
+    for j in range(low.shape[1]):
+        kept = np.where(~low[:, j] & row[:, j])[0]
+        if len(kept):
+            young[kept[0]:kept[0] + YOUNG_DAYS, j] = True
+    add_y = (oz_y > OWN_Z) & (zy > PEER_Z) & ~fy & np.isfinite(ox_y) & ~yearly(oz_y) & ~young
+    add_k = (oz_k > OWN_Z) & (zk > PEER_Z) & ~fk & np.isfinite(ox_k) & ~yearly(oz_k) & ~young
     cy, fy = np.where(add_y, ox_y, cy), fy | add_y
     ck, fk = np.where(add_k, ox_k, ck), fk | add_k
     zy, zk = np.where(add_y, np.maximum(zy, SPIKE_Z + 0.5), zy), np.where(add_k, np.maximum(zk, SPIKE_Z + 0.5), zk)

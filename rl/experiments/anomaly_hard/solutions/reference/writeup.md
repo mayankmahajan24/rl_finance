@@ -40,6 +40,13 @@ opening an episode; an episode closes when the source is back near its old basis
     company move, so one source's problem does not get its sister sources flagged.
 13. The level baseline leaves out the most recent 14 observations, so a ramp over weeks cannot drag it along (the
     drift detector then sees the whole move).
+14. Holidays inside an episode: a day is distrusted only if it is off the shifted level, and a settled change stays
+    trusted (previously every upheaval day of a lasting change was distrusted, every year).
+15. A drift alarm on dates where the same source alarmed a year earlier (within 14 days) is its own season: no episode.
+16. A source still settling in is not flagged at all, by either check.
+17. The slow-drift check judges its move against the noise of the two medians it compares, not one day's noise.
+18. The at-most-half-the-sources rule counts only episodes opened in the last 90 days: an old, settled lasting change
+    no longer blocks (or, worse, resets) a new change on a sister source.
 Tried and dropped (no consistent gain across tasks): a lagged level baseline for ramps; leave-one-out offsets inside
 episodes; leave-one-out everywhere (noisier drift detection, more false episodes).
 

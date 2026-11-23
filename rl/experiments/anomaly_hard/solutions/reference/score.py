@@ -31,7 +31,8 @@ OWN_Z, PEER_Z, OWN_N = 5.0, 2.5, 120   # own-history spike check: beyond OWN_Z o
 RECUR_SLACK = 3        # days of slack when matching the same dates a year earlier
 LONG_NOW, LONG_LO, LONG_HI = 28, 180, 365   # slow drift: last 28 observations against those 180-365 back
 LONG_K = 3.0           # ... at least this many times the source's own noise, on two weekly checks running
-SETTLE = 25            # days after a level change is detected before its new level is trusted
+WANDER_K = 3.0         # a level change must also be this many times the source's usual month-to-month wander
+SETTLE = 14            # days after a level change is detected before its new level is trusted
 BASE_N = 42            # observations in a source's level baseline
 SCALE_N = 120          # observations in a source's noise scale
 SPIKE_Z = 5.5          # single-day outlier threshold (robust z)
@@ -75,6 +76,18 @@ def recurs(zs, t, z):
         if np.any((np.sign(w) == np.sign(z)) & (np.abs(w) > SPIKE_Z / 2)):
             return True
     return False
+
+
+def wander(hist) -> float:
+    """How much the source's level against the company normally wanders from month to month, as reported: the robust
+    spread of the changes between consecutive 28-day medians over its last year (0 if too little history)."""
+    h = np.asarray(hist, float)[-364:]
+    h = h[np.isfinite(h)]
+    if len(h) < 4 * 28:
+        return 0.0
+    med = np.array([np.median(h[i:i + 28]) for i in range(len(h) % 28, len(h), 28)])
+    dif = np.diff(med)
+    return float(1.4826 * np.median(np.abs(dif - np.median(dif))))
 
 
 def moved_alone(Y, t, s, d):
@@ -236,7 +249,7 @@ def detect(Y, valid, channel, want=None):
                         h = np.fromiter(lt[s], float)
                         d = float(np.median(h[-LONG_NOW:]) - np.median(h[-LONG_HI:-LONG_LO]))
                         room = 2 * ((mode[use] == 1).sum() + 1) <= n
-                        big = abs(d) >= LONG_K * sig[s] and abs(d) > min_shift
+                        big = abs(d) >= LONG_K * sig[s] and abs(d) > max(min_shift, WANDER_K * wander(Y[:t + 1, s] - M[:t + 1]))
                         same = big and np.sign(d) == np.sign(long_prev[s])
                         long_prev[s] = d if big else 0.0
                         if same and room and moved_alone(Y, t, s, d):
@@ -261,7 +274,7 @@ def detect(Y, valid, channel, want=None):
                             keep = list(lv[s])[-len(run[s]):] if run[s] else []
                             lv[s].clear()
                             lv[s].extend(keep)
-                        elif abs(d) > min_shift and room:
+                        elif abs(d) > max(min_shift, WANDER_K * wander(Y[:t + 1, s] - M[:t + 1])) and room:
                             mode[s] = 1
                             delta[s] = d
                             ep[s] = list(run[s])

@@ -2,7 +2,8 @@
 
 A prototype, not a family: it is not in any manifest, CI or approval, and its tasks go to
 rl/tasks/proto/anomaly_hard/ (gitignored). It uses the bench split's companies, so results on it are eval
-results, and its own seeds (300001.., 390001.. for controls), outside every family's ranges.
+results, and its own seeds (300001.., 390001.. for controls; train split 320001.., 392001..), outside every family's
+ranges. --split train builds from the train companies into rl/tasks/proto/anomaly_hard_train/.
 
 Like anomaly_scoring, each task has a visible panel (environment/data/transactions.csv) and a hidden panel
 (tests/eval_panel.csv.gz) built with a different random stream, plus the gold (tests/gold.json) and the hidden
@@ -159,17 +160,20 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--n', type=int, default=4)
     ap.add_argument('--controls', type=int, default=1)
+    ap.add_argument('--split', default='bench', choices=['bench', 'train'])   # held-out companies are never used here
     a = ap.parse_args()
-    ctx = build_panel.context('txn_panel', 'bench')
+    ctx = build_panel.context('txn_panel', a.split)
+    out = OUT if a.split == 'bench' else OUT.with_name(f'anomaly_hard_{a.split}')
+    base, cbase, pre = (300000, 390000, 'anomhard') if a.split == 'bench' else (320000, 392000, f'anomhard-{a.split}')
     tmpl = (HERE / 'instruction.md').read_text()
     text = tmpl.format(firm=build_panel.FIRM, schema=build_panel.SCHEMA, copy_note=build_panel.COPY_NOTE)
-    shutil.rmtree(OUT, ignore_errors=True)
-    jobs = [(300000 + i, False, f'anomhard-{i:03d}') for i in range(1, a.n + 1)] + \
-           [(390000 + i, True, f'anomhard-control-{i:02d}') for i in range(1, a.controls + 1)]
+    shutil.rmtree(out, ignore_errors=True)
+    jobs = [(base + i, False, f'{pre}-{i:03d}') for i in range(1, a.n + 1)] + \
+           [(cbase + i, True, f'{pre}-control-{i:02d}') for i in range(1, a.controls + 1)]
     for seed, control, tid in jobs:
         shown, _, _, _ = plant(np.random.default_rng(seed), control, ctx)
         hidden, truth, mapping, clean = plant(np.random.default_rng([seed, 1]), control, ctx)
-        d = OUT / tid
+        d = out / tid
         (d / 'environment' / 'data').mkdir(parents=True)
         (d / 'tests').mkdir()
         shown.to_csv(d / 'environment' / 'data' / 'transactions.csv', index=False, date_format='%Y-%m-%d')

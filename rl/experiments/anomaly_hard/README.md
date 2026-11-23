@@ -240,3 +240,26 @@ weight (stability is a property of the cleaned series). Reward = 0.5 x confidenc
 The reference is tuned on 001-002 and scores as well on the held-out tasks: 89% of the ceiling. Opus is at 46-59% of
 it. The reference's write-up says what was changed from the Opus run and why; the biggest single change is the
 reviewer's lasting-change rule (trust a settled new level), which Opus missed.
+
+## Across more companies: the train split (2026-11-23)
+
+`build.py --split train` builds from the 8 train companies (AAL, ALGT, HA, LUV, UAL, JWN, ROST, TJX; each task draws 8
+of their 10 series groups); 6 planted tasks and 2 controls, about 56,000 rows each. None of their real data has been
+reviewed, so strict counts flags on real problems as false alarms (lenient leaves them unscored) and no real problem's
+cleaned values are scored. Held-out companies are not used.
+
+| Strict reward, train split | 001 | 002 | 003 | 004 | 005 | 006 | mean | lenient | controls |
+|---|---|---|---|---|---|---|---|---|---|
+| oracle | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | | 1.0, 1.0 |
+| ceiling | 0.800 | 0.875 | 0.873 | 0.863 | 0.852 | 0.852 | 0.853 | | 1.0, 1.0 |
+| reference | 0.848 | 0.768 | 0.852 | 0.779 | 0.835 | 0.868 | 0.825 | 0.839 | 0.905, 0.951 |
+| Opus run on 001 | 0.586 | 0.544 | 0.723 | 0.690 | 0.754 | 0.782 | 0.680 | 0.688 | 0.974, 0.989 |
+| Opus run on 004 | 0.630 | 0.531 | 0.746 | 0.556 | 0.729 | 0.599 | 0.632 | 0.643 | 0.964, 0.977 |
+| Opus run on 002 | 0.320 | 0.416 | 0.327 | 0.572 | 0.513 | 0.694 | 0.474 | 0.528 | 0.673, 0.810 |
+| Opus run on 003 | 0.365 | 0.130 | 0.140 | 0.547 | 0.240 | 0.553 | 0.329 | 0.379 | 0.351, 0.774 |
+| naive | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0, 0 |
+
+The reference, tuned only on bench tasks 001-002, scores 0.825 on companies it never saw (97% of the ceiling; on two
+tasks it beats the ceiling, which is a plausible best, not a bound: its imputation carries the source's own noise).
+Opus's runs spread from 0.33 to 0.68. Fixed on the way: a task with no reviewed real problems gave the hindsight
+reference an untyped empty table, which broke the oracle's merge.

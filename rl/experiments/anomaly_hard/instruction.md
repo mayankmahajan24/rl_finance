@@ -28,7 +28,8 @@ python /app/solution/score.py --input IN.csv --output OUT.csv
 `date, ticker, source_id, confidence, clean_ct, clean_amt`:
 
 * `confidence`, in [0, 1]: does this row carry usable signal about what the company actually did that day, as
-  reported or after your adjustment? High means trust it; below 0.5 means do not.
+  reported or after your adjustment? High means trust it; below 0.5 means do not. A change in a source's series can
+  be a temporary blip or a permanent shift.
 * `clean_ct`, `clean_amt`: a cleaned series for the row's ticker and source that is comparable like for like with
   that source's own history: what the source would have reported had it kept working the way it normally does.
   Where a row is fine, it equals the raw value. Where a row cannot be trusted, impute it. Leave a row blank only when

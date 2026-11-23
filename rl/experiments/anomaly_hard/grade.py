@@ -27,7 +27,7 @@ Reward = W_CONF x confidence + W_CLEAN x cleaned series x stability.
   level is the new normal; after that the new level is trusted (and the cleaned series should rescale it). When a
   temporary change ends, the next SETTLE_DAYS are not scored, and after that the source must be trusted.
   Confidence: F1 of alert precision (alerts: runs of distrusted scored days on a source, gaps of up to ALERT_GAP days
-    joined; precision: the share that touch an untrustworthy row) and recall (the share of problems caught: any of a
+    joined, split every ALERT_DAYS days; precision: the share that touch an untrustworthy row) and recall (the share of problems caught: any of a
     problem's untrustworthy days distrusted, averaged within each kind, then over kinds; the planted one-day problems
     are one kind). Row precision and day recall are reported, not scored. A panel with no untrustworthy rows: the
     share of scored rows trusted.
@@ -73,6 +73,7 @@ KEYS = ['date', 'ticker', 'source_id']
 OUT_COLS = ['confidence', 'clean_ct', 'clean_amt']
 CHANGE_DAYS, SETTLE_DAYS = 14, 45
 ALERT_GAP = 2            # days of trust that still join two distrusted runs into one alert
+ALERT_DAYS = CHANGE_DAYS  # an alert longer than a change's onset window counts as several
 ONE_DAY = {'volume_spike', 'dropout', 'count_flood', 'dollar_spike'}   # planted one-day problems: one kind
 REAL_TYPES = {'real', 'real_change'}   # problems in the source data (reviewed or known quirks): cleaned against hindsight_ref
 REF_DAYS = 56
@@ -542,12 +543,14 @@ def known_rows(truth: dict, ev: pd.DataFrame) -> pd.Series:
 
 
 def alerts(e_: pd.DataFrame) -> tuple[int, int]:
-    """Runs of distrusted scored days on a source (gaps of up to ALERT_GAP days joined), and how many touch an
+    """Alerts: runs of distrusted scored days on a source (gaps of up to ALERT_GAP days joined), each split into pieces
+    of at most ALERT_DAYS days (so distrusting a long stretch counts as many alerts, not one); and how many touch an
     untrustworthy row."""
     n = hit = 0
     for _, g in e_[e_.flag].sort_values('date').groupby(['ticker', 'source_id']):
         run_id = (g.date.diff().dt.days.fillna(999) > ALERT_GAP + 1).cumsum()
-        runs = g.groupby(run_id).label.any()
+        piece = (g.date - g.groupby(run_id).date.transform('min')).dt.days // ALERT_DAYS
+        runs = g.groupby([run_id, piece]).label.any()
         n += len(runs); hit += int(runs.sum())
     return n, hit
 

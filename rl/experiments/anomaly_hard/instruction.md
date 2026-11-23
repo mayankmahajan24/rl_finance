@@ -65,7 +65,8 @@ normally.
 
 * **Confidence (half).** Counted per problem and per alert. Recall is the share of problems you catch (a problem is
   caught if you score any of its untrustworthy days below 0.5; each kind of problem weighs the same). An alert is a
-  run of rows on one source scored below 0.5 (gaps of up to two days joined); precision is the share of your alerts
+  run of rows on one source scored below 0.5 (gaps of up to two days joined; a run longer than two weeks counts
+  as one alert per two weeks); precision is the share of your alerts
   that touch a real problem. The score is the F1 of the two. A problem counts from the day it first shows in the data;
   one that builds up too slowly for its start to be dated counts only in the cleaned series.
 * **Cleaned series (half).** On rows a problem affected, how much of the gap between the raw value and what the

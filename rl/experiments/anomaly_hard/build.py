@@ -28,6 +28,7 @@ RL = HERE.parents[1]
 sys.path[:0] = [str(RL), str(HERE)]
 from families._shared import build_panel  # noqa: E402
 from families._shared.panel_perturb import D, Frame, _fmt  # noqa: E402
+import background  # noqa: E402
 import grade  # noqa: E402
 import perturb as P  # noqa: E402
 
@@ -36,6 +37,8 @@ REVIEWED = HERE / "reviewed.yaml"   # verdicts on real (unplanted) problems, in 
 EVAL_START_DAYS = 365   # one year of warm-up: enough history for levels, noise and a yearly pattern (feedback #27)
 THIN_CT = 20   # a stretch whose 28-day median count is under this is too thin to trust: not scored (feedback #18)
 N_POINTS, SHIFTS = 2, [('step', 2), ('ramp', 2)]   # per panel: 2 of each point kind, 2 step and 2 ramp level shifts
+SEMI_REAL = True        # semi-real background (background.py, feedback #38): exact answer key
+N_RECURRING, N_SLOW = 2, 2   # per panel: planted yearly closures (normal) and slow panel ramps (problems)
 
 
 def plant(rng, control, ctx, n_tickers=8, sensors=None):
@@ -43,6 +46,8 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
     pool = sorted(sensors) if sensors else sorted(raw.ticker.unique())
     tks = list(rng.choice(pool, min(n_tickers, len(pool)), replace=False))
     F = Frame(raw, rng, tickers=tks, artifacts=ctx.artifacts)
+    if SEMI_REAL:                            # every source rebuilt on its company's real moves (background.py)
+        F.df = background.semi_real(F.df)
     d0, d1 = F.df.date.min(), F.df.date.max()
     span = (d1 - d0).days
     req, opt = F.natural()
@@ -62,17 +67,46 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
             if free(t, x, x + pd.Timedelta(days=30)):
                 decoys.append(f(F, t, x)); busy.append((t, x, x + pd.Timedelta(days=30)))
                 break
+    recurring_planted, thin_planted = [], []
+    if SEMI_REAL:                            # source behaviour that is normal, planted with exact labels
+        cands0 = F.candidates(exclude_series=art_series)
+        for _ in range(N_RECURRING):
+            for _ in range(100):
+                t, s_ = cands0[int(rng.integers(len(cands0)))]
+                r = background.plant_recurring(F, rng, t, s_, d0, d1)
+                if r:
+                    recurring_planted.append(r)
+                    for x in r['dates']:
+                        busy.append(((t, s_), pd.Timestamp(x) - pd.Timedelta(days=3), pd.Timestamp(x) + pd.Timedelta(days=3)))
+                    break
+        for _ in range(100):
+            t, s_ = cands0[int(rng.integers(len(cands0)))]
+            r = background.plant_thin_start(F, rng, t, s_, d0)
+            if r:
+                thin_planted.append(r)
+                busy.append(((t, s_), d0, pd.Timestamp(r['thin_until']) + pd.Timedelta(days=150)))
+                break
     truth_df = F.df.copy()
     if not control:
         cands = F.candidates(exclude_series=art_series)
         jobs = [(f, None) for f in P.POINTS for _ in range(N_POINTS)] + [(mode, None) for mode, n in SHIFTS
                                                                         for _ in range(n)]
+        jobs += [('slow', None) for _ in range(N_SLOW if SEMI_REAL else 0)]
         for f, _ in jobs:
             for _ in range(500):
                 t, s = cands[int(rng.integers(len(cands)))]
                 if callable(f):
                     lo = hi = day(0.32, 0.95)
                     hi = lo + pd.Timedelta(days=3)
+                elif f == 'slow':
+                    lo, hi = day(0.3, 0.6), d1
+                    if free((t, s), lo, hi):
+                        ev = background.slow_ramp(F, rng, t, s, lo, d1)
+                        if ev:
+                            events += ev
+                            busy.append(((t, s), lo, hi))
+                            break
+                    continue
                 else:
                     permanent = bool(rng.random() < 0.5)
                     lo = day(0.3, 0.8 if permanent else 0.7)
@@ -95,7 +129,7 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
     excl = [dict(ticker=i['ticker'], source_id=i['source_id'], lo=i['start'],
                  hi=i['end'] or F.d(ctx.panel_end)) for i in req]
     quirks = []
-    for i in opt:
+    for i in (opt if not SEMI_REAL else []):
         if (i['ticker'], i['source_id']) in judged:
             continue
         if i['source_id'] is None:
@@ -108,7 +142,13 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
             events.append(q)
             quirks.append(q)
     not_real, recurring = [], []
-    for r in reviewed():                                      # real problems in the source data, as reviewed
+    for r in recurring_planted:                               # planted yearly patterns: first year not scored
+        first = pd.Timestamp(r['dates'][0])
+        excl.append(dict(ticker=r['ticker'], source_id=r['source_id'], lo=_fmt(first), hi=_fmt(first),
+                         kind='recurring_first'))
+        recurring += [dict(ticker=r['ticker'], source_id=r['source_id'], start=x, end=x, note='planted yearly closure')
+                      for x in r['dates']]
+    for r in (reviewed() if not SEMI_REAL else []):          # real problems in the source data, as reviewed
         t, s_ = F.t(r['ticker']), F.s(r['source_id'])
         if t is None:
             continue
@@ -133,8 +173,9 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
         else:
             not_real.append(x)
     full = [dict(ticker=F.t(x['ticker']), source_id=F.s(int(x['source_id']))) for x in reviewed_series()
-            if F.t(x['ticker']) is not None]
+            if F.t(x['ticker']) is not None] if not SEMI_REAL else []
     truth = dict(family='anomaly_hard', control=control, events=events, decoys=decoys, exclusions=excl,
+                 background='semi_real' if SEMI_REAL else 'real', planted_thin_start=thin_planted,
                  reviewed_not_real=not_real, reviewed_recurring=recurring, reviewed_series=full,
                  ignore_series=F.low_volume_series(), eval_start=_fmt(d0 + pd.Timedelta(days=EVAL_START_DAYS)),
                  threshold=0.5, thin_ct=THIN_CT,
@@ -270,7 +311,9 @@ def quirk_event(df, it, d1):
 
 # the disguise, as this task describes it: the companies are named (feedback #28); codes, sources, dates and levels
 # stay disguised, and the panel the code is graded on has its own codes
-COPY_NOTE = """This copy of the panel is disguised. Each ticker is a code for a company named in the table below. The panel your
+COPY_NOTE = """This copy of the panel is built from the companies' real daily transactions: each source follows its company's real
+day-to-day moves, with its own level, weekday pattern and day-to-day noise. It is disguised. Each ticker is a code
+for a company named in the table below. The panel your
 code is graded on covers other companies, with their own codes and source ids, so the code must not depend on them. Source ids
 are shuffled. Dates are shifted by a whole multiple of 364 days, so weekdays line up but holidays can sit a few days
 off their usual dates. Each ticker-source series has its `ct` and `amt` multiplied by its own hidden factor between

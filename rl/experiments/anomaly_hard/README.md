@@ -191,3 +191,5 @@ cleaned series 0.53-0.73, self-consistency 0.43-0.60.
 Feedback #23: DDS-3's fall from 2015-10-16 is a reviewed lasting level change (scored like DAL-1). Thin data must be
 dropped only before a source is established (median at 20 or more for 90 days running) or when it never is; a source
 that thins later is kept (cleaned series scored, confidence not).
+Re-graded after #23 (oracle 1.0, naive 0.0 on all five): Opus runs strict mean 0.583, 0.490, 0.504, 0.560 (overall
+0.53), controls 0.47-0.68; reference 0.469, control 0.579.

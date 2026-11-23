@@ -37,9 +37,10 @@ THIN_CT = 20   # a stretch whose 28-day median count is under this is too thin t
 N_POINTS, SHIFTS = 2, [('step', 2), ('ramp', 2)]   # per panel: 2 of each point kind, 2 step and 2 ramp level shifts
 
 
-def plant(rng, control, ctx, n_tickers=8):
+def plant(rng, control, ctx, n_tickers=8, sensors=None):
     raw = ctx.raw
-    tks = list(rng.choice(sorted(raw.ticker.unique()), min(n_tickers, raw.ticker.nunique()), replace=False))
+    pool = sorted(sensors) if sensors else sorted(raw.ticker.unique())
+    tks = list(rng.choice(pool, min(n_tickers, len(pool)), replace=False))
     F = Frame(raw, rng, tickers=tks, artifacts=ctx.artifacts)
     d0, d1 = F.df.date.min(), F.df.date.max()
     span = (d1 - d0).days
@@ -212,6 +213,22 @@ BRANDS = {'M_M': "Macy's stores", 'M_BL': "Bloomingdale's", 'JWN_JWN': 'Nordstro
           'TJX_TJMAXX': 'T.J. Maxx and Marshalls'}
 
 
+def company_groups(ctx, seed) -> tuple[list[str], list[str]]:
+    """The split's companies in two groups, balanced by industry (each industry's companies shuffled and dealt in
+    turn): the visible panel is built from one group and the hidden panel the code is graded on from the other, so the
+    code is always graded on companies it was not built on. Returns the two groups' sensor tickers."""
+    ent = yaml.safe_load((RL / 'sources' / 'txn_panel' / 'annotations' / 'entities.yaml').read_text())['companies']
+    have = set(ctx.raw.ticker.unique())
+    rng = np.random.default_rng([seed, 2])
+    a, b, turn = [], [], 0
+    for ind in sorted({e['industry'] for e in ent.values()}):
+        comps = sorted(c for c, e in ent.items() if e['industry'] == ind and set(e['sensors']) & have)
+        for c in rng.permutation(comps):
+            (a if turn % 2 == 0 else b).extend(x for x in ent[c]['sensors'] if x in have)
+            turn += 1
+    return a, b
+
+
 def companies_table(shown: pd.DataFrame, mapping: dict) -> str:
     """The companies behind this task's visible ticker codes (entities.yaml), as a markdown table."""
     ent = yaml.safe_load((RL / 'sources' / 'txn_panel' / 'annotations' / 'entities.yaml').read_text())['companies']
@@ -265,8 +282,9 @@ def main():
     jobs = [(base + i, False, f'{pre}-{i:03d}') for i in range(1, a.n + 1)] + \
            [(cbase + i, True, f'{pre}-control-{i:02d}') for i in range(1, a.controls + 1)]
     for seed, control, tid in jobs:
-        shown, _, shown_map, _ = plant(np.random.default_rng(seed), control, ctx)
-        hidden, truth, mapping, clean = plant(np.random.default_rng([seed, 1]), control, ctx)
+        vis, hid = company_groups(ctx, seed)
+        shown, _, shown_map, _ = plant(np.random.default_rng(seed), control, ctx, sensors=vis)
+        hidden, truth, mapping, clean = plant(np.random.default_rng([seed, 1]), control, ctx, sensors=hid)
         d = out / tid
         (d / 'environment' / 'data').mkdir(parents=True)
         (d / 'tests').mkdir()
@@ -281,7 +299,8 @@ def main():
         # review verdicts on this task's flags back into original coordinates
         (d / 'mapping.json').write_text(json.dumps(mapping, indent=1))
         kinds = pd.Series([e['type'] for e in truth['events']]).value_counts().to_dict()
-        print(tid, len(hidden), 'rows;', kinds, '; decoys', [x['kind'] for x in truth['decoys']])
+        print(tid, 'visible', sorted(vis), 'hidden', sorted(hid), len(hidden), 'rows;', kinds,
+              '; decoys', [x['kind'] for x in truth['decoys']])
 
 
 if __name__ == '__main__':

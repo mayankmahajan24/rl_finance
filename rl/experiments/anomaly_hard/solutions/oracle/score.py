@@ -32,7 +32,7 @@ real = pd.Series(False, index=df.index)
 for e in gold['events']:
     if e['type'] in ('real', 'real_change'):
         real |= (df.ticker == e['ticker']) & (df.source_id == e['source_id']) & df.date.between(e['start'], e['end'])
-df['confidence'] = 1.0 - (df.label & (differs | real | df.thin)).astype(float)
+df['confidence'] = 1.0 - ((df.label & (differs | real)) | df.thin).astype(float)
 df.loc[df.thin, ['clean_ct', 'clean_amt']] = np.nan          # thin stretches are dropped
 df['date'] = df.date.dt.strftime('%Y-%m-%d')
 df[KEYS + ['confidence', 'clean_ct', 'clean_amt']].to_csv(a.output, index=False)

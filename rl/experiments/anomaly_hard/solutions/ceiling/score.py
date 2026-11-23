@@ -7,8 +7,9 @@ detector could:
   a row by its deviation from that in units of the source's own noise against its peers (sigma, per series and
   channel: log count and log ticket).
 * A one-day problem is caught on the day only if it stands out: more than POINT_K sigma. Smaller ones are missed.
-* A level change (planted shift or reviewed real change) is caught once its deviation's trailing 3-day median passes
-  SHIFT_K sigma, so ramps are caught late. From then on its onset is distrusted (until DISTRUST_DAYS after its start)
+* A level change (planted shift, reviewed real change or known quirk) is caught once its deviation's trailing 3-day
+  median (a step) or 14-day median (a slow ramp) passes SHIFT_K sigma, so ramps are caught late. Inside a change,
+  one-day problems are judged against the shifted level so far, caught or not. From then on its onset is distrusted (until DISTRUST_DAYS after its start)
   and the cleaned series is rescaled to the old level; after that the new level is trusted, still rescaled.
 * When a temporary shift ends, the correction carries on for RETURN_DAYS before the return is noticed.
 * Imputed and rescaled values carry the source's own noise (a deterministic draw per row, clipped at 2 sigma, times
@@ -95,8 +96,19 @@ for e in gold['events']:
         continue
     ser = ((df.ticker == e['ticker']) & (df.source_id == e['source_id'])).to_numpy()
     a0, b0 = pd.Timestamp(e.get('shift_start', e['start'])), pd.Timestamp(e['end'])
-    zz = df.z.where(ser).rolling(3, min_periods=3).median().to_numpy()   # trailing, within the series (sorted)
-    hit = ser & (df.date >= a0).to_numpy() & (df.date <= b0).to_numpy() & (zz > SHIFT_K)
+    span = ser & (df.date >= a0).to_numpy() & (df.date <= b0).to_numpy()
+    # inside a level change, a one-day problem is judged against the shifted level so far (trailing 14 days), whether
+    # or not the change has been caught: a real detector adapts to a level it missed
+    lvl_c = dev_c.where(ser).rolling(14, min_periods=3).median().shift(1)
+    lvl_t = dev_t.where(ser).rolling(14, min_periods=3).median().shift(1)
+    zrel = np.maximum((dev_c - lvl_c).abs() / df.sig_c, (dev_t - lvl_t).abs() / df.sig_t).fillna(0).to_numpy()
+    pt = span & (zrel > POINT_K)
+    fix[span] = pt[span]
+    conf[span] = np.where(pt[span], 0.05, 1.0)
+    # caught once the deviation's trailing median passes SHIFT_K: 3 days for a step, 14 for a slow ramp
+    z3 = df.z.where(ser).rolling(3, min_periods=3).median().to_numpy()
+    z14 = df.z.where(ser).rolling(14, min_periods=7).median().to_numpy()
+    hit = span & ((z3 > SHIFT_K) | (z14 > SHIFT_K))
     if not hit.any():
         continue
     td = df.date[hit].min()

@@ -275,3 +275,9 @@ to rescale; its window is widened here to 2014-12-01..2017-06-30 (data_audit rev
 Feedback #28: the instruction names the companies behind the visible codes (no pattern notes). Airgapped: score.py
 runs in its own network namespace in the grader; Opus task runs (`runner/run.sh`) have web tools disabled and every
 shell command in its own network namespace (`runner/offline.sh`).
+
+Feedback #29 (2026-11-23): visible and hidden panels from different companies; grader simplified (thin beginnings a
+gate; one-day kinds merged; stability = new alarms against the task's untrustworthy rows; proportional damage and
+history; one reward; unscored metrics removed). Oracle 1.0, naive 0.0 on all 13 tasks. Ceiling 0.69 (bench planted),
+0.70 (train planted): lower than before because the hidden panels are new companies and known quirks are graded,
+some of them (about 0.2 against peers) too small to catch within 14 days.

@@ -52,8 +52,8 @@ python /app/solution/score.py --input IN.csv --output OUT.csv
 * **Low-signal data.** Segments that carry no usable signal (for instance a stretch where a source has too few
   transactions for its daily numbers to mean much) may be discarded, as long as the rule is in the code so it would
   scale. Discard as little as you can: history is valuable.
-* **New data.** Your script is graded on a different panel of the same kind, with its own tickers, dates and
-  problems. Each run must finish within 20 minutes on 2 CPUs.
+* **New data.** Your script is graded on a different panel of the same kind: other companies, with their own
+  tickers, dates and problems. Each run must finish within 20 minutes on 2 CPUs.
 * **Your own output as input.** The script must also run on a file of its own cleaned series in the input format.
 
 ## How you are scored
@@ -64,20 +64,22 @@ normally.
 
 * **Confidence (half).** Rows scored below 0.5 are compared with the rows that cannot be trusted: F1 of those rows,
   with recall counted per problem (each kind of problem weighing the same), so a problem caught late loses the days
-  it went uncaught.
+  it went uncaught. A problem counts from the day it first shows in the data; one that builds up too slowly for its
+  start to be dated counts only in the cleaned series.
 * **Cleaned series (half).** On rows a problem affected, how much of the gap between the raw value and what the
   source should have reported your cleaned value closes (in log terms, count and dollars, each kind of problem
-  weighing the same), multiplied by the share of rows that were fine and that your cleaned series leaves within the
+  weighing the same; differences within the source's own day-to-day noise are not counted), multiplied by the share of rows that were fine and that your cleaned series leaves within the
   source's own noise, by the share of rows that should be kept and that you did not leave blank, and by a stability
   check: your script is run again on its own cleaned series (same columns; counts may not be whole numbers) and on
   clean data, and the cleaned series should not be distrusted more often than clean data (extra alarms count against
-  you in proportion to the size of the real problems in the panel). A blank cleaned value on a row with a problem counts as the raw value, so a row left blank where it
-  should have been imputed earns nothing.
+  you in proportion to the size of the real problems in the panel). A blank cleaned value on a row with a problem
+  counts as the raw value, so a row left blank where it should have been imputed earns nothing.
 
 The total is set to zero if the outputs are malformed, if the point-in-time check fails, if the code imports or shells
 out to a model or network client, if the write-up is missing, or if low-signal data is not dropped: a source that
 reports fewer than about twenty transactions a day before it has built up steady coverage (its early history, or all
 of it) must be distrusted and left blank there (at least 90% of those rows). A source that dips that low after it was
 established is kept: those rows count in the cleaned-series score, so blanking them costs history. Rows near the
-twenty-a-day line, the two weeks either side of a low-signal stretch's edges, and other debatable rows are not scored.
+twenty-a-day line, the two weeks either side of a low-signal stretch's edges, problems too small to stand out from a
+source's own noise, and other debatable rows are not scored.
 The write-up is also graded on its own, separately from this score.

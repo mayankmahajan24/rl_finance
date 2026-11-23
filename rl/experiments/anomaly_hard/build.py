@@ -154,7 +154,8 @@ def annotate_events(truth, df, truth_df):
     raw value against the hindsight reference, trailing 7-day median) reaches P.SHIFT_K times the source's own noise,
     in count or ticket; its onset is scored from then (earlier days unscored). A change that never gets there, and a
     reviewed one-day problem that never reaches P.POINT_K times that noise against the hindsight reference, are
-    `unscored`. The noise is the source's own day-to-day noise, defined as for the planted sizes."""
+    `unscored`. A change that took longer than grade.SETTLE_DAYS to become visible is `slow`: scored on the cleaned
+    series only. The noise is the source's own day-to-day noise, defined as for the planted sizes."""
     # the source's own day-to-day noise as the planted sizes are defined (perturb.own_noise: weekday pattern and a
     # 28-day running median removed), on the truth panel
     rows = []
@@ -205,6 +206,10 @@ def annotate_events(truth, df, truth_df):
             e['unscored'] = True
         else:
             e['visible'] = _fmt(seen.index.min())
+            # slower to show than a change's settling window (weeks): a build-up over months whose onset no
+            # point-in-time code can date, so it is scored on the cleaned series only (feedback #32)
+            if (seen.index.min() - pd.Timestamp(e.get('shift_start', e['start']))).days > grade.SETTLE_DAYS:
+                e['slow'] = True
 
 
 # windows on the shared artifact list that are narrower than the effect in the data, widened here (not in the shared
@@ -265,8 +270,8 @@ def quirk_event(df, it, d1):
 
 # the disguise, as this task describes it: the companies are named (feedback #28); codes, sources, dates and levels
 # stay disguised, and the panel the code is graded on has its own codes
-COPY_NOTE = """This copy of the panel is disguised. Each ticker is a code for a company named in the table below; the codes
-and source ids are different in the panel your code is graded on, so the code must not depend on them. Source ids
+COPY_NOTE = """This copy of the panel is disguised. Each ticker is a code for a company named in the table below. The panel your
+code is graded on covers other companies, with their own codes and source ids, so the code must not depend on them. Source ids
 are shuffled. Dates are shifted by a whole multiple of 364 days, so weekdays line up but holidays can sit a few days
 off their usual dates. Each ticker-source series has its `ct` and `amt` multiplied by its own hidden factor between
 0.3 and 3, so levels are not comparable across series. Growth within a series and average ticket size (`amt` / `ct`)

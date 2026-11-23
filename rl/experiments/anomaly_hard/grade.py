@@ -19,7 +19,9 @@ Reward = W_CONF x confidence + W_CLEAN x cleaned series x stability.
   of a thin stretch's edges are not scored; a source that thins after it was established is kept (scored for the
   cleaned series). What a point-in-time scorer could see (build.annotate_events, in the gold): a level change is
   scored from the day it became visible (its deviation reached 3x the source's own noise; earlier days not scored), and
-  a change that never did, or a reviewed one-day problem under 6x that noise, is not scored at all. Untrustworthy rows
+  a change that never did, or a reviewed one-day problem under 6x that noise, is not scored at all; a change that took
+  longer than SETTLE_DAYS to become visible (slow: a build-up over months, no onset a point-in-time scorer could date) is scored on the cleaned
+  series only, and for confidence only as trusted once it has settled. Untrustworthy rows
   (label_rows): every day of a one-day problem (planted, or reviewed real); a level change (planted, reviewed, or a
   known source quirk measured in the data) is untrustworthy for its first CHANGE_DAYS days from when it became visible, then not scored up to SETTLE_DAYS from its start (or its settle date) while the code decides whether the new
   level is the new normal; after that the new level is trusted (and the cleaned series should rescale it). When a
@@ -220,6 +222,9 @@ def label_rows(truth: dict, ev: pd.DataFrame, clean_truth: pd.DataFrame | None =
             v = pd.Timestamp(e['visible'])
             quiet |= ser & (ev.date >= min(first, a)) & (ev.date < v)
             a = v
+        if e.get('slow'):                  # no onset to date: confidence not scored until it has settled, then trusted
+            quiet |= ser & (ev.date >= first) & (ev.date <= max(a + D(SETTLE_DAYS - 1), pd.Timestamp(e.get('settle', a))))
+            continue
         if not e['regime']:
             parts.append((e, ser & ev.date.between(a, b)))
             continue

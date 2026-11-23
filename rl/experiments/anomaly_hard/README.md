@@ -183,3 +183,7 @@ Fresh Opus runs on the current instruction (subscription CLI, each from one task
 graded on all five tasks, strict: run on 001: 0.594, 0.581, 0.666, 0.582, control 0.721; run on 004: 0.572, 0.567,
 0.610, 0.515, control 0.585. Both discard and blank every thin stretch and barely touch good rows (damage under
 0.1%). Neither honest solution passes about 0.67: the ceiling for point-in-time code is well under 1.0.
+
+All four fresh Opus runs (2026-11-23; each written on one task, graded on all four planted tasks), strict mean:
+0.606, 0.506, 0.518, 0.566 (overall 0.55; lenient 0.57); controls 0.48-0.72. Every gate passed. Confidence 0.40-0.67,
+cleaned series 0.53-0.73, self-consistency 0.43-0.60.

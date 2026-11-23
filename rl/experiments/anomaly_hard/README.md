@@ -212,3 +212,31 @@ Feedback #24: alert precision weights each alert by min(1, days / 7). Strict pla
 the safeguards Opus's write-up described, plus the peer vote): 0.590, 0.493 (tuning), 0.440, 0.491 (held out),
 control 0.574; mean 0.50, up from 0.47. Its losses: damage from wrong offsets (penalty 0.36-0.98), "fixed" 0.39-0.45,
 slow ramps.
+
+## What the task is for, and the simplified grader (2026-11-23)
+
+The point: can a model write production-grade, point-in-time code that turns a noisy multi-source panel into
+something a researcher can rely on, generalising to data it has not seen? Two deliverables carry that: (1) the rows
+that cannot be trusted are flagged, and nothing else; (2) a cleaned series that is right, like for like, keeps as much
+history as possible, and is stable when the code is run on its own output. The rest (gates, Option A for lasting
+changes, hindsight references for reviewed real problems, the thin-data rule) is what makes those two measurable.
+
+Over-specified metrics removed from the reward (still reported in the details): event F1 (restates row F1: day
+recall is counted per problem, so a late catch already loses the days it went uncaught; alert precision restates
+row precision), the consistency score's "fixed" (a missed problem penalised a second time) and its separate 20%
+weight (stability is a property of the cleaned series). Reward = 0.5 x confidence (row F1) + 0.5 x cleaned series
+(gain x damage penalty x history kept x stability), stability = 0.5 x no new alarms + 0.5 x idempotent.
+
+| Strict reward | 001 | 002 | 003 | 004 | planted mean | control |
+|---|---|---|---|---|---|---|
+| oracle | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 |
+| ceiling (best plausible point-in-time) | 0.853 | 0.848 | 0.867 | 0.889 | 0.864 | 0.887 |
+| reference (from the best Opus run, improved) | 0.762 | 0.745 | 0.803 | 0.769 | 0.770 | 0.790 |
+| Opus run on 001 | 0.508 | 0.469 | 0.547 | 0.518 | 0.510 | 0.520 |
+| Opus run on 002 | 0.496 | 0.320 | 0.404 | 0.377 | 0.399 | 0.478 |
+| Opus run on 003 | 0.459 | 0.424 | 0.525 | 0.490 | 0.475 | 0.341 |
+| naive | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
+
+The reference is tuned on 001-002 and scores as well on the held-out tasks: 89% of the ceiling. Opus is at 46-59% of
+it. The reference's write-up says what was changed from the Opus run and why; the biggest single change is the
+reviewer's lasting-change rule (trust a settled new level), which Opus missed.

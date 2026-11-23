@@ -1,318 +1,434 @@
-"""Reference solution for anomaly_hard: per-row confidence and a like-for-like cleaned series, point in time.
+#!/usr/bin/env python
+"""Reference solution for anomaly_hard: trust scores and cleaned series for a multi-source daily transaction panel.
 
-    python score.py --input IN.csv --output OUT.csv
+Provenance: started from the best fresh Opus run on this task (anomhard-001, 2026-11-20; its own docstring follows),
+then improved by hand for the reviewer's rules; see writeup.md for what changed and why.
 
-Honest: reads only its input. One model, run separately on log count and log ticket size (dollars per transaction):
+For every ticker the sources are independent reads of the same company. Each source/day is compared with a robust
+cross-source consensus (median of the sources after removing each source's own level), separately for log count and
+log ticket size. A strictly causal state machine per source and channel flags one-day outliers and persistent level
+shifts (CUSUM) and repairs them: outliers are replaced by the consensus of the other sources, level shifts by removing
+the estimated shift so the source keeps its own day-to-day signal (its old basis). A level change is distrusted while
+it settles, then trusted as the source's new normal. One-day moves far outside the source's own history that also
+stand out against its peers are bad points too. A source's thin beginning (before its trailing 28-day median count
+has held 20 for 90 days) is discarded, with hysteresis; a source that thins later is kept.
 
-    x[s, t] = m[t] + L[s] + w[s, weekday] + noise
-
-m is the company's move that day (median over its other usable sources, each less its own level), L the source's
-level (trailing median of its cleaned relation to the company), w its weekday pattern. Residuals are measured in the
-source's own noise (trailing robust spread). Every company's sources are walked forward together, one day at a time,
-so every output for day t uses only rows dated t or earlier.
-
-* Bad point: |z| > POINT_K. Distrusted; the cleaned value is the model's expectation. A peer that is itself an outlier
-  today is left out of the company move.
-* Level change: more than MAX_POINT_DAYS outliers of one sign in a row, or a CUSUM (k=CUSUM_K, h=CUSUM_H) firing,
-  opens an episode with offset delta (the median residual since it began). Rows become raw - delta, so the cleaned
-  series stays on the source's old basis for as long as the change lasts; delta follows a running 14-day median (a ramp
-  keeps growing it); the episode closes when the 5-day median residual against the old basis is back near zero. Rows
-  are distrusted until SETTLE_DAYS after the change began, then trusted (the new level is the new normal).
-  Safeguards: a change must be at least SHIFT_MIN and SHIFT_K noise units; the source must have moved against most of
-  its peers one by one (all of them when it has two or fewer); at most half a company's usable sources may be in an
-  episode at once (more is a company-wide move: all reset); on upheaval days (the company's move against the same
-  weekday in recent weeks is over UPHEAVAL log units: holidays, closures) noise is widened and no episode opens; a jump
-  back to a level the source held in the past year is a recovery from a problem that was missed, so the baseline is
-  re-anchored instead of opening an episode.
-* Recurring: an outlier on dates where the same source moved the same way a year (or two) earlier is trusted and kept.
-* Low signal: until a source is established (its trailing 28-day median count has held THIN_CT for ESTABLISHED days
-  running) it is discarded (confidence 0, blank) while thin, with hysteresis: kept from KEEP_CT, dropped again under
-  DROP_CT. A source that never gets there stays discarded; one that dips later is kept.
+Everything for a row dated t uses only rows dated <= t.
 """
-from __future__ import annotations
-
 import argparse
+import sys
+from collections import deque
 
 import numpy as np
 import pandas as pd
 
-THIN_CT, ESTABLISHED = 20, 90
-KEEP_CT, DROP_CT = 25, 16   # before a source is established: keep from KEEP_CT, drop again under DROP_CT
-LEVEL_OBS, NOISE_OBS, WD_WEEKS = 42, 90, 8
-WARMUP = 28
-GAP_RESET = 60          # a source back after this many days without usable data starts its warm-up again
-POINT_K, MAX_POINT_DAYS = 4.5, 3
-CUSUM_K, CUSUM_H = 1.0, 7.0
-SHIFT_MIN, SHIFT_K = 0.15, 2.0
-SETTLE_DAYS = 30
-UPHEAVAL = 1.0
-RECUR_SLACK = 3
-NOISE_FLOOR = 0.03
+# ---------------------------------------------------------------- parameters
+LOW_CT = 20.0          # low-signal threshold (transactions / day)
+LOW_WIN = 28           # reports in the low-signal trailing median
+ESTABLISHED = 90       # a source is established once that median has held LOW_CT this many reports running
+KEEP_CT, DROP_CT = 25.0, 16.0   # before then: keep from KEEP_CT, drop again under DROP_CT (hysteresis)
+OWN_Z, PEER_Z, OWN_N = 5.0, 2.5, 120   # own-history spike check: beyond OWN_Z of its own spread, and PEER_Z vs peers
+SETTLE = 25            # days after a level change is detected before its new level is trusted
+BASE_N = 42            # observations in a source's level baseline
+SCALE_N = 120          # observations in a source's noise scale
+SPIKE_Z = 4.5          # single-day outlier threshold (robust z)
+CUSUM_K = 1.0          # CUSUM allowance (in sigmas)
+CUSUM_H = 7.0          # CUSUM decision interval
+Z_CLIP = 4.0           # clip z before feeding CUSUM
+MIN_SHIFT = {"ct": 0.12, "tk": 0.10}   # smallest level shift worth repairing (log)
+MIN_SPIKE = {"ct": 0.25, "tk": 0.20}   # smallest single-day error worth flagging (log)
+EP_WIN = 14            # days used for the running shift estimate
+EXIT_N = 5             # days used for the exit test
+EXIT_SIG = 1.0         # exit when the recent median residual is within this many sigmas
+EXIT_PEAK = 0.35       # ... or has fallen below this share of the episode's largest shift
+WARMUP = 14            # days of history before CUSUM is armed
+SIG_FLOOR = 0.02
+ABNORMAL = 1.0         # |company move vs. same weekday in prior weeks| marking upheaval days
+RECOV_LO, RECOV_HI, RECOV_BLK = 30, 400, 60   # past-year level blocks, to tell recoveries from new shifts
+RECOV_FRAC = 0.3
+HOLI_C = 0.3           # extra noise on days the whole company moves abnormally (holidays)
+HOLI_A0 = 0.4          # ... beyond this size of move
 
 
-def mad(v) -> float:
-    v = np.asarray(v, float)
-    v = v[np.isfinite(v)]
-    return float(1.4826 * np.median(np.abs(v - np.median(v)))) if len(v) >= 8 else np.nan
-
-
-class Channel:
-    """State of one channel (log count or log ticket) of one source."""
-
-    def __init__(self, n):
-        self.rel = []            # (day, cleaned relation to the company) on trusted days, for the level L
-        self.res = []            # residuals on ok days, for the noise
-        self.wd = {}             # weekday -> recent residual-from-level values
-        self.z = np.full(n, np.nan)
-        self.delta = 0.0         # current episode offset (0: none)
-        self.peak = 0.0          # the largest offset the current episode has reached
-        self.ep_start = None     # day index the current change began
-        self.ep_res = []         # residuals against the old basis during the episode
-        self.cp = self.cn = 0.0
-        self.cp0 = self.cn0 = 0
-        self.run = []            # consecutive outlier days (index, residual)
-        self.seen = 0
-
-    def level(self):
-        v = [r for _, r in self.rel[-LEVEL_OBS:]]
-        return float(np.median(v)) if len(v) >= 5 else np.nan
-
-    def weekday(self, wd):
-        v = self.wd.get(wd, [])[-WD_WEEKS:]
-        return float(np.median(v)) if len(v) >= 3 else 0.0
-
-    def noise(self):
-        s = mad(self.res[-NOISE_OBS:])
-        return max(s if np.isfinite(s) else 0.15, NOISE_FLOOR)
-
-
-def walk_company(dates, X, usable):
-    """X: days x sources log values of one channel (nan where missing); usable: days x sources (not discarded).
-    Returns state (0 ok, 1 bad point, 2 episode distrusted, 3 recurring, 4 warm-up/discarded), cleaned log values."""
-    n, S = X.shape
-    ch = [Channel(n) for _ in range(S)]
-    state = np.full((n, S), 4, int)
-    clean = X.copy()
-    comp = np.full(n, np.nan)            # the company's move each day, for the upheaval test
-    idx = {d: i for i, d in enumerate(dates)}
-    wdays = dates.dayofweek.to_numpy()
-    last_seen = [None] * S
-    for t in range(n):
-        live = [s for s in range(S) if usable[t, s] and np.isfinite(X[t, s])]
-        L = {s: ch[s].level() for s in live}
-        W = {s: ch[s].weekday(wdays[t]) for s in live}
-        base = {s: X[t, s] - ch[s].delta - L[s] - W[s] for s in live if np.isfinite(L[s])}
-        if base:
-            comp[t] = float(np.median(list(base.values())))
-        prior = [comp[j] for j in (idx.get(dates[t] - pd.Timedelta(days=7 * k)) for k in range(1, 5)) if j is not None]
-        prior = [v for v in prior if np.isfinite(v)]
-        upheaval = bool(prior) and np.isfinite(comp[t]) and abs(comp[t] - np.median(prior)) > UPHEAVAL
-
-        def move(s, drop=()):
-            v = [base[p] for p in base if p != s and p not in drop]
-            return float(np.median(v)) if v else (0.0 if S == 1 else np.nan)
-
-        # stage 1: company move from all peers; stage 2: without peers that are outliers today
-        z1 = {}
-        for s in base:
-            m = move(s)
-            if np.isfinite(m):
-                z1[s] = (X[t, s] - ch[s].delta - L[s] - W[s] - m) / ch[s].noise()
-        out = {s for s, z in z1.items() if abs(z) > POINT_K}
-        n_live = max(len(live), 1)
-        for s in live:
-            if last_seen[s] is not None and t - last_seen[s] > GAP_RESET:
-                ch[s] = Channel(n)                        # back after a long gap: its old level is stale, start over
-            last_seen[s] = t
-            c = ch[s]
-            c.seen += 1
-            if s not in base or c.seen <= WARMUP:
-                m = move(s) if s in base else np.nan
-                if np.isfinite(L.get(s, np.nan)) and np.isfinite(m):
-                    c.rel.append((t, X[t, s] - c.delta - m))
-                elif np.isfinite(X[t, s]):
-                    c.rel.append((t, X[t, s] - (comp[t] if np.isfinite(comp[t]) else 0.0)))
-                state[t, s] = 4
-                continue
-            m = move(s, out - {s})
-            if not np.isfinite(m):
-                m = move(s)
-            sig = c.noise() * (3.0 if upheaval else 1.0)
-            exp_old = m + L[s] + W[s]                     # expectation on the source's old basis
-            r = X[t, s] - c.delta - exp_old               # residual after the current episode's offset
-            z = r / sig
-            c.z[t] = z
-            st = 0
-            if c.delta != 0.0:
-                # in an episode: follow the offset, close it when the source is back on its old basis
-                c.ep_res.append(X[t, s] - exp_old)
-                # back on the old basis (against the largest offset the episode reached, so a gradual return closes)
-                if len(c.ep_res) >= 5 and abs(np.median(c.ep_res[-5:])) < 0.4 * c.peak:
-                    c.delta, c.ep_start, c.ep_res, c.peak = 0.0, None, [], 0.0
-                else:
-                    c.delta = float(np.median(c.ep_res[-14:]))
-                    c.peak = max(c.peak, abs(c.delta))
-                    r = X[t, s] - c.delta - exp_old
-                    z = r / sig
-                    c.z[t] = z
-                    if t - c.ep_start < SETTLE_DAYS:
-                        st = 2
-            if abs(z) > POINT_K and st == 0:
-                if recurs(c, dates, idx, t, z):
-                    st = 3
-                else:
-                    c.run.append((t, r))
-                    st = 1
-                    signs = {np.sign(v) for _, v in c.run}
-                    if len(c.run) > MAX_POINT_DAYS and len(signs) == 1 and not upheaval:
-                        d = float(np.median([v for _, v in c.run]))
-                        if opens(c, s, X, usable, t, c.run[0][0], d, sig, base):
-                            start_episode(c, c.run[0][0], d, X, t, s, exp_old, state)
-                            st = 2
-                        c.run = []
-            else:
-                c.run = []
-            if st == 0 and c.delta == 0.0:
-                if c.cp == 0:
-                    c.cp0 = t
-                if c.cn == 0:
-                    c.cn0 = t
-                zc = float(np.clip(z, -POINT_K, POINT_K))
-                c.cp, c.cn = max(0.0, c.cp + zc - CUSUM_K), max(0.0, c.cn - zc - CUSUM_K)
-                if (c.cp > CUSUM_H or c.cn > CUSUM_H) and not upheaval:
-                    j0 = c.cp0 if c.cp > CUSUM_H else c.cn0
-                    d = float(np.median([v for v in (X[j, s] - clean_rel_exp(ch[s], j) for j in range(max(j0, t - 13), t + 1))
-                                         if np.isfinite(v)] or [r]))
-                    c.cp = c.cn = 0.0
-                    if opens(c, s, X, usable, t, j0, d, sig, base):
-                        start_episode(c, j0, d, X, t, s, exp_old, state)
-                        st = 2
-            # cleaned value and the state the next days learn from
-            if st == 1:
-                clean[t, s] = exp_old
-            else:
-                clean[t, s] = X[t, s] - c.delta
-            if st in (0, 2, 3):
-                c.rel.append((t, clean[t, s] - m))
-                c.wd.setdefault(wdays[t], []).append(clean[t, s] - m - L[s])
-            if st == 0:
-                c.res.append(r)
-            c.exp = getattr(c, 'exp', {})
-            c.exp[t] = exp_old
-            state[t, s] = st
-        # at most half the usable sources may be in an episode: more is a company-wide move
-        in_ep = [s for s in live if ch[s].delta != 0.0]
-        if len(in_ep) > max(1, n_live // 2):
-            for s in in_ep:
-                ch[s].delta, ch[s].ep_start, ch[s].ep_res, ch[s].peak = 0.0, None, [], 0.0
-                clean[t, s] = X[t, s]
-                state[t, s] = 0
-    return state, clean
-
-
-def clean_rel_exp(c, j):
-    return getattr(c, 'exp', {}).get(j, np.nan)
-
-
-def recurs(c, dates, idx, t, z):
-    for yrs in (1, 2):
-        for k in range(-RECUR_SLACK, RECUR_SLACK + 1):
-            j = idx.get(dates[t] - pd.Timedelta(days=364 * yrs + k))
-            if j is not None and np.isfinite(c.z[j]) and abs(c.z[j]) > POINT_K / 2 and np.sign(c.z[j]) == np.sign(z):
-                return True
+def seen_before(hist, level, d):
+    """Did the source sit at level + d (within RECOV_FRAC*|d|) in some 60-day block
+    of the past year, while that block was clearly away from the current level?"""
+    h = np.fromiter(hist, float)[:-RECOV_LO]
+    for e in range(len(h), 29, -RECOV_BLK):
+        b = float(np.median(h[max(0, e - RECOV_BLK):e]))
+        if abs(level + d - b) < RECOV_FRAC * abs(d) and abs(b - level) > 0.5 * abs(d):
+            return True
     return False
 
 
-def opens(c, s, X, usable, t, j0, d, sig, base):
-    """Whether a candidate change of size d (begun at j0) on source s should open an episode."""
-    # big enough: against the noise of a median over the days it has lasted, not of one day
-    n_days = max(1, t - j0 + 1)
-    if abs(d) < max(SHIFT_MIN, SHIFT_K * sig * 1.25 / np.sqrt(n_days)):
-        return False
-    # the source moved against most of its peers one by one
-    votes = []
-    for p in range(X.shape[1]):
-        if p == s:
+def detect(Y, valid, channel, want=None):
+    """Causal detector on a (T days x S sources) log matrix.
+
+    Model: Y[t,s] = m[t] + L[s,t] + noise, where m is the company's common daily
+    move (median across sources) and L the source's level relative to
+    it (trailing median of its *cleaned* history, so a repaired level shift does
+    not leak into the baseline). Cells in `want` (rows whose value is unusable,
+    e.g. a zero or missing amount) are imputed from the consensus.
+    Returns clean values, flag and |z|.
+    """
+    T, S = Y.shape
+    Y = np.where(valid, Y, np.nan)
+    clean = np.full((T, S), np.nan)
+    innov = np.full((T, S), np.nan)    # residual minus current shift, on usable days
+    M = np.full(T, np.nan)
+    flag = np.zeros((T, S), bool)
+    age = np.full((T, S), -1)          # days since the current level-change episode opened (-1: none)
+    zabs = np.zeros((T, S))
+    mode = np.zeros(S, int)            # 0 normal, 1 shift
+    delta = np.zeros(S)
+    peak = np.zeros(S)
+    nep = np.zeros(S, int)             # days since the episode was opened
+    ep = [[] for _ in range(S)]
+    sp = np.zeros(S)
+    sn = np.zeros(S)
+    run = [[] for _ in range(S)]
+    nhist = np.zeros(S, int)
+    last_val = np.full(S, np.nan)      # last clean value of each source
+    lv = [deque(maxlen=BASE_N) for _ in range(S)]    # clean - common factor, last valid days
+    iv = [deque(maxlen=SCALE_N) for _ in range(S)]   # leave-one-out innovations, normal days
+    lt = [deque(maxlen=RECOV_HI) for _ in range(S)]  # longer level history (recovery test)
+    min_shift = MIN_SHIFT[channel]
+    min_spike = MIN_SPIKE[channel]
+
+    for t in range(T):
+        avail = np.isfinite(Y[t])
+        if not avail.any():
+            if want is not None:
+                for s in np.where(want[t] & np.isfinite(last_val))[0]:
+                    clean[t, s] = last_val[s]        # nothing to compare with: carry
+                    flag[t, s] = True
+                    zabs[t, s] = 10.0
             continue
-        pre = [X[j, s] - X[j, p] for j in range(max(0, j0 - 28), j0) if usable[j, p] and np.isfinite(X[j, p])]
-        post = [X[j, s] - X[j, p] for j in range(j0, t + 1) if usable[j, p] and np.isfinite(X[j, p])]
-        pre, post = [v for v in pre if np.isfinite(v)], [v for v in post if np.isfinite(v)]
-        if len(pre) >= 7 and len(post) >= 2:
-            sh = float(np.median(post) - np.median(pre))
-            votes.append(np.sign(sh) == np.sign(d) and abs(sh) >= abs(d) / 2)
-    if votes:
-        need = len(votes) if len(votes) <= 2 else int(np.ceil(2 * len(votes) / 3))
-        if sum(votes) < need:
-            return False
-    # recovery: the jump takes the source back to a relation it held in the past year (a missed problem ending)
-    past = [r for j, r in c.rel if t - 365 <= j < t - 90]
-    recent = [r for j, r in c.rel if j >= t - 28]
-    if len(past) >= 60 and recent:
-        before, now, held = float(np.median(recent)), float(np.median(recent)) + d, float(np.median(past))
-        # it had been well away from that relation, and the jump lands close to it
-        if abs(before - held) >= 0.75 * abs(d) and abs(now - held) < 0.25 * abs(d):
-            c.rel = [(j, r + d) for j, r in c.rel if j >= t - LEVEL_OBS]      # re-anchor the level instead
-            return False
-    return True
+        L = np.array([np.median(lv[j]) if lv[j] else np.nan for j in range(S)])
+        sig = np.full(S, 0.3)
+        for j in range(S):
+            if len(iv[j]) >= 10:
+                x = np.fromiter(iv[j], float)
+                sig[j] = 1.4826 * np.median(np.abs(x - np.median(x)))
+        sig = np.maximum(sig, SIG_FLOOR)
+
+        # guardrail: shifts are a minority phenomenon. If most usable sources look
+        # shifted, the company itself moved: drop all open episodes.
+        usable = avail & np.isfinite(L)
+        if usable.sum() >= 2 and 2 * (mode[usable] == 1).sum() > usable.sum():
+            for j in np.where(mode == 1)[0]:
+                mode[j] = 0
+                delta[j] = peak[j] = 0.0
+                nep[j] = 0
+                ep[j] = []
+                sp[j] = sn[j] = 0.0
+                run[j] = []
+        ycorr = Y[t] - np.where(mode == 1, delta, 0.0)
+        v = ycorr - L
+        use = avail & np.isfinite(v)
+        n = use.sum()
+        prev = [M[t - k] for k in (7, 14, 21) if t - k >= 0 and np.isfinite(M[t - k])]
+        mref = float(np.median(prev)) if prev else np.nan
+        if n >= 3:
+            m = float(np.median(v[use]))
+        elif n == 2:
+            vv = v[use]
+            if np.isfinite(mref):
+                m = vv[np.argmin(np.abs(vv - mref))]
+            else:
+                m = float(np.mean(vv))
+        elif n == 1:
+            m = float(v[use][0])
+        else:
+            m = float(np.nanmedian(Y[t]))   # gauge for the very first day(s)
+        M[t] = m
+        A = abs(m - mref) if np.isfinite(mref) else 0.0
+        decide = n >= 2   # with a single source we cannot tell who is wrong
+        calm = A < ABNORMAL  # company-wide upheaval days do not move episodes
+
+        for s in range(S):
+            if not avail[s]:
+                continue
+            y = Y[t, s]
+            if not np.isfinite(L[s]) or not decide:
+                clean[t, s] = y - (delta[s] if mode[s] == 1 else 0.0)
+                flag[t, s] = mode[s] == 1
+                continue
+            yhat = m + L[s]
+            r = y - yhat
+            oth = use.copy()
+            oth[s] = False
+            m_loo = float(np.median(v[oth])) if oth.any() else m
+            r_loo = y - L[s] - m_loo
+            # one-day problems are judged and imputed against the other sources only (with few sources the median
+            # includes this one, and its own problem drags the reference); level changes use the full median
+            yhat_loo, z_loo = m_loo + L[s], r_loo / np.sqrt(sig[s] ** 2 + (HOLI_C * max(A - HOLI_A0, 0.0)) ** 2)
+            se = np.sqrt(sig[s] ** 2 + (HOLI_C * max(A - HOLI_A0, 0.0)) ** 2)
+            nhist[s] += 1
+            armed = nhist[s] > WARMUP
+            z = r / se
+            is_spike = max(abs(z), abs(z_loo)) > SPIKE_Z and max(abs(r), abs(r_loo)) > min_spike and (armed or abs(r) > 0.7)
+            if abs(z_loo) > abs(z):
+                yhat_spike = yhat_loo
+            else:
+                yhat_spike = yhat
+            entered = False
+
+            if mode[s] == 0:
+                if armed and calm:
+                    zc = np.clip(z, -Z_CLIP, Z_CLIP)
+                    sp[s] = max(0.0, sp[s] + zc - CUSUM_K)
+                    sn[s] = max(0.0, sn[s] - zc - CUSUM_K)
+                    if sp[s] == 0 and sn[s] == 0:
+                        run[s] = []
+                    else:
+                        run[s] = (run[s] + [r])[-EP_WIN:]
+                    if sp[s] > CUSUM_H or sn[s] > CUSUM_H:
+                        d = float(np.median(run[s]))
+                        room = 2 * ((mode[use] == 1).sum() + 1) <= n
+                        # a jump back to where the source sat a few months ago is a
+                        # recovery from a problem we missed, not a new problem
+                        recov = seen_before(lt[s], L[s], d)
+                        if recov:
+                            keep = list(lv[s])[-len(run[s]):] if run[s] else []
+                            lv[s].clear()
+                            lv[s].extend(keep)
+                        elif abs(d) > min_shift and room:
+                            mode[s] = 1
+                            delta[s] = d
+                            ep[s] = list(run[s])
+                            entered = True
+                        sp[s] = sn[s] = 0.0
+                        run[s] = []
+                if mode[s] == 0:
+                    if is_spike:
+                        clean[t, s] = yhat_spike
+                        flag[t, s] = True
+                    else:
+                        clean[t, s] = y
+                        innov[t, s] = r_loo
+                    zabs[t, s] = abs(z)
+                    continue
+
+            # ---- shift mode
+            if not calm:
+                # hold the current shift through upheaval days
+                u = r - delta[s]
+                off = abs(u) / se > SPIKE_Z and abs(u) > min_spike
+                clean[t, s] = yhat if off else y - delta[s]
+                flag[t, s] = True
+                zabs[t, s] = abs(delta[s]) / se
+                continue
+            if not entered:
+                ep[s].append(r)
+                recent = ep[s][-3:]
+                if len(ep[s]) > 6 and abs(np.median(recent) - delta[s]) > 2.5 * se:
+                    ep[s] = list(recent)              # level moved again: restart estimate
+                ep[s] = ep[s][-EP_WIN:]
+                delta[s] = float(np.median(ep[s]))
+            nep[s] += 1
+            last = ep[s][-min(EXIT_N, nep[s]):]
+            peak[s] = max(peak[s], abs(delta[s]))
+            back = nep[s] >= EXIT_N and abs(np.median(last)) < max(
+                EXIT_SIG * sig[s], 0.5 * min_shift, EXIT_PEAK * peak[s])
+            # an old episode whose raw level is one the source already held in the
+            # past year was the end of a problem we missed: re-anchor instead
+            stale = (nep[s] >= 28 and nep[s] % 7 == 0 and
+                     seen_before(lt[s], L[s], delta[s]))
+            if stale:
+                lv[s].clear()
+                lv[s].extend([L[s] + x for x in ep[s][-EXIT_N:]])
+            if back or stale or abs(delta[s]) < 0.5 * min_shift:
+                mode[s] = 0
+                delta[s] = 0.0
+                peak[s] = 0.0
+                nep[s] = 0
+                ep[s] = []
+                sp[s] = sn[s] = 0.0
+                run[s] = []
+                if is_spike:
+                    clean[t, s] = yhat_spike
+                    flag[t, s] = True
+                else:
+                    clean[t, s] = y
+                zabs[t, s] = abs(z)
+                continue
+            u = r - delta[s]
+            if abs(u) / se > SPIKE_Z and abs(u) > min_spike:
+                clean[t, s] = yhat                    # off the shifted level: use consensus
+                flag[t, s] = True
+                zabs[t, s] = abs(z)
+            else:
+                clean[t, s] = y - delta[s]
+                flag[t, s] = True
+                age[t, s] = nep[s]
+                innov[t, s] = r_loo - delta[s]
+                zabs[t, s] = abs(delta[s]) / se
+        if want is not None:
+            for s in np.where(want[t] & ~avail)[0]:
+                if decide and np.isfinite(L[s]):
+                    clean[t, s] = m + L[s]
+                elif np.isfinite(last_val[s]):
+                    clean[t, s] = last_val[s]            # no consensus: carry the last clean value
+                else:
+                    continue
+                flag[t, s] = True
+                zabs[t, s] = 10.0
+        for s in range(S):
+            if avail[s] and np.isfinite(clean[t, s]):
+                last_val[s] = clean[t, s]
+                lv[s].append(clean[t, s] - m)
+                lt[s].append(clean[t, s] - m)
+            if np.isfinite(innov[t, s]):
+                iv[s].append(innov[t, s])
+    return clean, flag, zabs, age
 
 
-def start_episode(c, j0, d, X, t, s, exp_old, state):
-    c.delta, c.ep_start, c.ep_res, c.peak = d, j0, [d], abs(d)
+def own_spikes(Lx, ok):
+    """One-day moves against the source's own history (point in time): the log value against the median of the same
+    weekday over the last 4 weeks, net of the trailing 28-day drift of that gap, in units of its own trailing robust
+    spread. Returns |z| per cell (0 where it cannot be judged) and the own-history expectation."""
+    T, S = Lx.shape
+    z = np.zeros((T, S))
+    expect = np.full((T, S), np.nan)
+    for s in range(S):
+        v = pd.Series(np.where(ok[:, s], Lx[:, s], np.nan))
+        wd = pd.Series(np.arange(T) % 7)
+        base = v.groupby(wd).transform(lambda x: x.shift(1).rolling(4, min_periods=2).median())
+        gap = v - base
+        drift = gap.rolling(28, min_periods=7).median().shift(1).fillna(0)
+        dev = gap - drift
+        spread = (1.4826 * (dev - dev.rolling(OWN_N, min_periods=20).median().shift(1)).abs()
+                  .rolling(OWN_N, min_periods=20).median().shift(1)).clip(lower=SIG_FLOOR)
+        z[:, s] = (dev.abs() / spread).fillna(0).to_numpy()
+        expect[:, s] = (base + drift).to_numpy()
+    return z, expect
 
 
-def score(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.copy()
-    df['date'] = pd.to_datetime(df['date'])
-    out = []
-    for tk, g in df.groupby('ticker'):
-        ct = g.pivot(index='date', columns='source_id', values='ct').astype(float)
-        amt = g.pivot(index='date', columns='source_id', values='amt').astype(float)
-        dates, srcs = ct.index, list(ct.columns)
-        med = ct.rolling(28, min_periods=14).median()        # needs two weeks of data to count
-        held = (med >= THIN_CT).astype(int).rolling(ESTABLISHED, min_periods=ESTABLISHED).sum() >= ESTABLISHED
-        established = held.cummax()                      # once established, always (point in time)
-        # a source's thin beginning is dropped; with hysteresis (start keeping at KEEP_CT, drop again under DROP_CT
-        # until established) so a median hovering at the line doesn't leave a patchy series
-        discard = np.zeros(ct.shape, bool)
-        for k, s in enumerate(srcs):
-            dropping = True
-            for i, (mv, est, has) in enumerate(zip(med[s].to_numpy(), established[s].to_numpy(), ct[s].notna().to_numpy())):
-                if est or (np.isfinite(mv) and mv >= KEEP_CT):
+def process_ticker(g):
+    dates = pd.date_range(g["date"].min(), g["date"].max(), freq="D")
+    T = len(dates)
+    srcs = sorted(g["source_id"].unique())
+    S = len(srcs)
+    sidx = {s: i for i, s in enumerate(srcs)}
+    di = ((g["date"] - dates[0]).dt.days).to_numpy()
+    si = g["source_id"].map(sidx).to_numpy()
+    CT = np.full((T, S), np.nan)
+    AMT = np.full((T, S), np.nan)
+    CT[di, si] = g["ct"].to_numpy(float)
+    AMT[di, si] = g["amt"].to_numpy(float)
+
+    # low-signal mask: trailing median of the last LOW_WIN reported counts
+    low = np.zeros((T, S), bool)
+    for s in range(S):
+        ok = np.isfinite(CT[:, s])
+        if ok.any():
+            med = pd.Series(CT[ok, s]).rolling(LOW_WIN, min_periods=14).median().to_numpy()
+            held = pd.Series((med >= LOW_CT).astype(int)).rolling(ESTABLISHED, min_periods=ESTABLISHED).sum().to_numpy() >= ESTABLISHED
+            est = np.maximum.accumulate(held)
+            dropping, lo = True, np.zeros(len(med), bool)
+            for i, (mv, e) in enumerate(zip(med, est)):
+                if e or (np.isfinite(mv) and mv >= KEEP_CT):
                     dropping = False
-                elif not est and np.isfinite(mv) and mv < DROP_CT:
+                elif np.isfinite(mv) and mv < DROP_CT:
                     dropping = True
-                discard[i, k] = dropping and has and not est
-        usable = ct.notna().to_numpy() & ~discard
-        lc = np.log(ct.clip(lower=0.01)).to_numpy()
-        lt = (np.log(amt.clip(lower=0.01)) - np.log(ct.clip(lower=0.01))).to_numpy()
-        sc, cc = walk_company(dates, lc, usable)
-        st, ctk = walk_company(dates, lt, usable)
-        for k, s in enumerate(srcs):
-            has = ct[s].notna().to_numpy()
-            conf = np.ones(len(dates))
-            conf[(sc[:, k] == 2) | (st[:, k] == 2)] = 0.3
-            conf[(sc[:, k] == 1) | (st[:, k] == 1)] = 0.05
-            conf[discard[:, k]] = 0.0
-            cct, camt = np.exp(cc[:, k]), np.exp(cc[:, k] + ctk[:, k])
-            cct[discard[:, k]] = np.nan
-            camt[discard[:, k]] = np.nan
-            o = pd.DataFrame(dict(date=dates, ticker=tk, source_id=s, confidence=conf, clean_ct=cct, clean_amt=camt))
-            out.append(o[has])
-    res = pd.concat(out, ignore_index=True)
-    res = df[['date', 'ticker', 'source_id']].merge(res, on=['date', 'ticker', 'source_id'], how='left')
-    res['confidence'] = res.confidence.fillna(1.0)
+                lo[i] = dropping and not e
+            low[ok, s] = lo
+        low[~ok, s] = True     # rows without a usable count
+
+    row = np.zeros((T, S), bool)
+    row[di, si] = True
+    ct_ok = np.isfinite(CT) & (CT > 0)
+    tk_ok = ct_ok & np.isfinite(AMT) & (AMT > 0)
+    with np.errstate(all="ignore"):
+        LY = np.where(ct_ok, np.log(CT), np.nan)
+        LK = np.where(tk_ok, np.log(AMT) - np.log(CT), np.nan)
+    keep = row & ~low
+    cy, fy, zy, ay = detect(LY, ct_ok & ~low, "ct", keep & ~ct_ok)
+    ck, fk, zk, ak = detect(LK, tk_ok & ~low, "tk", keep & ~tk_ok)
+    # one-day moves far outside the source's own history that also stand out against its peers: bad points
+    oz_y, ox_y = own_spikes(LY, ct_ok & ~low)
+    oz_k, ox_k = own_spikes(LK, tk_ok & ~low)
+    add_y = (oz_y > OWN_Z) & (zy > PEER_Z) & ~fy & np.isfinite(ox_y)
+    add_k = (oz_k > OWN_Z) & (zk > PEER_Z) & ~fk & np.isfinite(ox_k)
+    cy, fy = np.where(add_y, ox_y, cy), fy | add_y
+    ck, fk = np.where(add_k, ox_k, ck), fk | add_k
+    zy, zk = np.where(add_y, np.maximum(zy, SPIKE_Z + 0.5), zy), np.where(add_k, np.maximum(zk, SPIKE_Z + 0.5), zk)
+    # a level change is distrusted while it settles; after SETTLE days its new level is the source's normal
+    # (trusted, still rescaled in the cleaned series)
+    fy_c = fy & ~(ay >= SETTLE)
+    fk_c = fk & ~(ak >= SETTLE)
+
+    # count: raw unless repaired; ticket: raw unless repaired; amount = count x ticket
+    out_ct = np.where(fy, np.exp(cy), CT)
+    tk = np.where(fk, ck, LK)
+    with np.errstate(all="ignore"):
+        out_amt = np.where(fy | fk, out_ct * np.exp(tk), AMT)
+    blank = ~keep | ~np.isfinite(out_ct) | ~(out_ct > 0)
+    out_amt = np.where(np.isfinite(out_amt), out_amt, np.nan)
+
+    flag = fy_c | fk_c
+    z = np.maximum(np.where(fy_c, zy, 0), np.where(fk_c, zk, 0))
+    zall = np.maximum(zy, zk)
+    conf = np.where(flag, 0.45 - 0.4 * (1 - np.exp(-np.maximum(z - 3, 0) / 5)),
+                    0.5 + 0.5 * np.exp(-((zall / SPIKE_Z) ** 2) * 2))
+    conf = np.where(blank, 0.05, conf)
+    conf = np.where(~blank & ~np.isfinite(out_amt), np.minimum(conf, 0.3), conf)
+    out_ct = np.where(blank, np.nan, out_ct)
+    out_amt = np.where(blank, np.nan, out_amt)
+
+    res = pd.DataFrame({
+        "conf": conf[di, si],
+        "clean_ct": out_ct[di, si],
+        "clean_amt": out_amt[di, si],
+    }, index=g.index)
     return res
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--input', required=True)
-    ap.add_argument('--output', required=True)
+    ap.add_argument("--input", required=True)
+    ap.add_argument("--output", required=True)
     a = ap.parse_args()
-    res = score(pd.read_csv(a.input))
-    res['date'] = res.date.dt.strftime('%Y-%m-%d')
-    res.to_csv(a.output, index=False, float_format='%.6g')
+    df = pd.read_csv(a.input)
+    df["date"] = pd.to_datetime(df["date"])
+    df["ct"] = pd.to_numeric(df["ct"], errors="coerce")
+    df["amt"] = pd.to_numeric(df["amt"], errors="coerce")
+    df = df.reset_index(drop=True)
+    df["_row"] = np.arange(len(df))
+
+    conf = np.full(len(df), 0.05)
+    cct = np.full(len(df), np.nan)
+    camt = np.full(len(df), np.nan)
+
+    # duplicated (date, ticker, source) rows: keep the first for the model, distrust the rest
+    dup = df.duplicated(["date", "ticker", "source_id"], keep="first").to_numpy()
+    base = df[~dup]
+    for _, g in base.groupby("ticker", sort=False):
+        r = process_ticker(g)
+        idx = g["_row"].to_numpy()
+        conf[idx] = r["conf"].to_numpy()
+        cct[idx] = r["clean_ct"].to_numpy()
+        camt[idx] = r["clean_amt"].to_numpy()
+    if dup.any():
+        key = ["date", "ticker", "source_id"]
+        firsts = df[~dup].set_index(key)["_row"]
+        drow = df[dup]
+        m = firsts.reindex(pd.MultiIndex.from_frame(drow[key])).to_numpy()
+        cct[drow["_row"].to_numpy()] = cct[m]
+        camt[drow["_row"].to_numpy()] = camt[m]
+        conf[drow["_row"].to_numpy()] = np.minimum(conf[m], 0.3)
+
+    out = pd.DataFrame({
+        "date": df["date"].dt.strftime("%Y-%m-%d"),
+        "ticker": df["ticker"],
+        "source_id": df["source_id"],
+        "confidence": np.clip(np.round(conf, 4), 0, 1),
+        "clean_ct": cct,
+        "clean_amt": camt,
+    })
+    out.to_csv(a.output, index=False)
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    sys.exit(main())

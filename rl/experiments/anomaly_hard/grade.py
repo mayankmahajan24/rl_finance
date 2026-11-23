@@ -9,7 +9,8 @@ Gates (reward 0 if any fails): output format (one row per input row; confidence 
 blank or non-negative), the point-in-time check on all three columns, no model or network calls in the code, and a
 write-up (default SOLUTION_DIR/../output/writeup.md).
 
-Reward = W_CONF x confidence score + W_CLEAN x cleaned-series score + W_CONS x self-consistency score.
+Reward = W_CONF x confidence score + W_CLEAN x cleaned-series score x stability (2026-11-23: event F1, the
+consistency score's "fixed" and its separate weight were removed as restating other metrics; they are still reported).
   Scored rows: from eval_start, not on low-volume series, not near known natural artifacts. Thin stretches (the truth
   count's centred 28-day median under THIN_LO x thin_ct, after their first THIN_EDGE days) before the source is
   established (its median held at thin_ct or more for THIN_ESTABLISHED days) are untrustworthy and should be dropped;
@@ -22,7 +23,7 @@ Reward = W_CONF x confidence score + W_CLEAN x cleaned-series score + W_CONS x s
   the code decides whether the new level is the new normal; after that the new level is trusted (and the cleaned series
   should rescale it). When a temporary shift ends the data is right again: the next SETTLE_DAYS are not scored, and
   after that the source must be trusted.
-  Confidence score: 0.5 x row F1 + 0.5 x event F1 of the rows scored below 0.5 (distrusted).
+  Confidence score: row F1 of the rows scored below 0.5 (distrusted); event F1 is reported only.
     row F1:   row precision vs day recall (share of each event's labelled days distrusted, averaged within each kind,
               then over kinds)
     event F1: alert precision (runs of distrusted days on a series, gaps of up to ALERT_GAP days joined, that touch an
@@ -42,9 +43,9 @@ Reward = W_CONF x confidence score + W_CLEAN x cleaned-series score + W_CONS x s
           basis, as for a planted shift); errors within the source's own noise in that relation are not counted
     damage penalty: max(0, 1 - mean cleaned error on scored rows no problem changed / DAMAGE_TOL)
     history kept:   max(0, 1 - share of scored rows outside thin stretches left blank / BLANK_TOL)
-  Self-consistency score: score.py run again, once on its own cleaned series (rows it left blank dropped) and once on
-  the truth panel (genuinely clean data, its own baseline). fixed x (0.5 x no new alarms + 0.5 x idempotent):
-    fixed:         share of the planted untrustworthy scored rows that the first run distrusted and the run on the
+  Stability (multiplies the cleaned-series score): score.py run again, once on its own cleaned series (rows it left blank dropped) and once on
+  the truth panel (genuinely clean data, its own baseline). 0.5 x no new alarms + 0.5 x idempotent:
+    fixed (reported only): share of the planted untrustworthy scored rows that the first run distrusted and the run on the
                    cleaned series trusts (caught, and repaired so well the code no longer objects)
     no new alarms: max(0, 1 - excess / NEW_ALARM_TOL), excess = share of scored rows distrusted on the cleaned series
                    minus the share distrusted on the truth panel, floored at 0
@@ -84,7 +85,7 @@ THIN_LO, THIN_HI, THIN_EDGE = 0.8, 1.25, 14   # thin: truth count's 28-day media
 DAMAGE_TOL = 0.05
 BLANK_TOL = 0.05   # history-kept penalty: zero when this share of the rows that should be kept is blank
 NEW_ALARM_TOL = 0.01
-W_CONF, W_CLEAN, W_CONS = 0.4, 0.4, 0.2
+W_CONF, W_CLEAN = 0.5, 0.5   # confidence (row F1) and cleaned series (x stability)
 # imports or shell calls that reach a model or the network
 NO_AI = re.compile(r'\b(anthropic|openai|google\.generativeai|google\.genai|mistralai|cohere|ollama|litellm|langchain|'
                    r'transformers|requests|httpx|aiohttp|urllib\.request|urllib3|http\.client|socket|websocket|'
@@ -276,7 +277,7 @@ def confidence_score(ev, scored):
     w_all, w_true = alerts(e_, weighted=True)
     alert_prec = w_true / w_all if w_all else 0.0       # weighted by alert length (see alerts)
     row_f1, event_f1 = f1(prec, day_rec), f1(alert_prec, ev_rec)
-    return 0.5 * row_f1 + 0.5 * event_f1, dict(
+    return row_f1, dict(          # event F1 is reported, not scored (it restates row F1)
         precision=round(prec, 3), day_recall=round(day_rec, 3), row_f1=round(row_f1, 3), alerts=n_alerts,
         true_alerts=true_alerts, alert_precision=round(alert_prec, 3), event_recall=round(ev_rec, 3),
         event_f1=round(event_f1, 3), tp=tp, fp=fp, fn=fn, by_kind=by_kind.round(3).reset_index().to_dict('records'),
@@ -429,14 +430,14 @@ def score(truth: dict, data: pd.DataFrame, clean_truth: pd.DataFrame, sol: pathl
     conf, conf_d = confidence_score(ev, scored)
     cln, cln_d = clean_score(truth, ev, stretches, ref)
     cons, cons_d = consistency_score(truth, sol, data, clean_truth, full, ev, stretches, c_)
-    reward = (W_CONF * conf + W_CLEAN * cln + W_CONS * cons) * all(gates.values())
+    reward = (W_CONF * conf + W_CLEAN * cln * cons) * all(gates.values())
     # unknowns: distrusted rows on real data nobody has judged. The reward counts them as false alarms (strict);
     # the lenient reward leaves them unscored. The gap is how much the score still rests on missing labels.
     unknown = ev.use & ev.flag & ~ev.label & ~known_rows(truth, ev)
     lev = ev.copy()
     lev.loc[unknown, 'use'] = False
     lconf, _ = confidence_score(lev, [(e, m) for e, m in scored])
-    lreward = (W_CONF * lconf + W_CLEAN * cln + W_CONS * cons) * all(gates.values())
+    lreward = (W_CONF * lconf + W_CLEAN * cln * cons) * all(gates.values())
     return reward, dict(gates=gates, ai_hits=hits, changed_on_truncation=leaks, rows_scored=int(ev.use.sum()),
                         reward_lenient=round(lreward, 3), unknown_flagged_rows=int(unknown.sum()),
                         unknown_alerts=alerts(ev[unknown].assign(label=True))[0] if unknown.any() else 0,
@@ -479,7 +480,7 @@ def consistency_score(truth, sol, data, clean_truth, full, ev, stretches, c_):
     change = 0.5 * ((lg(c2ct) - lg(c1ct)).abs() + (lg(c2amt) - lg(c1amt)).abs())
     moved = float(change[sc].mean()) if sc.any() else 0.0
     idem = max(0.0, 1 - moved / DAMAGE_TOL)
-    return fixed * (0.5 * no_new + 0.5 * idem), dict(
+    return 0.5 * no_new + 0.5 * idem, dict(       # stability; 'fixed' is reported, not scored
         fixed=round(fixed, 3), planted_bad_rows=int(bad.sum()), distrusted_share_cleaned=round(rate_c, 4),
         distrusted_share_truth=round(rate_t, 4), no_new_alarms=round(no_new, 3), recleaning_change=round(moved, 4),
         idempotent=round(idem, 3))

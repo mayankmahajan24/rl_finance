@@ -483,7 +483,14 @@ def score(truth: dict, data: pd.DataFrame, clean_truth: pd.DataFrame, sol: pathl
     gates['low_signal_dropped'] = low_share >= LOW_SIGNAL_SHARE
     reward = (W_CONF * conf + W_CLEAN * cln * cons) * all(gates.values())
     unknown = ev.use & ev.flag & ~ev.label & ~known_rows(truth, ev)   # distrusted real data nobody has judged
+    # reported, not scored: the reward if distrusted rows on real data nobody has judged were left unscored
+    lev = ev.copy()
+    lev.loc[unknown, 'use'] = False
+    lconf, lconf_d = confidence_score(lev, scored)
+    lreward = (W_CONF * lconf + W_CLEAN * cln * cons) * all(gates.values())
     return reward, dict(gates=gates, ai_hits=hits, changed_on_truncation=leaks, rows_scored=int(ev.use.sum()),
+                        reward_unjudged_unscored=round(lreward, 3), confidence_unjudged_unscored=round(lconf, 3),
+                        alert_precision_unjudged_unscored=lconf_d.get('alert_precision'),
                         low_signal=dict(rows=int(th.sum()), dropped_share=round(low_share, 3)),
                         unknown_flagged_rows=int(unknown.sum()), confidence_score=round(conf, 3),
                         clean_score=round(cln, 3), stability=round(cons, 3), confidence=conf_d, clean=cln_d,

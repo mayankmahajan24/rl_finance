@@ -14,6 +14,8 @@ repaired where it needs repair.
 
 {copy_note}
 
+{companies}
+
 ## What to deliver
 
 1. **`/app/solution/score.py`**, runnable as

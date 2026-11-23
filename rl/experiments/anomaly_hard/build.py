@@ -199,6 +199,33 @@ def quirk_event(df, it, d1):
                 note=f"{it.get('note', 'known source quirk')}: {name} {sh:+.2f} against peers")
 
 
+# the disguise, as this task describes it: the companies are named (feedback #28); codes, sources, dates and levels
+# stay disguised, and the panel the code is graded on has its own codes
+COPY_NOTE = """This copy of the panel is disguised. Each ticker is a code for a company named in the table below; the codes
+and source ids are different in the panel your code is graded on, so the code must not depend on them. Source ids
+are shuffled. Dates are shifted by a whole multiple of 364 days, so weekdays line up but holidays can sit a few days
+off their usual dates. Each ticker-source series has its `ct` and `amt` multiplied by its own hidden factor between
+0.3 and 3, so levels are not comparable across series. Growth within a series and average ticket size (`amt` / `ct`)
+are real."""
+BRANDS = {'M_M': "Macy's stores", 'M_BL': "Bloomingdale's", 'JWN_JWN': 'Nordstrom full-line stores',
+          'JWN_RACK': 'Nordstrom Rack', 'ROST_ROST': 'Ross Dress for Less', 'ROST_DD': "dd's DISCOUNTS",
+          'TJX_TJMAXX': 'T.J. Maxx and Marshalls'}
+
+
+def companies_table(shown: pd.DataFrame, mapping: dict) -> str:
+    """The companies behind this task's visible ticker codes (entities.yaml), as a markdown table."""
+    ent = yaml.safe_load((RL / 'sources' / 'txn_panel' / 'annotations' / 'entities.yaml').read_text())['companies']
+    by_sensor = {x: (tk, e) for tk, e in ent.items() for x in e['sensors']}
+    codes = mapping['tickers']
+    rows = ['| code | company | ticker | business |', '|---|---|---|---|']
+    for sensor, code in sorted(codes.items(), key=lambda kv: kv[1]):
+        if code not in set(shown.ticker):
+            continue
+        tk, e = by_sensor[sensor]
+        rows.append(f"| {code} | {e['name']}{' (' + BRANDS[sensor] + ')' if sensor in BRANDS else ''} | {tk} | {e['industry']} |")
+    return '\n'.join(rows)
+
+
 def recurring_first(F, t, s, r, slack=3):
     """The first year a reviewed recurring pattern's calendar window (same month and day, +-slack days) falls inside the
     source's data, in task coordinates, or None."""
@@ -233,12 +260,12 @@ def main():
     out = OUT if a.split == 'bench' else OUT.with_name(f'anomaly_hard_{a.split}')
     base, cbase, pre = (300000, 390000, 'anomhard') if a.split == 'bench' else (320000, 392000, f'anomhard-{a.split}')
     tmpl = (HERE / 'instruction.md').read_text()
-    text = tmpl.format(firm=build_panel.FIRM, schema=build_panel.SCHEMA, copy_note=build_panel.COPY_NOTE)
+    text = tmpl.format(firm=build_panel.FIRM, schema=build_panel.SCHEMA, copy_note=COPY_NOTE, companies='{companies}')
     shutil.rmtree(out, ignore_errors=True)
     jobs = [(base + i, False, f'{pre}-{i:03d}') for i in range(1, a.n + 1)] + \
            [(cbase + i, True, f'{pre}-control-{i:02d}') for i in range(1, a.controls + 1)]
     for seed, control, tid in jobs:
-        shown, _, _, _ = plant(np.random.default_rng(seed), control, ctx)
+        shown, _, shown_map, _ = plant(np.random.default_rng(seed), control, ctx)
         hidden, truth, mapping, clean = plant(np.random.default_rng([seed, 1]), control, ctx)
         d = out / tid
         (d / 'environment' / 'data').mkdir(parents=True)
@@ -249,7 +276,7 @@ def main():
         (d / 'tests' / 'truth_panel.csv.gz').write_bytes(gzip.compress(
             clean.to_csv(index=False, date_format='%Y-%m-%d').encode(), mtime=0))
         (d / 'tests' / 'gold.json').write_text(json.dumps(dict(truth, seed=seed), indent=1))
-        (d / 'instruction.md').write_text(text)
+        (d / 'instruction.md').write_text(text.replace('{companies}', companies_table(shown, shown_map)))
         # the hidden panel's disguise (original -> task coordinates), outside tests/ and environment/: for turning
         # review verdicts on this task's flags back into original coordinates
         (d / 'mapping.json').write_text(json.dumps(mapping, indent=1))

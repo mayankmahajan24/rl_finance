@@ -2,7 +2,8 @@
     python grade.py TASK_DIR SOLUTION_DIR [--writeup PATH] [--json OUT] [--cache DIR]
 
 Runs SOLUTION_DIR/score.py on the task's hidden panel, truncated at the gold's cutoffs (earliest first) and then
-whole, each run in its own empty folder with the network off (no proxy, minimal environment). A prototype: unlike
+whole, each run in its own empty folder with the network off (its own network namespace where the machine allows it,
+and no proxy settings, minimal environment). A prototype: unlike
 the Harbor verifier it does not sandbox the scorer as another user, so only grade code copied out of its run folder.
 
 Gates (reward 0 if any fails): output format (one row per input row; confidence in [0, 1]; clean_ct and clean_amt
@@ -99,6 +100,19 @@ class GateError(Exception):
     pass
 
 
+def _offline_prefix() -> list[str]:
+    """The scorer runs in a network namespace of its own (no interfaces: nothing reachable, proxy or not) where the
+    machine allows it; elsewhere it still gets an environment with no proxy settings."""
+    try:
+        ok = subprocess.run(['unshare', '-n', '--', 'true'], capture_output=True, timeout=10).returncode == 0
+    except (OSError, subprocess.SubprocessError):
+        ok = False
+    return ['unshare', '-n', '--'] if ok else []
+
+
+OFFLINE = _offline_prefix()
+
+
 def run(script: pathlib.Path, panel: pd.DataFrame, cache: pathlib.Path | None = None) -> pd.DataFrame:
     if cache and cache.exists():
         return pd.read_csv(cache, parse_dates=['date'])
@@ -107,8 +121,8 @@ def run(script: pathlib.Path, panel: pd.DataFrame, cache: pathlib.Path | None = 
         panel.to_csv(work / 'in.csv', index=False, date_format='%Y-%m-%d')
         env = {'PATH': os.environ['PATH'], 'HOME': str(work)}            # no proxy settings: no network
         env.update({k: v for k, v in os.environ.items() if k == 'ORACLE_TASK'})   # the grader-check oracle only
-        r = subprocess.run([sys.executable, str(script), '--input', str(work / 'in.csv'), '--output',
-                            str(work / 'out.csv')], cwd=work, capture_output=True, text=True, timeout=1200, env=env)
+        cmd = [sys.executable, str(script), '--input', str(work / 'in.csv'), '--output', str(work / 'out.csv')]
+        r = subprocess.run(OFFLINE + cmd, cwd=work, capture_output=True, text=True, timeout=1200, env=env)
         if r.returncode:
             raise GateError(f'score.py failed: {r.stderr[-1500:]}')
         s = pd.read_csv(work / 'out.csv', parse_dates=['date'])

@@ -271,3 +271,7 @@ anything smaller is normal data; excluded only without two usable peers. Company
 Feedback #27: scoring starts after one year of warm-up (was 545 days). The airline source-1 ramp is a lasting change
 to rescale; its window is widened here to 2014-12-01..2017-06-30 (data_audit review G4) so the measured change
 (+0.9 to +1.5 against peers) and onset match the data.
+
+Feedback #28: the instruction names the companies behind the visible codes (no pattern notes). Airgapped: score.py
+runs in its own network namespace in the grader; Opus task runs (`runner/run.sh`) have web tools disabled and every
+shell command in its own network namespace (`runner/offline.sh`).

@@ -193,3 +193,16 @@ dropped only before a source is established (median at 20 or more for 90 days ru
 that thins later is kept (cleaned series scored, confidence not).
 Re-graded after #23 (oracle 1.0, naive 0.0 on all five): Opus runs strict mean 0.583, 0.490, 0.504, 0.560 (overall
 0.53), controls 0.47-0.68; reference 0.469, control 0.579.
+
+## Ceiling: the best a point-in-time scorer could plausibly do (2026-11-23)
+
+`solutions/ceiling` reads the gold like the oracle but acts only as an excellent past-only detector could: a row is
+judged by its deviation from what it should read, in units of the source's own noise against its peers; one-day
+problems are caught on the day only above 3 sigma; level changes once their trailing 3-day median passes 2 sigma
+(ramps late), then rescaled; a temporary shift's end is missed for 3 days; imputed values carry the source's own noise
+(`solutions/ceiling_ideal`: exact imputation). Strict reward on the planted tasks: 0.751, 0.720, 0.765, 0.812 (mean
+0.76), control 0.806; ideal 0.828, 0.783, 0.830, 0.876 (mean 0.83), control 0.829.
+
+So the reachable range is about 0.76-0.83, not 1.0: Opus (0.53) is at about 70% of it and the reference (0.47) at 62%.
+What still caps the ceiling: event F1's alert precision (every short false alert counts as much as a true one), the
+consistency score's "fixed" (a missed problem also fails "fixed", so misses count twice), and ramps caught late.

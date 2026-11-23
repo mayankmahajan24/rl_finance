@@ -26,9 +26,11 @@ Reward = W_CONF x confidence + W_CLEAN x cleaned series x stability.
   known source quirk measured in the data) is untrustworthy for its first CHANGE_DAYS days from when it became visible, then not scored up to SETTLE_DAYS from its start (or its settle date) while the code decides whether the new
   level is the new normal; after that the new level is trusted (and the cleaned series should rescale it). When a
   temporary change ends, the next SETTLE_DAYS are not scored, and after that the source must be trusted.
-  Confidence: row F1 of the rows scored below 0.5 (distrusted): row precision vs day recall (share of each problem's
-    untrustworthy days distrusted, averaged within each kind, then over kinds; the planted one-day problems are one
-    kind). A panel with no untrustworthy rows: the share of scored rows trusted.
+  Confidence: F1 of alert precision (alerts: runs of distrusted scored days on a source, gaps of up to ALERT_GAP days
+    joined; precision: the share that touch an untrustworthy row) and recall (the share of problems caught: any of a
+    problem's untrustworthy days distrusted, averaged within each kind, then over kinds; the planted one-day problems
+    are one kind). Row precision and day recall are reported, not scored. A panel with no untrustworthy rows: the
+    share of scored rows trusted.
   Cleaned series: gain x intact x kept, against the truth panel (the hidden panel before the problems were planted;
     real events kept). Error = mean over count and dollars of |log value - log truth|; a blank cleaned value counts as
     the raw value.
@@ -70,7 +72,7 @@ import pandas as pd
 KEYS = ['date', 'ticker', 'source_id']
 OUT_COLS = ['confidence', 'clean_ct', 'clean_amt']
 CHANGE_DAYS, SETTLE_DAYS = 14, 45
-ALERT_GAP = 2            # days of trust that still join two distrusted runs into one (for known_rows)
+ALERT_GAP = 2            # days of trust that still join two distrusted runs into one alert
 ONE_DAY = {'volume_spike', 'dropout', 'count_flood', 'dollar_spike'}   # planted one-day problems: one kind
 REAL_TYPES = {'real', 'real_change'}   # problems in the source data (reviewed or known quirks): cleaned against hindsight_ref
 REF_DAYS = 56
@@ -283,12 +285,20 @@ def confidence_score(ev, scored):
                           delay_days=int((days.min() - pd.Timestamp(e['start'])).days) if len(days) else None))
     t = pd.DataFrame(table)
     t['day_recall'] = t.distrusted_days / t.days.clip(lower=1)
-    by_kind = t.groupby('kind').agg(events=('day_recall', 'size'), days=('days', 'sum'),
+    t['caught'] = (t.distrusted_days > 0).astype(float)
+    by_kind = t.groupby('kind').agg(events=('caught', 'size'), caught=('caught', 'mean'), days=('days', 'sum'),
                                     distrusted_days=('distrusted_days', 'sum'), day_recall=('day_recall', 'mean'))
+    # scored per problem and per alert (feedback #35): recall = share of problems caught (averaged within each kind,
+    # then over kinds); precision = share of alerts (runs of distrusted days on a source) that touch a problem
+    recall = float(by_kind.caught.mean())
+    n_alerts, true_alerts = alerts(e_)
+    alert_prec = true_alerts / n_alerts if n_alerts else 0.0
+    score = f1(alert_prec, recall)
     day_rec = float(by_kind.day_recall.mean())
-    row_f1 = f1(prec, day_rec)
-    return row_f1, dict(precision=round(prec, 3), day_recall=round(day_rec, 3), row_f1=round(row_f1, 3), tp=tp,
-                        fp=fp, fn=fn, by_kind=by_kind.round(3).reset_index().to_dict('records'), events=table)
+    return score, dict(alert_precision=round(alert_prec, 3), recall=round(recall, 3), alerts=n_alerts,
+                       true_alerts=true_alerts, row_precision=round(prec, 3), day_recall=round(day_rec, 3),
+                       row_f1=round(f1(prec, day_rec), 3), tp=tp, fp=fp, fn=fn,
+                       by_kind=by_kind.round(3).reset_index().to_dict('records'), events=table)
 
 
 def own_noise(truth_panel: pd.DataFrame) -> pd.DataFrame:
@@ -522,6 +532,17 @@ def known_rows(truth: dict, ev: pd.DataFrame) -> pd.Series:
             if (k[r.index] | ev.label[r.index]).any():
                 k[r.index] = True
     return k
+
+
+def alerts(e_: pd.DataFrame) -> tuple[int, int]:
+    """Runs of distrusted scored days on a source (gaps of up to ALERT_GAP days joined), and how many touch an
+    untrustworthy row."""
+    n = hit = 0
+    for _, g in e_[e_.flag].sort_values('date').groupby(['ticker', 'source_id']):
+        run_id = (g.date.diff().dt.days.fillna(999) > ALERT_GAP + 1).cumsum()
+        runs = g.groupby(run_id).label.any()
+        n += len(runs); hit += int(runs.sum())
+    return n, hit
 
 
 def main():

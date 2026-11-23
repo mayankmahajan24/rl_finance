@@ -38,6 +38,8 @@ opening an episode; an episode closes when the source is back near its old basis
 11. The recurring rule applies to the own-history check too (a closure on the same date each year is left alone).
 12. A peer that is itself far off on a day (beyond the one-day bar from the company median) is left out of that day's
     company move, so one source's problem does not get its sister sources flagged.
+13. The level baseline leaves out the most recent 14 observations, so a ramp over weeks cannot drag it along (the
+    drift detector then sees the whole move).
 Tried and dropped (no consistent gain across tasks): a lagged level baseline for ramps; leave-one-out offsets inside
 episodes; leave-one-out everywhere (noisier drift detection, more false episodes).
 

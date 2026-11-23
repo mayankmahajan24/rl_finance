@@ -33,6 +33,7 @@ LONG_NOW, LONG_LO, LONG_HI = 28, 180, 365   # slow drift: last 28 observations a
 LONG_K = 3.0           # ... at least this many times the source's own noise, on two weekly checks running
 WANDER_K = 3.0         # a level change must also be this many times the source's usual month-to-month wander
 YOUNG_DAYS = 120       # days after a source is first kept before it helps set the company's move
+LAG = 14               # most recent observations left out of the level baseline
 SETTLE = 14            # days after a level change is detected before its new level is trusted
 BASE_N = 42            # observations in a source's level baseline
 SCALE_N = 120          # observations in a source's noise scale
@@ -157,7 +158,9 @@ def detect(Y, valid, channel, want=None):
                     flag[t, s] = True
                     zabs[t, s] = 10.0
             continue
-        L = np.array([np.median(lv[j]) if lv[j] else np.nan for j in range(S)])
+        # the source's level from its history LAG observations back and earlier: a ramp cannot drag it along
+        L = np.array([np.median(list(lv[j])[:-LAG]) if len(lv[j]) > LAG + 7 else (np.median(lv[j]) if lv[j] else np.nan)
+                      for j in range(S)])
         sig = np.full(S, 0.3)
         for j in range(S):
             if len(iv[j]) >= 10:

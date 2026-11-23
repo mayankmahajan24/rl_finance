@@ -100,11 +100,13 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
                     hi = lo + pd.Timedelta(days=3)
                 elif f == 'slow':
                     lo, hi = day(0.3, 0.6), d1
-                    if free((t, s), lo, hi):
+                    # one level change at a time per company, so every change can be told from its peers
+                    if free((t, s), lo, hi) and free(('chg', t), lo, lo + pd.Timedelta(days=330)):
                         ev = background.slow_ramp(F, rng, t, s, lo, d1)
                         if ev:
                             events += ev
                             busy.append(((t, s), lo, hi))
+                            busy.append((('chg', t), lo, d1))     # a lasting change: the company's only one from here on
                             break
                     continue
                 else:
@@ -114,10 +116,15 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
                     hi = d1 if permanent else lo + pd.Timedelta(days=length + 45)
                 if not free((t, s), lo, hi) or not free(t, lo, lo + pd.Timedelta(days=3)):
                     continue
+                if not callable(f) and not free(('chg', t), lo, lo + pd.Timedelta(days=90)):
+                    continue                     # one level change at a time per company
                 ev = f(F, t, s, lo) if callable(f) else P.level_shift(F, t, s, lo, f, length, d1)
                 if ev:
                     events += ev
                     busy.append(((t, s), lo, hi))
+                    if not callable(f):
+                        # a lasting change holds the company to the end; a temporary one until it is over
+                        busy.append((('chg', t), lo, d1 if length is None else lo + pd.Timedelta(days=length + 45)))
                     break
     # a series reviewed end to end, or with a reviewed level change, is judged by the review, not by the shared
     # panel's list of known source artifacts (which would leave it unscored from the artifact to the panel end)

@@ -28,10 +28,13 @@ LOW_WIN = 28           # reports in the low-signal trailing median
 ESTABLISHED = 90       # a source is established once that median has held LOW_CT this many reports running
 KEEP_CT, DROP_CT = 25.0, 16.0   # before then: keep from KEEP_CT, drop again under DROP_CT (hysteresis)
 OWN_Z, PEER_Z, OWN_N = 5.0, 2.5, 120   # own-history spike check: beyond OWN_Z of its own spread, and PEER_Z vs peers
+RECUR_SLACK = 3        # days of slack when matching the same dates a year earlier
+LONG_NOW, LONG_LO, LONG_HI = 28, 180, 365   # slow drift: last 28 observations against those 180-365 back
+LONG_K = 3.0           # ... at least this many times the source's own noise, on two weekly checks running
 SETTLE = 25            # days after a level change is detected before its new level is trusted
 BASE_N = 42            # observations in a source's level baseline
 SCALE_N = 120          # observations in a source's noise scale
-SPIKE_Z = 4.5          # single-day outlier threshold (robust z)
+SPIKE_Z = 5.5          # single-day outlier threshold (robust z)
 CUSUM_K = 1.0          # CUSUM allowance (in sigmas)
 CUSUM_H = 7.0          # CUSUM decision interval
 Z_CLIP = 4.0           # clip z before feeding CUSUM
@@ -61,6 +64,38 @@ def seen_before(hist, level, d):
     return False
 
 
+def recurs(zs, t, z):
+    """Did this source move the same way (beyond half the spike threshold) within RECUR_SLACK days of the same date a
+    year or two earlier?"""
+    for yrs in (1, 2):
+        c = t - 364 * yrs
+        if c - RECUR_SLACK < 0:
+            continue
+        w = zs[c - RECUR_SLACK:c + RECUR_SLACK + 1]
+        if np.any((np.sign(w) == np.sign(z)) & (np.abs(w) > SPIKE_Z / 2)):
+            return True
+    return False
+
+
+def moved_alone(Y, t, s, d):
+    """The source moved by d against most of its peers one by one (all of them when it has two or fewer): its relation to
+    each peer now (last LONG_NOW days) against 6-12 months ago."""
+    votes = []
+    for p in range(Y.shape[1]):
+        if p == s:
+            continue
+        rel = Y[:t + 1, s] - Y[:t + 1, p]
+        now, then = rel[-LONG_NOW:], rel[-LONG_HI:-LONG_LO]
+        now, then = now[np.isfinite(now)], then[np.isfinite(then)]
+        if len(now) >= 14 and len(then) >= 60:
+            sh = float(np.median(now) - np.median(then))
+            votes.append(np.sign(sh) == np.sign(d) and abs(sh) >= abs(d) / 2)
+    if not votes:
+        return False
+    need = len(votes) if len(votes) <= 2 else int(np.ceil(2 * len(votes) / 3))
+    return sum(votes) >= need
+
+
 def detect(Y, valid, channel, want=None):
     """Causal detector on a (T days x S sources) log matrix.
 
@@ -79,6 +114,9 @@ def detect(Y, valid, channel, want=None):
     flag = np.zeros((T, S), bool)
     age = np.full((T, S), -1)          # days since the current level-change episode opened (-1: none)
     zabs = np.zeros((T, S))
+    zsig = np.zeros((T, S))
+    long_prev = np.zeros(S)            # last weekly slow-drift reading that passed the bar (0: none)
+    long_open = np.zeros(S, bool)      # current episode was opened by the slow-drift check            # signed residual (noise units) on judged days, for the recurring test
     mode = np.zeros(S, int)            # 0 normal, 1 shift
     delta = np.zeros(S)
     peak = np.zeros(S)
@@ -149,6 +187,8 @@ def detect(Y, valid, channel, want=None):
         for s in range(S):
             if not avail[s]:
                 continue
+            if mode[s] == 0:
+                long_open[s] = False
             y = Y[t, s]
             if not np.isfinite(L[s]) or not decide:
                 clean[t, s] = y - (delta[s] if mode[s] == 1 else 0.0)
@@ -169,9 +209,15 @@ def detect(Y, valid, channel, want=None):
             z = r / se
             is_spike = max(abs(z), abs(z_loo)) > SPIKE_Z and max(abs(r), abs(r_loo)) > min_spike and (armed or abs(r) > 0.7)
             if abs(z_loo) > abs(z):
-                yhat_spike = yhat_loo
+                yhat_spike, zz = yhat_loo, z_loo
             else:
-                yhat_spike = yhat
+                yhat_spike, zz = yhat, z
+            if armed:
+                zsig[t, s] = zz
+            # recurring: the same source moved the same way on the same dates a year (or two) earlier: a pattern of
+            # this source, not a problem (trusted, kept as reported)
+            if is_spike and recurs(zsig[:, s], t, zz):
+                is_spike = False
             entered = False
 
             if mode[s] == 0:
@@ -183,6 +229,28 @@ def detect(Y, valid, channel, want=None):
                         run[s] = []
                     else:
                         run[s] = (run[s] + [r])[-EP_WIN:]
+                    # slow drift: the source's relation to the company now against 6-12 months ago, which a ramp
+                    # over months cannot drag along (the CUSUM's baseline follows it)
+                    if (not entered and t % 7 == 0 and len(lt[s]) >= LONG_HI and sp[s] <= CUSUM_H
+                            and sn[s] <= CUSUM_H):
+                        h = np.fromiter(lt[s], float)
+                        d = float(np.median(h[-LONG_NOW:]) - np.median(h[-LONG_HI:-LONG_LO]))
+                        room = 2 * ((mode[use] == 1).sum() + 1) <= n
+                        big = abs(d) >= LONG_K * sig[s] and abs(d) > min_shift
+                        same = big and np.sign(d) == np.sign(long_prev[s])
+                        long_prev[s] = d if big else 0.0
+                        if same and room and moved_alone(Y, t, s, d):
+                            # its onset is long past: rescaled to the old basis from now on, trusted (not distrusted)
+                            long_open[s] = True
+                            mode[s] = 1
+                            delta[s] = d
+                            ep[s] = [d]
+                            entered = True
+                            base = [x - d for x in lv[s]]       # the baseline back on the old basis
+                            lv[s].clear()
+                            lv[s].extend(base)
+                            sp[s] = sn[s] = 0.0
+                            run[s] = []
                     if sp[s] > CUSUM_H or sn[s] > CUSUM_H:
                         d = float(np.median(run[s]))
                         room = 2 * ((mode[use] == 1).sum() + 1) <= n
@@ -198,6 +266,13 @@ def detect(Y, valid, channel, want=None):
                             delta[s] = d
                             ep[s] = list(run[s])
                             entered = True
+                            # part of a slow build-up (the source had already moved a third of the way, the same way,
+                            # 45-90 days ago): rescale it, but there is no fresh onset to distrust
+                            h = np.fromiter(lt[s], float)
+                            if len(h) >= 120:
+                                early = float(np.median(h[-90:-45]) - np.median(h[-120:-90]))
+                                if np.sign(early) == np.sign(d) and abs(early) >= abs(d) / 3:
+                                    long_open[s] = True
                         sp[s] = sn[s] = 0.0
                         run[s] = []
                 if mode[s] == 0:
@@ -261,7 +336,7 @@ def detect(Y, valid, channel, want=None):
             else:
                 clean[t, s] = y - delta[s]
                 flag[t, s] = True
-                age[t, s] = nep[s]
+                age[t, s] = SETTLE if long_open[s] else nep[s]
                 innov[t, s] = r_loo - delta[s]
                 zabs[t, s] = abs(delta[s]) / se
         if want is not None:

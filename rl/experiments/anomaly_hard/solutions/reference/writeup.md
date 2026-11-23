@@ -23,6 +23,13 @@ opening an episode; an episode closes when the source is back near its old basis
    against peers.
 4. One-day problems are judged and imputed against the other sources only (leave one out): with three usable sources
    the median includes the source itself and halves its own spike.
+5. Recurring patterns: a one-day outlier where the same source moved the same way within 3 days of the same date a
+   year or two earlier is trusted and kept (the reviewer's rule).
+6. Slow drift: weekly, the source's relation to the company over the last 28 observations against 180-365 back; if it
+   moved at least 3x its own noise on two checks running, and against most of its peers one by one, it is rescaled to
+   the old basis but not distrusted (its onset is long past). A CUSUM episode that is part of a slow build-up (the
+   source had already moved a third of the way, the same way, 45-90 days earlier) is likewise rescaled, not distrusted.
+7. One-day bar 5.5x the source's noise (planted one-day problems are at least 6x).
 Tried and dropped (no consistent gain across tasks): a lagged level baseline for ramps; leave-one-out offsets inside
 episodes; leave-one-out everywhere (noisier drift detection, more false episodes).
 

@@ -46,8 +46,9 @@ Reward = W_CONF x confidence + W_CLEAN x cleaned series x stability.
     kept:   share of the scored rows that should be kept (all but thin beginnings) not left blank
   Stability (multiplies the cleaned series): score.py run again on its own cleaned series (rows it left blank dropped)
     and on the truth panel (genuinely clean data, its own baseline): 1 - (rows distrusted on its cleaned series beyond
-    those distrusted on the truth panel) / (the task's untrustworthy rows), floored at 0: new alarms measured against
-    the size of what is actually wrong. If the run fails, 0.
+    those distrusted on the truth panel) / (the rows of the task's scored problems, in confidence or in the cleaned
+    series, whichever is more), floored at 0: new alarms measured against the size of what is actually wrong. If the
+    run fails, 0.
   Reported, not scored: distrusted rows on real data nobody has judged (unknown_flagged_rows).
   The write-up's quality is judged separately (not in this reward).
 """
@@ -463,7 +464,8 @@ def score(truth: dict, data: pd.DataFrame, clean_truth: pd.DataFrame, sol: pathl
     scored = label_rows(truth, ev, clean_truth)
     conf, conf_d = confidence_score(ev, scored)
     cln, cln_d = clean_score(truth, ev, stretches, ref)
-    cons, cons_d = consistency_score(sol, data, clean_truth, full, ev, stretches, c_)
+    problem_rows = max(int((ev.use & ev.label).sum()), sum(x['rows'] for x in cln_d.get('events', [])))
+    cons, cons_d = consistency_score(sol, data, clean_truth, full, ev, stretches, c_, problem_rows)
     # low signal dropped: a source's thin beginning distrusted and left blank
     th = ev.thin
     dropped = (th & ev.flag & ev.clean_ct.isna() & ev.clean_amt.isna())
@@ -478,7 +480,7 @@ def score(truth: dict, data: pd.DataFrame, clean_truth: pd.DataFrame, sol: pathl
                         consistency=cons_d)
 
 
-def consistency_score(sol, data, clean_truth, full, ev, stretches, c_):
+def consistency_score(sol, data, clean_truth, full, ev, stretches, c_, problem_rows):
     """Stability: run the code on its own cleaned series and on the truth panel; see the module docstring."""
     cleaned = data.drop(columns=['ct', 'amt']).merge(
         full[KEYS + ['clean_ct', 'clean_amt']].rename(columns={'clean_ct': 'ct', 'clean_amt': 'amt'}), on=KEYS)
@@ -494,7 +496,7 @@ def consistency_score(sol, data, clean_truth, full, ev, stretches, c_):
     sc = stretches.to_numpy() & k.confidence2.notna().to_numpy()
     n_c = int((k.confidence2[sc] < 0.5).sum())
     n_t = int((k.confidence_t[sc] < 0.5).sum())
-    n_bad = max(1, int((ev.use & ev.label).sum()))      # the task's untrustworthy rows: the scale of what is wrong
+    n_bad = max(1, problem_rows)      # the scale of what is wrong: rows of scored problems, in either score
     return max(0.0, 1 - max(0, n_c - n_t) / n_bad), dict(distrusted_rows_cleaned=n_c, distrusted_rows_truth=n_t,
                                                          untrustworthy_rows=n_bad, rows=int(sc.sum()))
 

@@ -32,6 +32,7 @@ RECUR_SLACK = 3        # days of slack when matching the same dates a year earli
 LONG_NOW, LONG_LO, LONG_HI = 28, 180, 365   # slow drift: last 28 observations against those 180-365 back
 LONG_K = 3.0           # ... at least this many times the source's own noise, on two weekly checks running
 WANDER_K = 3.0         # a level change must also be this many times the source's usual month-to-month wander
+YOUNG_DAYS = 120       # days after a source is first kept before it helps set the company's move
 SETTLE = 14            # days after a level change is detected before its new level is trusted
 BASE_N = 42            # observations in a source's level baseline
 SCALE_N = 120          # observations in a source's noise scale
@@ -121,6 +122,7 @@ def detect(Y, valid, channel, want=None):
     """
     T, S = Y.shape
     Y = np.where(valid, Y, np.nan)
+    first_ok = np.array([int(np.argmax(valid[:, j])) if valid[:, j].any() else T for j in range(S)])
     clean = np.full((T, S), np.nan)
     innov = np.full((T, S), np.nan)    # residual minus current shift, on usable days
     M = np.full(T, np.nan)
@@ -177,6 +179,17 @@ def detect(Y, valid, channel, want=None):
         ycorr = Y[t] - np.where(mode == 1, delta, 0.0)
         v = ycorr - L
         use = avail & np.isfinite(v)
+        # a source still settling in after it was first kept (a thin start growing into coverage) does not set the
+        # company's move yet: its own growth would read as everyone else's shift
+        settled = use & (t - first_ok >= YOUNG_DAYS)
+        if settled.sum() >= 2:
+            use = settled
+        # a peer that is itself far off today (its own one-day problem) does not set the company's move either
+        if use.sum() >= 3:
+            m0 = float(np.median(v[use]))
+            calm_src = use & (np.abs(v - m0) <= SPIKE_Z * sig)
+            if calm_src.sum() >= 2:
+                use = calm_src
         n = use.sum()
         prev = [M[t - k] for k in (7, 14, 21) if t - k >= 0 and np.isfinite(M[t - k])]
         mref = float(np.median(prev)) if prev else np.nan
@@ -211,6 +224,9 @@ def detect(Y, valid, channel, want=None):
             r = y - yhat
             oth = use.copy()
             oth[s] = False
+            if not oth.any():
+                oth = avail & np.isfinite(v)
+                oth[s] = False
             m_loo = float(np.median(v[oth])) if oth.any() else m
             r_loo = y - L[s] - m_loo
             # one-day problems are judged and imputed against the other sources only (with few sources the median
@@ -219,6 +235,7 @@ def detect(Y, valid, channel, want=None):
             se = np.sqrt(sig[s] ** 2 + (HOLI_C * max(A - HOLI_A0, 0.0)) ** 2)
             nhist[s] += 1
             armed = nhist[s] > WARMUP
+            settling = t - first_ok[s] < YOUNG_DAYS      # still growing into coverage: no level-change episodes yet
             z = r / se
             is_spike = max(abs(z), abs(z_loo)) > SPIKE_Z and max(abs(r), abs(r_loo)) > min_spike and (armed or abs(r) > 0.7)
             if abs(z_loo) > abs(z):
@@ -234,7 +251,7 @@ def detect(Y, valid, channel, want=None):
             entered = False
 
             if mode[s] == 0:
-                if armed and calm:
+                if armed and calm and not settling:
                     zc = np.clip(z, -Z_CLIP, Z_CLIP)
                     sp[s] = max(0.0, sp[s] + zc - CUSUM_K)
                     sn[s] = max(0.0, sn[s] - zc - CUSUM_K)
@@ -393,6 +410,21 @@ def own_spikes(Lx, ok):
     return z, expect
 
 
+def yearly(oz):
+    """Days whose own-history move also happened within RECUR_SLACK days of the same date a year or two earlier (the
+    recurring rule for the own-history check)."""
+    T = oz.shape[0]
+    big = oz > OWN_Z / 2
+    out = np.zeros_like(big)
+    for yrs in (1, 2):
+        lag = 364 * yrs
+        for k in range(-RECUR_SLACK, RECUR_SLACK + 1):
+            sh = lag + k
+            if 0 < sh < T:
+                out[sh:] |= big[:-sh]
+    return out
+
+
 def process_ticker(g):
     dates = pd.date_range(g["date"].min(), g["date"].max(), freq="D")
     T = len(dates)
@@ -437,8 +469,8 @@ def process_ticker(g):
     # one-day moves far outside the source's own history that also stand out against its peers: bad points
     oz_y, ox_y = own_spikes(LY, ct_ok & ~low)
     oz_k, ox_k = own_spikes(LK, tk_ok & ~low)
-    add_y = (oz_y > OWN_Z) & (zy > PEER_Z) & ~fy & np.isfinite(ox_y)
-    add_k = (oz_k > OWN_Z) & (zk > PEER_Z) & ~fk & np.isfinite(ox_k)
+    add_y = (oz_y > OWN_Z) & (zy > PEER_Z) & ~fy & np.isfinite(ox_y) & ~yearly(oz_y)
+    add_k = (oz_k > OWN_Z) & (zk > PEER_Z) & ~fk & np.isfinite(ox_k) & ~yearly(oz_k)
     cy, fy = np.where(add_y, ox_y, cy), fy | add_y
     ck, fk = np.where(add_k, ox_k, ck), fk | add_k
     zy, zk = np.where(add_y, np.maximum(zy, SPIKE_Z + 0.5), zy), np.where(add_k, np.maximum(zk, SPIKE_Z + 0.5), zk)

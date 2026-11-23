@@ -49,8 +49,8 @@ Reward = W_CONF x confidence + W_CLEAN x cleaned series x stability.
   Stability (multiplies the cleaned series): score.py run again on its own cleaned series (rows it left blank dropped)
     and on the truth panel (genuinely clean data, its own baseline): 1 - (rows distrusted on its cleaned series beyond
     those distrusted on the truth panel) / (the rows of the task's scored problems, in confidence or in the cleaned
-    series, whichever is more), floored at 0: new alarms measured against the size of what is actually wrong. If the
-    run fails, 0.
+    series, whichever is more; a panel with no problems: its scored rows), floored at 0: new alarms measured against
+    the size of what is actually wrong. If the run fails, 0.
   Reported, not scored: distrusted rows on real data nobody has judged (unknown_flagged_rows).
   The write-up's quality is judged separately (not in this reward).
 """
@@ -514,7 +514,9 @@ def consistency_score(sol, data, clean_truth, full, ev, stretches, c_, problem_r
     sc = stretches.to_numpy() & k.confidence2.notna().to_numpy()
     n_c = int((k.confidence2[sc] < 0.5).sum())
     n_t = int((k.confidence_t[sc] < 0.5).sum())
-    n_bad = max(1, problem_rows)      # the scale of what is wrong: rows of scored problems, in either score
+    # the scale of what is wrong: rows of scored problems, in either score; a panel with none: its scored rows (as for
+    # confidence on a clean panel, the share of rows the code keeps trusting)
+    n_bad = problem_rows if problem_rows else max(1, int(sc.sum()))
     return max(0.0, 1 - max(0, n_c - n_t) / n_bad), dict(distrusted_rows_cleaned=n_c, distrusted_rows_truth=n_t,
                                                          untrustworthy_rows=n_bad, rows=int(sc.sum()))
 

@@ -33,6 +33,11 @@ opening an episode; an episode closes when the source is back near its old basis
 8. A level change must also be at least 3x the source's usual month-to-month wander against the company (as reported):
    a source whose level drifts on its own is not given an episode for every swing.
 9. An episode is distrusted for 14 days after it is detected (the onset), then trusted.
+10. A source still settling in (its first 120 days after it is first kept, e.g. growing out of a thin start) gets no
+    level-change episodes and does not help set the company's move: its own growth would read as a shift.
+11. The recurring rule applies to the own-history check too (a closure on the same date each year is left alone).
+12. A peer that is itself far off on a day (beyond the one-day bar from the company median) is left out of that day's
+    company move, so one source's problem does not get its sister sources flagged.
 Tried and dropped (no consistent gain across tasks): a lagged level baseline for ramps; leave-one-out offsets inside
 episodes; leave-one-out everywhere (noisier drift detection, more false episodes).
 

@@ -263,3 +263,7 @@ The reference, tuned only on bench tasks 001-002, scores 0.825 on companies it n
 tasks it beats the ceiling, which is a plausible best, not a bound: its imputation carries the source's own noise).
 Opus's runs spread from 0.33 to 0.68. Fixed on the way: a task with no reviewed real problems gave the hindsight
 reference an untyped empty table, which broke the oracle's merge.
+
+Feedback #26: #24 reverted. Known source-level quirks are graded by what they did in the data (`build.quirk_event`):
+a lasting change against the source's peers (0.15 or more, count or ticket) is a real_change to flag and rescale,
+anything smaller is normal data; excluded only without two usable peers. Company-wide natural breaks stay excluded.

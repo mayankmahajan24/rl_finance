@@ -87,11 +87,24 @@ def plant(rng, control, ctx, n_tickers=8):
     # panel's list of known source artifacts (which would leave it unscored from the artifact to the panel end)
     judged = {(F.t(x['ticker']), F.s(int(x['source_id']))) for x in reviewed_series()} | \
              {(F.t(r['ticker']), F.s(int(r['source_id']))) for r in reviewed() if r['verdict'] == 'change'}
+    # company-wide natural breaks (every source at once: nothing to recover them from) stay out of scoring. A known
+    # quirk of one source is graded by what it did in this data (quirk_event): a lasting change to flag and rescale,
+    # or nothing (normal data); it stays out only when it cannot be cross-checked (fewer than two usable peers)
     excl = [dict(ticker=i['ticker'], source_id=i['source_id'], lo=i['start'],
-                 hi=i['end'] or F.d(ctx.panel_end)) for i in req] + \
-           [dict(ticker=i['ticker'], source_id=i['source_id'], lo=i['lo'],
-                 hi=F.d(ctx.panel_end) if i['source_id'] is not None else i['hi']) for i in opt
-            if (i['ticker'], i['source_id']) not in judged]
+                 hi=i['end'] or F.d(ctx.panel_end)) for i in req]
+    quirks = []
+    for i in opt:
+        if (i['ticker'], i['source_id']) in judged:
+            continue
+        if i['source_id'] is None:
+            excl.append(dict(ticker=i['ticker'], source_id=None, lo=i['lo'], hi=i['hi']))
+            continue
+        q = quirk_event(F.df, i, d1)
+        if q == 'unrecoverable':
+            excl.append(dict(ticker=i['ticker'], source_id=i['source_id'], lo=i['lo'], hi=F.d(ctx.panel_end)))
+        elif q:
+            events.append(q)
+            quirks.append(q)
     not_real, recurring = [], []
     for r in reviewed():                                      # real problems in the source data, as reviewed
         t, s_ = F.t(r['ticker']), F.s(r['source_id'])
@@ -130,6 +143,55 @@ def plant(rng, control, ctx, n_tickers=8):
     mapping = dict(tickers={o: d for o, d in F.tmap.items() if d in set(df.ticker)}, sources=F.smap,
                    shift_days=int(F.shift.days))
     return df, truth, mapping, truth_df
+
+
+QUIRK_MIN = 0.15        # a known source quirk that moved the source less than this (log) did nothing to grade
+
+
+def quirk_event(df, it, d1):
+    """What a known source-level quirk (artifact list: lo..hi, one source) did to that source in this data: its
+    relation to the median of its company's other sources, in log count and log ticket, over the 90 days before lo
+    against the 90 days after hi. Under QUIRK_MIN: None (normal data). Otherwise a real_change event (scored like a
+    reviewed level change): onset = first day the 14-day median relation is a third of the way to the new level,
+    settled = first day it is within a quarter of it, lasting to the panel end unless the source returns to its old
+    relation later (then until it does). 'unrecoverable' when the source has fewer than two other usable sources."""
+    t, s = it['ticker'], it['source_id']
+    lo, hi = pd.Timestamp(it['lo']), pd.Timestamp(it['hi'])
+    g = df[df.ticker == t]
+    ct = g.pivot(index='date', columns='source_id', values='ct').astype(float)
+    if s not in ct.columns or ct.shape[1] < 3:
+        return 'unrecoverable'
+    amt = g.pivot(index='date', columns='source_id', values='amt').astype(float)
+    peers = [c for c in ct.columns if c != s and ct[c].median() >= 20]
+    if len(peers) < 2:
+        return 'unrecoverable'
+    lc, lt = np.log(ct), np.log(amt) - np.log(ct)
+    best = None
+    for name, x in (('count', lc), ('ticket', lt)):
+        rel = (x[s] - x[peers].median(axis=1)).dropna()
+        pre = rel[(rel.index >= lo - pd.Timedelta(days=90)) & (rel.index < lo)]
+        post = rel[(rel.index > hi) & (rel.index <= hi + pd.Timedelta(days=90))]
+        if len(pre) < 30 or len(post) < 30:
+            continue
+        sh = float(post.median() - pre.median())
+        if best is None or abs(sh) > abs(best[1]):
+            best = (name, sh, rel, float(pre.median()))
+    if best is None or abs(best[1]) < QUIRK_MIN:
+        return None
+    name, sh, rel, base = best
+    sm = rel.rolling(14, min_periods=7, center=True).median()
+    dev = (sm - base) * np.sign(sh)
+    win = dev[(dev.index >= lo - pd.Timedelta(days=30)) & (dev.index <= hi + pd.Timedelta(days=30))]
+    onset = win[win > abs(sh) / 3].index.min()
+    settle = win[win > 0.75 * abs(sh)].index.min()
+    if pd.isna(onset):
+        return None
+    after = dev[dev.index > hi + pd.Timedelta(days=30)]
+    back = after[after < abs(sh) / 3].index
+    end = back.min() if len(back) and (after.loc[back.min():] < abs(sh) / 3).mean() > 0.8 else d1
+    return dict(type='real_change', regime=True, ticker=t, source_id=s, start=_fmt(onset), end=_fmt(end),
+                permanent=bool(end == d1), settle=_fmt(settle if not pd.isna(settle) else hi), origin='quirk',
+                note=f"{it.get('note', 'known source quirk')}: {name} {sh:+.2f} against peers")
 
 
 def recurring_first(F, t, s, r, slack=3):

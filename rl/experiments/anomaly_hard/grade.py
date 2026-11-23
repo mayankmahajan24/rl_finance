@@ -290,8 +290,11 @@ def hindsight_ref(truth: dict, panel: pd.DataFrame) -> pd.DataFrame:
     one row per day of each real problem (for a lasting change, from its start to its end)."""
     real = [e for e in truth['events'] if e['type'] in REAL_TYPES]
     out = []
-    if not real:
-        return pd.DataFrame(columns=KEYS + ['ref_ct', 'ref_amt', 'tol_ct', 'tol_amt'])
+    empty = pd.DataFrame({'date': pd.Series(dtype='datetime64[ns]'), 'ticker': pd.Series(dtype=object),
+                          'source_id': pd.Series(dtype='int64'), **{c: pd.Series(dtype=float)
+                                                                    for c in ('ref_ct', 'ref_amt', 'tol_ct', 'tol_amt')}})
+    if not real:            # typed, so merging it keeps the value columns numeric
+        return empty
     mad = lambda x: float(1.4826 * (x - x.median()).abs().median()) if len(x) > 5 else np.nan  # noqa: E731
     for tk in sorted({e['ticker'] for e in real}):
         g = panel[panel.ticker == tk]
@@ -321,7 +324,7 @@ def hindsight_ref(truth: dict, panel: pd.DataFrame) -> pd.DataFrame:
                 out.append(pd.DataFrame(dict(date=d, ticker=tk, source_id=s, ref_ct=np.exp(ref_lc).to_numpy(),
                                              ref_amt=np.exp(ref_lc + ref_lt).to_numpy(), tol_ct=tc,
                                              tol_amt=float(np.hypot(tc, tt)))))
-    return pd.concat(out, ignore_index=True) if out else pd.DataFrame(columns=KEYS + ['ref_ct', 'ref_amt', 'tol_ct', 'tol_amt'])
+    return pd.concat(out, ignore_index=True) if out else empty
 
 
 def clean_score(truth, ev, scored_rows, ref=None):

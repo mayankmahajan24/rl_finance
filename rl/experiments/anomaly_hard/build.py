@@ -156,20 +156,11 @@ def annotate_events(truth, df, truth_df):
     deviation (raw against the truth panel, trailing 7-day median) reaches P.SHIFT_K times the source's own noise, in
     count or ticket; its onset is scored from then (earlier days unscored). A change that never gets there is
     `unscored`. A planted slow ramp, or a change that took longer than grade.SETTLE_DAYS to become visible, is `slow`:
-    scored on the cleaned series only. The noise is the source's own day-to-day noise, defined as for the planted
-    sizes."""
-    # the source's own day-to-day noise as the planted sizes are defined (perturb.own_noise: weekday pattern and a
-    # 28-day running median removed), on the truth panel
-    rows = []
-    for (t, s_), x in truth_df.groupby(['ticker', 'source_id']):
-        x = x.set_index('date').sort_index()
-        n = {}
-        for k, v in (('sig_c', np.log(x.ct.clip(lower=0.01))), ('sig_t', np.log(x.amt.clip(lower=0.01) / x.ct.clip(lower=0.01)))):
-            v = v - v.groupby(v.index.dayofweek).transform('median')
-            r = (v - v.rolling(28, center=True, min_periods=7).median()).dropna()
-            n[k] = max(float(1.4826 * (r - r.median()).abs().median()), 0.01) if len(r) else 0.1
-        rows.append(dict(ticker=t, source_id=s_, **n))
-    sig = pd.DataFrame(rows).set_index(['ticker', 'source_id'])
+    scored on the cleaned series only. The noise is the grader's (grade.own_noise), so what is scored is what the
+    grader can tell apart from the source's normal variation against its sister sources."""
+    # the source's own noise as the grader measures it (grade.own_noise: its daily relation to its sister sources),
+    # so a change is scored only once it stands out the way the grader and any peer-based scorer can see it
+    sig = grade.own_noise(truth_df).set_index(['ticker', 'source_id'])
     raw = df.set_index(grade.KEYS)[['ct', 'amt']]
     tru = truth_df.set_index(grade.KEYS)[['ct', 'amt']]
     lg = lambda x: np.log(np.maximum(x.astype(float), 0.01))  # noqa: E731

@@ -3,7 +3,9 @@
 Every item has an id, what must be true, how to verify it in this repo, and what to do when it is
 not. `scripts/audit.py` settles the items tagged **[auto]** and lists every other one as `MANUAL`:
 those are yours to settle by reading and experiment. Items tagged **[human]** end in a decision
-only a person may record; prepare the evidence and stop there.
+only a person may record; prepare the evidence and stop there. **[optional]** items are worth doing
+only when the budget allows. Ids are stable, so a retired item leaves a gap rather than renumbering
+the rest.
 
 Statuses: `PASS` (with evidence from this session), `FAIL`, `WARN` (holds, but weakly or by
 heuristic: read it), `BLOCKED` (needs Docker, API spend or a person: say which, give the command),
@@ -42,7 +44,7 @@ It names the goal, not the method: no step lists, no description of the planted 
 hints, no "make sure to check X". Data holes are stated plainly ("no consensus exists for this
 quarter") without the rule for handling them. Coaching turns a judgment task into instruction
 following, and what the model then learns is to follow coaching.
-*Verify:* audit.py flags long templates and coaching phrases (heuristic). Read the template and ask
+*Verify:* audit.py flags templates over 900 words; the rest is reading. Read the template and ask
 of each sentence: does a professional given this assignment by a colleague get told this?
 *Fix:* delete the sentence; if a grader depended on it, the requirement moves to A3.
 

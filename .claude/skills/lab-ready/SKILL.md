@@ -126,11 +126,11 @@ Never change a verifier, tolerance or weight to move a pass rate: get the verifi
 where difficulty lands. And treat any working exploit as a blocker, not a note: reward
 hacking learned here transfers to other domains.
 
-Difficulty fixes follow `references/checklist.md` sections H and I. In short: screen with k = 2, then 4, then 8, stopping on a task once it is clearly too easy
-(2/2, 3/4, 4+/8); audit every 0/k for a
-harness or rubric bug before calling it hard; convert 0/k and k/k tasks before authoring new ones;
-move difficulty with two or three non-fatal decisions and matched no-action twins, never with
-length, clutter, a single fatal gate or hints.
+Difficulty fixes follow `references/checklist.md` sections H and I. In short: screen with k = 2,
+then 4, then 8, stopping on a task once it is clearly too easy (2/2, 3/4, 4+/8); audit every 0/k
+for a harness or rubric bug before calling it hard; convert 0/k and k/k tasks before authoring new
+ones; move difficulty with two or three non-fatal decisions and matched no-action twins, never
+with length, clutter, a single fatal gate or hints.
 
 ### 5. Report
 

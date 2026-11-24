@@ -6,9 +6,9 @@ scientist would for a downstream model (plain rules, few knobs, fast, every adju
 
 Per company, each source is compared with its sister sources, in log count and in log ticket size (dollars per
 transaction):
-  rel   = against each sister source, the day's difference from that pair's early level (median of its first
-          ANCHOR_DAYS days together); then the median over sisters (company-wide moves and a sister's own problem
-          both drop out)
+  rel   = against each sister source, the day's difference from that pair's early level for that weekday (median
+          over its first ANCHOR_DAYS days together); then the median over sisters (company-wide moves, weekday
+          patterns and a sister's own problem all drop out)
   level = the median of rel over the trailing BASE_DAYS (lagged LAG_DAYS, so a fresh change does not drag it along)
   sigma = the source's robust day-to-day spread of rel around its level (trailing NOISE_DAYS)
   z     = (rel - level) / sigma
@@ -36,7 +36,7 @@ import pandas as pd
 LOW_CT, DROP_CT, ESTABLISHED = 20.0, 16.0, 90   # low signal: keep from LOW_CT, drop under DROP_CT, until established
 BASE_DAYS, LAG_DAYS, NOISE_DAYS = 42, 14, 120   # level window, its lag, noise window (days of usable data)
 ANCHOR_DAYS = 56                                # days a pair needs together before it is compared
-SPIKE_Z, CUSUM_H, DISTRUST_DAYS = 5.0, 7.0, 14
+SPIKE_Z, CUSUM_H, DISTRUST_DAYS = 5.0, 12.0, 14   # CUSUM_H: day-to-day noise is autocorrelated, so above textbook
 YEARLY_SLACK = 3
 
 
@@ -61,7 +61,7 @@ def track(rel: np.ndarray, usable: np.ndarray, dates: pd.DatetimeIndex):
     """One source, one channel: walk forward; return offset to remove, flag reason codes, and episodes."""
     T = len(rel)
     off, code = np.zeros(T), np.zeros(T, int)          # code: 0 ok, 1 spike, 2 level change (distrusted), 3 rescaled
-    z_hist, hist = {}, []                              # z by date (for the yearly lookup), usable rel history
+    z_hist, hist, alarms = {}, [], {}                  # z and change alarms by date (yearly lookup); usable history
     level0, start, peak, pos, neg, episodes = None, None, 0.0, 0.0, 0.0, []
     for t in range(T):
         x = rel[t]
@@ -89,7 +89,14 @@ def track(rel: np.ndarray, usable: np.ndarray, dates: pd.DatetimeIndex):
             zc = float(np.clip(z, -4, 4))
             pos, neg = max(0.0, pos + zc - 1.0), max(0.0, neg - zc - 1.0)
             if pos > CUSUM_H or neg > CUSUM_H:         # a level change: freeze the old level
-                level0, start, peak, pos, neg = base, t, 0.0, 0.0, 0.0
+                sign = 1 if pos > CUSUM_H else -1
+                pos, neg = 0.0, 0.0
+                if any(alarms.get(dates[t] - pd.DateOffset(years=k) + pd.Timedelta(days=d)) == sign
+                       for k in (1, 2) for d in range(-14, 15)):
+                    alarms[dates[t]] = sign                # the same move a year earlier: its season, not a change
+                    continue
+                alarms[dates[t]] = sign
+                level0, start, peak = base, t, 0.0
                 episodes.append(dict(start=dates[t]))
         if level0 is not None:
             o = float(np.median(np.asarray(hist)[-min(14, max(3, len(hist) - 1)):]) - level0)
@@ -118,7 +125,10 @@ def relation(x: pd.DataFrame, peers: pd.DataFrame, usable: pd.DataFrame, s) -> n
         if len(first) < ANCHOR_DAYS:
             continue
         anchor_day = first.index[ANCHOR_DAYS - 1]
-        devs.append((d - first.iloc[:ANCHOR_DAYS].median()).where(d.index >= anchor_day))
+        early = first.iloc[:ANCHOR_DAYS]
+        by_wd = early.groupby(early.index.dayofweek).median()             # each source has its own weekday pattern
+        anchor = pd.Series(d.index.dayofweek, index=d.index).map(by_wd).fillna(early.median())
+        devs.append((d - anchor).where(d.index >= anchor_day))
     return pd.concat(devs, axis=1).median(axis=1).to_numpy() if devs else np.full(len(x), np.nan)
 
 
@@ -142,9 +152,10 @@ def process(g: pd.DataFrame, peer_ct=None, peer_tk=None):
 def clean_ticker(g: pd.DataFrame):
     ct, amt, lc, lt, res = process(g)                  # pass 1
     cl_c = lc.copy(); cl_t = lt.copy()
-    for s, r in res.items():
-        cl_c[s] = lc[s] - r['c'][0]
-        cl_t[s] = lt[s] - r['t'][0]
+    for s, r in res.items():                           # a sister's one-day problems are left out of pass 2
+        spike = (r['c'][1] == 1) | (r['t'][1] == 1)
+        cl_c[s] = (lc[s] - r['c'][0]).where(~spike)
+        cl_t[s] = (lt[s] - r['t'][0]).where(~spike)
     ct, amt, lc, lt, res = process(g, cl_c, cl_t)      # pass 2: peers on their cleaned values
     rows, report = [], []
     for s, r in res.items():

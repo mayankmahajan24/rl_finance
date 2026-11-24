@@ -143,7 +143,10 @@ def run(script: pathlib.Path, panel: pd.DataFrame, cache: pathlib.Path | None = 
             cmd = (['unshare', '-n', '--'] if ISOLATE else []) + cmd
         else:
             if ISOLATE:
-                subprocess.run(['chmod', '-R', 'a+rX', str(script.parent)], check=True)
+                if any(script.resolve().is_relative_to(d) for d in WRITABLE):   # hidden by the empty mounts: copy in
+                    shutil.copytree(script.resolve().parent, work / 'solution')
+                    cmd[1] = str(work / 'solution' / script.name)
+                subprocess.run(['chmod', '-R', 'a+rX', str(pathlib.Path(cmd[1]).parent)], check=True)
             cmd = _sandboxed(cmd, work)
         r = subprocess.run(cmd, cwd=work, capture_output=True, text=True, timeout=1200, env=env)
         if r.returncode:

@@ -50,7 +50,7 @@ Stability: score.py run again on its own cleaned series (blank rows dropped) and
 distrusted on its cleaned series beyond those distrusted on the truth panel) / (rows of the task's scored problems,
 in either score; a panel with none: its scored rows), floored at 0. If a run fails, 0.
 
-The write-up's quality is judged separately (not in this reward).
+The write-up must exist (a gate); its content is read by a reviewer, not scored here.
 """
 from __future__ import annotations
 

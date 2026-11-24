@@ -90,4 +90,4 @@ established is kept: those rows count in the cleaned-series score, so blanking t
 Not scored: the panel's first year (history for your code to learn from), rows near the twenty-a-day line, the two
 weeks either side of a low-signal stretch's edges, problems too small to stand out from a source's own noise, and
 other debatable rows.
-The write-up is also graded on its own, separately from this score.
+The write-up is not part of this score: it is read by a reviewer, and it must exist.

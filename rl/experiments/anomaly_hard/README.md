@@ -85,6 +85,8 @@ data, and a few days either side of the thin start's edges.
 | `ceiling_ideal` | the ceiling with exact imputation | 0.999 | 0.999 | 0.995 min |
 | `ceiling` | gold-informed but realistic: a step caught on a 3-day median, ramps on a 14-day median, imputation with the source's own noise | 0.981 | 0.980 | 0.960 min |
 | **`reference`** | hand-built point-in-time scorer (`solutions/reference/writeup.md`) | **0.939** | **0.938** | 0.883 min |
+| `practitioner` | a plain ~200-line scorer: pairwise peer z-scores per weekday, CUSUM with rescaling, thin-start rule, yearly lookup, reason and adjustment columns (12 s a task) | 0.704 | | |
+| Opus runs (8, Nov 20 and 23, older instructions) | fresh model solutions | 0.28 (0.08-0.50) | | |
 | `trust_all_ref` | the reference's cleaned series, every row trusted | 0.231 | 0.250 | 1.0 on the 3 controls (correct there), 0 elsewhere |
 | `distrust_all_ref` | the reference's cleaned series, every row distrusted | 0.000 | 0.000 | 0.000 min |
 | `distrust_all` | every row distrusted, the answer key's cleaned series | 0.000 | 0.000 | 0.000 min |
@@ -111,7 +113,9 @@ Reference per task (reward and its three components; the geometric mean for comp
 | train-control-01 * | 1.000 | 1.000 | 1.000 | 1.000 | 0.999 | 1.000 |
 | train-control-02 | 0.999 | 0.999 | 0.999 | 1.000 | 0.999 | 1.000 |
 
-\* tuning tasks; the other eight are held out. On 45 newly generated train tasks (scale check): answer key 1.0 on all, do-nothing 0, ceiling 0.971 (min 0.878), reference 0.904 on a sample of nine (min 0.725: false alerts). The reference's main loss is false alerts (2-6 a task, around real company events, a source's early growth and inside slow ramps). The ceiling's gap to 1.0 is imputation noise (a repaired value carries the source's own noise): with exact imputation it scores 0.999.
+\* tuning tasks; the other eight are held out. On 45 newly generated train tasks (scale check): answer key 1.0 on all, do-nothing 0, ceiling 0.971 (min 0.878), reference 0.904 on a sample of nine (min 0.725: false alerts). The reference's main loss is false alerts (2-6 a task, around real company events, a source's early growth and inside slow ramps). What separates the three: false alerts per task (tuned reference 3, practitioner 17, Opus 120;
+alert precision 0.78, 0.37, 0.10) and the cleaned series (0.96, 0.69, 0.67). The gap from a plain, sound approach
+(0.70) to the tuned reference (0.94) is false-alert tuning and careful rescaling. The ceiling's gap to 1.0 is imputation noise (a repaired value carries the source's own noise): with exact imputation it scores 0.999.
 
 ## Run
 

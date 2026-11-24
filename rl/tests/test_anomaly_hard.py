@@ -1,7 +1,7 @@
 """anomaly_hard prototype grader (rl/experiments/anomaly_hard/grade.py), graded offline on one train task built into a
 scratch folder (the built tasks under rl/tasks/proto are left alone).
 
-  - A known pass (the answer key) scores 1.0, and so does a paraphrase of it (other confidence values on the same side
+  - A known pass (the answer key) scores 1.0 on each of the task's three hidden panels, and so does a paraphrase of it (other confidence values on the same side
     of 0.5, cleaned values moved within a fraction of the source's own noise).
   - A known fail (do nothing) and the negation of the answer key (its confidence inverted) score 0.
   - Lopsided and constant answers (distrust everything with a perfect cleaned series) score 0.
@@ -79,6 +79,15 @@ def variant(tmp_path, name, edit):
 def test_answer_key_passes(task, monkeypatch):
     reward, d = grade_sol(task, SOL / "oracle", monkeypatch, trusted=True, tmp=task)
     assert reward == pytest.approx(1.0, abs=1e-3), d["gates"]
+
+
+def test_answer_key_passes_on_every_hidden_panel(task, monkeypatch, tmp_path):
+    import grade
+    monkeypatch.setenv("ORACLE_TASK", str(task))
+    w = tmp_path / "writeup.md"
+    w.write_text("method note")
+    reward, d = grade.grade_task(task, SOL / "oracle", w)
+    assert len(d["panels"]) == 3 and reward == pytest.approx(1.0, abs=1e-3), d["panels"]
 
 
 def test_paraphrased_answer_key_passes(task, monkeypatch, tmp_path):

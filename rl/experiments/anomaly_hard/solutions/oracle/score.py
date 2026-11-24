@@ -16,9 +16,9 @@ from grade import KEYS, label_rows  # noqa: E402
 
 ap = argparse.ArgumentParser(); ap.add_argument('--input'); ap.add_argument('--output'); a = ap.parse_args()
 df = pd.read_csv(a.input, parse_dates=['date'])
-task = pathlib.Path(os.environ['ORACLE_TASK'])
-gold = json.loads((task / 'tests' / 'gold.json').read_text())
-truth = pd.read_csv(task / 'tests' / 'truth_panel.csv.gz', parse_dates=['date'])
+tests = pathlib.Path(os.environ.get('ORACLE_TESTS') or pathlib.Path(os.environ['ORACLE_TASK']) / 'tests')   # the panel graded
+gold = json.loads((tests / 'gold.json').read_text())
+truth = pd.read_csv(tests / 'truth_panel.csv.gz', parse_dates=['date'])
 label_rows(gold, df, truth)
 df = df.merge(truth[KEYS + ['ct', 'amt']].rename(columns={'ct': 'clean_ct', 'amt': 'clean_amt'}), on=KEYS, how='left')
 differs = ~np.isclose(df.ct, df.clean_ct, rtol=1e-6) | ~np.isclose(df.amt, df.clean_amt, rtol=1e-6)

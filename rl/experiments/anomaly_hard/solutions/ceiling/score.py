@@ -46,9 +46,9 @@ def draw(df: pd.DataFrame, salt: int) -> np.ndarray:
 
 ap = argparse.ArgumentParser(); ap.add_argument('--input'); ap.add_argument('--output'); a = ap.parse_args()
 df = pd.read_csv(a.input, parse_dates=['date'])
-task = pathlib.Path(os.environ['ORACLE_TASK'])
-gold = json.loads((task / 'tests' / 'gold.json').read_text())
-truth = pd.read_csv(task / 'tests' / 'truth_panel.csv.gz', parse_dates=['date'])
+tests = pathlib.Path(os.environ.get('ORACLE_TESTS') or pathlib.Path(os.environ['ORACLE_TASK']) / 'tests')   # the panel graded
+gold = json.loads((tests / 'gold.json').read_text())
+truth = pd.read_csv(tests / 'truth_panel.csv.gz', parse_dates=['date'])
 label_rows(gold, df, truth)                       # sets df.thin (stretches the grader expects dropped)
 
 # what each row should read

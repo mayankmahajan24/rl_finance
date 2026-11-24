@@ -40,6 +40,7 @@ OUT = RL / "tasks" / "proto" / "anomaly_hard"
 EVAL_START_DAYS = 365   # one year of warm-up: enough history for levels, noise and a yearly pattern
 THIN_CT = 20   # a source's thin beginning (28-day median count under this, before it is established) must be dropped
 N_POINTS, SHIFTS = 2, [('step', 2), ('ramp', 2)]   # per panel: 2 of each point kind, 2 step and 2 ramp level shifts
+N_PANELS = 3           # hidden panels a task is graded on (the reward is their mean): fresh draws of problems
 N_RECURRING, N_SLOW = 2, 2   # per panel: planted yearly closures (normal) and slow panel ramps (problems)
 
 
@@ -240,8 +241,9 @@ def companies_table(shown: pd.DataFrame, mapping: dict) -> str:
 
 
 def build_task(ctx, d: pathlib.Path, seed: int, control: bool) -> dict:
-    """One task into folder d (created): visible panel from one company group, hidden panel, truth panel and gold
-    from the other. Returns the gold."""
+    """One task into folder d (created): visible panel from one company group; N_PANELS hidden panels from the other,
+    each with its own planted problems, disguise, truth panel and gold (panel 1 in tests/, panel k in tests/panel-k/).
+    Returns panel 1's gold."""
     tmpl = (HERE / 'instruction.md').read_text()
     text = tmpl.format(firm=build_panel.FIRM, schema=build_panel.SCHEMA, copy_note=COPY_NOTE, companies='{companies}')
     vis, hid = company_groups(ctx, seed)
@@ -255,6 +257,13 @@ def build_task(ctx, d: pathlib.Path, seed: int, control: bool) -> dict:
     (d / 'tests' / 'truth_panel.csv.gz').write_bytes(gzip.compress(
         clean.to_csv(index=False, date_format='%Y-%m-%d').encode(), mtime=0))
     (d / 'tests' / 'gold.json').write_text(json.dumps(dict(truth, seed=seed), indent=1))
+    for k in range(2, N_PANELS + 1):      # more hidden panels: the same companies, fresh problems and disguise
+        h, t, _, c = plant(np.random.default_rng([seed, k]), control, ctx, sensors=hid)
+        pk = d / 'tests' / f'panel-{k}'
+        pk.mkdir()
+        pk.joinpath('eval_panel.csv.gz').write_bytes(gzip.compress(h.to_csv(index=False, date_format='%Y-%m-%d').encode(), mtime=0))
+        pk.joinpath('truth_panel.csv.gz').write_bytes(gzip.compress(c.to_csv(index=False, date_format='%Y-%m-%d').encode(), mtime=0))
+        pk.joinpath('gold.json').write_text(json.dumps(dict(t, seed=seed, panel=k), indent=1))
     (d / 'tests').chmod(0o700)          # grader-only: the scorer runs as nobody and cannot read it
     (d / 'instruction.md').write_text(text.replace('{companies}', companies_table(shown, shown_map)))
     # the hidden panel's disguise (original -> task coordinates), outside tests/ and environment/

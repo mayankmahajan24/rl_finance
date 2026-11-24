@@ -1,10 +1,12 @@
 """Grade a solution on an anomaly_hard task:
     python grade.py TASK_DIR SOLUTION_DIR [--writeup PATH] [--json OUT] [--cache DIR]
 
-Runs SOLUTION_DIR/score.py on the task's hidden panel (tests/eval_panel.csv.gz), truncated at the gold's cutoffs and
-then whole, each run in an empty folder with the network off (its own network namespace where the machine allows it;
-no proxy settings, minimal environment). Scores against the gold (tests/gold.json: every planted problem, exact) and
-the truth panel (tests/truth_panel.csv.gz: the hidden panel before the problems were planted, real events kept).
+Grades every hidden panel of the task (tests/, then tests/panel-2, panel-3: the same hidden companies, each with its own
+planted problems and disguise, so tuning to one panel does not pay); reward = the mean of the panels' rewards, 0 if
+any panel fails an integrity gate (format, point in time, no AI, write-up). On each panel it runs SOLUTION_DIR/score.py
+on the hidden panel (eval_panel.csv.gz), truncated at the gold's cutoffs and then whole, each run in an empty folder with the network off (its own network namespace where the machine allows it;
+no proxy settings, minimal environment). Scores against the panel's gold (gold.json: every planted problem, exact) and
+its truth panel (truth_panel.csv.gz: the hidden panel before the problems were planted, real events kept).
 
 Gates (reward 0 if any fails):
   format         one output row per input row; confidence in [0, 1]; clean_ct, clean_amt blank or non-negative
@@ -139,7 +141,7 @@ def run(script: pathlib.Path, panel: pd.DataFrame, cache: pathlib.Path | None = 
         env = {'PATH': os.environ['PATH'], 'HOME': str(work)}            # no proxy settings: no network
         cmd = [sys.executable, str(script), '--input', str(work / 'in.csv'), '--output', str(work / 'out.csv')]
         if trusted:                      # grader checks only: they read the gold through ORACLE_TASK
-            env.update({k: v for k, v in os.environ.items() if k == 'ORACLE_TASK'})
+            env.update({k: v for k, v in os.environ.items() if k in ('ORACLE_TASK', 'ORACLE_TESTS')})
             cmd = (['unshare', '-n', '--'] if ISOLATE else []) + cmd
         else:
             if ISOLATE:
@@ -509,28 +511,57 @@ def alerts(e_: pd.DataFrame) -> tuple[int, int]:
     return n, hit
 
 
+INTEGRITY = ('format', 'point_in_time', 'no_ai', 'writeup')   # any panel failing one of these: reward 0
+
+
+def panels(task: pathlib.Path) -> list[pathlib.Path]:
+    """The task's hidden panels: tests/ itself, then tests/panel-2, panel-3, ..."""
+    return [task / 'tests'] + sorted((p for p in (task / 'tests').glob('panel-*') if p.is_dir()),
+                                     key=lambda p: int(p.name.split('-')[1]))
+
+
+def grade_task(task: pathlib.Path, sol: pathlib.Path, writeup: pathlib.Path, cache: pathlib.Path | None = None):
+    """Grade every hidden panel; reward = the mean of their rewards (0 if any fails an integrity gate). Panel 1's
+    details stay at the top level; every panel's summary is in `panels`."""
+    rows, first = [], None
+    for k, tests in enumerate(panels(task), 1):
+        truth = json.loads((tests / 'gold.json').read_text())
+        data = pd.read_csv(tests / 'eval_panel.csv.gz', parse_dates=['date'])
+        clean_truth = pd.read_csv(tests / 'truth_panel.csv.gz', parse_dates=['date'])
+        os.environ['ORACLE_TESTS'] = str(tests.resolve())   # forwarded to the grader's own check solutions only
+        try:
+            reward, d = score(truth, data, clean_truth, sol, writeup, (cache / f'panel-{k}') if cache else None)
+        finally:
+            os.environ.pop('ORACLE_TESTS', None)
+        first = first or d
+        rows.append(dict(panel=k, reward=round(reward, 3), gates=d['gates'], **{x: d.get(x) for x in (
+            'confidence_score', 'clean_score', 'stability', 'reward_geometric')}))
+        if not all(d['gates'].get(g, True) for g in INTEGRITY):
+            break                                         # an integrity failure ends grading
+    ok = all(all(r['gates'].get(g, True) for g in INTEGRITY) for r in rows)
+    reward = float(np.mean([r['reward'] for r in rows])) * ok
+    mean = lambda x: round(float(np.mean([r[x] or 0 for r in rows])), 3)  # noqa: E731
+    gates = {g: all(r['gates'].get(g, True) for r in rows) for g in first['gates']}
+    return reward, dict(first, gates=gates, confidence_score=mean('confidence_score'), clean_score=mean('clean_score'),
+                        stability=mean('stability'), reward_geometric=mean('reward_geometric'), panels=rows)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('task'); ap.add_argument('solution'); ap.add_argument('--json')
     ap.add_argument('--writeup'); ap.add_argument('--cache')
     a = ap.parse_args()
     task, sol = pathlib.Path(a.task), pathlib.Path(a.solution).resolve()
-    truth = json.loads((task / 'tests' / 'gold.json').read_text())
-    data = pd.read_csv(task / 'tests' / 'eval_panel.csv.gz', parse_dates=['date'])
-    clean_truth = pd.read_csv(task / 'tests' / 'truth_panel.csv.gz', parse_dates=['date'])
     writeup = pathlib.Path(a.writeup) if a.writeup else sol.parent / 'output' / 'writeup.md'
     if ISOLATE:
         (task / 'tests').chmod(0o700)    # grader-only: out of reach of the scorer, which runs as nobody
-    reward, d = score(truth, data, clean_truth, sol, writeup, pathlib.Path(a.cache) if a.cache else None)
+    reward, d = grade_task(task, sol, writeup, pathlib.Path(a.cache) if a.cache else None)
     d['isolation'] = 'nobody, offline, no shared writable folders' if ISOLATE else 'off (not root): grading only'
     res = dict(task=task.name, solution=str(sol), reward=round(reward, 3), **d)
     if a.json:
         pathlib.Path(a.json).write_text(json.dumps(res, indent=1, default=str))
     short = {k: v for k, v in res.items() if k not in ('confidence', 'clean', 'solution', 'changed_on_truncation')}
     print(json.dumps(short, default=str))
-    for part in ('confidence', 'clean'):  # per kind
-        for k in res.get(part, {}).get('by_kind', []):
-            print('   ', part, k)
 
 
 if __name__ == '__main__':

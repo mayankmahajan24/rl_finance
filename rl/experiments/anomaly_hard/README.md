@@ -56,7 +56,10 @@ the series without detecting its problems cannot pass).
 | 5 | Keep the history | kept: share of rows that should be kept not left blank |
 | 6 | Stability | the scorer re-run on its own cleaned series raises no more alarms than on clean data (excess scaled by the size of the task's problems) |
 
-**Reward** = 0.4 x confidence + 0.4 x cleaned series + 0.2 x stability, where confidence = F1(1, 2) and cleaned
+**Three hidden panels.** Each task is graded on three hidden panels of the same companies, each with its own
+planted problems and disguise; the reward is their mean. Tuning to particular panels stops paying.
+
+**Reward** (per panel) = 0.4 x confidence + 0.4 x cleaned series + 0.2 x stability, where confidence = F1(1, 2) and cleaned
 series = 3 x 4 x 5. An ordinary weighted average; the three components are in the detailed metrics (and the
 geometric mean, the reward before feedback #45, as `reward_geometric`), so a lopsided solution is visible. The
 detection gate keeps cleaning-only solutions from scoring: without it, the reference's cleaned series with every row

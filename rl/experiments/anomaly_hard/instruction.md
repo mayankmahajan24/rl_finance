@@ -53,8 +53,9 @@ python /app/solution/score.py --input IN.csv --output OUT.csv
 * **Low-signal data.** Segments that carry no usable signal (for instance a stretch where a source has too few
   transactions for its daily numbers to mean much) may be discarded, as long as the rule is in the code so it would
   scale. Discard as little as you can: history is valuable.
-* **New data.** Your script is graded on a different panel of the same kind: other companies, with their own
-  tickers, dates and problems. Each run must finish within 20 minutes on 2 CPUs.
+* **New data.** Your script is graded on three different panels of the same kind: other companies, with their own
+  tickers, dates and problems, each drawn afresh; your score is the mean over the three. Each run must finish within
+  20 minutes on 2 CPUs.
 * **Your own output as input.** The script must also run on a file of its own cleaned series in the input format.
 
 ## How you are scored

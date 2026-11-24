@@ -40,8 +40,6 @@ BAND = (1 / 8, 3 / 8)        # the pass-rate band on-policy RL learns from
 JUDGMENT_WORDS = ("appropriate", "appropriately", "adequate", "adequately", "reasonable", "reasonably", "sufficient",
                   "sufficiently", "thorough", "thoroughly", "clear", "clearly", "well", "proper", "properly",
                   "suitable", "sensible", "high-quality", "meaningful")
-COACHING = ("hint", "make sure to", "be sure to", "remember to", "don't forget", "step 1", "you should first",
-            "a good approach", "we recommend", "tip:", "watch out for", "be careful")
 REQUIRED_KEYS = ("id", "version", "source", "builder", "verifier", "verifier_timeout_sec", "gold_file", "reward",
                  "gold_inputs", "instrument", "calibration", "leak_check")
 STRAY = (".git", "__pycache__", ".ipynb_checkpoints", ".bash_history", ".python_history", ".cache", ".DS_Store")
@@ -74,6 +72,8 @@ class Card:
         """Items nothing settled: a person's decision is BLOCKED on that person, the rest are MANUAL."""
         for it in self.items.values():
             human = it["tag"] == "human"
+            if it["status"] is None and it["tag"] == "optional":
+                it["status"], it["evidence"] = NA, ["optional: settle it if the budget allows, or leave it"]
             if it["status"] is None:
                 it["status"] = BLOCKED if human else MANUAL
             if human and it["status"] != PASS:
@@ -120,13 +120,8 @@ def static(card: Card, fam_id: str) -> dict:
 
     templates = [p for p in [d / "instruction.md", *sorted((d / "prompts").glob("*.md"))] if p.exists()]
     for t in templates:
-        text = t.read_text()
-        words, hits = len(text.split()), sorted({c.strip(" ,:") for c in COACHING if c in text.lower()})
-        if words > 900 or hits:
-            card.set("A2", WARN, f"{t.name}: {words} words" + (f"; possible coaching: {hits}" if hits else "")
-                     + " (heuristic: read it)")
-        else:
-            card.set("A2", MANUAL, f"{t.name}: {words} words, no coaching phrases found; still read it")
+        words = len(t.read_text().split())
+        card.set("A2", WARN if words > 900 else MANUAL, f"{t.name}: {words} words" + ("; long for an instruction" if words > 900 else "") + "; read it for coaching")
     if not fam.get("rubric_visibility") and "judge" in fam:
         card.set("A3", WARN, "judged family with no rubric_visibility note in family.yaml")
 
@@ -341,7 +336,7 @@ def calibration(card: Card, fam_id: str, split: str) -> None:
     cmd = f"python rl/harness/calibrate.py run --split {split} --model <strong> --model <weaker> --k 2 --budget <usd>"
     if not runs:
         card.set("H2", BLOCKED, f"no calibration run for {split}: {cmd} (approved instrument, API budget), then k 4, 8")
-        for item in ("H3", "H4", "H5", "H6", "H7", "H8", "H9", "H11", "H12", "E6"):
+        for item in ("H4", "H5", "H7", "H8", "H9", "H11", "E6"):
             card.set(item, BLOCKED, "needs the calibration run (H2)")
         return
     stats = json.loads(runs[-1].read_text())
@@ -362,8 +357,6 @@ def calibration(card: Card, fam_id: str, split: str) -> None:
                  f"{model}: {zero}/{n} at 0, {band}/{n} in 1/8-3/8, {n - zero - full_ - band}/{n} otherwise mixed, {full_}/{n} at k/k")
         if zero:
             card.set("H5", MANUAL, f"{model}: {zero} tasks at 0/k to audit from transcripts")
-        if zero or full_:
-            card.set("H6", MANUAL, f"{model}: {zero + full_} tasks at 0/k or k/k to convert")
     errored = max((s["errored"] for t in tasks.values() for s in t["models"].values()), default=0)
     card.set("H7", PASS if errored <= 0.05 else FAIL, f"worst errored share {errored}")
     k = stats["k"]

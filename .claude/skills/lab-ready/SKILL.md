@@ -123,10 +123,11 @@ shared code that changes every family at once (`families/_shared/harbor.py`, `ju
 those, bring the evidence and a recommendation.
 
 Never change a verifier, tolerance or weight to move a pass rate: get the verifier right, then see
-where difficulty lands (H10). And treat any working exploit as a blocker, not a note: reward
-hacking learned here transfers to other domains (E7).
+where difficulty lands. And treat any working exploit as a blocker, not a note: reward
+hacking learned here transfers to other domains.
 
-Difficulty fixes follow `references/checklist.md` sections H and I. In short: audit every 0/k for a
+Difficulty fixes follow `references/checklist.md` sections H and I. In short: screen with k = 2, then 4, then 8, stopping on a task once it is clearly too easy
+(2/2, 3/4, 4+/8); audit every 0/k for a
 harness or rubric bug before calling it hard; convert 0/k and k/k tasks before authoring new ones;
 move difficulty with two or three non-fatal decisions and matched no-action twins, never with
 length, clutter, a single fatal gate or hints.
@@ -148,7 +149,7 @@ Re-run the audit, merge in your manual findings, and write the readiness report 
 ## Open: needs a person      (the decision, the evidence, the exact command)
 ## Open: needs Docker or budget   (the command and what it will show)
 ## Residual risks accepted
-## Scorecard                 (every item A1–K5: status and one line of evidence)
+## Scorecard                 (every item A1–K4: status and one line of evidence)
 ```
 
 No item may be left `MANUAL`. The report goes in git, so it follows the run-records rule: no gold,
@@ -159,7 +160,7 @@ fixes, the rebuilt manifests and the report together only when the user asks for
 
 ## Reference
 
-- `references/checklist.md` — the full checklist, A1–K5. Read it in step 3; it is the skill's
+- `references/checklist.md` — the full checklist, A1–K4. Read it in step 3; it is the skill's
   substance.
 - `scripts/audit.py` — the mechanical items and the scorecard. It parses the checklist for its
   items, so a new item added there appears in the scorecard as `MANUAL` until the script learns it.

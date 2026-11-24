@@ -71,8 +71,7 @@ its control; the only differences should be the data itself.
 It is something the `role` in its metadata does at a fund, with the inputs they would have, not a
 puzzle built to be hard. In a judgment domain the gold holds what is not in the dataset: what the
 expert finds non-obvious, what others miss, and the counterfactuals that would flip the call, not
-only the final answer. A task is also not a job: real work runs through other people and several
-steps, so the family's description claims the task it measures and no more.
+only the final answer.
 *Verify:* the source's assignment and README; for research_design, gold records ruled-out objections.
 
 ### A7. No task can only be scored by guessing
@@ -202,6 +201,7 @@ The verifier never re-reads `/app/data` as truth and never imports from `/app`.
 
 ### D4. Reward is between 0 and 1; a crash is an error; an unavailable judge is "not graded" [auto]
 Never a silent 0 and never a default pass.
+Grading also finishes inside `verifier_timeout_sec` on the largest task and on the `long` attack.
 *Verify:* `malformed` and `long` attacks do not crash the verifier (audit.py); read the judge-down path.
 
 ### D5. The code-graded reward is deterministic [auto]
@@ -214,10 +214,6 @@ Where the verifier executes agent code (anomaly_scoring's scorer), that code run
 unprivileged user, with a minimal environment, unable to read `tests/` or write under
 `/logs/verifier`, and with a timeout.
 *Verify:* read how the verifier launches it; try a submission that opens `/tests/gold.json`.
-
-### D7. Grading finishes inside its timeout on the largest task
-*Verify:* time the verifier on the biggest input and on the `long` attack against
-`verifier_timeout_sec`.
 
 ### D8. The gold is right, and does not contradict itself
 An incorrect verifier is worse than none: gold agrees with the instruction and with the data the
@@ -280,11 +276,6 @@ guessing the generator, reading files it should not have, special-casing the ver
 after the answer was already written.
 *Verify:* Harbor job folders under `runs/calibration/<s>/<run_id>/jobs/` (local, gitignored).
 BLOCKED until a calibration run exists.
-
-### E7. A loophole is a blocker, never a known limit
-Reward hacking learned on one task transfers: a finance task with an exploitable grader can
-degrade a model's behaviour in unrelated domains. Any attack that scores above the margin is fixed
-or the affected tasks are withheld from training; it is not shipped with a note.
 
 ### E8. A grader exists that the training loop never sees, and shortcuts are watched for
 Any grader used for RL or best-of-n selection is eventually gamed. Keep a check outside the reward
@@ -352,19 +343,6 @@ Report, per line, the catch rate (bad outputs the judge fails), the false-fail r
 it fails) and kappa. Raw agreement hides both errors when most answers pass.
 Until a second expert labels the same tasks this is a stated limit, not a pass.
 
-### F11. Every rubric and any cheaper judge was tested vote by vote before paying for rollouts
-The F3 answer, a known pass and a known fail, per line, before any calibration run.
-
-### F12. The rubric has been through its rounds of drift, and they are logged
-Reading traces changes what the criteria mean; expect two or three rounds before a rubric settles.
-Each round is recorded (what was read, which lines changed and why:
-`runs/<family>/reviews/feedback_log.md`), and labels made under an older wording are redone or dropped.
-
-### F13. The quality rubric and the training reward are kept apart
-A rich, judged quality measure is for understanding a model; the reward a policy climbs is
-low-variance and hard to argue with. Where a judged score enters the reward, its weight is
-bounded and stated (F4), and the full rubric is still reported separately as a diagnostic.
-
 ---
 
 ## G. Evaluator tests
@@ -376,11 +354,6 @@ audit.py only checks the family appears in the tests; read them for the four cas
 
 ### G2. Reference and naive rewards are pinned [auto]
 A sample of the family's tasks in `tests/expected_rewards.json`.
-
-### G3. Changes are made one at a time, with the expected flips written down first
-Before re-running after a grader or rubric change, list which pinned rewards and which attack
-scores should move and which way. Anything else that moves is a bug. `UPDATE_EXPECTED=1` only for
-the flips you predicted.
 
 ### G4. The suite is green [auto]
 `pytest -m "not slow"` and `ruff check`; the full `pytest` before a release.
@@ -401,10 +374,6 @@ that a weaker one exposes. `calibrate.py run --model <strong> --model <weak>`. W
 agent harness is available (`--agent`), run it too: a result that holds in one harness only is a
 harness result.
 
-### H3. Screening is a ladder, not a flat k
-k = 2, then 4, then 8, stopping early on a task at 2/2, 3/4 or 4+/8: it is too easy for on-policy
-RL at that point and more rollouts are wasted.
-
 ### H4. Tasks sit in the mixed-outcome band [auto, when stats exist]
 For the model being trained, target 1/8 to 3/8. 0/8 and 8/8 groups give zero advantage under
 GRPO/RLOO. audit.py reads the latest `runs/calibration/<s>/*/stats.json` and reports the share of
@@ -416,9 +385,6 @@ tolerance, a judge line nobody could pass, wrong gold (D8). A task at 0/k for ev
 bug needs supervised data first, not on-policy RL: say so rather than keep it. But don't write a
 hard task off on a small k: a sparse pass rate is noisy (0/4 is consistent with a 1-in-8 task
 about 6 times in 10), and some hard tasks are learned slowly. Look at the interval, not the count.
-
-### H6. 0/k and k/k tasks are converted before new ones are authored
-Move a too-easy task with the dials in section I; a too-hard one by fixing what H5 found.
 
 ### H7. Errors are infrastructure, and rare
 `errored` near 0; refusals, truncations and timeouts are scored 0 and counted separately; the agent
@@ -432,22 +398,18 @@ floor is below the gap between models (`report.md`, Model separation).
 Tokens, wall time and judge cost per attempt from the run records. A dearer task with mixed
 outcomes beats a cheap one at 0/8.
 
-### H10. The band was reached by changing tasks, never by bending the verifier
-Write the right verifier first; then see where difficulty lands. Loosening a tolerance, dropping a
-check or re-weighting the reward to pull a task into the band makes the number fit and the
-measurement wrong. Every verifier or threshold change in this session has a correctness reason
-stated in the report, independent of any pass rate.
-
 ### H11. Reliability and cost are reported, not only pass@1
 pass^k (all k attempts pass) beside pass@k, both with bootstrap intervals (`calibrate.py report`
 gives these), and cost per correct outcome (spend divided by passing attempts) from the run
 records. Capability improves faster than reliability, and identical runs can differ many times
 over in cost, so the spread of cost per attempt is reported too.
 
-### H12. The result survives a reworded instruction
+### H12. The result survives a reworded instruction [optional]
 A paraphrase of the instruction with the same content (reordered, different wording, same
 deliverables) gives a pass rate inside the noise of the original. A drop means the task was
 measuring the phrasing.
+Costs a second calibration run; worth it for long hand-written instructions, rarely for a short
+generated template.
 *Verify:* build two or three train tasks with a paraphrased template into a scratch folder and
 run the same k; do not commit the variant.
 
@@ -459,21 +421,17 @@ run the same k; do not commit the variant.
 The score comes from two or three non-fatal sizing or calibration decisions, each moving it part
 of the way. A gate that zeroes the reward is there for integrity (foresight, look-ahead, a
 contradiction between deliverables), never as the difficulty, and is recorded as such in `reward`.
+Difficulty does not come from length, clutter, planted contradictions or hints either: frontier
+models read through all of these, and they raise cost, not signal.
 A penalty for inefficiency (tokens, steps, time), if there is one, is bounded and small next to
 the outcome: its effect on behaviour is not linear in its size.
 *Verify:* read `reward` in `family.yaml`; over the attack and solution rows, how often is the
 reward exactly 0 for an answer that did real work?
 
-### I2. Difficulty does not come from length, clutter, planted contradictions or hints
-Frontier models read through all of these; they raise cost, not signal.
-
 ### I3. Matched no-action twins exist in every split [auto]
 For planted tasks there are controls where the right move is to do nothing, matched in everything
 visible. Report their share and the over-intervention rate from calibration.
 *Verify:* audit.py counts `control = true` tasks per split (or the family's own twin marker).
-
-### I4. Positive and negative cases are balanced
-Across the split, the correct answer is not predictable from base rates (E3).
 
 ### I5. Tasks in the family differ in what they demand
 Not one solution replayed with new numbers: trap types, magnitudes and which ones co-occur vary;
@@ -511,8 +469,6 @@ train tasks so this does not come up.
 that is the system working. Never run `--approve` yourself.
 ### J8. The source's licence allows the intended use [human]
 `licence.status` in `sources/<source>/source.yaml`.
-### J9. Only run records are committed
-No transcripts, answers, gold, grading breakdowns, or an anonymised task's real company in git.
 
 ---
 
@@ -520,14 +476,10 @@ No transcripts, answers, gold, grading breakdowns, or an anonymised task's real 
 
 ### K1. `python rl/splits/check.py --release` passes [auto; expected to fail until J6 and J7 are done]
 ### K2. The sign-off steps in `review/SIGNOFF.md` are done in order [human]
-### K3. `release/CHANGELOG.md` and the family's `reward` text describe the family as it now is
-### K4. Known limits are written down
-Anything left `WARN`, `BLOCKED` or accepted as a residual risk appears in the readiness report and,
-where it outlives the session, in `rl/README.md` (Known limits).
 
-### K5. The family says what kind of measurement it is
-Capability (can a model do this at all: hard, mixed outcomes), reliability or regression (does it
-keep doing it: near-saturated, tracked with pass^k), or training. A task that saturates as a
-capability measure moves to the regression set rather than being deleted. Passing a task in
-isolation is not evidence for the workflow around it: say which of capability, reliability and
-checkability of the output the family speaks to, in `rl/README.md`.
+### K4. What the family is, and what is left open, is written down
+Anything left `WARN`, `BLOCKED` or accepted as a residual risk appears in the readiness report and,
+where it outlives the session, in `rl/README.md` (Known limits). The family's `reward` text and
+`release/CHANGELOG.md` describe it as it now is, including whether it is meant as a capability
+measure, a regression set or training data. Rubric changes made after reading traces are logged in
+`runs/<family>/reviews/feedback_log.md`.

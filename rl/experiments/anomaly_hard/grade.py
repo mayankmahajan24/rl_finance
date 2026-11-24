@@ -11,7 +11,8 @@ blank or non-negative), the point-in-time check on all three columns, no model o
 write-up (default SOLUTION_DIR/../output/writeup.md), and low signal dropped: at least LOW_SIGNAL_SHARE of the rows of
 thin beginnings (below) distrusted and left blank.
 
-Reward = W_CONF x confidence + W_CLEAN x cleaned series x stability.
+Reward = sqrt(confidence x cleaned series x stability): the geometric mean of the two halves, so both must be good
+(knowing what is wrong and repairing it); either alone scores near 0.
   Scored rows: from eval_start, not on low-volume series, not on company-wide natural breaks. Thin beginnings (before a
   source is established: its truth count's centred 28-day median has held thin_ct for THIN_ESTABLISHED days) where
   that median is under THIN_LO x thin_ct, after their first THIN_EDGE days, must be dropped (the gate above) and are
@@ -82,7 +83,6 @@ THIN_LO, THIN_HI, THIN_EDGE = 0.8, 1.25, 14   # thin: truth count's 28-day media
 # dropped (distrusted, left blank); between THIN_LO and THIN_HI x thin_ct, and the first THIN_EDGE days of a thin
 # stretch and the THIN_EDGE days after it, are not scored (the code cannot tell yet, point in time)
 LOW_SIGNAL_SHARE = 0.9   # gate: share of a task's thin-beginning rows that must be distrusted and left blank
-W_CONF, W_CLEAN = 0.5, 0.5   # confidence (row F1) and cleaned series (x stability)
 # imports or shell calls that reach a model or the network
 NO_AI = re.compile(r'\b(anthropic|openai|google\.generativeai|google\.genai|mistralai|cohere|ollama|litellm|langchain|'
                    r'transformers|requests|httpx|aiohttp|urllib\.request|urllib3|http\.client|socket|websocket|'
@@ -482,13 +482,13 @@ def score(truth: dict, data: pd.DataFrame, clean_truth: pd.DataFrame, sol: pathl
     dropped = (th & ev.flag & ev.clean_ct.isna() & ev.clean_amt.isna())
     low_share = float(dropped.sum() / th.sum()) if th.any() else 1.0
     gates['low_signal_dropped'] = low_share >= LOW_SIGNAL_SHARE
-    reward = (W_CONF * conf + W_CLEAN * cln * cons) * all(gates.values())
+    reward = float(np.sqrt(max(conf, 0.0) * max(cln * cons, 0.0))) * all(gates.values())   # both halves must be good
     unknown = ev.use & ev.flag & ~ev.label & ~known_rows(truth, ev)   # distrusted real data nobody has judged
     # reported, not scored: the reward if distrusted rows on real data nobody has judged were left unscored
     lev = ev.copy()
     lev.loc[unknown, 'use'] = False
     lconf, lconf_d = confidence_score(lev, scored)
-    lreward = (W_CONF * lconf + W_CLEAN * cln * cons) * all(gates.values())
+    lreward = float(np.sqrt(max(lconf, 0.0) * max(cln * cons, 0.0))) * all(gates.values())
     return reward, dict(gates=gates, ai_hits=hits, changed_on_truncation=leaks, rows_scored=int(ev.use.sum()),
                         reward_unjudged_unscored=round(lreward, 3), confidence_unjudged_unscored=round(lconf, 3),
                         alert_precision_unjudged_unscored=lconf_d.get('alert_precision'),

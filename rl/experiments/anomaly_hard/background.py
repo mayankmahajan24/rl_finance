@@ -87,7 +87,7 @@ def plant_recurring(F, rng, t, s, d0, d1) -> dict | None:
 
 
 def plant_thin_start(F, rng, t, s, d0) -> dict | None:
-    """A source that starts thin (about 6-14 transactions a day) for 300-600 days, then grows into full coverage over
+    """A source that starts thin (about 6-14 transactions a day) for 450-700 days (past the scored panel's first year), then grows into full coverage over
     60-120 days; counts drawn as a small panel would report them (Poisson), dollars at the source's own ticket size."""
     m = (F.df.ticker == t) & (F.df.source_id == s)
     x = F.df[m].sort_values('date')
@@ -97,7 +97,7 @@ def plant_thin_start(F, rng, t, s, d0) -> dict | None:
     target = float(rng.uniform(6, 14))
     if level <= target * 2:
         return None
-    thin_days, grow = int(rng.integers(300, 601)), int(rng.integers(60, 121))
+    thin_days, grow = int(rng.integers(450, 701)), int(rng.integers(60, 121))   # past the year of warm-up
     age = (x.date - x.date.min()).dt.days.to_numpy()
     frac = np.clip((age - thin_days) / grow, 0, 1)
     scale = np.exp(np.log(target / level) * (1 - frac))

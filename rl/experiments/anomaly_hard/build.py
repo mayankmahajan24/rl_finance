@@ -79,7 +79,7 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
                     for x in r['dates']:
                         busy.append(((t, s_), pd.Timestamp(x) - pd.Timedelta(days=3), pd.Timestamp(x) + pd.Timedelta(days=3)))
                     break
-        for _ in range(100):
+        for _ in range(500):                 # every panel has a thin start (so doing nothing cannot pass)
             t, s_ = cands0[int(rng.integers(len(cands0)))]
             r = background.plant_thin_start(F, rng, t, s_, d0)
             if r:
@@ -256,7 +256,8 @@ def annotate_events(truth, df, truth_df):
             e['visible'] = _fmt(seen.index.min())
             # slower to show than a change's settling window (weeks): a build-up over months whose onset no
             # point-in-time code can date, so it is scored on the cleaned series only (feedback #32)
-            if (seen.index.min() - pd.Timestamp(e.get('shift_start', e['start']))).days > grade.SETTLE_DAYS:
+            if (seen.index.min() - pd.Timestamp(e.get('shift_start', e['start']))).days > grade.SETTLE_DAYS \
+                    or e['type'] == 'level_shift_slow':     # a build-up over months is slow, however large
                 e['slow'] = True
 
 

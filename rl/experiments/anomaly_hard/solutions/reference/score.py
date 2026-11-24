@@ -26,7 +26,7 @@ import pandas as pd
 LOW_CT = 20.0          # low-signal threshold (transactions / day)
 LOW_WIN = 28           # reports in the low-signal trailing median
 ESTABLISHED = 90       # a source is established once that median has held LOW_CT this many reports running
-KEEP_CT, DROP_CT = 25.0, 16.0   # before then: keep from KEEP_CT, drop again under DROP_CT (hysteresis)
+KEEP_CT, DROP_CT = 20.0, 16.0   # before then: keep from KEEP_CT, drop again under DROP_CT (hysteresis)
 OWN_Z, PEER_Z, OWN_N = 5.0, 2.5, 120   # own-history spike check: beyond OWN_Z of its own spread, and PEER_Z vs peers
 RECUR_SLACK = 3        # days of slack when matching the same dates a year earlier
 LONG_NOW, LONG_LO, LONG_HI = 28, 180, 365   # slow drift: last 28 observations against those 180-365 back
@@ -67,6 +67,23 @@ def seen_before(hist, level, d):
         if abs(level + d - b) < RECOV_FRAC * abs(d) and abs(b - level) > 0.5 * abs(d):
             return True
     return False
+
+
+def kept_since(valid, gap=7):
+    """For each day and source, the day its current kept stretch began (gaps of up to gap days do not end a stretch):
+    a source settles in again every time it comes back after being dropped."""
+    T, S = valid.shape
+    out = np.full((T, S), -10**6)
+    for j in range(S):
+        start, last = None, None
+        for t in range(T):
+            if valid[t, j]:
+                if start is None or t - last > gap:
+                    start = t
+                last = t
+            if start is not None:
+                out[t, j] = start
+    return out
 
 
 def recurs(zs, t, z):
@@ -130,7 +147,7 @@ def detect(Y, valid, channel, want=None):
     """
     T, S = Y.shape
     Y = np.where(valid, Y, np.nan)
-    first_ok = np.array([int(np.argmax(valid[:, j])) if valid[:, j].any() else T for j in range(S)])
+    run_start = kept_since(valid)                  # start of each source's current kept stretch, per day
     clean = np.full((T, S), np.nan)
     innov = np.full((T, S), np.nan)    # residual minus current shift, on usable days
     M = np.full(T, np.nan)
@@ -193,7 +210,7 @@ def detect(Y, valid, channel, want=None):
         use = avail & np.isfinite(v)
         # a source still settling in after it was first kept (a thin start growing into coverage) does not set the
         # company's move yet: its own growth would read as everyone else's shift
-        settled = use & (t - first_ok >= YOUNG_DAYS)
+        settled = use & (t - run_start[t] >= YOUNG_DAYS)
         if settled.sum() >= 2:
             use = settled
         # a peer that is itself far off today (its own one-day problem) does not set the company's move either
@@ -247,7 +264,7 @@ def detect(Y, valid, channel, want=None):
             se = np.sqrt(sig[s] ** 2 + (HOLI_C * max(A - HOLI_A0, 0.0)) ** 2)
             nhist[s] += 1
             armed = nhist[s] > WARMUP
-            settling = t - first_ok[s] < YOUNG_DAYS      # still growing into coverage: no level-change episodes yet
+            settling = t - run_start[t, s] < YOUNG_DAYS  # still growing into coverage: no level-change episodes yet
             z = r / se
             is_spike = max(abs(z), abs(z_loo)) > SPIKE_Z and max(abs(r), abs(r_loo)) > min_spike and (armed or abs(r) > 0.7)
             if abs(z_loo) > abs(z):
@@ -490,11 +507,7 @@ def process_ticker(g):
     # one-day moves far outside the source's own history that also stand out against its peers: bad points
     oz_y, ox_y = own_spikes(LY, ct_ok & ~low)
     oz_k, ox_k = own_spikes(LK, tk_ok & ~low)
-    young = np.zeros_like(low)                     # a source's first YOUNG_DAYS after it is first kept
-    for j in range(low.shape[1]):
-        kept = np.where(~low[:, j] & row[:, j])[0]
-        if len(kept):
-            young[kept[0]:kept[0] + YOUNG_DAYS, j] = True
+    young = (np.arange(T)[:, None] - kept_since(~low & row)) < YOUNG_DAYS   # settling in after being kept
     add_y = (oz_y > OWN_Z) & (zy > PEER_Z) & ~fy & np.isfinite(ox_y) & ~yearly(oz_y) & ~young
     add_k = (oz_k > OWN_Z) & (zk > PEER_Z) & ~fk & np.isfinite(ox_k) & ~yearly(oz_k) & ~young
     cy, fy = np.where(add_y, ox_y, cy), fy | add_y

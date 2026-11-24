@@ -63,13 +63,15 @@ The grader knows which rows misreport (problems planted in the hidden panel, and
 reviewed ones and known quirks of individual sources) and what each source would have reported had it been working
 normally.
 
-* **Confidence (half).** Counted per problem and per alert. Recall is the share of problems you catch (a problem is
+Your score combines two parts, multiplied and square-rooted (a geometric mean), so both have to be good:
+
+* **Confidence.** Counted per problem and per alert. Recall is the share of problems you catch (a problem is
   caught if you score any of its untrustworthy days below 0.5; each kind of problem weighs the same). An alert is a
   run of rows on one source scored below 0.5 (gaps of up to two days joined; a run longer than two weeks counts
   as one alert per two weeks); precision is the share of your alerts
   that touch a real problem. The score is the F1 of the two. A problem counts from the day it first shows in the data;
   one that builds up too slowly for its start to be dated counts only in the cleaned series.
-* **Cleaned series (half).** On rows a problem affected, how much of the gap between the raw value and what the
+* **Cleaned series.** On rows a problem affected, how much of the gap between the raw value and what the
   source should have reported your cleaned value closes (in log terms, count and dollars, each kind of problem
   weighing the same; differences within the source's own day-to-day noise are not counted), multiplied by the share of rows that were fine and that your cleaned series leaves within the
   source's own noise, by the share of rows that should be kept and that you did not leave blank, and by a stability

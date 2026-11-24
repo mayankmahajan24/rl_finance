@@ -36,9 +36,18 @@ o.to_csv(out, index=False)
 """
 
 
+def _experiment_module(name: str):
+    """The experiment's own module by file path (rl/build.py shares the name `build`)."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(f"anomaly_hard_{name}", HERE / f"{name}.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
 @pytest.fixture(scope="module")
 def task(tmp_path_factory):
-    build = pytest.importorskip("build")
+    build = _experiment_module("build")
     from families._shared import build_panel
     d = tmp_path_factory.mktemp("anomaly_hard") / "anomhard-train-test"
     build.build_task(build_panel.context("txn_panel", "train"), d, 320001, False)

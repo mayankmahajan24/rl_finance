@@ -31,7 +31,7 @@ established is kept.
 
 **Checks.** Point in time by construction, confirmed by the grader's truncation check. Re-run on its own output it
 raises almost no new alarms (stability 0.87-1.0). Tuned on tasks 001, 004, train-001, train-002 and
-train-control-01; the other eight held out. Reward 0.928 on all 13 tasks, 0.935 on the held-out ones (2026-11-24).
+train-control-01; the other eight held out. Reward 0.939 on all 13 tasks, 0.938 on the held-out ones (2026-11-24).
 numpy and pandas only.
 
 **Known gaps.** False alerts remain the main loss (2-6 a task, around real company events, a source's early growth

@@ -70,45 +70,48 @@ trusted or distrusted would score 0.67 and 0.59.
   temporary change ends, 45 days unscored, then trusted.
 * The first yearly closure is unscored; later ones must be trusted.
 
+**Isolation.** The grader runs agent code as `nobody`, with no network, in its own mount namespace where every shared
+writable folder is empty (no memory between its five runs), and the task's `tests/` folder is root-only. A source's
+own noise (`own_noise`) is measured on usable days only (28-day median at least 20 a day, against peers that are too).
+
 **Not scored:** series too low-volume to grade, short windows around company-wide natural breaks in the underlying
 data, and a few days either side of the thin start's edges.
 
 ## Results (all 13 tasks, 2026-11-24)
 
-| Solution | What it is | All 13 | Held out (8) | Min / max |
+| Solution | What it is | All 13 | Held out (8) | Min |
 |---|---|---|---|---|
-| `oracle` | the answer key | 1.000 | 1.000 | 1.000 |
-| `ceiling` | gold-informed but realistic: a step caught on a 3-day median, ramps on a 14-day median, imputation with the source's own noise | 0.951 | 0.968 | 0.866 min |
-| `ceiling_ideal` | the ceiling with exact imputation | 0.980 | 0.993 | 0.888 min |
-| **`reference`** | hand-built point-in-time scorer (`solutions/reference/writeup.md`) | **0.928** | **0.935** | 0.850 min |
+| `oracle` | the answer key | 1.000 | 1.000 | 1.000 min |
+| `ceiling_ideal` | the ceiling with exact imputation | 0.999 | 0.999 | 0.995 min |
+| `ceiling` | gold-informed but realistic: a step caught on a 3-day median, ramps on a 14-day median, imputation with the source's own noise | 0.981 | 0.980 | 0.960 min |
+| **`reference`** | hand-built point-in-time scorer (`solutions/reference/writeup.md`) | **0.939** | **0.938** | 0.883 min |
 | `trust_all_ref` | the reference's cleaned series, every row trusted | 0.231 | 0.250 | 1.0 on the 3 controls (correct there), 0 elsewhere |
-| `distrust_all_ref` | the reference's cleaned series, every row distrusted | 0.000 | 0.000 | 0.000 |
-| `distrust_all` | every row distrusted, the answer key's cleaned series | 0.000 | 0.000 | 0.000 |
-| `distrust_all_raw` | every row distrusted, raw series | 0.000 | 0.000 | 0.000 |
-| `naive` | do nothing (trust all, clean = raw; fails the low-signal gate) | 0.000 | 0.000 | 0.000 |
+| `distrust_all_ref` | the reference's cleaned series, every row distrusted | 0.000 | 0.000 | 0.000 min |
+| `distrust_all` | every row distrusted, the answer key's cleaned series | 0.000 | 0.000 | 0.000 min |
+| `naive` | do nothing (trust all, clean = raw; fails the low-signal gate) | 0.000 | 0.000 | 0.000 min |
+| `exploit_gold_read` | agent code that looks for the answer key on disk | 0.000 | 0.000 | 0.000 min |
+
+The exploit probes `exploit_memory` (memory between the grader's runs) and `exploit_selfrun` (recognising the re-run on its own cleaned series) score exactly the reference: neither channel exists.
 
 Reference per task (reward and its three components; the geometric mean for comparison; the ceiling):
 
 | Task | Reward | Conf. | Cleaned | Stab. | Geometric | Ceiling |
 |---|---|---|---|---|---|---|
-| 001 * | 0.927 | 0.909 | 0.973 | 0.870 | 0.877 | 0.919 |
-| 002 | 0.882 | 0.789 | 0.926 | 0.981 | 0.847 | 0.957 |
-| 003 | 0.913 | 0.828 | 0.967 | 0.976 | 0.884 | 0.920 |
-| 004 * | 0.850 | 0.750 | 0.902 | 0.947 | 0.800 | 0.927 |
+| 001 * | 0.944 | 0.917 | 0.975 | 0.937 | 0.915 | 0.975 |
+| 002 | 0.883 | 0.789 | 0.927 | 0.984 | 0.848 | 0.966 |
+| 003 | 0.961 | 0.957 | 0.967 | 0.957 | 0.941 | 0.974 |
+| 004 * | 0.920 | 0.900 | 0.980 | 0.839 | 0.860 | 0.975 |
 | control-01 | 1.000 | 1.000 | 1.000 | 0.999 | 1.000 | 1.000 |
-| train-001 * | 0.923 | 0.923 | 0.891 | 0.988 | 0.901 | 0.907 |
-| train-002 * | 0.889 | 0.815 | 0.912 | 0.993 | 0.859 | 0.866 |
-| train-003 | 0.939 | 0.899 | 0.967 | 0.965 | 0.916 | 0.978 |
-| train-004 | 0.906 | 0.796 | 0.971 | 0.997 | 0.878 | 0.955 |
-| train-005 | 0.925 | 0.857 | 0.960 | 0.993 | 0.904 | 0.976 |
-| train-006 | 0.915 | 0.800 | 0.993 | 0.989 | 0.886 | 0.957 |
+| train-001 * | 0.926 | 0.917 | 0.902 | 0.991 | 0.905 | 0.991 |
+| train-002 * | 0.913 | 0.833 | 0.958 | 0.984 | 0.886 | 0.968 |
+| train-003 | 0.892 | 0.863 | 0.882 | 0.971 | 0.860 | 0.981 |
+| train-004 | 0.933 | 0.863 | 0.972 | 0.995 | 0.914 | 0.980 |
+| train-005 | 0.920 | 0.857 | 0.948 | 0.988 | 0.896 | 0.979 |
+| train-006 | 0.915 | 0.800 | 0.992 | 0.989 | 0.886 | 0.960 |
 | train-control-01 * | 1.000 | 1.000 | 1.000 | 1.000 | 0.999 | 1.000 |
 | train-control-02 | 0.999 | 0.999 | 0.999 | 1.000 | 0.999 | 1.000 |
 
-\* tuning tasks; the other eight are held out. The reference's main loss is false alerts (2-6 a task, around real
-company events, a source's early growth and inside slow ramps). The ceiling's gap to 1.0 is irreducible
-for a point-in-time scorer: imputation noise (a repaired value carries the source's own noise: ceiling 0.951 against
-0.980 with exact imputation) and detection lag (a change cannot be dated until it has shown for a few days: the rest).
+\* tuning tasks; the other eight are held out. On 45 newly generated train tasks (scale check): answer key 1.0 on all, do-nothing 0, ceiling 0.971 (min 0.878), reference 0.904 on a sample of nine (min 0.725: false alerts). The reference's main loss is false alerts (2-6 a task, around real company events, a source's early growth and inside slow ramps). The ceiling's gap to 1.0 is imputation noise (a repaired value carries the source's own noise): with exact imputation it scores 0.999.
 
 ## Run
 

@@ -17,7 +17,7 @@ opening an episode; an episode closes when the source is back near its old basis
    the reviewer's rule for lasting changes. The original distrusted every day of an episode (confidence precision
    0.15-0.21; this alone took the reward from about 0.49 to 0.72).
 2. Thin data: only a source's thin beginning is discarded (until its median has held 20 a day for 90 days, with
-   hysteresis: kept from 25, dropped again under 16); a source that thins later is kept (reviewer's rule).
+   hysteresis: kept from 20, dropped again under 16); a source that thins later is kept (reviewer's rule).
 3. One-day problems are also judged against the source's own history (beyond 5x its own spread, and beyond 2.5x
    against its peers so real company moves stay trusted): catches ticket spikes on sources whose ticket is noisy
    against peers.
@@ -47,12 +47,15 @@ opening an episode; an episode closes when the source is back near its old basis
 17. The slow-drift check judges its move against the noise of the two medians it compares, not one day's noise.
 18. The at-most-half-the-sources rule counts only episodes opened in the last 90 days: an old, settled lasting change
     no longer blocks (or, worse, resets) a new change on a sister source.
+19. A source settles in again whenever it comes back after being dropped (a kept stretch starts after a gap of more
+    than 7 days), not only the first time it is kept: a thin start with a few sporadic kept days no longer ends the
+    settling period before the source has grown into coverage.
 Tried and dropped (no consistent gain across tasks): a lagged level baseline for ramps; leave-one-out offsets inside
 episodes; leave-one-out everywhere (noisier drift detection, more false episodes).
 
 **Checks.** Point in time by construction (forward walk), confirmed by the grader's truncation check. Re-run on its own
-output it moves the series 0.1-0.5% and raises no new alarms. Tuned on tasks 001-002; 003, 004 and the control held
-out (they score as well or better). numpy and pandas only.
+output it moves the series 0.1-0.5% and raises no new alarms. Tuned on tasks 001, 004, train-001, train-002 and train-control-01; the other eight held out. Reward
+0.904 on all 13 tasks, 0.914 on the held-out ones (2026-11-24). numpy and pandas only.
 
 **Known gaps.** Slow ramps are caught late (gain 0.2-0.65); a single-measure step on a source whose ticket is noisy
 against its peers can be missed; small reviewed real problems inside a source's noise are missed (recall 0.55-0.7).

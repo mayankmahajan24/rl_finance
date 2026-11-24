@@ -81,6 +81,8 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
                     break
         for _ in range(500):                 # every panel has a thin start (so doing nothing cannot pass)
             t, s_ = cands0[int(rng.integers(len(cands0)))]
+            if any((r['ticker'], r['source_id']) == (t, s_) for r in recurring_planted):
+                continue                     # a closure hidden in thin data would first show years later
             r = background.plant_thin_start(F, rng, t, s_, d0)
             if r:
                 thin_planted.append(r)

@@ -35,10 +35,10 @@ Reward = sqrt(confidence x cleaned series x stability): the geometric mean of th
   Cleaned series: gain x intact x kept, against the truth panel (the hidden panel before the problems were planted;
     real events kept). Error = mean over count and dollars of |log value - log truth|; a blank cleaned value counts as
     the raw value.
-    gain:   for each problem, 1 - (cleaned error / raw error) summed over the scored rows it changed, each error
-            counted only beyond the source's own noise (own_noise; dollars: the count and ticket noises combined),
-            floored at 0;
-            averaged within each kind, then over kinds. Reviewed real problems and known quirks have no truth panel
+    gain:   per kind of problem, 1 - (cleaned error / raw error) summed over the scored rows its problems changed
+            (pooled, so a problem that barely moved the series weighs little), each error counted only beyond the
+            source's own noise (own_noise; dollars: the count and ticket noises combined), floored at 0; then the
+            mean over kinds. Reviewed real problems and known quirks have no truth panel
             value (the truth panel is the real data), so they are scored against a hindsight reference built from the
             full hidden series (hindsight_ref): the source's relation to the median of its company's other sources (log
             count, log ticket), from REF_DAYS either side of a one-off problem (other problems left out), or the
@@ -400,7 +400,8 @@ def clean_score(truth, ev, scored_rows, ref=None):
                 continue
             g = max(0.0, 1 - ec[m].sum() / er[m].sum())
             gains.append(dict(type=e['type'], kind=kind(e['type']), ticker=e['ticker'], source_id=e['source_id'],
-                              start=e['start'], rows=int(m.sum()), raw_error=round(float(er[m].mean()), 3),
+                              start=e['start'], rows=int(m.sum()), raw_total=float(er[m].sum()), clean_total=float(ec[m].sum()),
+                              raw_error=round(float(er[m].mean()), 3),
                               clean_error=round(float(ec[m].mean()), 3), gain=round(g, 3)))
             continue
         er = 0.5 * (beyond(lg(ev.ct) - lg(ev.tct), ev.sig_c) + beyond(lg(ev.amt) - lg(ev.tamt), sig_a))
@@ -410,7 +411,8 @@ def clean_score(truth, ev, scored_rows, ref=None):
             continue
         g = max(0.0, 1 - ec[m].sum() / er[m].sum())
         gains.append(dict(type=e['type'], kind=kind(e['type']), ticker=e['ticker'], source_id=e['source_id'],
-                          start=e['start'], rows=int(m.sum()), raw_error=round(float(er[m].mean()), 3),
+                          start=e['start'], rows=int(m.sum()), raw_total=float(er[m].sum()), clean_total=float(ec[m].sum()),
+                              raw_error=round(float(er[m].mean()), 3),
                           clean_error=round(float(ec[m].mean()), 3), gain=round(g, 3)))
     # rows no problem touched should be left as they are: intact = within the source's own noise of the truth
     ok = scored_rows & ~changed & ~real & ~ev.thin
@@ -422,9 +424,15 @@ def clean_score(truth, ev, scored_rows, ref=None):
     kept = 1 - blank / int(keep.sum()) if keep.any() else 1.0
     if gains:
         g = pd.DataFrame(gains)
-        gain = float(g.groupby('kind').gain.mean().mean())
-        by_kind = g.groupby('kind').agg(events=('gain', 'size'), gain=('gain', 'mean'),
-                                        raw_error=('raw_error', 'mean'), clean_error=('clean_error', 'mean'))
+        # per kind, the share of its error (beyond noise) repaired, pooled over its problems (a problem that barely
+        # moved the series weighs little); then the mean over kinds
+        tot = g.groupby('kind')[['raw_total', 'clean_total']].sum()
+        gain = float((1 - tot.clean_total / tot.raw_total).clip(lower=0).mean())
+        g = g.drop(columns=['raw_total', 'clean_total'])
+        gains = g.to_dict('records')
+        by_kind = g.groupby('kind').agg(events=('gain', 'size'), raw_error=('raw_error', 'mean'),
+                                        clean_error=('clean_error', 'mean'))
+        by_kind['gain'] = (1 - tot.clean_total / tot.raw_total).clip(lower=0)
         by_kind = by_kind.round(3).reset_index().to_dict('records')
     else:
         gain, by_kind = 1.0, []

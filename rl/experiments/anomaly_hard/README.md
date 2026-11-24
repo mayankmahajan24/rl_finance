@@ -49,23 +49,34 @@ cycles, holiday shifts, quarter-end surges, settlement lags).
 
 ## The grader (`grade.py`)
 
-Gates, reward 0 if any fails: output format, the point-in-time check on all three columns, no model or network
-client in the code (import scan; the runs have no network), the write-up present. Then, in three parts:
+What it grades, the things that matter for this kind of task (details in `grade.py`'s docstring):
 
-* **Confidence (40%):** rows below 0.5 are distrusted. Untrustworthy rows: every day of a point anomaly or reviewed
-  real problem, and a level shift's first 14 days; the following days up to 45 are unscored while the code settles on
-  the new level, after which the new level is trusted. When a temporary shift ends the data is right again: the next
-  45 days are unscored, then the source must be trusted. 0.5 x row F1 (precision vs per-problem day recall) + 0.5 x
-  event F1 (alert precision vs problems caught).
-* **Self-consistency (20%):** `score.py` run again on its own cleaned series and on the truth panel. Fixed (share of
-  planted untrustworthy rows the first run distrusted and the run on the cleaned series trusts) x (0.5 x no new alarms
-  (falls to zero when the cleaned series is distrusted on 1 point more of rows than the truth panel) + 0.5 x
-  idempotent (falls to zero when re-cleaning moves the cleaned series 5% on average)).
-* **Cleaned series (40%):** for each planted problem (and each reviewed real problem, against a hindsight reference from the full series), the share of the raw value's log error (vs the truth panel)
-  that the cleaned value closes, averaged within and then across kinds; times a damage penalty that reaches zero when
-  rows no problem touched move 5% on average.
-* Unscored: before the warm-up ends, low-volume series, thin stretches (truth count's 28-day median under 10), near
-  known natural artifacts. The write-up is judged separately.
+Gates (reward 0 if any fails): output format; point in time (the output on any day must not change when later days
+are added); no model or network calls (the scorer also runs with the network off); a write-up; and low signal
+dropped (at least 90% of the rows of every thin beginning distrusted and left blank).
+
+1. **Catch the problems** (recall): the share of planted problems with any untrustworthy day distrusted, per kind (the
+   one-day kinds, steps, ramps), averaged over kinds. A change counts from the day it first shows (3x the source's own
+   noise); a slow build-up over months is scored only in the cleaned series.
+2. **Don't raise false alarms** (alert precision): runs of distrusted days on a source, gaps of 2 days joined and
+   split every 14 days, count as alerts; the share that touch a problem. Closures every year, real company events
+   and the new level after a lasting change must be trusted.
+   Confidence = F1 of 1 and 2.
+3. **Repair the problem rows** (gain): per kind, the share of the raw error beyond the source's own noise that the
+   cleaned series removes, pooled over the kind's problems: impute one-day problems, rescale a lasting change to the
+   old basis.
+4. **Don't damage good rows** (intact): the share of untouched rows left within the source's own noise.
+5. **Keep the history** (kept): the share of rows that should be kept not left blank.
+   Cleaned series = 3 x 4 x 5.
+6. **Stability**: run again on its own cleaned series, the scorer should raise no new alarms beyond those it raises on
+   genuinely clean data (scaled by the size of the task's problems).
+
+Reward = sqrt(confidence x cleaned series x stability), a geometric mean: knowing what is wrong without repairing it,
+or repairing without knowing, scores low. Graded on a hidden panel of other companies than the visible one.
+
+Probes (all 13 tasks, 2026-11-24): oracle (the answer key) 1.0; ceiling (a gold-informed point-in-time detector with
+realistic limits) 0.932; reference 0.904 (held-out tasks 0.914); do nothing 0.0; distrust everything with the
+answer key's cleaned series 0.108 (at most 0.195); distrust everything, raw series 0.0.
 
 Checks: `solutions/oracle` (the gold) scores 1.0 on all five tasks; `solutions/naive` (trust everything, clean = raw)
 scores 0; a model import, a cleaned series that looks ahead, a 3% nudge to every value and blank imputations are each

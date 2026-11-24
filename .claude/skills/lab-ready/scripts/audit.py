@@ -341,7 +341,7 @@ def calibration(card: Card, fam_id: str, split: str) -> None:
     cmd = f"python rl/harness/calibrate.py run --split {split} --model <strong> --model <weaker> --k 2 --budget <usd>"
     if not runs:
         card.set("H2", BLOCKED, f"no calibration run for {split}: {cmd} (approved instrument, API budget), then k 4, 8")
-        for item in ("H3", "H4", "H5", "H6", "H7", "H8", "H9", "E6"):
+        for item in ("H3", "H4", "H5", "H6", "H7", "H8", "H9", "H11", "H12", "E6"):
             card.set(item, BLOCKED, "needs the calibration run (H2)")
         return
     stats = json.loads(runs[-1].read_text())
@@ -366,6 +366,12 @@ def calibration(card: Card, fam_id: str, split: str) -> None:
             card.set("H6", MANUAL, f"{model}: {zero + full_} tasks at 0/k or k/k to convert")
     errored = max((s["errored"] for t in tasks.values() for s in t["models"].values()), default=0)
     card.set("H7", PASS if errored <= 0.05 else FAIL, f"worst errored share {errored}")
+    k = stats["k"]
+    solid = [(t["task_id"], m, s[f"pass^{k}"]) for t in tasks.values() for m, s in t["models"].items() if s.get(f"pass^{k}") is not None]
+    if solid:
+        mean = sum(v for _, _, v in solid) / len(solid)
+        card.set("H11", MANUAL, f"mean pass^{k} {mean:.2f} over {len(solid)} task-model pairs (intervals in report.md); "
+                 "add cost per correct outcome from the run records")
     fam = stats["families"].get(fam_id, {})
     card.set("H8", MANUAL, f"noise floor {fam.get('noise_floor')}; separation {fam.get('separation')}")
 

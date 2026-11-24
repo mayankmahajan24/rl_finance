@@ -69,9 +69,22 @@ its control; the only differences should be the data itself.
 
 ### A6. The task is real work
 It is something the `role` in its metadata does at a fund, with the inputs they would have, not a
-puzzle built to be hard. Judgment-domain tasks capture the expert's counterfactuals (what new
-information would change the call), not only the final answer.
+puzzle built to be hard. In a judgment domain the gold holds what is not in the dataset: what the
+expert finds non-obvious, what others miss, and the counterfactuals that would flip the call, not
+only the final answer. A task is also not a job: real work runs through other people and several
+steps, so the family's description claims the task it measures and no more.
 *Verify:* the source's assignment and README; for research_design, gold records ruled-out objections.
+
+### A7. No task can only be scored by guessing
+If the instruction leaves a rule, a value or a convention unstated and the data does not settle
+it, a model can only score by guessing, and RL then teaches it to guess with confidence in
+production. Everything the gold depends on is either stated, derivable from the visible files, or
+genuinely unknowable, and in the last case the right answer is to say so and the grader pays for
+that, not for a lucky guess.
+*Verify:* for each gold field, name the visible evidence that determines it. Take a train task's
+passing answer and ask which of its choices the agent could not have justified from what it saw.
+*Fix:* state the convention (A3), put the evidence in the data, or make "cannot be determined" a
+scored answer.
 
 ---
 
@@ -178,6 +191,7 @@ evidence (in-sample errors, a count), the verifier recomputes it.
 No check on which tools or commands were used, no required intermediate files, no exact-string
 match where equality of meaning is intended: numbers within a stated tolerance, dates and case
 normalised, order-insensitive lists, an interval match for ranges.
+A verifier that fails a valid alternative is a lazy verifier, and it teaches one route.
 *Verify:* write two correct answers that differ in form (key order, date format, an equivalent
 label, a different but valid method) and grade both.
 *Fix:* normalise in the verifier; add the pair to the tests (G1).
@@ -204,6 +218,30 @@ unprivileged user, with a minimal environment, unable to read `tests/` or write 
 ### D7. Grading finishes inside its timeout on the largest task
 *Verify:* time the verifier on the biggest input and on the `long` attack against
 `verifier_timeout_sec`.
+
+### D8. The gold is right, and does not contradict itself
+An incorrect verifier is worse than none: gold agrees with the instruction and with the data the
+agent sees, no two gold items conflict, and where a planted item overlaps a natural one the gold
+says which counts. Tolerances match what the instruction promises.
+*Verify:* solve two train tasks by hand, or read the reference's misses one by one: each
+disagreement is either the reference's error or the gold's. Read every 0/k task with this in mind (H5).
+
+### D9. Doing the right thing plus the wrong thing does not pay in full
+A verifier that checks only for the wanted outcome is missing its other half. It also checks what
+should not have happened: input data altered, files written outside the deliverables, an action
+out of scope for the role, a step that failed but was counted because it was attempted, the right
+record with the wrong field. Check resulting state, not that a call was made.
+*Verify:* take a passing answer and add a harmful side effect the role would be blamed for (edit
+`/app/data`, write a second contradictory deliverable, overwrite an input). The reward must fall
+or the trial must be flagged.
+*Fix:* a state check in the verifier, and the case as an attack.
+
+### D10. What the agent tells the reader is checked against what it did
+A write-up, summary or message that claims work that was not done, or numbers the artifacts do
+not support, costs reward: a model must not learn that lying to the user is free. (kpi_nowcast's
+C36 is the pattern: figures in the brief must match the forecast JSON and the errors recomputed
+from it.)
+*Verify:* keep a passing answer's artifacts and rewrite its prose to overclaim; grade it.
 
 ---
 
@@ -243,6 +281,20 @@ after the answer was already written.
 *Verify:* Harbor job folders under `runs/calibration/<s>/<run_id>/jobs/` (local, gitignored).
 BLOCKED until a calibration run exists.
 
+### E7. A loophole is a blocker, never a known limit
+Reward hacking learned on one task transfers: a finance task with an exploitable grader can
+degrade a model's behaviour in unrelated domains. Any attack that scores above the margin is fixed
+or the affected tasks are withheld from training; it is not shipped with a note.
+
+### E8. A grader exists that the training loop never sees, and shortcuts are watched for
+Any grader used for RL or best-of-n selection is eventually gamed. Keep a check outside the reward
+that training cannot optimise against: the held-out split with its secret seeds, a diagnostic
+metric that is never blended in, or a second grader run only at evaluation. Name it in the report.
+Alongside it, look in transcripts for shortcut behaviour (reading history or metadata, probing
+`/tests`, editing inputs, searching for the generator) and plan to tighten the graders as models
+improve: a grader that held for this year's models is not finished.
+*Verify:* which metric or split plays this role for the family; that nothing in `reward` depends on it.
+
 ---
 
 ## F. Rubrics and model judges
@@ -281,8 +333,9 @@ forced to guess, and the code decides what unknown scores.
 
 ### F7. The judge is pinned and separate from the model under test [auto, partial]
 Model, effort, votes and max tokens in `family.yaml` (`judge`), part of the instrument; no
-fallback model; the anti-injection preamble on every call. Avoid a judge from the same model as
-the one being scored; where both are Anthropic models say so in the report and lean on F9 and F10.
+fallback model; the anti-injection preamble on every call. The judge should come from a different
+model family than the one being scored; where both are Anthropic models say so in the report as a
+limit and lean on F9 and F10.
 
 ### F8. Order effects are neutralised
 Comparisons are shown in both orders and score only when consistent; lists of items shown to the
@@ -293,11 +346,24 @@ judge do not put gold first.
 flip are rewritten (F1), not out-voted.
 
 ### F10. The judge agrees with people [human]
-Against held-out human labels: failure recall and pass precision per line, reported separately.
+Hand-label 10 to 20 real traces to align the rubric with what the expert means; 50 to 100 expert
+labels before trusting the judge's scores at scale; re-label when the agent or the rubric changes.
+Report, per line, the catch rate (bad outputs the judge fails), the false-fail rate (good outputs
+it fails) and kappa. Raw agreement hides both errors when most answers pass.
 Until a second expert labels the same tasks this is a stated limit, not a pass.
 
 ### F11. Every rubric and any cheaper judge was tested vote by vote before paying for rollouts
 The F3 answer, a known pass and a known fail, per line, before any calibration run.
+
+### F12. The rubric has been through its rounds of drift, and they are logged
+Reading traces changes what the criteria mean; expect two or three rounds before a rubric settles.
+Each round is recorded (what was read, which lines changed and why:
+`runs/<family>/reviews/feedback_log.md`), and labels made under an older wording are redone or dropped.
+
+### F13. The quality rubric and the training reward are kept apart
+A rich, judged quality measure is for understanding a model; the reward a policy climbs is
+low-variance and hard to argue with. Where a judged score enters the reward, its weight is
+bounded and stated (F4), and the full rubric is still reported separately as a diagnostic.
 
 ---
 
@@ -331,7 +397,9 @@ budget. Never run calibration on held-out tasks to tune anything.
 
 ### H2. At least two model families, one of them weaker, through the real agent harness
 The model and its harness are tested together. A strong model reads through harness and API bugs
-that a weaker one exposes. `calibrate.py run --model <strong> --model <weak>`.
+that a weaker one exposes. `calibrate.py run --model <strong> --model <weak>`. Where a second
+agent harness is available (`--agent`), run it too: a result that holds in one harness only is a
+harness result.
 
 ### H3. Screening is a ladder, not a flat k
 k = 2, then 4, then 8, stopping early on a task at 2/2, 3/4 or 4+/8: it is too easy for on-policy
@@ -344,8 +412,10 @@ tasks at 0, in band, above band and at k/k.
 
 ### H5. Every 0/k was audited for a harness or rubric bug before being called hard
 Read the transcripts. Typical causes: an output path the agent could not have known, a timeout, a
-tolerance, a judge line nobody could pass. A task at 0/k for every model with no bug needs
-supervised data first, not on-policy RL: say so rather than keep it.
+tolerance, a judge line nobody could pass, wrong gold (D8). A task at 0/k for every model with no
+bug needs supervised data first, not on-policy RL: say so rather than keep it. But don't write a
+hard task off on a small k: a sparse pass rate is noisy (0/4 is consistent with a 1-in-8 task
+about 6 times in 10), and some hard tasks are learned slowly. Look at the interval, not the count.
 
 ### H6. 0/k and k/k tasks are converted before new ones are authored
 Move a too-easy task with the dials in section I; a too-hard one by fixing what H5 found.
@@ -362,6 +432,25 @@ floor is below the gap between models (`report.md`, Model separation).
 Tokens, wall time and judge cost per attempt from the run records. A dearer task with mixed
 outcomes beats a cheap one at 0/8.
 
+### H10. The band was reached by changing tasks, never by bending the verifier
+Write the right verifier first; then see where difficulty lands. Loosening a tolerance, dropping a
+check or re-weighting the reward to pull a task into the band makes the number fit and the
+measurement wrong. Every verifier or threshold change in this session has a correctness reason
+stated in the report, independent of any pass rate.
+
+### H11. Reliability and cost are reported, not only pass@1
+pass^k (all k attempts pass) beside pass@k, both with bootstrap intervals (`calibrate.py report`
+gives these), and cost per correct outcome (spend divided by passing attempts) from the run
+records. Capability improves faster than reliability, and identical runs can differ many times
+over in cost, so the spread of cost per attempt is reported too.
+
+### H12. The result survives a reworded instruction
+A paraphrase of the instruction with the same content (reordered, different wording, same
+deliverables) gives a pass rate inside the noise of the original. A drop means the task was
+measuring the phrasing.
+*Verify:* build two or three train tasks with a paraphrased template into a scratch folder and
+run the same k; do not commit the variant.
+
 ---
 
 ## I. Difficulty design
@@ -370,6 +459,8 @@ outcomes beats a cheap one at 0/8.
 The score comes from two or three non-fatal sizing or calibration decisions, each moving it part
 of the way. A gate that zeroes the reward is there for integrity (foresight, look-ahead, a
 contradiction between deliverables), never as the difficulty, and is recorded as such in `reward`.
+A penalty for inefficiency (tokens, steps, time), if there is one, is bounded and small next to
+the outcome: its effect on behaviour is not linear in its size.
 *Verify:* read `reward` in `family.yaml`; over the attack and solution rows, how often is the
 reward exactly 0 for an answer that did real work?
 
@@ -388,6 +479,14 @@ Across the split, the correct answer is not predictable from base rates (E3).
 Not one solution replayed with new numbers: trap types, magnitudes and which ones co-occur vary;
 fingerprints are unique; train can be generated at volume without repeats
 (`python rl/build.py <f> --split train --n 200 --controls 20`, then count distinct fingerprints).
+
+### I6. Where the job is pricing uncertainty, the reward prices it too
+A reward that pays only for the point answer teaches overconfidence. If the deliverable carries a
+range, a probability or a confidence, a proper scoring rule on it reaches the reward (or the
+report states why it is a diagnostic only), an over-narrow interval costs more than an honest wide
+one, and "not enough evidence" can be the best-scoring answer on the tasks where it is true.
+*Verify:* grade the reference with its interval collapsed to the point, and with it widened tenfold;
+see what moves.
 
 ---
 
@@ -425,3 +524,10 @@ No transcripts, answers, gold, grading breakdowns, or an anonymised task's real 
 ### K4. Known limits are written down
 Anything left `WARN`, `BLOCKED` or accepted as a residual risk appears in the readiness report and,
 where it outlives the session, in `rl/README.md` (Known limits).
+
+### K5. The family says what kind of measurement it is
+Capability (can a model do this at all: hard, mixed outcomes), reliability or regression (does it
+keep doing it: near-saturated, tracked with pass^k), or training. A task that saturates as a
+capability measure moves to the regression set rather than being deleted. Passing a task in
+isolation is not evidence for the workflow around it: say which of capability, reliability and
+checkability of the output the family speaks to, in `rl/README.md`.

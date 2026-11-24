@@ -3,20 +3,19 @@
 Like the oracle it reads the task's gold and truth panel (ORACLE_TASK), but it only acts the way an excellent past-only
 detector could:
 
-* It knows what each row should read (the truth panel; the hindsight reference on reviewed real problems), and judges
-  a row by its deviation from that in units of the source's own noise against its peers (sigma, per series and
-  channel: log count and log ticket).
+* It knows what each row should read (the truth panel), and judges a row by its deviation from that in units of
+  the source's own noise against its peers (sigma, per series and channel: log count and log ticket).
 * A one-day problem is caught on the day only if it stands out: more than POINT_K sigma. Smaller ones are missed.
-* A level change (planted shift, reviewed real change or known quirk) is caught once its deviation's trailing 3-day
-  median (a step) or 14-day median (a slow ramp) passes SHIFT_K sigma, so ramps are caught late. Inside a change,
-  one-day problems are judged against the shifted level so far, caught or not. From then on its onset is distrusted (until DISTRUST_DAYS after its start)
-  and the cleaned series is rescaled to the old level; after that the new level is trusted, still rescaled.
+* A level change is caught once its deviation's trailing 3-day median (a step) or 14-day median (a slow ramp) passes
+  SHIFT_K sigma, so ramps are caught late. Inside a change, one-day problems are judged against the shifted level so
+  far, caught or not. From then on its onset is distrusted (until DISTRUST_DAYS after its start) and the cleaned
+  series is rescaled to the old level; after that the new level is trusted, still rescaled.
 * When a temporary shift ends, the correction carries on for RETURN_DAYS before the return is noticed.
 * Imputed and rescaled values carry the source's own noise (a deterministic draw per row, clipped at 2 sigma, times
   NOISE): the best a peer-based estimate can do. NOISE = 0 (solutions/ceiling_ideal) is the ideal variant with exact
   imputation.
-* Thin stretches are dropped as the grader expects; recurring patterns and real-event decoys are left alone (they do
-  not deviate from the truth).
+* The thin beginning is dropped as the grader expects; yearly closures and real company events are left alone (they
+  do not deviate from the truth).
 """
 import argparse
 import json
@@ -29,7 +28,7 @@ import pandas as pd
 
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parents[1]))
-from grade import KEYS, hindsight_ref, label_rows  # noqa: E402
+from grade import KEYS, label_rows  # noqa: E402
 
 POINT_K, SHIFT_K = 3.0, 2.0
 DISTRUST_DAYS = 30
@@ -72,9 +71,6 @@ label_rows(gold, df, truth)                       # sets df.thin (stretches the 
 
 # what each row should read
 df = df.merge(truth[KEYS + ['ct', 'amt']].rename(columns={'ct': 'xct', 'amt': 'xamt'}), on=KEYS, how='left')
-ref = hindsight_ref(gold, truth)
-df = df.merge(ref[KEYS + ['ref_ct', 'ref_amt']], on=KEYS, how='left')
-df['xct'], df['xamt'] = df.ref_ct.fillna(df.xct), df.ref_amt.fillna(df.xamt)
 df = df.merge(own_noise(truth), on=['ticker', 'source_id'], how='left')
 df = df.sort_values(['ticker', 'source_id', 'date']).reset_index(drop=True)
 dev_c = np.log(df.ct.clip(lower=0.01) / df.xct)

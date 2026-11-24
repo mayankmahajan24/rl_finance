@@ -1,8 +1,5 @@
-"""Semi-real background for anomaly_hard tasks (feedback #38): an answer key that is exact.
-
-The real panel carries source-specific oddities nobody has labelled (one-off glitches, drifts, quirks), so a scorer that
-flags them cannot be told whether it was right. Here every source keeps its company's real day-to-day behaviour but
-loses its own unlabelled oddities, and the source-level traps that matter are planted back with exact labels:
+"""Semi-real background for anomaly_hard tasks: every source follows its company's real daily behaviour, and every
+source-level oddity is planted with an exact label.
 
   semi_real          each source = its company's real daily move (median of its sources, each net of its own
                      level) + the source's own constant level + its weekday pattern + its real day-to-day noise with

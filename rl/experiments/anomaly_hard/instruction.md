@@ -59,34 +59,35 @@ python /app/solution/score.py --input IN.csv --output OUT.csv
 
 ## How you are scored
 
-The grader knows which rows misreport (problems planted in the hidden panel, and real problems in the source data:
-reviewed ones and known quirks of individual sources) and what each source would have reported had it been working
-normally.
+The grader knows which rows of the hidden panel misreport and what each source would have reported had it been
+working normally.
 
 Your score is a weighted average of three parts: 40% confidence, 40% cleaned series, 20% stability.
 
-* **Confidence.** Counted per problem and per alert. Recall is the share of problems you catch (a problem is
-  caught if you score any of its untrustworthy days below 0.5; each kind of problem weighs the same). An alert is a
-  run of rows on one source scored below 0.5 (gaps of up to two days joined; a run longer than two weeks counts
-  as one alert per two weeks); precision is the share of your alerts
-  that touch a real problem. The score is the F1 of the two. A problem counts from the day it first shows in the data;
-  one that builds up too slowly for its start to be dated counts only in the cleaned series.
-* **Cleaned series.** On rows a problem affected, how much of the gap between the raw value and what the
-  source should have reported your cleaned value closes (in log terms, count and dollars, each kind of problem
-  weighing the same; differences within the source's own day-to-day noise are not counted), multiplied by the share of rows that were fine and that your cleaned series leaves within the
-  source's own noise, and by the share of rows that should be kept and that you did not leave blank. A blank cleaned
-  value on a row with a problem counts as the raw value, so a row left blank where it should have been imputed earns
-  nothing.
+* **Confidence.** Counted per problem and per alert. Recall is the share of problems you catch (a problem is caught
+  if you score any of its untrustworthy days below 0.5; each kind of problem weighs the same). An alert is a run of
+  rows on one source scored below 0.5 (gaps of up to two days joined; a run longer than two weeks counts as one alert
+  per two weeks); precision is the share of your alerts that touch a real problem. The score is the F1 of the two. A
+  problem counts from the day it first shows in the data; one that builds up too slowly for its start to be dated
+  counts only in the cleaned series.
+* **Cleaned series.** On rows a problem affected, how much of the gap between the raw value and what the source
+  should have reported your cleaned value closes (in log terms, count and dollars, each kind of problem weighing the
+  same; differences within the source's own day-to-day noise are not counted), multiplied by the share of rows that
+  were fine and that your cleaned series leaves within the source's own noise, and by the share of rows that should be
+  kept and that you did not leave blank. A blank cleaned value on a row with a problem counts as the raw value, so a
+  row left blank where it should have been imputed earns nothing.
 * **Stability.** Your script is run again on its own cleaned series (same columns; counts may not be whole numbers)
   and on clean data, and the cleaned series should not be distrusted more often than clean data (extra alarms count
   against you in proportion to the size of the real problems in the panel).
 
 The total is set to zero if the outputs are malformed, if the point-in-time check fails, if the code imports or shells
-out to a model or network client, if the write-up is missing, if the confidence score is under 0.25 (repairing the series without detecting its
-problems does not count), or if low-signal data is not dropped: a source that
-reports fewer than about twenty transactions a day before it has built up steady coverage (its early history, or all
-of it) must be distrusted and left blank there (at least 90% of those rows). A source that dips that low after it was
-established is kept: those rows count in the cleaned-series score, so blanking them costs history. Rows near the
-twenty-a-day line, the two weeks either side of a low-signal stretch's edges, problems too small to stand out from a
-source's own noise, and other debatable rows are not scored.
+out to a model or network client, if the write-up is missing, if the confidence score is under 0.25 (repairing the
+series without detecting its problems does not count), or if low-signal data is not dropped: a source that reports
+fewer than about twenty transactions a day before it has built up steady coverage (its early history, or all of it)
+must be distrusted and left blank there (at least 90% of those rows). A source that dips that low after it was
+established is kept: those rows count in the cleaned-series score, so blanking them costs history.
+
+Not scored: the panel's first year (history for your code to learn from), rows near the twenty-a-day line, the two
+weeks either side of a low-signal stretch's edges, problems too small to stand out from a source's own noise, and
+other debatable rows.
 The write-up is also graded on its own, separately from this score.

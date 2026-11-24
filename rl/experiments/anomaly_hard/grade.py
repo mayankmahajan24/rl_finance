@@ -1,61 +1,56 @@
-"""Grade a solution on an anomaly_hard prototype task:
+"""Grade a solution on an anomaly_hard task:
     python grade.py TASK_DIR SOLUTION_DIR [--writeup PATH] [--json OUT] [--cache DIR]
 
-Runs SOLUTION_DIR/score.py on the task's hidden panel, truncated at the gold's cutoffs (earliest first) and then
-whole, each run in its own empty folder with the network off (its own network namespace where the machine allows it,
-and no proxy settings, minimal environment). A prototype: unlike
-the Harbor verifier it does not sandbox the scorer as another user, so only grade code copied out of its run folder.
+Runs SOLUTION_DIR/score.py on the task's hidden panel (tests/eval_panel.csv.gz), truncated at the gold's cutoffs and
+then whole, each run in an empty folder with the network off (its own network namespace where the machine allows it;
+no proxy settings, minimal environment). Scores against the gold (tests/gold.json: every planted problem, exact) and
+the truth panel (tests/truth_panel.csv.gz: the hidden panel before the problems were planted, real events kept).
 
-Gates (reward 0 if any fails): output format (one row per input row; confidence in [0, 1]; clean_ct and clean_amt
-blank or non-negative), the point-in-time check on all three columns, no model or network calls in the code, a
-write-up (default SOLUTION_DIR/../output/writeup.md), low signal dropped: at least LOW_SIGNAL_SHARE of the rows of
-thin beginnings (below) distrusted and left blank, and detects: a confidence score (below) of at least MIN_CONFIDENCE,
-so a solution that repairs the series but ignores confidence (trusts or distrusts everything) scores 0.
+Gates (reward 0 if any fails):
+  format         one output row per input row; confidence in [0, 1]; clean_ct, clean_amt blank or non-negative
+  point_in_time  outputs on the truncated panels equal the full run's, all three columns
+  no_ai          no model or network client imported or shelled out to
+  writeup        SOLUTION_DIR/../output/writeup.md (or --writeup) exists and is not empty
+  low_signal_dropped  at least LOW_SIGNAL_SHARE of the thin beginning's rows distrusted (confidence < 0.5) and blank
+  detects        confidence score at least MIN_CONFIDENCE (repairing the series without detecting problems cannot pass)
 
-Reward = W_CONF x confidence + W_CLEAN x cleaned series + W_STAB x stability (0.4 / 0.4 / 0.2), a weighted average;
-the three components are reported, and so is the geometric mean sqrt(confidence x cleaned series x stability) as
-reward_geometric (the reward before feedback #45).
-  Scored rows: from eval_start, not on low-volume series, not on company-wide natural breaks. Thin beginnings (before a
-  source is established: its truth count's centred 28-day median has held thin_ct for THIN_ESTABLISHED days) where
-  that median is under THIN_LO x thin_ct, after their first THIN_EDGE days, must be dropped (the gate above) and are
-  otherwise not scored; borderline rows (median between THIN_LO and THIN_HI x thin_ct) and THIN_EDGE days either side
-  of a thin stretch's edges are not scored; a source that thins after it was established is kept (scored for the
-  cleaned series). What a point-in-time scorer could see (build.annotate_events, in the gold): a level change is
-  scored from the day it became visible (its deviation reached 3x the source's own noise; earlier days not scored), and
-  a change that never did, or a reviewed one-day problem under 6x that noise, is not scored at all; a change that took
-  longer than SETTLE_DAYS to become visible (slow: a build-up over months, no onset a point-in-time scorer could date) is scored on the cleaned
-  series only, and for confidence only as trusted once it has settled. Untrustworthy rows
-  (label_rows): every day of a one-day problem (planted, or reviewed real); a level change (planted, reviewed, or a
-  known source quirk measured in the data) is untrustworthy for its first CHANGE_DAYS days from when it became visible, then not scored up to SETTLE_DAYS from its start (or its settle date) while the code decides whether the new
-  level is the new normal; after that the new level is trusted (and the cleaned series should rescale it). When a
-  temporary change ends, the next SETTLE_DAYS are not scored, and after that the source must be trusted.
-  Confidence: F1 of alert precision (alerts: runs of distrusted scored days on a source, gaps of up to ALERT_GAP days
-    joined, split every ALERT_DAYS days; precision: the share that touch an untrustworthy row) and recall (the share of problems caught: any of a
-    problem's untrustworthy days distrusted, averaged within each kind, then over kinds; the planted one-day problems
-    are one kind). Row precision and day recall are reported, not scored. A panel with no untrustworthy rows: the
-    share of scored rows trusted.
-  Cleaned series: gain x intact x kept, against the truth panel (the hidden panel before the problems were planted;
-    real events kept). Error = mean over count and dollars of |log value - log truth|; a blank cleaned value counts as
-    the raw value.
-    gain:   per kind of problem, 1 - (cleaned error / raw error) summed over the scored rows its problems changed
-            (pooled, so a problem that barely moved the series weighs little), each error counted only beyond the
-            source's own noise (own_noise; dollars: the count and ticket noises combined), floored at 0; then the
-            mean over kinds. Reviewed real problems and known quirks have no truth panel
-            value (the truth panel is the real data), so they are scored against a hindsight reference built from the
-            full hidden series (hindsight_ref): the source's relation to the median of its company's other sources (log
-            count, log ticket), from REF_DAYS either side of a one-off problem (other problems left out), or the
-            REF_DAYS before a lasting change (the old basis); errors within the source's own noise in that relation
-            are not counted
-    intact: share of the scored rows no problem changed whose cleaned value is within the source's own noise of the
-            truth (own_noise: its daily relation to its peers' median, robust spread), in count and in ticket
-    kept:   share of the scored rows that should be kept (all but thin beginnings) not left blank
-  Stability (multiplies the cleaned series): score.py run again on its own cleaned series (rows it left blank dropped)
-    and on the truth panel (genuinely clean data, its own baseline): 1 - (rows distrusted on its cleaned series beyond
-    those distrusted on the truth panel) / (the rows of the task's scored problems, in confidence or in the cleaned
-    series, whichever is more; a panel with no problems: its scored rows), floored at 0: new alarms measured against
-    the size of what is actually wrong. If the run fails, 0.
-  Reported, not scored: distrusted rows on real data nobody has judged (unknown_flagged_rows).
-  The write-up's quality is judged separately (not in this reward).
+Reward = W_CONF x confidence + W_CLEAN x cleaned series + W_STAB x stability (0.4 / 0.4 / 0.2). Also reported: the
+three components and the geometric mean sqrt(confidence x cleaned series x stability) (reward_geometric).
+
+Scored rows (label_rows): from eval_start (one year in), not on low-volume series (ignore_series), not near
+company-wide natural breaks (exclusions with no source), not on a closure's first year (exclusions of kind
+recurring_first). Timing, from what a point-in-time scorer could see (build.annotate_events, written into the gold):
+  * a problem is scored from the day it becomes `visible` (its trailing 7-day median deviation reaches 3x the source's
+    own noise); a level change that never does is `unscored`; one that takes over SETTLE_DAYS to show is `slow`
+    (cleaned series only; for confidence unscored until settled, then trusted)
+  * one-day problems: every day untrustworthy
+  * level changes: the first CHANGE_DAYS from when visible untrustworthy, unscored up to SETTLE_DAYS while the code
+    decides, then the new level trusted; after a temporary change ends, SETTLE_DAYS unscored, then trusted
+  * thin beginning: before a source is established (its truth count's centred 28-day median has held thin_ct for
+    THIN_ESTABLISHED days), rows with that median under THIN_LO x thin_ct must be dropped (the gate); rows between
+    THIN_LO and THIN_HI x thin_ct and THIN_EDGE days either side of the stretch's edges are unscored. A source that
+    thins after it was established is kept (scored for the cleaned series).
+
+Confidence = F1(alert precision, recall).
+  recall           share of problems with any untrustworthy day distrusted, per kind (the four one-day kinds are one
+                   kind), mean over kinds
+  alert precision  alerts are runs of distrusted scored days on a source, gaps up to ALERT_GAP days joined, split every
+                   ALERT_DAYS days; the share that touch an untrustworthy row
+  A panel with no untrustworthy rows (a control): the share of scored rows trusted.
+
+Cleaned series = gain x intact x kept, against the truth panel; a blank cleaned value counts as the raw value.
+  gain    per kind, 1 - (cleaned error / raw error) pooled over the kind's problems' scored rows, each error = mean over
+          count and dollars of |log value - log truth| beyond the source's own noise (own_noise; dollars: count and
+          ticket noise combined), floored at 0; mean over kinds
+  intact  share of scored rows no problem changed whose cleaned value is within the source's own noise of the truth,
+          in count and in ticket
+  kept    share of scored rows that should be kept (all but the thin beginning) not left blank
+
+Stability: score.py run again on its own cleaned series (blank rows dropped) and on the truth panel: 1 - (rows
+distrusted on its cleaned series beyond those distrusted on the truth panel) / (rows of the task's scored problems,
+in either score; a panel with none: its scored rows), floored at 0. If a run fails, 0.
+
+The write-up's quality is judged separately (not in this reward).
 """
 from __future__ import annotations
 
@@ -79,8 +74,6 @@ W_CONF, W_CLEAN, W_STAB = 0.4, 0.4, 0.2   # headline reward weights (confidence,
 ALERT_GAP = 2            # days of trust that still join two distrusted runs into one alert
 ALERT_DAYS = CHANGE_DAYS  # an alert longer than a change's onset window counts as several
 ONE_DAY = {'volume_spike', 'dropout', 'count_flood', 'dollar_spike'}   # planted one-day problems: one kind
-REAL_TYPES = {'real', 'real_change'}   # problems in the source data (reviewed or known quirks): cleaned against hindsight_ref
-REF_DAYS = 56
 THIN_ESTABLISHED = 90    # a source is established once its median has held at thin_ct or more this many days running
 THIN_LO, THIN_HI, THIN_EDGE = 0.8, 1.25, 14   # thin: truth count's 28-day median under THIN_LO x thin_ct must be
 # dropped (distrusted, left blank); between THIN_LO and THIN_HI x thin_ct, and the first THIN_EDGE days of a thin
@@ -279,8 +272,6 @@ def confidence_score(ev, scored):
     flag, pos = e_.flag, e_.label
     if not pos.any():
         return float(1 - flag.mean()), dict(no_bad_rows=True, distrusted_share=round(float(flag.mean()), 4))
-    tp, fp, fn = int((flag & pos).sum()), int((flag & ~pos).sum()), int((~flag & pos).sum())
-    prec = tp / (tp + fp) if tp + fp else 0.0
     table = []
     for e, m in scored:
         days = ev.date[m & ev.flag]
@@ -289,21 +280,17 @@ def confidence_score(ev, scored):
                           distrusted_days=int((m & ev.flag).sum()),
                           delay_days=int((days.min() - pd.Timestamp(e['start'])).days) if len(days) else None))
     t = pd.DataFrame(table)
-    t['day_recall'] = t.distrusted_days / t.days.clip(lower=1)
     t['caught'] = (t.distrusted_days > 0).astype(float)
     by_kind = t.groupby('kind').agg(events=('caught', 'size'), caught=('caught', 'mean'), days=('days', 'sum'),
-                                    distrusted_days=('distrusted_days', 'sum'), day_recall=('day_recall', 'mean'))
-    # scored per problem and per alert (feedback #35): recall = share of problems caught (averaged within each kind,
-    # then over kinds); precision = share of alerts (runs of distrusted days on a source) that touch a problem
+                                    distrusted_days=('distrusted_days', 'sum'))
+    # recall = share of problems caught (averaged within each kind, then over kinds); precision = share of alerts
+    # (runs of distrusted days on a source) that touch a problem
     recall = float(by_kind.caught.mean())
     n_alerts, true_alerts = alerts(e_)
     alert_prec = true_alerts / n_alerts if n_alerts else 0.0
     score = f1(alert_prec, recall)
-    day_rec = float(by_kind.day_recall.mean())
     return score, dict(alert_precision=round(alert_prec, 3), recall=round(recall, 3), alerts=n_alerts,
-                       true_alerts=true_alerts, row_precision=round(prec, 3), day_recall=round(day_rec, 3),
-                       row_f1=round(f1(prec, day_rec), 3), tp=tp, fp=fp, fn=fn,
-                       by_kind=by_kind.round(3).reset_index().to_dict('records'), events=table)
+                       true_alerts=true_alerts, by_kind=by_kind.round(3).reset_index().to_dict('records'), events=table)
 
 
 def own_noise(truth_panel: pd.DataFrame) -> pd.DataFrame:
@@ -324,50 +311,7 @@ def own_noise(truth_panel: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(out)
 
 
-def hindsight_ref(truth: dict, panel: pd.DataFrame) -> pd.DataFrame:
-    """What each reviewed real problem's rows should have read, from the full series (panel = the hidden truth panel,
-    which still has the real problems in it): KEYS + ref_ct, ref_amt, tol_ct, tol_amt (log-units noise allowance),
-    one row per day of each real problem (for a lasting change, from its start to its end)."""
-    real = [e for e in truth['events'] if e['type'] in REAL_TYPES]
-    out = []
-    empty = pd.DataFrame({'date': pd.Series(dtype='datetime64[ns]'), 'ticker': pd.Series(dtype=object),
-                          'source_id': pd.Series(dtype='int64'), **{c: pd.Series(dtype=float)
-                                                                    for c in ('ref_ct', 'ref_amt', 'tol_ct', 'tol_amt')}})
-    if not real:            # typed, so merging it keeps the value columns numeric
-        return empty
-    mad = lambda x: float(1.4826 * (x - x.median()).abs().median()) if len(x) > 5 else np.nan  # noqa: E731
-    for tk in sorted({e['ticker'] for e in real}):
-        g = panel[panel.ticker == tk]
-        lc = np.log(g.pivot(index='date', columns='source_id', values='ct').clip(lower=0.01))
-        lt = np.log(g.pivot(index='date', columns='source_id', values='amt').clip(lower=0.01)) - lc
-        for s in sorted({e['source_id'] for e in real if e['ticker'] == tk}):
-            peers = [c for c in lc.columns if c != s]
-            if not peers:
-                continue
-            rc, rt = lc[s] - lc[peers].median(axis=1), lt[s] - lt[peers].median(axis=1)
-            mine = [e for e in real if e['ticker'] == tk and e['source_id'] == s]
-            bad = pd.Series(False, index=lc.index)
-            for e in mine:
-                bad |= (lc.index >= pd.Timestamp(e['start'])) & (lc.index <= pd.Timestamp(e['end']))
-            for e in mine:
-                a, b = pd.Timestamp(e['start']), pd.Timestamp(e['end'])
-                pre = (lc.index >= a - pd.Timedelta(days=REF_DAYS)) & (lc.index < a)
-                post = (lc.index > b) & (lc.index <= b + pd.Timedelta(days=REF_DAYS))
-                win = (pre | (post if e['type'] == 'real' else False)) & ~bad & rc.notna() & rt.notna()
-                if win.sum() < 10:
-                    continue
-                span = (lc.index >= a) & (lc.index <= b)
-                d = lc.index[span]
-                ref_lc = lc.loc[d, peers].median(axis=1) + rc[win].median()
-                ref_lt = lt.loc[d, peers].median(axis=1) + rt[win].median()
-                tc, tt = mad(rc[win]), mad(rt[win])
-                out.append(pd.DataFrame(dict(date=d, ticker=tk, source_id=s, ref_ct=np.exp(ref_lc).to_numpy(),
-                                             ref_amt=np.exp(ref_lc + ref_lt).to_numpy(), tol_ct=tc,
-                                             tol_amt=float(np.hypot(tc, tt)))))
-    return pd.concat(out, ignore_index=True) if out else empty
-
-
-def clean_score(truth, ev, scored_rows, ref=None):
+def clean_score(truth, ev, scored_rows):
     """ev carries raw ct/amt, truth tct/tamt and the cleaned values (blank = raw); scored_rows is the scored mask
     before label_rows forced labelled rows in (the cleaned series is scored on the same stretches)."""
     lg = lambda x: np.log(np.maximum(x.astype(float), 0.01))  # noqa: E731
@@ -376,7 +320,7 @@ def clean_score(truth, ev, scored_rows, ref=None):
     err_raw = 0.5 * ((lg(ev.ct) - lg(ev.tct)).abs() + (lg(ev.amt) - lg(ev.tamt)).abs())
     err_cln = 0.5 * ((lg(cc) - lg(ev.tct)).abs() + (lg(ca) - lg(ev.tamt)).abs())
     changed = err_raw > 1e-6
-    real = pd.Series(False, index=ev.index)
+    unscored = pd.Series(False, index=ev.index)        # rows of problems before they show (not scored)
     gains = []
     sig_a = np.hypot(ev.sig_c, ev.sig_t)              # dollars = count x ticket: their noises add
     beyond = lambda d, s: (d.abs() - s).clip(lower=0)  # noqa: E731   error beyond the source's own noise
@@ -385,29 +329,11 @@ def clean_score(truth, ev, scored_rows, ref=None):
         first = pd.Timestamp(e.get('shift_start', e['start']))
         span = ser & ev.date.between(first, pd.Timestamp(e['end']))
         if e.get('unscored'):
-            real |= span                                  # not scored, and not counted as untouched rows either
+            unscored |= span                              # not scored, and not counted as untouched rows either
             continue
         if e.get('visible'):                              # before it was visible, it is not scored
-            real |= span & (ev.date < pd.Timestamp(e['visible']))
+            unscored |= span & (ev.date < pd.Timestamp(e['visible']))
             span &= ev.date >= pd.Timestamp(e['visible'])
-        if e['type'] in REAL_TYPES:          # real problems: against the hindsight reference, net of its noise
-            real |= span
-            if ref is None or not ev.ref_ct.notna().any():
-                continue
-            rc, ra = ev.ref_ct, ev.ref_amt
-            er = 0.5 * (((lg(ev.ct) - lg(rc)).abs() - ev.tol_ct).clip(lower=0)
-                        + ((lg(ev.amt) - lg(ra)).abs() - ev.tol_amt).clip(lower=0))
-            ec = 0.5 * (((lg(cc) - lg(rc)).abs() - ev.tol_ct).clip(lower=0)
-                        + ((lg(ca) - lg(ra)).abs() - ev.tol_amt).clip(lower=0))
-            m = span & scored_rows & rc.notna() & (er > 1e-6) & ~ev.thin          # a thin stretch is dropped, not repaired
-            if not m.any():
-                continue
-            g = max(0.0, 1 - ec[m].sum() / er[m].sum())
-            gains.append(dict(type=e['type'], kind=kind(e['type']), ticker=e['ticker'], source_id=e['source_id'],
-                              start=e['start'], rows=int(m.sum()), raw_total=float(er[m].sum()), clean_total=float(ec[m].sum()),
-                              raw_error=round(float(er[m].mean()), 3),
-                              clean_error=round(float(ec[m].mean()), 3), gain=round(g, 3)))
-            continue
         er = 0.5 * (beyond(lg(ev.ct) - lg(ev.tct), ev.sig_c) + beyond(lg(ev.amt) - lg(ev.tamt), sig_a))
         ec = 0.5 * (beyond(lg(cc) - lg(ev.tct), ev.sig_c) + beyond(lg(ca) - lg(ev.tamt), sig_a))
         m = span & changed & scored_rows & ~ev.thin & (er > 1e-6)
@@ -416,10 +342,9 @@ def clean_score(truth, ev, scored_rows, ref=None):
         g = max(0.0, 1 - ec[m].sum() / er[m].sum())
         gains.append(dict(type=e['type'], kind=kind(e['type']), ticker=e['ticker'], source_id=e['source_id'],
                           start=e['start'], rows=int(m.sum()), raw_total=float(er[m].sum()), clean_total=float(ec[m].sum()),
-                              raw_error=round(float(er[m].mean()), 3),
-                          clean_error=round(float(ec[m].mean()), 3), gain=round(g, 3)))
+                          raw_error=round(float(er[m].mean()), 3), clean_error=round(float(ec[m].mean()), 3), gain=round(g, 3)))
     # rows no problem touched should be left as they are: intact = within the source's own noise of the truth
-    ok = scored_rows & ~changed & ~real & ~ev.thin
+    ok = scored_rows & ~changed & ~unscored & ~ev.thin
     dc, dt = (lg(cc) - lg(ev.tct)).abs(), ((lg(ca) - lg(cc)) - (lg(ev.tamt) - lg(ev.tct))).abs()
     intact_rows = (dc <= ev.sig_c) & (dt <= ev.sig_t)
     intact = float(intact_rows[ok].mean()) if ok.any() else 1.0
@@ -481,12 +406,11 @@ def score(truth: dict, data: pd.DataFrame, clean_truth: pd.DataFrame, sol: pathl
     ev = data[KEYS + ['ct', 'amt']].merge(full, on=KEYS, how='left')
     ev = ev.merge(clean_truth[KEYS + ['ct', 'amt']].rename(columns={'ct': 'tct', 'amt': 'tamt'}), on=KEYS, how='left')
     ev['flag'] = ev.confidence < 0.5
-    ref = hindsight_ref(truth, clean_truth)
-    ev = ev.merge(ref, on=KEYS, how='left').merge(own_noise(clean_truth), on=['ticker', 'source_id'], how='left')
+    ev = ev.merge(own_noise(clean_truth), on=['ticker', 'source_id'], how='left')
     stretches = scored_stretches(truth, ev, clean_truth)
     scored = label_rows(truth, ev, clean_truth)
     conf, conf_d = confidence_score(ev, scored)
-    cln, cln_d = clean_score(truth, ev, stretches, ref)
+    cln, cln_d = clean_score(truth, ev, stretches)
     problem_rows = max(int((ev.use & ev.label).sum()), sum(x['rows'] for x in cln_d.get('events', [])))
     cons, cons_d = consistency_score(sol, data, clean_truth, full, ev, stretches, c_, problem_rows)
     # low signal dropped: a source's thin beginning distrusted and left blank
@@ -498,18 +422,10 @@ def score(truth: dict, data: pd.DataFrame, clean_truth: pd.DataFrame, sol: pathl
     ok = all(gates.values())
     reward = (W_CONF * conf + W_CLEAN * cln + W_STAB * cons) * ok           # headline: a weighted average
     geo = float(np.sqrt(max(conf, 0.0) * max(cln * cons, 0.0))) * ok      # reported: the geometric mean
-    unknown = ev.use & ev.flag & ~ev.label & ~known_rows(truth, ev)   # distrusted real data nobody has judged
-    # reported, not scored: the reward if distrusted rows on real data nobody has judged were left unscored
-    lev = ev.copy()
-    lev.loc[unknown, 'use'] = False
-    lconf, lconf_d = confidence_score(lev, scored)
-    lreward = (W_CONF * lconf + W_CLEAN * cln + W_STAB * cons) * ok
     return reward, dict(gates=gates, ai_hits=hits, changed_on_truncation=leaks, rows_scored=int(ev.use.sum()),
                         reward_geometric=round(geo, 3),
-                        reward_unjudged_unscored=round(lreward, 3), confidence_unjudged_unscored=round(lconf, 3),
-                        alert_precision_unjudged_unscored=lconf_d.get('alert_precision'),
                         low_signal=dict(rows=int(th.sum()), dropped_share=round(low_share, 3)),
-                        unknown_flagged_rows=int(unknown.sum()), confidence_score=round(conf, 3),
+                        confidence_score=round(conf, 3),
                         clean_score=round(cln, 3), stability=round(cons, 3), confidence=conf_d, clean=cln_d,
                         consistency=cons_d)
 
@@ -535,29 +451,6 @@ def consistency_score(sol, data, clean_truth, full, ev, stretches, c_, problem_r
     n_bad = problem_rows if problem_rows else max(1, int(sc.sum()))
     return max(0.0, 1 - max(0, n_c - n_t) / n_bad), dict(distrusted_rows_cleaned=n_c, distrusted_rows_truth=n_t,
                                                          untrustworthy_rows=n_bad, rows=int(sc.sum()))
-
-
-def known_rows(truth: dict, ev: pd.DataFrame) -> pd.Series:
-    """Rows whose status is known without a label: changed by a planted problem (raw differs from the truth panel),
-    inside a real-event decoy, inside a reviewed fine or recurring stretch, on a series reviewed end to end, or in a run
-    of distrusted days that touches any of those or a labelled problem."""
-    k = (np.abs(np.log(ev.ct.astype(float)) - np.log(ev.tct.astype(float))) > 1e-9) | \
-        (np.abs(np.log(ev.amt.astype(float)) - np.log(ev.tamt.astype(float))) > 1e-9)
-    for x in truth.get('decoys', []):
-        k |= (ev.ticker == x['ticker']) & ev.date.between(pd.Timestamp(x['start']), pd.Timestamp(x['end']) + pd.Timedelta(days=14))
-    for x in truth.get('reviewed_not_real', []) + truth.get('reviewed_recurring', []):
-        k |= (ev.ticker == x['ticker']) & (ev.source_id == x['source_id']) & \
-            ev.date.between(pd.Timestamp(x['start']), pd.Timestamp(x['end']))
-    for x in truth.get('reviewed_series', []):
-        k |= (ev.ticker == x['ticker']) & (ev.source_id == x['source_id'])
-    # a run of distrusted days that touches a planted or labelled problem is that problem's (over-)flagging: known
-    f = ev[ev.flag].sort_values('date')
-    for _, g in f.groupby(['ticker', 'source_id']):
-        rid = (g.date.diff().dt.days.fillna(999) > ALERT_GAP + 1).cumsum()
-        for _, r in g.groupby(rid):
-            if (k[r.index] | ev.label[r.index]).any():
-                k[r.index] = True
-    return k
 
 
 def alerts(e_: pd.DataFrame) -> tuple[int, int]:

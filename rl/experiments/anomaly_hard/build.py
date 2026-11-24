@@ -5,10 +5,14 @@ rl/tasks/proto/anomaly_hard/ (gitignored). It uses the bench split's companies, 
 results, and its own seeds (300001.., 390001.. for controls; train split 320001.., 392001..), outside every family's
 ranges. --split train builds from the train companies into rl/tasks/proto/anomaly_hard_train/.
 
-Like anomaly_scoring, each task has a visible panel (environment/data/transactions.csv) and a hidden panel
-(tests/eval_panel.csv.gz) built with a different random stream, plus the gold (tests/gold.json) and the hidden
-panel as it was before the problems were planted (tests/truth_panel.csv.gz: real events included), which is what
-the cleaned series is scored against.
+Each task has a visible panel (environment/data/transactions.csv) built from one industry-balanced half of the
+split's companies, and a hidden panel (tests/eval_panel.csv.gz) from the other half, with its own random stream; plus
+the gold (tests/gold.json: every planted problem, exact) and the hidden panel before the problems were planted
+(tests/truth_panel.csv.gz: real events included), which the cleaned series is scored against.
+
+Every source is rebuilt on its company's real daily move (background.semi_real), so the only source-level oddities are
+the planted ones: normal behaviour (yearly closures, a thin beginning, company-wide real events) and problems
+(one-day problems, steps, ramps, slow ramps).
 """
 from __future__ import annotations
 
@@ -27,17 +31,15 @@ HERE = pathlib.Path(__file__).resolve().parent
 RL = HERE.parents[1]
 sys.path[:0] = [str(RL), str(HERE)]
 from families._shared import build_panel  # noqa: E402
-from families._shared.panel_perturb import D, Frame, _fmt  # noqa: E402
+from families._shared.panel_perturb import Frame, _fmt  # noqa: E402
 import background  # noqa: E402
 import grade  # noqa: E402
 import perturb as P  # noqa: E402
 
 OUT = RL / "tasks" / "proto" / "anomaly_hard"
-REVIEWED = HERE / "reviewed.yaml"   # verdicts on real (unplanted) problems, in original coordinates; grader-only
-EVAL_START_DAYS = 365   # one year of warm-up: enough history for levels, noise and a yearly pattern (feedback #27)
-THIN_CT = 20   # a stretch whose 28-day median count is under this is too thin to trust: not scored (feedback #18)
+EVAL_START_DAYS = 365   # one year of warm-up: enough history for levels, noise and a yearly pattern
+THIN_CT = 20   # a source's thin beginning (28-day median count under this, before it is established) must be dropped
 N_POINTS, SHIFTS = 2, [('step', 2), ('ramp', 2)]   # per panel: 2 of each point kind, 2 step and 2 ramp level shifts
-SEMI_REAL = True        # semi-real background (background.py, feedback #38): exact answer key
 N_RECURRING, N_SLOW = 2, 2   # per panel: planted yearly closures (normal) and slow panel ramps (problems)
 
 
@@ -46,12 +48,11 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
     pool = sorted(sensors) if sensors else sorted(raw.ticker.unique())
     tks = list(rng.choice(pool, min(n_tickers, len(pool)), replace=False))
     F = Frame(raw, rng, tickers=tks, artifacts=ctx.artifacts)
-    if SEMI_REAL:                            # every source rebuilt on its company's real moves (background.py)
-        F.df = background.semi_real(F.df)
+    F.df = background.semi_real(F.df)        # every source rebuilt on its company's real moves
     d0, d1 = F.df.date.min(), F.df.date.max()
     span = (d1 - d0).days
-    req, opt = F.natural()
-    art_series = {(i['ticker'], i['source_id']) for i in opt if i['source_id'] is not None}
+    req, opt = F.natural()                   # known natural breaks and source artifacts of the real panel
+    art_series = {(i['ticker'], i['source_id']) for i in opt if i['source_id'] is not None}   # nothing planted on them
     events, decoys, busy = [], [], []      # busy: (key, lo, hi) windows already used, so problems don't overlap
 
     def free(key, lo, hi, pad=20):
@@ -68,32 +69,32 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
                 decoys.append(f(F, t, x)); busy.append((t, x, x + pd.Timedelta(days=30)))
                 break
     recurring_planted, thin_planted = [], []
-    if SEMI_REAL:                            # source behaviour that is normal, planted with exact labels
-        cands0 = F.candidates(exclude_series=art_series)
-        for _ in range(N_RECURRING):
-            for _ in range(100):
-                t, s_ = cands0[int(rng.integers(len(cands0)))]
-                r = background.plant_recurring(F, rng, t, s_, d0, d1)
-                if r:
-                    recurring_planted.append(r)
-                    for x in r['dates']:
-                        busy.append(((t, s_), pd.Timestamp(x) - pd.Timedelta(days=3), pd.Timestamp(x) + pd.Timedelta(days=3)))
-                    break
-        for _ in range(500):                 # every panel has a thin start (so doing nothing cannot pass)
+    # source behaviour that is normal, planted with exact labels
+    cands0 = F.candidates(exclude_series=art_series)
+    for _ in range(N_RECURRING):
+        for _ in range(100):
             t, s_ = cands0[int(rng.integers(len(cands0)))]
-            if any((r['ticker'], r['source_id']) == (t, s_) for r in recurring_planted):
-                continue                     # a closure hidden in thin data would first show years later
-            r = background.plant_thin_start(F, rng, t, s_, d0)
+            r = background.plant_recurring(F, rng, t, s_, d0, d1)
             if r:
-                thin_planted.append(r)
-                busy.append(((t, s_), d0, pd.Timestamp(r['thin_until']) + pd.Timedelta(days=150)))
+                recurring_planted.append(r)
+                for x in r['dates']:
+                    busy.append(((t, s_), pd.Timestamp(x) - pd.Timedelta(days=3), pd.Timestamp(x) + pd.Timedelta(days=3)))
                 break
+    for _ in range(500):                 # every panel has a thin start (so doing nothing cannot pass)
+        t, s_ = cands0[int(rng.integers(len(cands0)))]
+        if any((r['ticker'], r['source_id']) == (t, s_) for r in recurring_planted):
+            continue                     # a closure hidden in thin data would first show years later
+        r = background.plant_thin_start(F, rng, t, s_, d0)
+        if r:
+            thin_planted.append(r)
+            busy.append(((t, s_), d0, pd.Timestamp(r['thin_until']) + pd.Timedelta(days=150)))
+            break
     truth_df = F.df.copy()
     if not control:
         cands = F.candidates(exclude_series=art_series)
         jobs = [(f, None) for f in P.POINTS for _ in range(N_POINTS)] + [(mode, None) for mode, n in SHIFTS
                                                                         for _ in range(n)]
-        jobs += [('slow', None) for _ in range(N_SLOW if SEMI_REAL else 0)]
+        jobs += [('slow', None) for _ in range(N_SLOW)]
         for f, _ in jobs:
             for _ in range(500):
                 t, s = cands[int(rng.integers(len(cands)))]
@@ -128,66 +129,18 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
                         # a lasting change holds the company to the end; a temporary one until it is over
                         busy.append((('chg', t), lo, d1 if length is None else lo + pd.Timedelta(days=length + 45)))
                     break
-    # a series reviewed end to end, or with a reviewed level change, is judged by the review, not by the shared
-    # panel's list of known source artifacts (which would leave it unscored from the artifact to the panel end)
-    judged = {(F.t(x['ticker']), F.s(int(x['source_id']))) for x in reviewed_series()} | \
-             {(F.t(r['ticker']), F.s(int(r['source_id']))) for r in reviewed() if r['verdict'] == 'change'}
-    # company-wide natural breaks (every source at once: nothing to recover them from) stay out of scoring. A known
-    # quirk of one source is graded by what it did in this data (quirk_event): a lasting change to flag and rescale,
-    # or nothing (normal data); it stays out only when it cannot be cross-checked (fewer than two usable peers)
+    # company-wide natural breaks (every source at once: nothing to recover them from) are not scored
     excl = [dict(ticker=i['ticker'], source_id=i['source_id'], lo=i['start'],
                  hi=i['end'] or F.d(ctx.panel_end)) for i in req]
-    quirks = []
-    for i in (opt if not SEMI_REAL else []):
-        if (i['ticker'], i['source_id']) in judged:
-            continue
-        if i['source_id'] is None:
-            excl.append(dict(ticker=i['ticker'], source_id=None, lo=i['lo'], hi=i['hi']))
-            continue
-        q = quirk_event(F.df, i, d1)
-        if q == 'unrecoverable':
-            excl.append(dict(ticker=i['ticker'], source_id=i['source_id'], lo=i['lo'], hi=F.d(ctx.panel_end)))
-        elif q:
-            events.append(q)
-            quirks.append(q)
-    not_real, recurring = [], []
+    closures = []
     for r in recurring_planted:                               # planted yearly patterns: first year not scored
         first = pd.Timestamp(r['dates'][0])
         excl.append(dict(ticker=r['ticker'], source_id=r['source_id'], lo=_fmt(first), hi=_fmt(first),
                          kind='recurring_first'))
-        recurring += [dict(ticker=r['ticker'], source_id=r['source_id'], start=x, end=x, note='planted yearly closure')
-                      for x in r['dates']]
-    for r in (reviewed() if not SEMI_REAL else []):          # real problems in the source data, as reviewed
-        t, s_ = F.t(r['ticker']), F.s(r['source_id'])
-        if t is None:
-            continue
-        x = dict(ticker=t, source_id=s_, start=F.d(r['start']), end=F.d(r['end']), note=r.get('note', ''))
-        if r['verdict'] == 'real':
-            events.append(dict(x, type='real', regime=False))   # the days the reviewer marked bad, as marked
-        elif r['verdict'] == 'change':
-            # a real lasting change in the source, scored like a planted level shift (grade.label_rows): its first
-            # days are untrustworthy, then the new level is normal; it returns after `end` unless end == start
-            lasts = r['end'] == r['start']
-            events.append(dict(x, type='real_change', regime=True, permanent=lasts,
-                               end=F.d(ctx.panel_end) if lasts else x['end'], settle=F.d(r.get('settle', r['start']))))
-        elif r['verdict'] == 'recurring':
-            # a pattern the source shows every year is normal: the first time it appears in the data it is not scored
-            # (distrusting it then is understandable); every later year it must be trusted and left as it is
-            first = recurring_first(F, t, s_, r)
-            if first:
-                excl.append(dict(ticker=t, source_id=s_, lo=first[0], hi=first[1], kind='recurring_first'))
-            recurring.append(dict(x, first=first))
-        elif r['verdict'] == 'unsure':
-            excl.append(dict(ticker=t, source_id=s_, lo=x['start'], hi=x['end']))
-        else:
-            not_real.append(x)
-    full = [dict(ticker=F.t(x['ticker']), source_id=F.s(int(x['source_id']))) for x in reviewed_series()
-            if F.t(x['ticker']) is not None] if not SEMI_REAL else []
+        closures += [dict(ticker=r['ticker'], source_id=r['source_id'], start=x, end=x) for x in r['dates']]
     truth = dict(family='anomaly_hard', control=control, events=events, decoys=decoys, exclusions=excl,
-                 background='semi_real' if SEMI_REAL else 'real', planted_thin_start=thin_planted,
-                 reviewed_not_real=not_real, reviewed_recurring=recurring, reviewed_series=full,
-                 ignore_series=F.low_volume_series(), eval_start=_fmt(d0 + pd.Timedelta(days=EVAL_START_DAYS)),
-                 threshold=0.5, thin_ct=THIN_CT,
+                 closures=closures, thin_start=thin_planted, ignore_series=F.low_volume_series(),
+                 eval_start=_fmt(d0 + pd.Timedelta(days=EVAL_START_DAYS)), threshold=0.5, thin_ct=THIN_CT,
                  truncation_cutoffs=[_fmt(d0 + (d1 - d0) * f) for f in (0.45, 0.7)])
     df = F.df.sort_values(['date', 'ticker', 'source_id']).reset_index(drop=True)
     truth_df = truth_df.sort_values(['date', 'ticker', 'source_id']).reset_index(drop=True)
@@ -199,13 +152,12 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
 
 
 def annotate_events(truth, df, truth_df):
-    """What a point-in-time scorer could see (feedback #31), written into each event: a level change becomes
-    `visible` on the first day its deviation (planted: the exact planted move, raw against the truth panel; real: the
-    raw value against the hindsight reference, trailing 7-day median) reaches P.SHIFT_K times the source's own noise,
-    in count or ticket; its onset is scored from then (earlier days unscored). A change that never gets there, and a
-    reviewed one-day problem that never reaches P.POINT_K times that noise against the hindsight reference, are
-    `unscored`. A change that took longer than grade.SETTLE_DAYS to become visible is `slow`: scored on the cleaned
-    series only. The noise is the source's own day-to-day noise, defined as for the planted sizes."""
+    """What a point-in-time scorer could see, written into each level change: it becomes `visible` on the first day its
+    deviation (raw against the truth panel, trailing 7-day median) reaches P.SHIFT_K times the source's own noise, in
+    count or ticket; its onset is scored from then (earlier days unscored). A change that never gets there is
+    `unscored`. A planted slow ramp, or a change that took longer than grade.SETTLE_DAYS to become visible, is `slow`:
+    scored on the cleaned series only. The noise is the source's own day-to-day noise, defined as for the planted
+    sizes."""
     # the source's own day-to-day noise as the planted sizes are defined (perturb.own_noise: weekday pattern and a
     # 28-day running median removed), on the truth panel
     rows = []
@@ -218,7 +170,6 @@ def annotate_events(truth, df, truth_df):
             n[k] = max(float(1.4826 * (r - r.median()).abs().median()), 0.01) if len(r) else 0.1
         rows.append(dict(ticker=t, source_id=s_, **n))
     sig = pd.DataFrame(rows).set_index(['ticker', 'source_id'])
-    ref = grade.hindsight_ref(truth, truth_df).set_index(grade.KEYS)
     raw = df.set_index(grade.KEYS)[['ct', 'amt']]
     tru = truth_df.set_index(grade.KEYS)[['ct', 'amt']]
     lg = lambda x: np.log(np.maximum(x.astype(float), 0.01))  # noqa: E731
@@ -227,99 +178,32 @@ def annotate_events(truth, df, truth_df):
         if key not in sig.index:
             continue
         sc, st = sig.loc[key, 'sig_c'], sig.loc[key, 'sig_t']
-        a = pd.Timestamp(e.get('shift_start', e['start'])) - (pd.Timedelta(days=60) if e['type'] in grade.REAL_TYPES else pd.Timedelta(0))
+        if not e.get('regime'):
+            continue
+        a = pd.Timestamp(e.get('shift_start', e['start']))
         b = pd.Timestamp(e['end'])
         r = raw.xs((e['ticker'], e['source_id']), level=('ticker', 'source_id'))
         r = r[(r.index >= a) & (r.index <= b)]
-        if e['type'] in grade.REAL_TYPES:
-            x = ref.xs((e['ticker'], e['source_id']), level=('ticker', 'source_id'))[['ref_ct', 'ref_amt']] \
-                if (e['ticker'], e['source_id']) in set(zip(ref.index.get_level_values(1), ref.index.get_level_values(2))) else None
-            if x is None or x.empty:
-                continue
-            x = x.rename(columns={'ref_ct': 'ct', 'ref_amt': 'amt'})
-        else:
-            x = tru.xs((e['ticker'], e['source_id']), level=('ticker', 'source_id'))
+        x = tru.xs((e['ticker'], e['source_id']), level=('ticker', 'source_id'))
         j = r.join(x, rsuffix='_x', how='inner')
         if j.empty:
             continue
         dc = lg(j.ct) - lg(j.ct_x)
         dt = (lg(j.amt) - lg(j.ct)) - (lg(j.amt_x) - lg(j.ct_x))
-        if e['type'] == 'real':                       # a reviewed one-day problem: does it stand out at all?
-            if float(np.maximum(dc.abs() / sc, dt.abs() / st).max()) < P.POINT_K:
-                e['unscored'] = True
-            continue
-        if not e.get('regime'):
-            continue
         z = np.maximum(dc.rolling(7, min_periods=1).median().abs() / sc, dt.rolling(7, min_periods=1).median().abs() / st)
         seen = z[z >= P.SHIFT_K]
         if seen.empty:
             e['unscored'] = True
         else:
             e['visible'] = _fmt(seen.index.min())
-            # slower to show than a change's settling window (weeks): a build-up over months whose onset no
-            # point-in-time code can date, so it is scored on the cleaned series only (feedback #32)
+            # slower to show than a change's settling window (weeks), or planted as a build-up over months: no
+            # point-in-time code can date its onset, so it is scored on the cleaned series only
             if (seen.index.min() - pd.Timestamp(e.get('shift_start', e['start']))).days > grade.SETTLE_DAYS \
                     or e['type'] == 'level_shift_slow':     # a build-up over months is slow, however large
                 e['slow'] = True
 
 
-# windows on the shared artifact list that are narrower than the effect in the data, widened here (not in the shared
-# list, which is also data_audit's gold): days added before lo and after hi
-QUIRK_WIDEN = {'source-1 airline panel ramp': (517, 150)}   # 2016-05-01..2017-01-31 -> 2014-12-01..2017-06-30 (data_audit review G4)
-
-
-def quirk_event(df, it, d1):
-    """What a known source-level quirk (artifact list: lo..hi, one source) did to that source in this data: its
-    relation to the median of its company's other sources, in log count and log ticket, over the 90 days before lo
-    against the 90 days after hi. A change smaller than P.SHIFT_K times the source's own noise in that relation (the
-    size planted shifts must reach) is normal data: None. Otherwise a real_change event (scored like a
-    reviewed level change): onset = first day the 14-day median relation is a third of the way to the new level,
-    settled = first day it is within a quarter of it, lasting to the panel end unless the source returns to its old
-    relation later (then until it does). 'unrecoverable' when the source has fewer than two other usable sources."""
-    t, s = it['ticker'], it['source_id']
-    lo, hi = pd.Timestamp(it['lo']), pd.Timestamp(it['hi'])
-    before, after_ = QUIRK_WIDEN.get(it.get('note', ''), (0, 0))
-    lo, hi = lo - pd.Timedelta(days=before), hi + pd.Timedelta(days=after_)
-    g = df[df.ticker == t]
-    ct = g.pivot(index='date', columns='source_id', values='ct').astype(float)
-    if s not in ct.columns or ct.shape[1] < 3:
-        return 'unrecoverable'
-    amt = g.pivot(index='date', columns='source_id', values='amt').astype(float)
-    peers = [c for c in ct.columns if c != s and ct[c].median() >= 20]
-    if len(peers) < 2:
-        return 'unrecoverable'
-    lc, lt = np.log(ct), np.log(amt) - np.log(ct)
-    best = None
-    for name, x in (('count', lc), ('ticket', lt)):
-        rel = (x[s] - x[peers].median(axis=1)).dropna()
-        pre = rel[(rel.index >= lo - pd.Timedelta(days=90)) & (rel.index < lo)]
-        post = rel[(rel.index > hi) & (rel.index <= hi + pd.Timedelta(days=90))]
-        if len(pre) < 30 or len(post) < 30:
-            continue
-        sh = float(post.median() - pre.median())
-        r = (rel - rel.rolling(28, min_periods=7, center=True).median()).dropna()
-        noise = max(float(1.4826 * (r - r.median()).abs().median()), 0.02)      # its own noise in that relation
-        if abs(sh) >= P.SHIFT_K * noise and (best is None or abs(sh) / noise > abs(best[1]) / best[4]):
-            best = (name, sh, rel, float(pre.median()), noise)
-    if best is None:
-        return None
-    name, sh, rel, base, noise = best
-    sm = rel.rolling(14, min_periods=7, center=True).median()
-    dev = (sm - base) * np.sign(sh)
-    win = dev[(dev.index >= lo - pd.Timedelta(days=30)) & (dev.index <= hi + pd.Timedelta(days=30))]
-    onset = win[win > abs(sh) / 3].index.min()
-    settle = win[win > 0.75 * abs(sh)].index.min()
-    if pd.isna(onset):
-        return None
-    after = dev[dev.index > hi + pd.Timedelta(days=30)]
-    back = after[after < abs(sh) / 3].index
-    end = back.min() if len(back) and (after.loc[back.min():] < abs(sh) / 3).mean() > 0.8 else d1
-    return dict(type='real_change', regime=True, ticker=t, source_id=s, start=_fmt(onset), end=_fmt(end),
-                permanent=bool(end == d1), settle=_fmt(settle if not pd.isna(settle) else hi), origin='quirk',
-                note=f"{it.get('note', 'known source quirk')}: {name} {sh:+.2f} against peers ({abs(sh) / noise:.1f}x its noise)")
-
-
-# the disguise, as this task describes it: the companies are named (feedback #28); codes, sources, dates and levels
+# the disguise, as this task describes it: the companies are named; codes, sources, dates and levels
 # stay disguised, and the panel the code is graded on has its own codes
 COPY_NOTE = """This copy of the panel is built from the companies' real daily transactions: each source follows its company's real
 day-to-day moves, with its own level, weekday pattern and day-to-day noise. It is disguised. Each ticker is a code
@@ -364,30 +248,6 @@ def companies_table(shown: pd.DataFrame, mapping: dict) -> str:
     return '\n'.join(rows)
 
 
-def recurring_first(F, t, s, r, slack=3):
-    """The first year a reviewed recurring pattern's calendar window (same month and day, +-slack days) falls inside the
-    source's data, in task coordinates, or None."""
-    a, b = D(r['start']), D(r['end'])
-    have = F.df[(F.df.ticker == t) & (F.df.source_id == s)].date
-    if have.empty:
-        return None
-    first_day = have.min() - F.shift                     # original coordinates
-    for k in range(-10, 11):
-        lo, hi = a + pd.DateOffset(years=k) - pd.Timedelta(days=slack), b + pd.DateOffset(years=k) + pd.Timedelta(days=slack)
-        if lo >= first_day:
-            return [F.d(lo), F.d(hi)]
-    return None
-
-
-def reviewed_series() -> list[dict]:
-    """Series the reviewer has gone through end to end: every day not marked on them is confirmed fine."""
-    return (yaml.safe_load(REVIEWED.read_text()) or {}).get('reviewed_series') or [] if REVIEWED.exists() else []
-
-
-def reviewed() -> list[dict]:
-    return (yaml.safe_load(REVIEWED.read_text()) or {}).get('reviewed') or [] if REVIEWED.exists() else []
-
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--n', type=int, default=4)
@@ -416,8 +276,7 @@ def main():
             clean.to_csv(index=False, date_format='%Y-%m-%d').encode(), mtime=0))
         (d / 'tests' / 'gold.json').write_text(json.dumps(dict(truth, seed=seed), indent=1))
         (d / 'instruction.md').write_text(text.replace('{companies}', companies_table(shown, shown_map)))
-        # the hidden panel's disguise (original -> task coordinates), outside tests/ and environment/: for turning
-        # review verdicts on this task's flags back into original coordinates
+        # the hidden panel's disguise (original -> task coordinates), outside tests/ and environment/
         (d / 'mapping.json').write_text(json.dumps(mapping, indent=1))
         kinds = pd.Series([e['type'] for e in truth['events']]).value_counts().to_dict()
         print(tid, 'visible', sorted(vis), 'hidden', sorted(hid), len(hidden), 'rows;', kinds,

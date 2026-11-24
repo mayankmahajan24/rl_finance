@@ -1,8 +1,8 @@
 # anomaly_hard (prototype)
 
 A hard anomaly-detection-and-repair task on card-transaction panels, built so frontier models do not saturate it.
-Prototype: no manifest, CI, approval or Harbor packaging yet. Reviewer feedback: `rl/runs/anomaly_hard/reviews/feedback_log.md`.
-Earlier versions, experiments and their scores: `HISTORY.md`.
+Prototype: no manifest, CI, approval or Harbor packaging yet. Reviewer feedback, verbatim with what changed:
+`rl/runs/anomaly_hard/reviews/feedback_log.md`. Earlier versions are in git history.
 
 ## The task (`instruction.md`)
 
@@ -79,6 +79,7 @@ data, and a few days either side of the thin start's edges.
 |---|---|---|---|---|
 | `oracle` | the answer key | 1.000 | 1.000 | 1.000 |
 | `ceiling` | gold-informed but realistic: a step caught on a 3-day median, ramps on a 14-day median, imputation with the source's own noise | 0.951 | 0.968 | 0.866 min |
+| `ceiling_ideal` | the ceiling with exact imputation | 0.980 | 0.993 | 0.888 min |
 | **`reference`** | hand-built point-in-time scorer (`solutions/reference/writeup.md`) | **0.928** | **0.935** | 0.850 min |
 | `trust_all_ref` | the reference's cleaned series, every row trusted | 0.231 | 0.250 | 1.0 on the 3 controls (correct there), 0 elsewhere |
 | `distrust_all_ref` | the reference's cleaned series, every row distrusted | 0.000 | 0.000 | 0.000 |
@@ -105,8 +106,9 @@ Reference per task (reward and its three components; the geometric mean for comp
 | train-control-02 | 0.999 | 0.999 | 0.999 | 1.000 | 0.999 | 1.000 |
 
 \* tuning tasks; the other eight are held out. The reference's main loss is false alerts (2-6 a task, around real
-company events, a source's early growth and inside slow ramps). The ceiling's gap to 1.0 is detection lag and
-imputation noise.
+company events, a source's early growth and inside slow ramps). The ceiling's gap to 1.0 is irreducible
+for a point-in-time scorer: imputation noise (a repaired value carries the source's own noise: ceiling 0.951 against
+0.980 with exact imputation) and detection lag (a change cannot be dated until it has shown for a few days: the rest).
 
 ## Run
 
@@ -117,10 +119,3 @@ python rl/experiments/anomaly_hard/grade.py rl/tasks/proto/anomaly_hard/anomhard
 ```
 
 Model runs: `rl/experiments/anomaly_hard/runner/run.sh` (airgapped through `runner/offline.sh`).
-
-## Known gaps
-
-* `instruction.md` still says the grader knows "real problems in the source data: reviewed ones and known quirks";
-  the semi-real tasks have none (wording change pending approval).
-* `grade.py` still carries code paths for the real-data background (reviewed problems, known quirks, hindsight
-  reference) and unscored diagnostics; unused on the current tasks (removal proposed, feedback #44).

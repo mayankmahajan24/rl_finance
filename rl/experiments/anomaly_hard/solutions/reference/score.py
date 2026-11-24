@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 """Reference solution for anomaly_hard: trust scores and cleaned series for a multi-source daily transaction panel.
 
-Provenance: started from the best fresh Opus run on this task (anomhard-001, 2026-11-20; its own docstring follows),
-then improved by hand for the reviewer's rules; see writeup.md for what changed and why.
-
 For every ticker the sources are independent reads of the same company. Each source/day is compared with a robust
 cross-source consensus (median of the sources after removing each source's own level), separately for log count and
 log ticket size. A strictly causal state machine per source and channel flags one-day outliers and persistent level

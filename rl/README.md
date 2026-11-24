@@ -45,6 +45,16 @@ python rl/harness/sandbox_probe.py --with-judge rl/tasks/bench/kn-produce-AIR02-
 
 Every human sign-off, in order, from merged code to a releasable sample: [`review/SIGNOFF.md`](review/SIGNOFF.md).
 
+**Is a family ready for a lab?** The `lab-ready` Claude Code skill (`../.claude/skills/lab-ready/`) audits a
+family against one checklist (solvable, airgapped, graded on world state, resistant to reward hacking,
+sound rubrics, calibrated difficulty, release gates), fixes what it can and writes the readiness report to
+`runs/<family>/reviews/`. Its mechanical half runs on its own, offline and without spend:
+
+```sh
+python .claude/skills/lab-ready/scripts/audit.py --family data_audit              # train: 2 tasks + 1 control
+python .claude/skills/lab-ready/scripts/audit.py --family research_design --split eval
+```
+
 **Skills.** `run_api.py --skills default` gives Anthropic models the `buy_side_core` profile from
 `skills/config.yaml` (18 of the financial-services repo's 63 skills; the API caps a request at 20,
 and the config says why every other skill is out). Runs are skills-off unless they ask. Skills

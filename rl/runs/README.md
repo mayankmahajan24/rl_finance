@@ -10,6 +10,7 @@ runs/solutions/<split>.records.jsonl  reference vs naive solvers on built tasks 
 runs/attacks/<split>.csv              the reward-hacking suite (rl/harness/attacks.py)
 runs/<family>/baseline/               earlier runs, kept as records only
 runs/<family>/reviews/                human reviews of runs and the grader feedback log, with dispositions
+runs/<family>/reviews/lab_ready_<date>.md   readiness report of the lab-ready skill (.claude/skills/lab-ready/)
 runs/kpi_nowcast/trajectory/          score per variant over time; _state.json: report settings
 ```
 

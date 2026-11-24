@@ -42,7 +42,8 @@ problems (closures, thin start and real events only). 13 tasks: 5 bench (001-004
 
 **Gates** (reward 0 if any fails): output format; point in time (outputs on truncated panels must match the full run,
 all three columns); no model or network client in the code; a write-up; low signal dropped (at least 90% of the thin
-start's rows distrusted and blank).
+start's rows distrusted and blank); detects (a confidence score of at least 0.25, so repairing
+the series without detecting its problems cannot pass).
 
 **What is graded**, six things:
 
@@ -55,9 +56,11 @@ start's rows distrusted and blank).
 | 5 | Keep the history | kept: share of rows that should be kept not left blank |
 | 6 | Stability | the scorer re-run on its own cleaned series raises no more alarms than on clean data (excess scaled by the size of the task's problems) |
 
-**Reward** = sqrt(confidence x cleaned series x stability), where confidence = F1(1, 2) and cleaned series = 3 x 4 x 5.
-A geometric mean of the two halves: never above their average, and lopsided solutions (detect without repairing,
-or the reverse) score low.
+**Reward** = 0.4 x confidence + 0.4 x cleaned series + 0.2 x stability, where confidence = F1(1, 2) and cleaned
+series = 3 x 4 x 5. An ordinary weighted average; the three components are in the detailed metrics (and the
+geometric mean, the reward before feedback #45, as `reward_geometric`), so a lopsided solution is visible. The
+detection gate keeps cleaning-only solutions from scoring: without it, the reference's cleaned series with every row
+trusted or distrusted would score 0.67 and 0.59.
 
 **Timing rules** (what a point-in-time scorer could know):
 * Scoring starts after a one-year warm-up.
@@ -72,32 +75,34 @@ data, and a few days either side of the thin start's edges.
 
 ## Results (all 13 tasks, 2026-11-24)
 
-| Solution | What it is | All 13 | Held out (8) | Min |
+| Solution | What it is | All 13 | Held out (8) | Min / max |
 |---|---|---|---|---|
 | `oracle` | the answer key | 1.000 | 1.000 | 1.000 |
-| `ceiling` | gold-informed but realistic: a step caught on a 3-day median, ramps on a 14-day median, imputation with the source's own noise | 0.932 | 0.957 | 0.828 |
-| **`reference`** | hand-built point-in-time scorer (`solutions/reference/writeup.md`) | **0.904** | **0.914** | 0.800 |
-| `distrust_all` | everything distrusted, with the answer key's cleaned series | 0.108 | 0.103 | 0.195 max |
-| `distrust_all_raw` | everything distrusted, raw series | 0.000 | 0.000 | 0.000 |
+| `ceiling` | gold-informed but realistic: a step caught on a 3-day median, ramps on a 14-day median, imputation with the source's own noise | 0.951 | 0.968 | 0.866 min |
+| **`reference`** | hand-built point-in-time scorer (`solutions/reference/writeup.md`) | **0.928** | **0.935** | 0.850 min |
+| `trust_all_ref` | the reference's cleaned series, every row trusted | 0.231 | 0.250 | 1.0 on the 3 controls (correct there), 0 elsewhere |
+| `distrust_all_ref` | the reference's cleaned series, every row distrusted | 0.000 | 0.000 | 0.000 |
+| `distrust_all` | every row distrusted, the answer key's cleaned series | 0.000 | 0.000 | 0.000 |
+| `distrust_all_raw` | every row distrusted, raw series | 0.000 | 0.000 | 0.000 |
 | `naive` | do nothing (trust all, clean = raw; fails the low-signal gate) | 0.000 | 0.000 | 0.000 |
 
-Reference per task (reward; confidence, cleaned series, stability):
+Reference per task (reward and its three components; the geometric mean for comparison; the ceiling):
 
-| Task | Reward | Conf. | Cleaned | Stab. | Ceiling |
-|---|---|---|---|---|---|
-| 001 * | 0.877 | 0.909 | 0.973 | 0.870 | 0.847 |
-| 002 | 0.847 | 0.789 | 0.926 | 0.981 | 0.943 |
-| 003 | 0.884 | 0.828 | 0.967 | 0.976 | 0.899 |
-| 004 * | 0.800 | 0.750 | 0.902 | 0.947 | 0.903 |
-| control-01 | 1.000 | 1.000 | 1.000 | 0.999 | 1.000 |
-| train-001 * | 0.901 | 0.923 | 0.891 | 0.988 | 0.882 |
-| train-002 * | 0.859 | 0.815 | 0.912 | 0.993 | 0.828 |
-| train-003 | 0.916 | 0.899 | 0.967 | 0.965 | 0.966 |
-| train-004 | 0.878 | 0.796 | 0.971 | 0.997 | 0.940 |
-| train-005 | 0.904 | 0.857 | 0.960 | 0.993 | 0.969 |
-| train-006 | 0.886 | 0.800 | 0.993 | 0.989 | 0.941 |
-| train-control-01 * | 0.999 | 1.000 | 1.000 | 1.000 | 1.000 |
-| train-control-02 | 0.999 | 0.999 | 0.999 | 1.000 | 1.000 |
+| Task | Reward | Conf. | Cleaned | Stab. | Geometric | Ceiling |
+|---|---|---|---|---|---|---|
+| 001 * | 0.927 | 0.909 | 0.973 | 0.870 | 0.877 | 0.919 |
+| 002 | 0.882 | 0.789 | 0.926 | 0.981 | 0.847 | 0.957 |
+| 003 | 0.913 | 0.828 | 0.967 | 0.976 | 0.884 | 0.920 |
+| 004 * | 0.850 | 0.750 | 0.902 | 0.947 | 0.800 | 0.927 |
+| control-01 | 1.000 | 1.000 | 1.000 | 0.999 | 1.000 | 1.000 |
+| train-001 * | 0.923 | 0.923 | 0.891 | 0.988 | 0.901 | 0.907 |
+| train-002 * | 0.889 | 0.815 | 0.912 | 0.993 | 0.859 | 0.866 |
+| train-003 | 0.939 | 0.899 | 0.967 | 0.965 | 0.916 | 0.978 |
+| train-004 | 0.906 | 0.796 | 0.971 | 0.997 | 0.878 | 0.955 |
+| train-005 | 0.925 | 0.857 | 0.960 | 0.993 | 0.904 | 0.976 |
+| train-006 | 0.915 | 0.800 | 0.993 | 0.989 | 0.886 | 0.957 |
+| train-control-01 * | 1.000 | 1.000 | 1.000 | 1.000 | 0.999 | 1.000 |
+| train-control-02 | 0.999 | 0.999 | 0.999 | 1.000 | 0.999 | 1.000 |
 
 \* tuning tasks; the other eight are held out. The reference's main loss is false alerts (2-6 a task, around real
 company events, a source's early growth and inside slow ramps). The ceiling's gap to 1.0 is detection lag and

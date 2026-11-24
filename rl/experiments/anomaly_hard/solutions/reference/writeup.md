@@ -55,7 +55,7 @@ episodes; leave-one-out everywhere (noisier drift detection, more false episodes
 
 **Checks.** Point in time by construction (forward walk), confirmed by the grader's truncation check. Re-run on its own
 output it moves the series 0.1-0.5% and raises no new alarms. Tuned on tasks 001, 004, train-001, train-002 and train-control-01; the other eight held out. Reward
-0.904 on all 13 tasks, 0.914 on the held-out ones (2026-11-24). numpy and pandas only.
+0.928 on all 13 tasks, 0.935 on the held-out ones (2026-11-24; weighted-average reward). numpy and pandas only.
 
 **Known gaps.** Slow ramps are caught late (gain 0.2-0.65); a single-measure step on a source whose ticket is noisy
 against its peers can be missed; small reviewed real problems inside a source's noise are missed (recall 0.55-0.7).

@@ -8,12 +8,13 @@ the Harbor verifier it does not sandbox the scorer as another user, so only grad
 
 Gates (reward 0 if any fails): output format (one row per input row; confidence in [0, 1]; clean_ct and clean_amt
 blank or non-negative), the point-in-time check on all three columns, no model or network calls in the code, a
-write-up (default SOLUTION_DIR/../output/writeup.md), and low signal dropped: at least LOW_SIGNAL_SHARE of the rows of
-thin beginnings (below) distrusted and left blank.
+write-up (default SOLUTION_DIR/../output/writeup.md), low signal dropped: at least LOW_SIGNAL_SHARE of the rows of
+thin beginnings (below) distrusted and left blank, and detects: a confidence score (below) of at least MIN_CONFIDENCE,
+so a solution that repairs the series but ignores confidence (trusts or distrusts everything) scores 0.
 
-Reward = W_CONF x confidence + W_CLEAN x cleaned series + W_STAB x stability (0.4 / 0.4 / 0.2; trial, feedback #45,
-pending a decision on a detection gate). The geometric mean sqrt(confidence x cleaned series x stability), the reward
-before #45, is reported as reward_geometric.
+Reward = W_CONF x confidence + W_CLEAN x cleaned series + W_STAB x stability (0.4 / 0.4 / 0.2), a weighted average;
+the three components are reported, and so is the geometric mean sqrt(confidence x cleaned series x stability) as
+reward_geometric (the reward before feedback #45).
   Scored rows: from eval_start, not on low-volume series, not on company-wide natural breaks. Thin beginnings (before a
   source is established: its truth count's centred 28-day median has held thin_ct for THIN_ESTABLISHED days) where
   that median is under THIN_LO x thin_ct, after their first THIN_EDGE days, must be dropped (the gate above) and are
@@ -85,6 +86,7 @@ THIN_LO, THIN_HI, THIN_EDGE = 0.8, 1.25, 14   # thin: truth count's 28-day media
 # dropped (distrusted, left blank); between THIN_LO and THIN_HI x thin_ct, and the first THIN_EDGE days of a thin
 # stretch and the THIN_EDGE days after it, are not scored (the code cannot tell yet, point in time)
 LOW_SIGNAL_SHARE = 0.9   # gate: share of a task's thin-beginning rows that must be distrusted and left blank
+MIN_CONFIDENCE = 0.25    # gate: the confidence score a solution must reach (it must actually detect problems)
 # imports or shell calls that reach a model or the network
 NO_AI = re.compile(r'\b(anthropic|openai|google\.generativeai|google\.genai|mistralai|cohere|ollama|litellm|langchain|'
                    r'transformers|requests|httpx|aiohttp|urllib\.request|urllib3|http\.client|socket|websocket|'
@@ -492,6 +494,7 @@ def score(truth: dict, data: pd.DataFrame, clean_truth: pd.DataFrame, sol: pathl
     dropped = (th & ev.flag & ev.clean_ct.isna() & ev.clean_amt.isna())
     low_share = float(dropped.sum() / th.sum()) if th.any() else 1.0
     gates['low_signal_dropped'] = low_share >= LOW_SIGNAL_SHARE
+    gates['detects'] = conf >= MIN_CONFIDENCE                          # cleaning alone cannot pass
     ok = all(gates.values())
     reward = (W_CONF * conf + W_CLEAN * cln + W_STAB * cons) * ok           # headline: a weighted average
     geo = float(np.sqrt(max(conf, 0.0) * max(cln * cons, 0.0))) * ok      # reported: the geometric mean

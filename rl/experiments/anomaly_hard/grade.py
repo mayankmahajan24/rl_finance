@@ -11,8 +11,9 @@ blank or non-negative), the point-in-time check on all three columns, no model o
 write-up (default SOLUTION_DIR/../output/writeup.md), and low signal dropped: at least LOW_SIGNAL_SHARE of the rows of
 thin beginnings (below) distrusted and left blank.
 
-Reward = sqrt(confidence x cleaned series x stability): the geometric mean of the two halves, so both must be good
-(knowing what is wrong and repairing it); either alone scores near 0.
+Reward = W_CONF x confidence + W_CLEAN x cleaned series + W_STAB x stability (0.4 / 0.4 / 0.2; trial, feedback #45,
+pending a decision on a detection gate). The geometric mean sqrt(confidence x cleaned series x stability), the reward
+before #45, is reported as reward_geometric.
   Scored rows: from eval_start, not on low-volume series, not on company-wide natural breaks. Thin beginnings (before a
   source is established: its truth count's centred 28-day median has held thin_ct for THIN_ESTABLISHED days) where
   that median is under THIN_LO x thin_ct, after their first THIN_EDGE days, must be dropped (the gate above) and are
@@ -73,6 +74,7 @@ import pandas as pd
 KEYS = ['date', 'ticker', 'source_id']
 OUT_COLS = ['confidence', 'clean_ct', 'clean_amt']
 CHANGE_DAYS, SETTLE_DAYS = 14, 45
+W_CONF, W_CLEAN, W_STAB = 0.4, 0.4, 0.2   # headline reward weights (confidence, cleaned series, stability)
 ALERT_GAP = 2            # days of trust that still join two distrusted runs into one alert
 ALERT_DAYS = CHANGE_DAYS  # an alert longer than a change's onset window counts as several
 ONE_DAY = {'volume_spike', 'dropout', 'count_flood', 'dollar_spike'}   # planted one-day problems: one kind
@@ -490,14 +492,17 @@ def score(truth: dict, data: pd.DataFrame, clean_truth: pd.DataFrame, sol: pathl
     dropped = (th & ev.flag & ev.clean_ct.isna() & ev.clean_amt.isna())
     low_share = float(dropped.sum() / th.sum()) if th.any() else 1.0
     gates['low_signal_dropped'] = low_share >= LOW_SIGNAL_SHARE
-    reward = float(np.sqrt(max(conf, 0.0) * max(cln * cons, 0.0))) * all(gates.values())   # both halves must be good
+    ok = all(gates.values())
+    reward = (W_CONF * conf + W_CLEAN * cln + W_STAB * cons) * ok           # headline: a weighted average
+    geo = float(np.sqrt(max(conf, 0.0) * max(cln * cons, 0.0))) * ok      # reported: the geometric mean
     unknown = ev.use & ev.flag & ~ev.label & ~known_rows(truth, ev)   # distrusted real data nobody has judged
     # reported, not scored: the reward if distrusted rows on real data nobody has judged were left unscored
     lev = ev.copy()
     lev.loc[unknown, 'use'] = False
     lconf, lconf_d = confidence_score(lev, scored)
-    lreward = float(np.sqrt(max(lconf, 0.0) * max(cln * cons, 0.0))) * all(gates.values())
+    lreward = (W_CONF * lconf + W_CLEAN * cln + W_STAB * cons) * ok
     return reward, dict(gates=gates, ai_hits=hits, changed_on_truncation=leaks, rows_scored=int(ev.use.sum()),
+                        reward_geometric=round(geo, 3),
                         reward_unjudged_unscored=round(lreward, 3), confidence_unjudged_unscored=round(lconf, 3),
                         alert_precision_unjudged_unscored=lconf_d.get('alert_precision'),
                         low_signal=dict(rows=int(th.sum()), dropped_share=round(low_share, 3)),

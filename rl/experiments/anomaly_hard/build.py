@@ -248,6 +248,32 @@ def companies_table(shown: pd.DataFrame, mapping: dict) -> str:
     return '\n'.join(rows)
 
 
+def build_task(ctx, d: pathlib.Path, seed: int, control: bool) -> dict:
+    """One task into folder d (created): visible panel from one company group, hidden panel, truth panel and gold
+    from the other. Returns the gold."""
+    tmpl = (HERE / 'instruction.md').read_text()
+    text = tmpl.format(firm=build_panel.FIRM, schema=build_panel.SCHEMA, copy_note=COPY_NOTE, companies='{companies}')
+    vis, hid = company_groups(ctx, seed)
+    shown, _, shown_map, _ = plant(np.random.default_rng(seed), control, ctx, sensors=vis)
+    hidden, truth, mapping, clean = plant(np.random.default_rng([seed, 1]), control, ctx, sensors=hid)
+    (d / 'environment' / 'data').mkdir(parents=True)
+    (d / 'tests').mkdir()
+    shown.to_csv(d / 'environment' / 'data' / 'transactions.csv', index=False, date_format='%Y-%m-%d')
+    (d / 'tests' / 'eval_panel.csv.gz').write_bytes(gzip.compress(
+        hidden.to_csv(index=False, date_format='%Y-%m-%d').encode(), mtime=0))
+    (d / 'tests' / 'truth_panel.csv.gz').write_bytes(gzip.compress(
+        clean.to_csv(index=False, date_format='%Y-%m-%d').encode(), mtime=0))
+    (d / 'tests' / 'gold.json').write_text(json.dumps(dict(truth, seed=seed), indent=1))
+    (d / 'tests').chmod(0o700)          # grader-only: the scorer runs as nobody and cannot read it
+    (d / 'instruction.md').write_text(text.replace('{companies}', companies_table(shown, shown_map)))
+    # the hidden panel's disguise (original -> task coordinates), outside tests/ and environment/
+    (d / 'mapping.json').write_text(json.dumps(mapping, indent=1))
+    kinds = pd.Series([e['type'] for e in truth['events']]).value_counts().to_dict()
+    print(d.name, 'visible', sorted(vis), 'hidden', sorted(hid), len(hidden), 'rows;', kinds,
+          '; decoys', [x['kind'] for x in truth['decoys']])
+    return truth
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--n', type=int, default=4)
@@ -257,30 +283,11 @@ def main():
     ctx = build_panel.context('txn_panel', a.split)
     out = OUT if a.split == 'bench' else OUT.with_name(f'anomaly_hard_{a.split}')
     base, cbase, pre = (300000, 390000, 'anomhard') if a.split == 'bench' else (320000, 392000, f'anomhard-{a.split}')
-    tmpl = (HERE / 'instruction.md').read_text()
-    text = tmpl.format(firm=build_panel.FIRM, schema=build_panel.SCHEMA, copy_note=COPY_NOTE, companies='{companies}')
     shutil.rmtree(out, ignore_errors=True)
     jobs = [(base + i, False, f'{pre}-{i:03d}') for i in range(1, a.n + 1)] + \
            [(cbase + i, True, f'{pre}-control-{i:02d}') for i in range(1, a.controls + 1)]
     for seed, control, tid in jobs:
-        vis, hid = company_groups(ctx, seed)
-        shown, _, shown_map, _ = plant(np.random.default_rng(seed), control, ctx, sensors=vis)
-        hidden, truth, mapping, clean = plant(np.random.default_rng([seed, 1]), control, ctx, sensors=hid)
-        d = out / tid
-        (d / 'environment' / 'data').mkdir(parents=True)
-        (d / 'tests').mkdir()
-        shown.to_csv(d / 'environment' / 'data' / 'transactions.csv', index=False, date_format='%Y-%m-%d')
-        (d / 'tests' / 'eval_panel.csv.gz').write_bytes(gzip.compress(
-            hidden.to_csv(index=False, date_format='%Y-%m-%d').encode(), mtime=0))
-        (d / 'tests' / 'truth_panel.csv.gz').write_bytes(gzip.compress(
-            clean.to_csv(index=False, date_format='%Y-%m-%d').encode(), mtime=0))
-        (d / 'tests' / 'gold.json').write_text(json.dumps(dict(truth, seed=seed), indent=1))
-        (d / 'instruction.md').write_text(text.replace('{companies}', companies_table(shown, shown_map)))
-        # the hidden panel's disguise (original -> task coordinates), outside tests/ and environment/
-        (d / 'mapping.json').write_text(json.dumps(mapping, indent=1))
-        kinds = pd.Series([e['type'] for e in truth['events']]).value_counts().to_dict()
-        print(tid, 'visible', sorted(vis), 'hidden', sorted(hid), len(hidden), 'rows;', kinds,
-              '; decoys', [x['kind'] for x in truth['decoys']])
+        build_task(ctx, out / tid, seed, control)
 
 
 if __name__ == '__main__':

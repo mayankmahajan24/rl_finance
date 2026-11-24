@@ -59,6 +59,7 @@ import json
 import os
 import pathlib
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -94,29 +95,57 @@ class GateError(Exception):
     pass
 
 
-def _offline_prefix() -> list[str]:
-    """The scorer runs in a network namespace of its own (no interfaces: nothing reachable, proxy or not) where the
-    machine allows it; elsewhere it still gets an environment with no proxy settings."""
+HERE = pathlib.Path(__file__).resolve().parent
+# grader checks that read the gold on purpose (ORACLE_TASK): only these run as root with the task folder visible
+TRUSTED = {HERE / 'solutions' / n / 'score.py' for n in ('oracle', 'ceiling', 'ceiling_ideal', 'distrust_all')}
+WRITABLE = ('/tmp', '/var/tmp', '/dev/shm', '/run/lock', '/var/lib/php/sessions')   # shared folders anyone can write
+WORK_ROOT = pathlib.Path('/var/lib/anomaly_hard_grade')     # run folders (not under /tmp, which each run gets empty)
+
+
+def _can_isolate() -> bool:
+    """Root with network and mount namespaces: the scorer can run as nobody, offline, with nothing shared to write."""
+    if os.geteuid() != 0:
+        return False
     try:
-        ok = subprocess.run(['unshare', '-n', '--', 'true'], capture_output=True, timeout=10).returncode == 0
+        return subprocess.run(['unshare', '-n', '-m', '--', 'true'], capture_output=True, timeout=10).returncode == 0
     except (OSError, subprocess.SubprocessError):
-        ok = False
-    return ['unshare', '-n', '--'] if ok else []
+        return False
 
 
-OFFLINE = _offline_prefix()
+ISOLATE = _can_isolate()
+
+
+def _sandboxed(cmd: list[str], work: pathlib.Path) -> list[str]:
+    """Agent code: its own network namespace (nothing reachable), its own mount namespace with every shared writable
+    folder replaced by an empty one (no memory between runs), and run as nobody (the task's tests/, root-only, is out
+    of reach). Elsewhere (not root): the bare command, and the result says isolation is off."""
+    if not ISOLATE:
+        return cmd
+    mounts = ' '.join(f'[ -d {d} ] && mount -t tmpfs -o size=256m,mode=1777 tmpfs {d};' for d in WRITABLE)
+    inner = ' '.join(shlex.quote(c) for c in ['setpriv', '--reuid=nobody', '--regid=nogroup', '--clear-groups', '--'] + cmd)
+    return ['unshare', '-n', '-m', '--propagation', 'private', '--', 'sh', '-c', f'{mounts} cd {shlex.quote(str(work))} && exec {inner}']
 
 
 def run(script: pathlib.Path, panel: pd.DataFrame, cache: pathlib.Path | None = None) -> pd.DataFrame:
     if cache and cache.exists():
         return pd.read_csv(cache, parse_dates=['date'])
-    work = pathlib.Path(tempfile.mkdtemp())
+    trusted = script.resolve() in TRUSTED
+    WORK_ROOT.mkdir(mode=0o711, parents=True, exist_ok=True) if ISOLATE else None
+    work = pathlib.Path(tempfile.mkdtemp(dir=WORK_ROOT if ISOLATE else None))
     try:
+        work.chmod(0o777)
         panel.to_csv(work / 'in.csv', index=False, date_format='%Y-%m-%d')
+        (work / 'in.csv').chmod(0o644)
         env = {'PATH': os.environ['PATH'], 'HOME': str(work)}            # no proxy settings: no network
-        env.update({k: v for k, v in os.environ.items() if k == 'ORACLE_TASK'})   # the grader-check oracle only
         cmd = [sys.executable, str(script), '--input', str(work / 'in.csv'), '--output', str(work / 'out.csv')]
-        r = subprocess.run(OFFLINE + cmd, cwd=work, capture_output=True, text=True, timeout=1200, env=env)
+        if trusted:                      # grader checks only: they read the gold through ORACLE_TASK
+            env.update({k: v for k, v in os.environ.items() if k == 'ORACLE_TASK'})
+            cmd = (['unshare', '-n', '--'] if ISOLATE else []) + cmd
+        else:
+            if ISOLATE:
+                subprocess.run(['chmod', '-R', 'a+rX', str(script.parent)], check=True)
+            cmd = _sandboxed(cmd, work)
+        r = subprocess.run(cmd, cwd=work, capture_output=True, text=True, timeout=1200, env=env)
         if r.returncode:
             raise GateError(f'score.py failed: {r.stderr[-1500:]}')
         s = pd.read_csv(work / 'out.csv', parse_dates=['date'])
@@ -435,6 +464,8 @@ def consistency_score(sol, data, clean_truth, full, ev, stretches, c_, problem_r
     cleaned = data.drop(columns=['ct', 'amt']).merge(
         full[KEYS + ['clean_ct', 'clean_amt']].rename(columns={'clean_ct': 'ct', 'clean_amt': 'amt'}), on=KEYS)
     cleaned = cleaned.dropna(subset=['ct', 'amt'])[data.columns]
+    cleaned['ct'] = cleaned.ct.round().clip(lower=1).astype(int)          # reported like raw data: whole counts,
+    cleaned['amt'] = cleaned.amt.round(2).clip(lower=0.01)                # dollars to the cent
     try:
         again = run(sol / 'score.py', cleaned, c_('self'))
         base = run(sol / 'score.py', clean_truth[data.columns], c_('truthrun'))
@@ -476,7 +507,10 @@ def main():
     data = pd.read_csv(task / 'tests' / 'eval_panel.csv.gz', parse_dates=['date'])
     clean_truth = pd.read_csv(task / 'tests' / 'truth_panel.csv.gz', parse_dates=['date'])
     writeup = pathlib.Path(a.writeup) if a.writeup else sol.parent / 'output' / 'writeup.md'
+    if ISOLATE:
+        (task / 'tests').chmod(0o700)    # grader-only: out of reach of the scorer, which runs as nobody
     reward, d = score(truth, data, clean_truth, sol, writeup, pathlib.Path(a.cache) if a.cache else None)
+    d['isolation'] = 'nobody, offline, no shared writable folders' if ISOLATE else 'off (not root): grading only'
     res = dict(task=task.name, solution=str(sol), reward=round(reward, 3), **d)
     if a.json:
         pathlib.Path(a.json).write_text(json.dumps(res, indent=1, default=str))

@@ -322,19 +322,28 @@ def confidence_score(ev, scored):
                        true_alerts=true_alerts, by_kind=by_kind.round(3).reset_index().to_dict('records'), events=table)
 
 
-def own_noise(truth_panel: pd.DataFrame) -> pd.DataFrame:
+def own_noise(truth_panel: pd.DataFrame, thin_ct: float = 20) -> pd.DataFrame:
     """Per series: the robust spread of its daily relation to its peers' median (log count: sig_c, log ticket: sig_t),
-    around its own 28-day median: how far a value can sit from the truth and still be within the source's noise."""
+    around its own 28-day median: how far a value can sit from the truth and still be within the source's noise.
+    Measured on usable data only: a source's days whose 28-day median count is under thin_ct (a thin start, a series
+    too small to score) neither count toward its own noise nor enter its peers' median (a series with too few usable
+    days falls back to all of its days)."""
     out = []
     for tk, g in truth_panel.groupby('ticker'):
-        lc = np.log(g.pivot(index='date', columns='source_id', values='ct').clip(lower=0.01))
+        ct = g.pivot(index='date', columns='source_id', values='ct')
+        lc = np.log(ct.clip(lower=0.01))
         lt = np.log(g.pivot(index='date', columns='source_id', values='amt').clip(lower=0.01)) - lc
+        usable = ct.rolling(28, min_periods=1, center=True).median() >= thin_ct
         for s in lc.columns:
             peers = [c for c in lc.columns if c != s]
             row = dict(ticker=tk, source_id=s)
             for name, x in (('sig_c', lc), ('sig_t', lt)):
-                rel = x[s] - (x[peers].median(axis=1) if peers else 0)
-                r = (rel - rel.rolling(28, min_periods=7, center=True).median()).dropna()
+                for mask in (usable, None):
+                    xm = x.where(mask) if mask is not None else x
+                    rel = xm[s] - (xm[peers].median(axis=1) if peers else 0)
+                    r = (rel - rel.rolling(28, min_periods=7, center=True).median()).dropna()
+                    if len(r) > 60 or mask is None:
+                        break
                 row[name] = max(float(1.4826 * (r - r.median()).abs().median()), 0.02) if len(r) > 20 else 0.15
             out.append(row)
     return pd.DataFrame(out)

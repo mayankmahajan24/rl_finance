@@ -28,30 +28,12 @@ import pandas as pd
 
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parents[1]))
-from grade import KEYS, label_rows  # noqa: E402
+from grade import KEYS, label_rows, own_noise  # noqa: E402
 
 POINT_K, SHIFT_K = 3.0, 2.0
 DISTRUST_DAYS = 30
 RETURN_DAYS = 3
 NOISE = globals().get('NOISE_OVERRIDE', 1.0)
-
-
-def own_noise(truth: pd.DataFrame) -> pd.DataFrame:
-    """sigma per series and channel: robust spread of the source's daily relation to its peers' median, around its
-    own 28-day median (from the truth panel)."""
-    out = []
-    for tk, g in truth.groupby('ticker'):
-        lc = np.log(g.pivot(index='date', columns='source_id', values='ct').clip(lower=0.01))
-        lt = np.log(g.pivot(index='date', columns='source_id', values='amt').clip(lower=0.01)) - lc
-        for s in lc.columns:
-            peers = [c for c in lc.columns if c != s]
-            row = dict(ticker=tk, source_id=s)
-            for name, x in (('sig_c', lc), ('sig_t', lt)):
-                rel = x[s] - (x[peers].median(axis=1) if peers else 0)
-                r = (rel - rel.rolling(28, min_periods=7, center=True).median()).dropna()
-                row[name] = max(float(1.4826 * (r - r.median()).abs().median()), 0.02) if len(r) > 20 else 0.15
-            out.append(row)
-    return pd.DataFrame(out)
 
 
 def draw(df: pd.DataFrame, salt: int) -> np.ndarray:

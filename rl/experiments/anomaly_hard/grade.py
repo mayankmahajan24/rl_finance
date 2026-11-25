@@ -32,6 +32,7 @@ recurring_first). Timing, from what a point-in-time scorer could see (build.anno
     own noise); a level change that never does is `unscored`; one that takes over SETTLE_DAYS to show is `slow`
     (cleaned series only; for confidence unscored until settled, then trusted)
   * one-day problems: every day untrustworthy
+  * a ramp (a shift built up over ramp_days) counts for confidence from the day it is fully built, not before
   * level changes: the first CHANGE_DAYS from when visible untrustworthy, unscored up to SETTLE_DAYS while the code
     decides, then the new level trusted; after a temporary change ends, SETTLE_DAYS unscored, then trusted
   * thin beginning: before a source is established (its truth count's centred 28-day median has held thin_ct for
@@ -273,6 +274,11 @@ def label_rows(truth: dict, ev: pd.DataFrame, clean_truth: pd.DataFrame | None =
         if not e['regime']:
             parts.append((e, ser & ev.date.between(a, b)))
             continue
+        if e.get('ramp_days'):             # a gradual shift: for confidence it counts once it has fully built up
+            built = pd.Timestamp(e.get('shift_start', e['start'])) + D(int(e['ramp_days']) - 1)
+            if built > a:
+                quiet |= ser & (ev.date >= a) & (ev.date < built)
+                a = built
         settle = max(a + D(SETTLE_DAYS - 1), pd.Timestamp(e.get('settle', a)))
         on_end = min(a + D(CHANGE_DAYS - 1), b)
         quiet |= ser & (ev.date > on_end) & (ev.date <= min(settle, b))

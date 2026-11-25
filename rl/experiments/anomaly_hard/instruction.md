@@ -111,7 +111,7 @@ Your score is a weighted average of three parts: 40% confidence, 40% cleaned ser
   confidence the better; on rows that are fine, the higher the better; both by the squared error of your confidence
   against what the row is (0 untrustworthy, 1 fine), with the untrustworthy rows and the fine rows weighing half each
   (and each kind of problem weighing the same). A constant 0.5 scores nothing. A problem counts from the day it first
-  shows in the data (a shift that builds up over weeks, from the day it has fully built up); after a lasting change, its first two weeks are untrustworthy, the weeks while it settles are
+  shows in the data; after a lasting change, its first two weeks are untrustworthy, the weeks while it settles are
   not scored, and from then on the new level counts as fine, so confidence should rise again. A problem that builds
   up too slowly for its start to be dated counts only in the cleaned series.
 * **Cleaned series.** On rows a problem affected, how much of the gap between the raw value and what the source

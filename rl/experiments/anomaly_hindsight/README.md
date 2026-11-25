@@ -171,3 +171,10 @@ python rl/experiments/anomaly_hindsight/grade.py rl/tasks/proto/anomaly_hindsigh
 ```
 
 Model runs: `rl/experiments/anomaly_hindsight/runner/run.sh` (airgapped through `runner/offline.sh`).
+
+## Results (2026-11-25)
+
+Reference (`solutions/practitioner`, discard rules added): data reward 0.869 on all 13 tasks (tuning 0.846, held-out
+0.883). Eight Opus runs on the current instruction and grader: data 0.324 (0.19-0.47), report 0.679, total 0.271.
+Most of the gap is the low-signal gate: each run leaves 8-16 of 39 panels under 90% of thin rows both distrusted and
+blank (blanked but still trusted, or distrusted but imputed); half the runs also miss the detection gate on 4-10 tasks.

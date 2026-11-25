@@ -62,11 +62,12 @@ python /app/solution/score.py --input IN.csv --output OUT.csv
       reported value), with the series, the dates and why, and what a user should do about each; and any other risk
       specific to these series.
 
-   The report must include a line chart of the original series against the cleaned series: for every series in the
-   panel, one panel per series (small multiples), drawing exactly two lines and nothing else (no other series, bands,
-   averages, thresholds or markers): the reported values and your cleaned values over the panel's whole history, in
-   their own units (transactions a day, or dollars a day), with no log scale or other transformation, and the
-   reported values drawn exactly as reported (not smoothed, resampled, clipped or filled in). Save each chart as a PNG
+   The report must include line charts of the original series against the cleaned series, for both measures: for
+   every series in the panel, one panel for its daily count (transactions a day) and one for its daily spend (dollars a
+   day), as small multiples. Each panel draws exactly two lines and nothing else (no other series, bands, averages,
+   thresholds or markers): the reported values and your cleaned values over the panel's whole history, in their own
+   units, with no log scale or other transformation, and the reported values drawn exactly as reported (not smoothed,
+   resampled, clipped or filled in). Save each chart as a PNG
    in `/app/output/figures/` and show it in the report as `![what it shows](figures/name.png)`.
 
    Between 150 and 500 words, not counting tables, code blocks and chart lines; a shorter or longer report, a missing section or a missing chart each halve the report's score. Write it for its reader, in plain, complete sentences they can follow without the code (no note-form

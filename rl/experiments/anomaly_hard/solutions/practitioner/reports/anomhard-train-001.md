@@ -50,7 +50,9 @@ cleaned values, so one source's problem does not distort its sisters' scores. Ev
 | `adj_ct`, `adj_ticket` | the log adjustment applied |
 | How to use | model on rows with confidence of 0.5 or more; never compare levels across sources |
 
-![Every series: reported (grey) and cleaned (blue) daily transaction count, 2011-01-05 to 2016-01-04](figures/anomhard-train-001.png)
+![Every series: reported (grey) and cleaned (blue) daily transaction count, 2011-01-05 to 2016-01-04](figures/anomhard-train-001-count.png)
+
+![Every series: reported (grey) and cleaned (blue) daily spend in dollars, 2011-01-05 to 2016-01-04](figures/anomhard-train-001-spend.png)
 
 ## Parameters
 

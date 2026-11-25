@@ -343,7 +343,7 @@ def calibration(card: Card, fam_id: str, split: str) -> None:
     cmd = f"python rl/harness/calibrate.py run --split {split} --model <strong> --model <weaker> --k 2 --budget <usd>"
     if not runs:
         card.set("H2", BLOCKED, f"no calibration run for {split}: {cmd} (approved instrument, API budget), then k 4, 8")
-        for item in ("H4", "H5", "H7", "H8", "H9", "H11", "E6"):
+        for item in ("H4", "H5", "H7", "H8", "H9", "H11", "H15", "H16", "E6"):
             card.set(item, BLOCKED, "needs the calibration run (H2)")
         return
     stats = json.loads(runs[-1].read_text())
@@ -364,6 +364,18 @@ def calibration(card: Card, fam_id: str, split: str) -> None:
                  f"{model}: {zero}/{n} at 0, {band}/{n} in 1/8-3/8, {n - zero - full_ - band}/{n} otherwise mixed, {full_}/{n} at k/k")
         if zero:
             card.set("H5", MANUAL, f"{model}: {zero} tasks at 0/k to audit from transcripts")
+    means = {}
+    for model in models:
+        rates = [t["models"][model]["pass_rate"] for t in tasks.values() if model in t["models"] and t["models"][model]["pass_rate"] is not None]
+        if rates:
+            means[model] = (sum(rates) / len(rates), sum(r == 1 for r in rates), len(rates))
+    if means:
+        top = max(means, key=lambda m: means[m][0])
+        mean, at_k, n = means[top]
+        card.set("H16", MANUAL, f"strongest model {top}: mean pass rate {mean:.2f}, {at_k}/{n} tasks at k/k; "
+                 "for a capability measure, state the headroom and the saturation level (N/A for training data only)")
+        card.set("H15", MANUAL, "mean pass rate by model: " + ", ".join(f"{m} {v[0]:.2f}" for m, v in sorted(means.items()))
+                 + "; read against the target for the set's stated purpose (T6)")
     errored = max((s["errored"] for t in tasks.values() for s in t["models"].values()), default=0)
     card.set("H7", PASS if errored <= 0.05 else FAIL, f"worst errored share {errored}")
     k = stats["k"]

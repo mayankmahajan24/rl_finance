@@ -121,6 +121,10 @@ Difficulty is moved by task design only, never by the grader.
   not hold (I8).
 - For group-relative training aim for 1/8 to 3/8 on the model being trained; report the pass-rate
   curve either way, not only pass@1 (H4, H11).
+- Judge the distribution against what the set is for (H15): the band for training data, a low
+  start with room to climb for a capability measure, near 100% and stable for a regression set.
+- For a capability measure, report the strongest model's pass rate and the level at which the set
+  counts as saturated; past it, add harder tasks or graduate the set to a regression set (H16).
 
 ### 7. Clear the data
 

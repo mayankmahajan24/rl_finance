@@ -248,6 +248,36 @@ generated template.
 *Verify:* build two or three train tasks with a paraphrased template into a scratch folder and
 run the same k; do not commit the variant.
 
+### H15. The set's purpose sets its pass-rate target
+What the set is for (T6) decides what a good pass-rate distribution is, and the report judges the
+set against that target only:
+- **Training data:** the mixed-outcome band on the model being trained (H4).
+- **A capability measure:** it starts low. The strongest calibration model is well short of the
+  ceiling, models separate (H8), and the room left is stated (H16). A capability set that opens
+  near the top has nothing to climb.
+- **A regression set:** near 100% for the reference model and stable across runs (pass^k, H11),
+  so that a drop means something broke. A regression task at 3/8 is noise, not a guard.
+
+A set sold for two purposes meets both targets or is split into two named subsets. The target
+numbers are the owner's to confirm, like the pass threshold (H1).
+*Verify:* the purpose in the datasheet or `release/` notes (T6); the pass-rate distribution from
+the latest calibration stats read against that purpose's target, not against the training band by
+default.
+*Fix:* move difficulty by task design (section I), or relabel the set as what its numbers support.
+
+### H16. A capability measure has headroom, and says when it is spent
+A set at or near 100% still catches regressions and no longer shows improvement: gains by a better
+model become small moves inside the noise. For a set meant as a capability measure, the report
+gives the strongest calibration model's pass rate with its interval, the share of tasks at k/k for
+that model, and the level at which the set is treated as saturated. At that level the set gets
+harder tasks (T5 converts the k/k tasks first) or graduates: it is relabelled a regression set
+and a new capability set is started. Before calling a set saturated or a model stuck, read the
+transcripts (grader-design E6): a ceiling short of 100% is sometimes unfair grading or a harness
+limit, not difficulty. N/A for a set meant only as training data.
+*Verify:* audit.py reports the strongest model's mean pass rate and its k/k share from the latest
+`runs/calibration/<s>/*/stats.json`; the saturation level is written in the datasheet.
+BLOCKED until a calibration run exists.
+
 ---
 
 ## I. Difficulty design and variety

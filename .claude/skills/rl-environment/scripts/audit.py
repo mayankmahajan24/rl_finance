@@ -1,15 +1,17 @@
-"""Lab-ready audit: settle the mechanical items of references/checklist.md for one family and print
-the whole checklist as a scorecard. Items this script can't settle are listed as MANUAL (read and
+"""Lab-ready audit: settle the mechanical items of the three checklists (grader-design: the grading,
+task-generation: the task set, rl-environment: what a run can reach) for one family and print them
+as a scorecard. Items this script can't settle are listed as MANUAL (read and
 experiment), BLOCKED (needs Docker, API spend or a person: the command is given) or left for the
 human decision they end in.
 
 Nothing here spends money, calls a model, or writes to the repo: solvers and attacks are graded
 offline in scratch folders (JUDGE=keyword, no API key), the way rl/harness/ does.
 
-    python .claude/skills/lab-ready/scripts/audit.py --family data_audit                 # train, 2 tasks + 1 control
-    python .claude/skills/lab-ready/scripts/audit.py --family kpi_nowcast --split bench --sample 4
-    python .claude/skills/lab-ready/scripts/audit.py --family data_audit --static        # no built tasks needed
-    python .claude/skills/lab-ready/scripts/audit.py --family data_audit --out report.md --json report.json
+    python .claude/skills/rl-environment/scripts/audit.py --family data_audit                 # train, 2 tasks + 1 control
+    python .claude/skills/rl-environment/scripts/audit.py --family kpi_nowcast --split bench --sample 4
+    python .claude/skills/rl-environment/scripts/audit.py --family data_audit --static        # no built tasks needed
+    python .claude/skills/rl-environment/scripts/audit.py --family data_audit --out report.md --json report.json
+    python .claude/skills/rl-environment/scripts/audit.py --family data_audit --skill grader-design   # one skill's items only
 
 Exit code 1 when any item FAILs. Run with the repo's Python (requirements.txt installed).
 """
@@ -30,7 +32,7 @@ import tomllib
 HERE = pathlib.Path(__file__).resolve()
 ROOT = HERE.parents[4]
 RL = ROOT / "rl"
-CHECKLIST = HERE.parents[1] / "references" / "checklist.md"
+SKILLS = ("grader-design", "task-generation", "rl-environment")   # one checklist each; an id lives in exactly one
 for p in (RL, RL / "harness"):
     sys.path.insert(0, str(p))
 
@@ -49,15 +51,20 @@ class Card:
     """The checklist, with a status and evidence per item."""
 
     def __init__(self) -> None:
-        text = CHECKLIST.read_text()
         self.items = {}
-        section = ""
-        for line in text.splitlines():
-            if m := re.match(r"## ([A-K])\. (.+)", line):
-                section = m.group(2)
-            elif m := re.match(r"### ([A-K]\d+)\. (.+?)(?: \[(.+)\])?$", line):
-                self.items[m.group(1)] = {"section": section, "title": m.group(2), "tag": m.group(3) or "",
-                                          "status": None, "evidence": []}
+        for skill in SKILLS:
+            section = ""
+            for line in (HERE.parents[2] / skill / "references" / "checklist.md").read_text().splitlines():
+                if m := re.match(r"## ([A-Z])\. (.+)", line):
+                    section = m.group(2)
+                elif m := re.match(r"### ([A-Z]\d+)\. (.+?)(?: \[(.+)\])?$", line):
+                    self.items[m.group(1)] = {"skill": skill, "section": section, "title": m.group(2),
+                                              "tag": m.group(3) or "", "status": None, "evidence": []}
+
+    def only(self, skill: str | None) -> None:
+        """Keep one skill's items, once everything has been settled."""
+        if skill:
+            self.items = {k: i for k, i in self.items.items() if i["skill"] == skill}
 
     def set(self, item: str, status: str, evidence: str = "") -> None:
         """Record a result; the worst status given for an item wins, and evidence accumulates."""
@@ -81,7 +88,7 @@ class Card:
 
     def markdown(self, title: str) -> str:
         counts = {s: sum(i["status"] == s for i in self.items.values()) for s in (PASS, FAIL, WARN, BLOCKED, MANUAL, NA)}
-        out = [f"# Lab-ready audit: {title}", "", " · ".join(f"{s} {n}" for s, n in counts.items() if n), ""]
+        out = [f"# Audit: {title}", "", " · ".join(f"{s} {n}" for s, n in counts.items() if n), ""]
         section = None
         for k, i in self.items.items():
             if i["section"] != section:
@@ -378,6 +385,7 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--static", action="store_true", help="family-folder checks only; needs no built tasks")
     ap.add_argument("--out", type=pathlib.Path, help="write the scorecard (markdown) here as well as stdout")
     ap.add_argument("--json", type=pathlib.Path, help="write the items as JSON")
+    ap.add_argument("--skill", choices=SKILLS, help="print one skill's items only (default: all three checklists)")
     a = ap.parse_args(argv)
 
     card = Card()
@@ -390,7 +398,9 @@ def main(argv: list[str] | None = None) -> None:
         for item in ("B2", "C2"):
             card.set(item, BLOCKED, "no Docker daemon here: use the Oracle / Sandbox probe workflows")
     card.close()
-    text = card.markdown(f"{a.family}" + ("" if a.static else f" / {a.split}") + (" (static only)" if a.static else ""))
+    card.only(a.skill)
+    text = card.markdown(f"{a.family}" + ("" if a.static else f" / {a.split}") + (" (static only)" if a.static else "")
+                         + (f" ({a.skill} items)" if a.skill else ""))
     print(text)
     if a.out:
         a.out.write_text(text)

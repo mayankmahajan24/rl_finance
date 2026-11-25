@@ -85,8 +85,9 @@ python /app/solution/score.py --input IN.csv --output OUT.csv
   obviously wrong datapoints automatically. Encode every judgment in the code, not in a list of dates or tickers.
   The code must treat every company and every source alike: no rule, setting or exception for a particular ticker,
   source id or date (source ids are shuffled on the panels your code is graded on).
-* **Simple is fine.** Use complexity only where it clearly helps. Python with pandas, numpy, scipy, statsmodels and
-  scikit-learn is available; use any of them, or none.
+* **Simple is fine.** Use complexity only where it clearly helps. Python 3.12 with pandas, numpy, scipy, statsmodels,
+  scikit-learn, matplotlib, ruptures, Rbeast, prophet and statsforecast is available (fixed versions, no network);
+  use any of them, or none.
 * **Low-signal data.** Segments that carry no usable signal (for instance a stretch where a source has too few
   transactions for its daily numbers to mean much) may be discarded, as long as the rule is in the code so it would
   scale. Discard as little as you can: history is valuable.

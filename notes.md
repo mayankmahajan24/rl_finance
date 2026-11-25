@@ -32,6 +32,8 @@ panel code in `rl/families/_shared` and the source data, like every family).
 | Built tasks | `rl/tasks/proto/anomaly_hard{,_train}/anomhard-*` | `rl/tasks/proto/anomaly_hindsight{,_train}/anomhind-*` |
 | Cleaned series | point in time, like confidence | built in hindsight from the whole panel; confidence stays point in time |
 | Registered family | no (`rl/families` has no entry; recommended, undecided) | no |
+| Task image | `environment/Dockerfile` + `requirements.lock`: Python 3.12, pinned pandas, numpy, scipy, statsmodels, scikit-learn, matplotlib, ruptures, Rbeast, prophet, statsforecast; no network (E31). In the builder; built tasks get it at the next rebuild | same, its own copy |
+| Local runs and grading | `runner/setup_env.sh` makes the pinned venv (`/home/user/venvpin`); `run.sh` puts it first on PATH; grade with its python | same, its own copy |
 
 ### 1.1 The task (both)
 
@@ -237,6 +239,8 @@ active construction; "Retired" means it was later replaced (see section 3).
 | E27 | 11-25 | anomaly_hindsight grader: cleaned series scored over each problem's whole span and on sub-visible problems; judge told every discarded stretch; instruction matched (H#8) | Not run (on hold); imports checked | Adopted (anomaly_hindsight only) |
 | E28 | 11-25 | anomaly_hindsight test bed (H#9): rebuild; grader check; 8 Opus runs (h1-*); fresh reference developed on the 15 tuning panels, one general rule at a time | Grader check: answer key 1.000 on all 13 tasks, do-nothing 0, distrust-everything 0, unmodified practitioner 0.817. Reference path: ph0 practitioner 0.797; **ph1 + four discard rules 0.846 (adopted)**; ph2-ph4 general two-sided rescale 0.765-0.779 (damages good rows); ph5 backfill detected changes 0.847 and ph6 centred offset inside changes 0.842 (no gain). Remaining loss: ramped shifts (repair gain 0.56), mostly undetected in real time. Three Opus runs killed by an infrastructure interruption at 06:38 and resumed in their own sessions | Done. Reference on all 13 tasks 0.869 (tuning 0.846, held-out 0.883). 8 Opus runs: data 0.324 (0.19-0.47), report 0.679, total 0.271 (anomaly_hard: 0.467 / 0.818 / 0.422). Main loss: the low-signal gate fails on 8-16 of 39 panels per run (82-92% of thin rows distrusted and blank; misses are blanked but still trusted, or distrusted but imputed); the detection gate fails on 4-10 tasks for half the runs |
 | E29 | 11-25 | anomaly_hindsight judge V5 false fails: two correct reports zeroed (every-row counts and after-first-year share read as contradictions; a dark stretch called blank). Facts now give rows_blank, rows_changed_at_all, distrusted shares and counts after the first year, per-series no-row stretches; V5 checks every reasonable reading and ignores word choice on a matching number | Re-judged all 8: no V5 gate; reports 0.64-0.71. Probe (one count changed to a wrong value): V5 still fails on 2 of 3 votes | Active |
+| E30 | 11-25 | Library-based references for anomaly_hard (#69, #70): practitioner with one part swapped for ruptures, Rbeast, statsmodels MSTL, statsforecast AutoETS or Prophet; tuning panels | Practitioner 0.871; MSTL 0.760; statsforecast 0.741; ruptures 0.738 (stricter 0.65-0.68); Rbeast 0.721 (stricter 0.693); Prophet 0.540 (on the sisters' median as regressor 0.398). Break finders miss ramps and slow drifts in real time, which leak out as one-day spikes (false alerts 15-19 a panel against 5.8); MSTL removes seasonality the sister comparison already removed; Prophet moves when a sister enters or leaves. Rbeast's first result in a process differs from later ones (warm-up call needed for point in time). None shorter in a way that matters | Retired; kept in `solutions/library/` |
+| E31 | 11-25 | Pinned task image for both tasks (#71, H#10) | Image built (python:3.12-slim by digest, full lockfile, pip check) and checked with no network: every library imports, a chart renders, the practitioner and every library variant run. The earlier Opus runs used the container's Python 3.13 (pandas 3.0.6) unpinned | Active; built tasks get it at the next rebuild |
 | E25 | 11-25 | anomaly_hindsight copy with hindsight cleaning rules (#60, #61, H#1-H#4) | Built; every task has a thin start, 7 of 13 a company-wide break | Active, on hold |
 
 ---
@@ -245,6 +249,7 @@ active construction; "Retired" means it was later replaced (see section 3).
 
 | What | Retired | Why | Replaced by |
 |---|---|---|---|
+| Library-based references (ruptures, Rbeast, MSTL, statsforecast, Prophet) | 11-25 | Below the practitioner on the tuning panels (0.54-0.76 against 0.871), E30 | Practitioner (CUSUM) kept |
 | Real-data background, reviewed real problems, quirk events, hindsight reference, review/triage tools | 11-23 / 11-24 | Debatable labels; no exact truth | Semi-real background with planted problems (E5) |
 | Per-alert precision weighting, event F1, the "fixed" metric, row-level F1 | 11-23 | Restated other parts or rewarded spraying flags | Alert F1 with the 14-day split |
 | Geometric-mean reward | 11-24 | Hard to explain; one weak part zeroed everything | Weighted 0.4/0.4/0.2 plus detection gate |

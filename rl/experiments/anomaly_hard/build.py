@@ -250,6 +250,8 @@ def build_task(ctx, d: pathlib.Path, seed: int, control: bool) -> dict:
     shown, _, shown_map, _ = plant(np.random.default_rng(seed), control, ctx, sensors=vis)
     hidden, truth, mapping, clean = plant(np.random.default_rng([seed, 1]), control, ctx, sensors=hid)
     (d / 'environment' / 'data').mkdir(parents=True)
+    for f in ('Dockerfile', 'requirements.lock'):     # the pinned task image (environment/ in this folder)
+        shutil.copy(HERE / 'environment' / f, d / 'environment' / f)
     (d / 'tests').mkdir()
     shown.to_csv(d / 'environment' / 'data' / 'transactions.csv', index=False, date_format='%Y-%m-%d')
     (d / 'tests' / 'eval_panel.csv.gz').write_bytes(gzip.compress(

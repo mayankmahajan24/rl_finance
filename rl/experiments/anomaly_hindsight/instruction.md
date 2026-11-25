@@ -90,8 +90,9 @@ python /app/solution/score.py --input IN.csv --output OUT.csv
   obviously wrong datapoints automatically. Encode every judgment in the code, not in a list of dates or tickers.
   The code must treat every company and every source alike: no rule, setting or exception for a particular ticker,
   source id or date (source ids are shuffled on the panels your code is graded on).
-* **Simple is fine.** Use complexity only where it clearly helps. Python with pandas, numpy, scipy, statsmodels and
-  scikit-learn is available; use any of them, or none.
+* **Simple is fine.** Use complexity only where it clearly helps. Python 3.12 with pandas, numpy, scipy, statsmodels,
+  scikit-learn, matplotlib, ruptures, Rbeast, prophet and statsforecast is available (fixed versions, no network);
+  use any of them, or none.
 * **Discarded stretches.** Encode the like-for-like rules above in the code so they would scale. Discard nothing
   else: history is valuable.
 * **New data.** Your script is graded on three different panels of the same kind: other companies, with their own

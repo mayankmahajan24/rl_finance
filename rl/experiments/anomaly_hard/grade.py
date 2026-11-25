@@ -1,5 +1,5 @@
 """Grade a solution on an anomaly_hard task:
-    python grade.py TASK_DIR SOLUTION_DIR [--writeup PATH] [--json OUT] [--cache DIR]
+    python grade.py TASK_DIR SOLUTION_DIR [--writeup PATH] [--json OUT] [--cache DIR] [--home TASK_DIR]
 
 Grades every hidden panel of the task (tests/, then tests/panel-2, panel-3: the same hidden companies, each with its own
 planted problems and disguise, so tuning to one panel does not pay); reward = the mean of the panels' rewards, 0 if
@@ -16,8 +16,13 @@ Gates (reward 0 if any fails):
   low_signal_dropped  at least LOW_SIGNAL_SHARE of the thin beginning's rows distrusted (confidence < 0.5) and blank
   detects        confidence score at least MIN_CONFIDENCE (repairing the series without detecting problems cannot pass)
 
-Reward = W_CONF x confidence + W_CLEAN x cleaned series + W_STAB x stability (0.4 / 0.4 / 0.2). Also reported: the
-three components and the geometric mean sqrt(confidence x cleaned series x stability) (reward_geometric).
+Data reward = W_CONF x confidence + W_CLEAN x cleaned series + W_STAB x stability (0.4 / 0.4 / 0.2). Also reported:
+the three components and the geometric mean sqrt(confidence x cleaned series x stability) (reward_geometric).
+
+Reward = data reward x (0.5 + 0.5 x writeup_score): the report graded on the task's visible panel and the solution's
+own output on it (writeup.py, judge.md: code items and a model judge), so the report can halve the reward but never
+earn it alone. The data reward alone when no judge can run (details.writeup says why) or with WRITEUP_JUDGE=skip.
+--home TASK grades the report against the task it was written for, when the solution is graded on another task.
 
 Scored rows (label_rows): from eval_start (one year in), not on low-volume series (ignore_series), not near
 company-wide natural breaks (exclusions with no source), not on a closure's first year (exclusions of kind
@@ -69,6 +74,8 @@ import tempfile
 
 import numpy as np
 import pandas as pd
+
+import writeup as writeup_grade  # the write-up rubric (writeup.py, judge.md)
 
 KEYS = ['date', 'ticker', 'source_id']
 OUT_COLS = ['confidence', 'clean_ct', 'clean_amt']
@@ -128,7 +135,7 @@ def _sandboxed(cmd: list[str], work: pathlib.Path) -> list[str]:
     return ['unshare', '-n', '-m', '--propagation', 'private', '--', 'sh', '-c', f'{mounts} cd {shlex.quote(str(work))} && exec {inner}']
 
 
-def run(script: pathlib.Path, panel: pd.DataFrame, cache: pathlib.Path | None = None) -> pd.DataFrame:
+def run(script: pathlib.Path, panel: pd.DataFrame, cache: pathlib.Path | None = None, keep_extra: bool = False) -> pd.DataFrame:
     if cache and cache.exists():
         return pd.read_csv(cache, parse_dates=['date'])
     trusted = script.resolve() in TRUSTED
@@ -158,7 +165,7 @@ def run(script: pathlib.Path, panel: pd.DataFrame, cache: pathlib.Path | None = 
         shutil.rmtree(work, ignore_errors=True)
     check_format(panel, s)
     s['source_id'] = s.source_id.astype(int)
-    s = s[KEYS + OUT_COLS]
+    s = s if keep_extra else s[KEYS + OUT_COLS]
     if cache:
         cache.parent.mkdir(parents=True, exist_ok=True)
         s.to_csv(cache, index=False, date_format='%Y-%m-%d')
@@ -520,9 +527,12 @@ def panels(task: pathlib.Path) -> list[pathlib.Path]:
                                      key=lambda p: int(p.name.split('-')[1]))
 
 
-def grade_task(task: pathlib.Path, sol: pathlib.Path, writeup: pathlib.Path, cache: pathlib.Path | None = None):
-    """Grade every hidden panel; reward = the mean of their rewards (0 if any fails an integrity gate). Panel 1's
-    details stay at the top level; every panel's summary is in `panels`."""
+def grade_task(task: pathlib.Path, sol: pathlib.Path, writeup: pathlib.Path, cache: pathlib.Path | None = None,
+               home: pathlib.Path | None = None):
+    """Grade every hidden panel (data reward = the mean of their rewards, 0 if any fails an integrity gate), then the
+    write-up on the visible panel of `home` (the task it was written for; default this task): reward = data reward x
+    (0.5 + 0.5 x writeup_score), or the data reward alone when no judge can run. Panel 1's details stay at the top
+    level; every panel's summary is in `panels`, the write-up's grade in `writeup`."""
     rows, first = [], None
     for k, tests in enumerate(panels(task), 1):
         truth = json.loads((tests / 'gold.json').read_text())
@@ -539,10 +549,20 @@ def grade_task(task: pathlib.Path, sol: pathlib.Path, writeup: pathlib.Path, cac
         if not all(d['gates'].get(g, True) for g in INTEGRITY):
             break                                         # an integrity failure ends grading
     ok = all(all(r['gates'].get(g, True) for g in INTEGRITY) for r in rows)
-    reward = float(np.mean([r['reward'] for r in rows])) * ok
+    data_reward = float(np.mean([r['reward'] for r in rows])) * ok
     mean = lambda x: round(float(np.mean([r[x] or 0 for r in rows])), 3)  # noqa: E731
     gates = {g: all(r['gates'].get(g, True) for r in rows) for g in first['gates']}
-    return reward, dict(first, gates=gates, confidence_score=mean('confidence_score'), clean_score=mean('clean_score'),
+    w = None
+    if ok and os.environ.get('WRITEUP_JUDGE') != 'skip':
+        h = home or task
+        try:
+            w = writeup_grade.grade(h, sol, writeup, run, (cache.parent / f'writeup-{h.name}') if cache else None)
+        except (GateError, RuntimeError) as e:
+            w = dict(writeup_score=None, judge=f'not graded: {str(e)[-300:]}')
+    ws = (w or {}).get('writeup_score')
+    reward = data_reward * (0.5 + 0.5 * ws) if ws is not None else data_reward
+    return reward, dict(first, gates=gates, data_reward=round(data_reward, 3), writeup=w,
+                        confidence_score=mean('confidence_score'), clean_score=mean('clean_score'),
                         stability=mean('stability'), reward_geometric=mean('reward_geometric'), panels=rows)
 
 
@@ -550,12 +570,14 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('task'); ap.add_argument('solution'); ap.add_argument('--json')
     ap.add_argument('--writeup'); ap.add_argument('--cache')
+    ap.add_argument('--home', help='the task the write-up was written for (default: TASK)')
     a = ap.parse_args()
     task, sol = pathlib.Path(a.task), pathlib.Path(a.solution).resolve()
     writeup = pathlib.Path(a.writeup) if a.writeup else sol.parent / 'output' / 'writeup.md'
     if ISOLATE:
         (task / 'tests').chmod(0o700)    # grader-only: out of reach of the scorer, which runs as nobody
-    reward, d = grade_task(task, sol, writeup, pathlib.Path(a.cache) if a.cache else None)
+    reward, d = grade_task(task, sol, writeup, pathlib.Path(a.cache) if a.cache else None,
+                          pathlib.Path(a.home) if a.home else None)
     d['isolation'] = 'nobody, offline, no shared writable folders' if ISOLATE else 'off (not root): grading only'
     res = dict(task=task.name, solution=str(sol), reward=round(reward, 3), **d)
     if a.json:

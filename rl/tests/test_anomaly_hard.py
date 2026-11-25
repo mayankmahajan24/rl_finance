@@ -84,6 +84,7 @@ def test_answer_key_passes(task, monkeypatch):
 def test_answer_key_passes_on_every_hidden_panel(task, monkeypatch, tmp_path):
     import grade
     monkeypatch.setenv("ORACLE_TASK", str(task))
+    monkeypatch.setenv("WRITEUP_JUDGE", "skip")       # the data reward only (the write-up has its own tests)
     w = tmp_path / "writeup.md"
     w.write_text("method note")
     reward, d = grade.grade_task(task, SOL / "oracle", w)

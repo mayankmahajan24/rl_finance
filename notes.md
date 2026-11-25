@@ -148,6 +148,7 @@ With `WRITEUP_JUDGE=skip`, or when no judge can run, the total is the data rewar
 - **Report rubric.** M5 asks which cleaned-series steps use later data. The judge's facts list every blank
   (discarded) stretch, and U1 asks for them (H#8).
 - **Answer key** blanks the dropped rows.
+- **Practitioner reference** (`solutions/practitioner`, H#9): anomaly_hard's practitioner plus `hindsight_discards` (never steady, steady start at 70% of the next 180 days' level, company-wide outage under 30% of yearly level for 4+ days, coverage break x3 kept to the longer side). 0.846 on the tuning panels; full 13-task grade in progress. Its reports have not been written yet.
 - **Not yet verified:** that the answer key scores 1.0 and that the references lose on these cases. References and
   reports are not adapted.
 
@@ -234,7 +235,7 @@ active construction; "Retired" means it was later replaced (see section 3).
 | E24 | 11-25 | K6 and K9 false positives (epoch date, inequality) fixed (#65, H#5) | v8-t006 report 0.71 to 0.76 | Adopted (both tasks) |
 | E26 | 11-25 | No ticker-, source- or date-specific logic: instruction line plus K6 widened to source-id comparisons (#66, H#6) | Every existing solution (references, ceiling, 21 Opus runs) passes; tests cover 7 cases | Adopted (both tasks) |
 | E27 | 11-25 | anomaly_hindsight grader: cleaned series scored over each problem's whole span and on sub-visible problems; judge told every discarded stretch; instruction matched (H#8) | Not run (on hold); imports checked | Adopted (anomaly_hindsight only) |
-| E28 | 11-25 | anomaly_hindsight test bed (H#9): rebuild; 8 Opus runs (h1-*, one per train task plus a second on train-001 and train-002); grader check (answer key, probes); fresh reference from the practitioner, developed on the 15 tuning panels one general rule at a time (ph0 baseline, ph1 = four discard rules: never steady, steady start, company-wide outage, coverage break) | In progress | Running |
+| E28 | 11-25 | anomaly_hindsight test bed (H#9): rebuild; grader check; 8 Opus runs (h1-*); fresh reference developed on the 15 tuning panels, one general rule at a time | Grader check: answer key 1.000 on all 13 tasks, do-nothing 0, distrust-everything 0, unmodified practitioner 0.817. Reference path: ph0 practitioner 0.797; **ph1 + four discard rules 0.846 (adopted)**; ph2-ph4 general two-sided rescale 0.765-0.779 (damages good rows); ph5 backfill detected changes 0.847 and ph6 centred offset inside changes 0.842 (no gain). Remaining loss: ramped shifts (repair gain 0.56), mostly undetected in real time. Three Opus runs killed by an infrastructure interruption at 06:38 and resumed in their own sessions | Reference adopted; runs and grading in progress |
 | E25 | 11-25 | anomaly_hindsight copy with hindsight cleaning rules (#60, #61, H#1-H#4) | Built; every task has a thin start, 7 of 13 a company-wide break | Active, on hold |
 
 ---

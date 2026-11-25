@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Practitioner reference for anomaly_hindsight: trust scores and a like-for-like cleaned series, written the way a data
+"""Practitioner reference for anomaly_hindsight (the anomaly_hard practitioner plus hindsight discards, 2026-11-25): trust scores and a like-for-like cleaned series, written the way a data
 scientist would for a downstream model (plain rules, few knobs, fast, every adjustment explained).
 
     python score.py --input IN.csv --output OUT.csv [--report REPORT.csv]
@@ -29,7 +29,11 @@ Rules:
 Two passes: the second uses the first pass's cleaned values for the sister sources (their one-day problems left out),
 so one source's problem does not leak into its sisters' comparison. Every output for day t uses rows dated <= t only.
 
-Extra output columns for the analyst: reason (ok, low_signal, spike, level_change, rescaled, yearly_pattern) and
+Hindsight (cleaned series only; confidence stays point in time): a final pass blanks what cannot be put like for like
+(hindsight_discards): a company-wide coverage break's shorter side, a company-wide outage, a source's history before it
+reaches steady coverage, and a source that never does.
+
+Extra output columns for the analyst: reason (ok, low_signal, spike, level_change, rescaled, yearly_pattern, discarded) and
 adj_ct, adj_ticket (log adjustment applied to count and ticket size). --report writes one line per flagged episode.
 """
 import argparse
@@ -46,6 +50,11 @@ CUSUM_H = 12.0                                  # change alarm (allowance 1); da
 CONFIRM_Z = 2.0                                 # a change must hold: its last 7 days' median this many sigmas off
 DISTRUST_DAYS = 14                              # a new level is distrusted this long, then trusted (still rescaled)
 YEARLY_SLACK = 3                                # days of slack when looking up the same date a year or two earlier
+
+# hindsight discards (the cleaned series may use the whole panel)
+STEADY_FRAC, STEADY_AHEAD = 0.7, 180      # steady once the 28-day median reaches 70% of the next 180 days' level
+OUTAGE_FRAC, OUTAGE_DAYS = 0.3, 4         # company-wide outage: every source under 30% of its yearly level, 4+ days
+BREAK_X, BREAK_WIN = 3.0, 60              # coverage break: every source x3 (or /3) across 60 days either side, lasting
 
 
 def low_signal(ct: np.ndarray, established: bool = False) -> np.ndarray:
@@ -233,6 +242,58 @@ def clean_ticker(g: pd.DataFrame):
     return pd.concat(rows, ignore_index=True), report
 
 
+def hindsight_discards(df: pd.DataFrame) -> pd.Series:
+    """Rows whose cleaned values cannot be put like for like with the rest of their series, decided from the whole
+    panel: a company-wide coverage break (its shorter side), a company-wide outage, a source's history before it
+    reaches steady coverage, and a source that never does. Returns a boolean Series aligned with df."""
+    drop = pd.Series(False, index=df.index)
+    for tk, g in df.groupby('ticker'):
+        ct = g.pivot(index='date', columns='source_id', values='ct').astype(float)
+        days = pd.date_range(ct.index.min(), ct.index.max())
+        ct = ct.reindex(days)
+        keep_from, keep_to = days[0], days[-1]
+        # coverage break: every source moves together by BREAK_X or more, and the move lasts for the rest of the series
+        before = ct.rolling(BREAK_WIN, min_periods=20).median().shift(1)
+        after = ct[::-1].rolling(BREAK_WIN, min_periods=20).median()[::-1]
+        lr = np.log(after / before)
+        up = (lr > np.log(BREAK_X)).all(axis=1) & lr.notna().all(axis=1)
+        dn = (lr < -np.log(BREAK_X)).all(axis=1) & lr.notna().all(axis=1)
+        for cand in (up, dn):
+            if not cand.any():
+                continue
+            d = lr[cand].abs().mean(axis=1).idxmax()
+            pre = ct[(ct.index < d) & (ct.index >= d - pd.Timedelta(days=365))].median()
+            post = ct[(ct.index >= d) & (ct.index < d + pd.Timedelta(days=365))].median()
+            ratio = np.log(post / pre)
+            if (ratio.abs() > np.log(BREAK_X)).all() and (np.sign(ratio) == np.sign(ratio.iloc[0])).all():
+                if (d - days[0]) < (days[-1] - d):
+                    keep_from = max(keep_from, d)
+                else:
+                    keep_to = min(keep_to, d - pd.Timedelta(days=1))
+        cut = (ct.index < keep_from) | (ct.index > keep_to)
+        # company-wide outage: every reporting source far under its own yearly level for several days running
+        yearly = ct.rolling(365, min_periods=60, center=True).median()
+        low = ((ct / yearly) < OUTAGE_FRAC) | ct.isna()
+        out = low.all(axis=1)                    # a day no source reports counts as dark too
+        run = out.groupby((~out).cumsum()).transform('sum')
+        outage = out & (run >= OUTAGE_DAYS)
+        for s in ct.columns:
+            x = ct[s].where(~pd.Series(cut, index=ct.index) & ~outage)
+            m28 = x.rolling(28, min_periods=7, center=True).median()
+            held = (m28 >= LOW_CT).astype(int).rolling(ESTABLISHED).sum() >= ESTABLISHED
+            if not held.any():
+                bad = pd.Series(True, index=ct.index)            # never reaches steady coverage
+            else:
+                ahead = m28[::-1].rolling(STEADY_AHEAD, min_periods=28).median()[::-1]
+                steady = (m28 >= STEADY_FRAC * ahead) & (m28 >= LOW_CT)
+                start = steady.idxmax() if steady.any() else ct.index[-1]
+                bad = (ct.index < start) | pd.Series(cut, index=ct.index) | outage
+            bad = pd.Series(np.asarray(bad), index=ct.index)
+            rows = g.index[g.source_id == s]
+            drop.loc[rows] = bad.reindex(g.loc[rows, 'date']).fillna(False).to_numpy()
+    return drop
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--input', required=True); ap.add_argument('--output', required=True); ap.add_argument('--report')
@@ -248,6 +309,9 @@ def main():
     out['clean_ct'] = out.clean_ct.where(out.clean_ct.notna() | (out.reason == 'low_signal'), df.ct)
     out['clean_amt'] = out.clean_amt.where(out.clean_amt.notna() | (out.reason == 'low_signal'), df.amt)
     out['reason'] = out.reason.fillna('ok')
+    gone = hindsight_discards(df).to_numpy()                 # hindsight: stretches that cannot be made like for like
+    out.loc[gone, ['clean_ct', 'clean_amt']] = np.nan
+    out.loc[gone & (out.reason == 'ok'), 'reason'] = 'discarded'
     out['date'] = out.date.dt.strftime('%Y-%m-%d')
     out.to_csv(a.output, index=False)
     if a.report:

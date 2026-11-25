@@ -83,6 +83,8 @@ python /app/solution/score.py --input IN.csv --output OUT.csv
   network service. It runs with the network off.
 * **Built to scale.** Imagine running this on hundreds more sources and companies: the bar is to catch the
   obviously wrong datapoints automatically. Encode every judgment in the code, not in a list of dates or tickers.
+  The code must treat every company and every source alike: no rule, setting or exception for a particular ticker,
+  source id or date (source ids are shuffled on the panels your code is graded on).
 * **Simple is fine.** Use complexity only where it clearly helps. Python with pandas, numpy, scipy, statsmodels and
   scikit-learn is available; use any of them, or none.
 * **Low-signal data.** Segments that carry no usable signal (for instance a stretch where a source has too few

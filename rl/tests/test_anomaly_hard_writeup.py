@@ -130,3 +130,17 @@ def test_an_epoch_date_in_code_is_not_a_hand_picked_case(tmp_path, ref):
     (sol / 'epoch.py').write_text("ORIGIN = '1970-01-01'\nPICKED = '2011-01-05'\n")
     picked = W.hand_picked(sol, VISIBLE)
     assert any('2011-01-05' in p for p in picked) and not any('1970-01-01' in p for p in picked)
+
+
+@pytest.mark.parametrize('code,bad', [("if source_id == 1:\n    x = 2\n", True),
+                                      ("df = df[df.source_id != 1]\n", True),
+                                      ("skip = src in (1, 5)\n", True),
+                                      ("if row['source_id'] == 1:\n    pass\n", True),
+                                      ("for s in sources:\n    n = len(s)\n", False),
+                                      ("x = 1\nif x == 1:\n    pass\n", False),
+                                      ("n = df.groupby('source_id').size()\nok = n == 1\n", False)])
+def test_source_specific_logic_fails(tmp_path, ref, code, bad):
+    sol = tmp_path / 'sol'
+    shutil.copytree(HERE / 'solutions' / 'practitioner', sol, ignore=shutil.ignore_patterns('reports'))
+    (sol / 'special.py').write_text(code)
+    assert (items(ref, sol)['K6'] == 'fail') is bad, W.hand_picked(sol, VISIBLE)

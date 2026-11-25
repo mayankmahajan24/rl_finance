@@ -3,8 +3,8 @@
 A running record of what is built, what was tried, and what was retired, kept for the final report. **Update it with
 every change or experiment**: add a row to the experiment log, move anything replaced to "Retired", and keep "Active
 construction" true at all times. Verbatim feedback and each decision's details stay in the feedback logs
-(`rl/runs/anomaly_hard/reviews/feedback_log.md`, numbered #1-#65 so far; `rl/runs/anomaly_hindsight/reviews/feedback_log.md`,
-#1-#5). Branch `claude/nice-heisenberg-ukw1gi` (draft pull request mayankmahajan24/rl_finance#73).
+(`rl/runs/anomaly_hard/reviews/feedback_log.md`, numbered #1-#66 so far; `rl/runs/anomaly_hindsight/reviews/feedback_log.md`,
+#1-#6). Branch `claude/nice-heisenberg-ukw1gi` (draft pull request mayankmahajan24/rl_finance#73).
 
 Last updated: 2026-11-25.
 
@@ -95,7 +95,8 @@ KSS, JCP) are never used.
   - K1: six sections, each with content;
   - K2-K4: their order;
   - K5: no mention of the assessment, scripts or commands;
-  - K6: no hand-coded ticker or in-range date in the code;
+  - K6: no logic specific to a ticker, source or date in the code: a visible ticker code, an in-range date, or a
+    source id compared with a number;
   - K7: report not written by code;
   - K8: a chart shown;
   - K9: no hidden HTML.
@@ -217,6 +218,7 @@ active construction; "Retired" means it was later replaced (see section 3).
 | E22 | 11-25 | Smooth the gates: ramp min(1, conf/0.4); task-level gate; both; plus no low-signal gate (#64) | Spread (sd) 0.260, 0.226, 0.258, 0.227, 0.204 | Not adopted; variance is real |
 | E23 | 11-25 | Readable prose: instruction plus judge F4 (#62); limit raised to 500 words (#63) | Note-form reference fails F4 unanimously; rewritten reference passes | Adopted (both tasks) |
 | E24 | 11-25 | K6 and K9 false positives (epoch date, inequality) fixed (#65, H#5) | v8-t006 report 0.71 to 0.76 | Adopted (both tasks) |
+| E26 | 11-25 | No ticker-, source- or date-specific logic: instruction line plus K6 widened to source-id comparisons (#66, H#6) | Every existing solution (references, ceiling, 21 Opus runs) passes; tests cover 7 cases | Adopted (both tasks) |
 | E25 | 11-25 | anomaly_hindsight copy with hindsight cleaning rules (#60, #61, H#1-H#4) | Built; every task has a thin start, 7 of 13 a company-wide break | Active, on hold |
 
 ---
@@ -251,7 +253,7 @@ active construction; "Retired" means it was later replaced (see section 3).
   - `grader_2026-11-25.md` (report grader review with probes and fixes).
 - **Tests:**
   - `rl/tests/test_anomaly_hard.py` (slow: answer key, probes, gates, isolation);
-  - `rl/tests/test_anomaly_hard_writeup.py` (25 offline tests of the report code items).
+  - `rl/tests/test_anomaly_hard_writeup.py` (32 offline tests of the report code items).
 - **Opus runs (container only, not in git):** `/home/user/anomaly_hard_runs/`
   - `run.sh` (airgapped, subscription);
   - `prompt-<run>.txt`;

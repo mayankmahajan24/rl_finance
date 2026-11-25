@@ -29,6 +29,14 @@ Rules:
 Two passes: the second uses the first pass's cleaned values for the sister sources (their one-day problems left out),
 so one source's problem does not leak into its sisters' comparison. Every output for day t uses rows dated <= t only.
 
+Confidence is the probability that a day is fine (carries the source's usual signal), from the same evidence the rules
+use: a logistic in the day's distance from its expected level in noise units, |z|, centred on the spike bar so it
+crosses 0.5 where the rules decide (PROB_K steep); on trusted days it also falls as the change alarm (CUSUM) builds
+(CUSUM_K), so the days before a change is confirmed already score lower; inside a change's distrust window it comes
+from the size of the change, |offset| / sigma, against CHANGE_MID; on the thin beginning it is under 0.5, lower the
+thinner the source. The lower of the two channels (count, ticket) is the day's confidence. After a change has been
+distrusted for DISTRUST_DAYS, its rescaled days are trusted again and confidence returns to the trusted range.
+
 Extra output columns for the analyst: reason (ok, low_signal, spike, level_change, rescaled, yearly_pattern) and
 adj_ct, adj_ticket (log adjustment applied to count and ticket size). --report writes one line per flagged episode.
 """
@@ -44,6 +52,9 @@ SPIKE_Z = 6.0                                   # one-day problem: this many sig
 MAX_SPIKE_DAYS = 3                              # a one-day problem lasts at most this long; longer is a level change
 CUSUM_H = 12.0                                  # change alarm (allowance 1); day-to-day noise is autocorrelated
 CONFIRM_Z = 2.0                                 # a change must hold: its last 7 days' median this many sigmas off
+CHANGE_MID = 1.0                                # a change this many sigmas off is even odds inside the window
+CUSUM_K = 0.8                                   # how fast confidence falls as the change alarm builds (per unit)
+PROB_K = 1.5                                    # steepness of confidence around the bar (per sigma)
 DISTRUST_DAYS = 14                              # a new level is distrusted this long, then trusted (still rescaled)
 YEARLY_SLACK = 3                                # days of slack when looking up the same date a year or two earlier
 
@@ -66,10 +77,23 @@ def low_signal(ct: np.ndarray, established: bool = False) -> np.ndarray:
     return out
 
 
+def prob(z, code, off, sig, cus):
+    """Probability that a day is fine, from how far it sits from the source's expected level in its own noise units:
+    a logistic in |z| centred on the spike bar (PROB_K steep), so it crosses 0.5 exactly where the rules decide.
+    Trusted days map to (0.5, 1), distrusted days to (0, 0.5). Inside a level change's distrust window the evidence is
+    the size of the change itself, |offset| / sigma, against CHANGE_MID."""
+    z = np.abs(np.nan_to_num(z))
+    s = np.where(np.isfinite(sig) & (sig > 0), sig, np.nan)
+    fit = 1 / (1 + np.exp(np.clip(PROB_K * (z - SPIKE_Z), -50, 50)))              # 1 near the level, 0 far off
+    chg = 1 / (1 + np.exp(np.clip(PROB_K * (np.nan_to_num(np.abs(off) / s, nan=CONFIRM_Z) - CHANGE_MID), -50, 50)))
+    build = 1 / (1 + np.exp(np.clip(CUSUM_K * (cus - CUSUM_H / 2), -50, 50)))      # evidence of a change building up
+    return np.where(code == 1, 0.5 * fit, np.where(code == 2, 0.5 * chg, 0.5 + 0.5 * np.minimum(fit, build)))
+
+
 def track(rel: np.ndarray, usable: np.ndarray, dates: pd.DatetimeIndex, cnt_var: np.ndarray):
     """One source, one channel: walk forward; return offset to remove, flag reason codes, and episodes."""
     T = len(rel)
-    off, code, zs = np.zeros(T), np.zeros(T, int), np.zeros(T)   # code: 0 ok, 1 spike, 2 change (distrusted), 3 rescaled
+    off, code, zs, sg, cs = np.zeros(T), np.zeros(T, int), np.zeros(T), np.full(T, np.nan), np.zeros(T)   # code: 0 ok, 1 spike, 2 change (distrusted), 3 rescaled
     z_hist, hist, alarms = {}, [], {}                  # z and change alarms by date (yearly lookup); usable history
     level0, start, peak, pos, neg, episodes = None, None, 0.0, 0.0, 0.0, []
     run = []                                           # the current run of consecutive spike days, same sign
@@ -91,6 +115,7 @@ def track(rel: np.ndarray, usable: np.ndarray, dates: pd.DatetimeIndex, cnt_var:
         z = (x - base - cur) / sigma
         z_hist[dates[t]] = z
         zs[t] = z
+        sg[t] = sigma
         if abs(z) > SPIKE_Z:
             run = run + [t] if run and np.sign(zs[run[-1]]) == np.sign(z) else [t]
             if len(run) > MAX_SPIKE_DAYS:              # off for longer than a one-day problem lasts: a level change
@@ -115,6 +140,7 @@ def track(rel: np.ndarray, usable: np.ndarray, dates: pd.DatetimeIndex, cnt_var:
         if level0 is None:
             zc = float(np.clip(z, -4, 4))
             pos, neg = max(0.0, pos + zc - 1.0), max(0.0, neg - zc - 1.0)
+            cs[t] = max(pos, neg)
             if pos > CUSUM_H or neg > CUSUM_H:         # a level change: freeze the old level
                 sign = 1 if pos > CUSUM_H else -1
                 pos, neg = 0.0, 0.0
@@ -138,7 +164,7 @@ def track(rel: np.ndarray, usable: np.ndarray, dates: pd.DatetimeIndex, cnt_var:
             code[t] = 2 if t - start < DISTRUST_DAYS else 3
     if level0 is not None:
         episodes[-1].update(end=None, peak=peak)
-    return off, code, episodes, zs
+    return off, code, episodes, zs, sg, cs
 
 
 def relation(x: pd.DataFrame, peers: pd.DataFrame, usable: pd.DataFrame, s, settled: pd.DataFrame) -> np.ndarray:
@@ -204,8 +230,8 @@ def clean_ticker(g: pd.DataFrame):
     ct, amt, lc, lt, res = process(g, cl_c, cl_t)      # pass 2: peers on their cleaned values
     rows, report = [], []
     for s, r in res.items():
-        oc, cc, ec, _, refc = r['c']
-        ot, ctk, et, _, reft = r['t']
+        oc, cc, ec, zc, sgc, csc, refc = r['c']
+        ot, ctk, et, zt, sgt, cst, reft = r['t']
         x_c, x_t = lc[s].to_numpy(), lt[s].to_numpy()
         new_c, new_t = x_c - oc, x_t - ot
         # a one-day problem: the source's own level against its sisters that day
@@ -219,7 +245,9 @@ def clean_ticker(g: pd.DataFrame):
         low = r['low']
         reason = np.where(low, 'low_signal', np.where(spike, 'spike', np.where((cc == 2) | (ctk == 2), 'level_change',
                           np.where((cc == 3) | (ctk == 3), 'rescaled', np.where((cc == -1) | (ctk == -1), 'yearly_pattern', 'ok')))))
-        conf = np.where(low, 0.0, np.where(spike, 0.05, np.where(reason == 'level_change', 0.3, 1.0)))
+        conf = np.minimum(prob(zc, cc, oc, sgc, csc), prob(zt, ctk, ot, sgt, cst))   # the weaker channel decides
+        m28 = ct[s].rolling(28, min_periods=1).median().to_numpy()
+        conf = np.where(low, 0.45 * np.clip(np.nan_to_num(m28) / LOW_CT, 0, 1), conf)   # thin: under 0.5, by how thin
         out_ct = np.where(low, np.nan, np.exp(new_c))
         out_amt = np.where(low, np.nan, np.exp(new_c + new_t))
         have = ct[s].notna().to_numpy()

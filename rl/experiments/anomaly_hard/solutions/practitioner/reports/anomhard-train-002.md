@@ -44,7 +44,7 @@ cleaned values, so one source's problem does not distort its sisters' scores. Ev
 
 | Column | Meaning |
 |---|---|
-| `confidence` | 1 trusted; 0.3 new level change; 0.05 spike; 0 low signal (under 0.5 = distrust) |
+| `confidence` | the probability that the day is fine, from its distance to the expected level in noise units; under 0.5 = distrust |
 | `clean_ct`, `clean_amt` | the source's series on its own original basis; blank only for low signal |
 | `reason` | ok, spike, level_change, rescaled, yearly_pattern or low_signal |
 | `adj_ct`, `adj_ticket` | the log adjustment applied |
@@ -71,7 +71,9 @@ cleaned values, so one source's problem does not distort its sisters' scores. Ev
 | Imputation level window | 42 days (56 - 14) | tuned: longer is steadier, slower to follow growth |
 | Change end | offset under 1/3 of its peak | tuned: lower holds changes longer |
 | Expected-count window | 28-day median, 7 days minimum | four weeks keeps weekday balance |
-| Confidence values | 1, 0.3, 0.05, 0 | requirement: under 0.5 means distrust; below it, only the order matters to a user filtering at 0.5 |
+| Confidence curve | logistic, 1.5 per sigma, crossing 0.5 at the spike bar | 0.5 given as the trust line; slope 1.5 tuned (1.0 scored the same) |
+| Change build-up, inside a change | falls 0.8 per CUSUM unit past half the alarm (6); even odds at an offset of 1 sigma | tuned: the days before a change is confirmed score lower, so a late alarm costs less |
+| Thin start | 0.45 times the 28-day median over 20 | keeps thin days under 0.5, lower when thinner |
 | Log floors | 0.5 transactions, $0.01 | avoid log of zero |
 | How "tuned" values were set | practice panels with planted problems, one value at a time | most problems caught per false alert |
 

@@ -267,10 +267,15 @@ def facts(visible: pd.DataFrame, out: pd.DataFrame, instruction: str) -> dict:
         b_runs = _runs(blank, g.date)                  # every blank stretch, distrusted or not: what the output discards
         series[-1]['blank'] = dict(rows=int(blank.sum()), runs=len(b_runs), first=str(b_runs[0][0].date()),
                                    last=str(b_runs[-1][1].date())) if b_runs else None
+        changed = (~blank) & (((g.clean_ct - g.ct).abs() > 1e-9) | ((g.clean_amt - g.amt).abs() > 1e-6))
+        series[-1].update(changed_at_all=int(changed.sum()), no_row_stretches=[
+            dict(start=str((a + pd.Timedelta(days=1)).date()), end=str((b - pd.Timedelta(days=1)).date()), days=int((b - a).days - 1))
+            for a, b in zip(g.date.iloc[:-1], g.date.iloc[1:]) if (b - a).days > 5])
         for a, b, n in b_runs:
             discarded.append(dict(ticker=tk, source_id=int(s), start=str(a.date()), end=str(b.date()), rows=n))
     unrepaired.sort(key=lambda r: -r['rows'])
     tot = lambda k: int(sum(x[k] for x in series))  # noqa: E731
+    tot_blank = int(sum((x['blank'] or {}).get('rows', 0) for x in series))
     return dict(
         panel=dict(first_date=str(visible.date.min().date()), last_date=str(visible.date.max().date()),
                    rows=len(visible), tickers=sorted(visible.ticker.astype(str).unique()),
@@ -282,6 +287,9 @@ def facts(visible: pd.DataFrame, out: pd.DataFrame, instruction: str) -> dict:
             rows_distrusted=tot('distrusted'), rows_distrusted_blank=tot('distrusted_blank'),
             rows_distrusted_left_at_reported=tot('distrusted_left_at_reported'),
             rows_distrusted_repaired=tot('distrusted_repaired'), rows_trusted_adjusted=tot('trusted_adjusted'),
+            rows_blank=tot_blank, rows_changed_at_all=tot('changed_at_all'),
+            share_distrusted=round(float((v.confidence < 0.5).mean()), 3),
+            share_distrusted_after_first_year=round(float((v[v.date >= v.date.min() + pd.Timedelta(days=365)].confidence < 0.5).mean()), 3),
             alerts=tot('alerts'), per_series=series,
             distrusted_not_repaired_runs=unrepaired[:MAX_RUNS], distrusted_not_repaired_runs_total=len(unrepaired),
             blank_runs=sorted(discarded, key=lambda r: -r['rows'])[:MAX_RUNS], blank_runs_total=len(discarded)))

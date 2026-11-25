@@ -11,17 +11,18 @@ built to break the grader, and leaves the proof behind as tests.
 
 ## What this skill owns
 
-Three skills take a family to lab-ready, usually in this order, and each checklist item lives in
-exactly one:
+Three skills take a family to lab-ready, and each checklist item lives in exactly one. An
+environment is a verifier, a world and a task set, built in that order, so the skills are used in
+that order too, with the release gate last:
 
 - **`grader-design` (here): what the score pays for.** Verifiers, rubrics, judges, reward shape,
   grader exploits, evaluator tests. The question is whether the grader paid for something that is
   not the work.
+- **`rl-environment`: the world a task runs in.** Realism, leaks, network, tools, resets,
+  harness, replay, and the release gate, which asks for this skill's report at the family's
+  current version (its item K5) and does not re-check grading.
 - **`task-generation`: which tasks exist.** Going from data and a sound grader to a set of tasks
-  that are real, solvable, varied, calibrated, cleanly split and licensable.
-- **`rl-environment`: what the agent can reach when a task runs.** Leaks, network, tools,
-  look-ahead, resets, harness, replay, and the release gate, which asks for this skill's report at
-  the family's current version (its item K5) and does not re-check grading.
+  that are real, solvable, varied, calibrated, point-in-time, cleanly split and licensable.
 
 ## Ground rules
 
@@ -60,7 +61,9 @@ others miss, which counterfactual would flip the call (checklist F14). Ask, and 
 3. **A model judge** only for what needs judgment, one criterion per call.
 
 Code is deterministic and free to re-run after every change; a judge is neither. Each judged line
-you can move to code is one fewer line to calibrate (D11).
+you can move to code is one fewer line to calibrate (D11). Do not avoid the judge where judgment is
+the point: passing every code check and being good work are different bars, and a calibrated judge
+is how the second is measured.
 
 ### 3. Draft the rubric and the reward
 
@@ -94,7 +97,9 @@ any of them. This is where most weak graders show, and it is cheap.
 | Passing artifacts with prose that overclaims | below the reference | D10 |
 | Empty, malformed, very long, an injection aimed at the judge | 0, no crash | E2, D4 |
 
-Then hunt for the family's own exploits (E4). Read the verifier as an agent that wants the reward
+Then hunt for the family's own exploits (E4). An exploit usually means the task or the scoring was
+underspecified; the aim is to make the honest path easier than the hack, not to make hacking
+impossible. Read the verifier as an agent that wants the reward
 without the work and write at least five concrete attempts before judging any:
 
 - What does the verifier trust that I report? (my own error metrics, counts, a "done" flag)
@@ -169,7 +174,7 @@ Write to `rl/runs/<family>/reviews/grader_<YYYY-MM-DD>.md`:
 ## Open: needs a person      (the decision, the evidence, the exact command)
 ## Open: needs budget        (the command and what it will show)
 ## Residual risks accepted
-## Scorecard                 (every item D1–M4: status and one line of evidence)
+## Scorecard                 (every item D1–M6: status and one line of evidence)
 ```
 
 No item may be left `MANUAL`. The report goes in git: no gold, no model answers, no real company
@@ -177,7 +182,7 @@ behind an anonymised task.
 
 ## Reference
 
-- `references/checklist.md` — the full list, D1–M4. Read it in step 5.
+- `references/checklist.md` — the full list, D1–M6. Read it in step 5.
 - `../rl-environment/scripts/audit.py --skill grader-design` — the mechanical items and the scorecard.
 
 Left out on purpose: metagraders, production A/B tests and continuously refreshed eval suites.

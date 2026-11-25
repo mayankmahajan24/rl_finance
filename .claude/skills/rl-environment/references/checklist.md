@@ -13,15 +13,15 @@ heuristic: read it), `BLOCKED` (needs Docker, API spend or a person: say which, 
 
 Paths are relative to `rl/`. `<f>` is the family id, `<s>` the split.
 
-This list covers the integrity of the environment a task runs in: what the agent can see, reach
-and remember, whether each trial is clean and reproducible, and the release gates. What the grader
+This list covers the integrity of the environment a task runs in: whether the world is realistic,
+what the agent can see and reach, whether each trial is clean and reproducible, and the release gates. What the grader
 pays for is on the `grader-design` checklist (D, E, F, G, M). Whether the tasks are real, solvable,
 varied and calibrated is on the `task-generation` checklist (T and most of A, B, H, I, J). K5 and
 K7 are the two items here that ask for those reviews.
 
 ## Contents
 
-- A. Leaks in what the agent sees
+- A. The world: leaks and realism
 - B. The reference inside the environment
 - C. Isolation and cheat paths: airgap, tools, point in time, clean reset
 - H. Harness and infrastructure
@@ -30,7 +30,7 @@ K7 are the two items here that ask for those reviews.
 
 ---
 
-## A. Leaks in what the agent sees
+## A. The world: leaks and realism
 
 ### A4. Nothing the agent sees identifies the gold, the benchmark or a disguised company [auto]
 *Verify:* `splits/check.py` check 8 (`leakcheck.py`); `leak_check` in `family.yaml` declares the gold
@@ -52,6 +52,23 @@ model must not lose reward for following directions it was given.
 verifier; list each place the two disagree. Whoever built the world should not be the only one to
 read it for leaks.
 *Fix:* at the generator or the data file; a contradiction that is deliberate is stated in the `rubric_visibility` note (task-generation A3).
+
+### A9. Generated data does not read as generated
+Synthetic records carry the texture of real ones: uneven formatting, human-like errors,
+company-specific habits, gaps. Templated text, concatenated or implausible documents and values on
+a clean grid tell the model it is in a test, and it then behaves differently (C11).
+*Verify:* show a sample of the visible data, with no context, to a model or a person and ask which
+rows are synthetic and why; fix what gives them away and repeat until nothing is singled out.
+Families built on real panels: N/A for the real rows, still applies to anything planted.
+
+### A11. The world holds what the job needs, where the job would keep it
+The environment mirrors the setup the work is done in: the files, records, tools and state the
+role would have, seeded and reset between trials. Rules and requirements sit in documents and
+records the way they do at work, not only in the prompt. Nothing the real job would provide is
+withheld to make the task harder: a missing tool or missing context is fake difficulty, and it
+pushes the model toward workarounds.
+*Verify:* list what the role would have in front of them for this assignment and find each in
+`environment/`; anything absent is either a data hole the instruction states plainly or a defect.
 
 ---
 
@@ -106,6 +123,8 @@ after the agent finishes) or nowhere. The Dockerfile copies `data/` only.
 One container per trial from the image; nothing a previous trial or the build left behind: no
 `.git`, no caches, no shell history, no `__pycache__`, no editor state under `environment/`; no
 host mounts or shared volumes in `task.toml`; `JUDGE_CACHE` never mounted where the agent runs.
+History is a look-ahead path too: unpruned git history or a cache written after the task's as-of
+point lets the agent read the answer, or a later fix, straight off the disk.
 *Verify:* audit.py lists stray files under `environment/`; read `task.toml` for mounts.
 
 ### C8. The verifier does not trust the container the agent ran in [auto, reports the mode]
@@ -141,23 +160,13 @@ URLs; ask whether the task could be done faster by ignoring the provided files.
 ### C11. The world does not announce that it is a test
 Tells are found and removed: a clock that moves too evenly, a world too small to be real, a folder
 layout that looks like a benchmark task, file or path names that mention grading, rubrics, gold,
-tests or the task id, a canary string in view. Agents now often begin by looking for grader files,
+tests or the task id, a canary string in view, a prompt or system message that says this is a
+synthetic or evaluation environment. Agents now often begin by looking for grader files,
 and a model that knows it is being evaluated acts more cautiously, so its behaviour there is not
 the behaviour a lab is buying.
 *Verify:* list the image's file tree and environment variables as the agent sees them; read
 calibration transcripts for the model remarking that this is an eval or a test.
-*Fix:* rename, restructure, or enrich the world; do not treat cleaner behaviour under suspicion as
-the true signal.
-
-### C12. The model's own memory is not a look-ahead path
-Pinning the clock stops the sandbox seeing the future; it does not stop a model that was trained
-after the as-of date from remembering it. For a dated task, the outcome being forecast is either
-later than the training cutoff of every model the task is meant for, or the company and period are
-disguised well enough that the model cannot place them, and the probe says so.
-*Verify:* `harness/memorisation.py` (named against disguised variants) and `canary_probe.py` (J5);
-compare `as_of` with the cutoffs of the calibration models. Needs an API key: BLOCKED without one.
-*Fix:* disguise, or restrict the task to models whose cutoff precedes the outcome and say so in
-the datasheet.
+*Fix:* rename, restructure, or enrich the world. What awareness does to the score is grader-design M6.
 
 ### C13. Transcripts were read for access the agent should not have had
 Listing `/tests` or `/logs/verifier`, reading repository or shell history, searching for the
@@ -165,6 +174,13 @@ generator or the gold, editing inputs, probing the network, looking up the compa
 defect in the environment even when the attempt failed.
 *Verify:* grep the calibration job folders for those paths and commands, across every model run.
 BLOCKED until a calibration run exists.
+
+### C14. The environment exposes the end state the grader needs
+Everything the verifier must read to score the outcome (output files, changed records, the state
+of any simulated system) is still there, complete and unambiguous, when the agent stops, so
+grading never has to fall back on what the agent said it did.
+*Verify:* after a reference run, list what the verifier opens and confirm each exists in the
+finished container or the declared artifacts. How it is scored is grader-design D1.
 
 ---
 
@@ -178,9 +194,17 @@ timeout is not what decides pass or fail.
 A model is always measured together with its harness. The harness makes the agent do the thing
 being trained (for a task about reading a chart, the image reaches the model), and a harness fault
 (a timeout, a tool error, a truncated file read) is counted as an error (H7), not as the model
-failing.
+failing. A weaker model is run as well as a strong one, because a strong model papers over harness
+and API gaps; a good harness is also no substitute for a valid environment.
 *Verify:* read three transcripts for how the inputs reached the model; confirm errored trials are
 separated from failed ones in the run records.
+
+### H14. The environment runs as a plain offline eval
+An environment is a task set, a harness and a verifier, and the three come apart: any model can be
+run through it with a standard harness and graded afterwards, and nothing is tied to one training
+stack, tokenizer or rollout loop. A lab evaluates before it trains.
+*Verify:* the `harbor run` command in `README.md` works with a second model or agent unchanged;
+a saved answer regrades (K6).
 
 ---
 

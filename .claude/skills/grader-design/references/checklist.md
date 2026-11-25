@@ -96,7 +96,10 @@ from it.)
 ### D11. Code grades whatever the output holds direct evidence for
 A code check is cheap, deterministic and runs on every answer after every change. The order is:
 code on the artifacts; then a claim check against the source documents; then a model judge, and
-only for what needs judgment. A judged line that code could settle is moved to code.
+only for what needs judgment. A judged line that code could settle is moved to code. The reverse
+mistake is avoiding a judge altogether: most real work cannot be fully verified by code, a
+deterministic check and a quality judgment are different bars (two answers can pass the same
+checks and differ in quality), and a calibrated judge is how the second gets measured.
 *Verify:* for each judged line ask what a script would need to decide it. Lines about a number, a
 date, a count, the presence of a field or agreement between two deliverables belong in code.
 
@@ -112,7 +115,9 @@ about correctness. Any change made after a calibration run is read twice.
 
 ## E. Red-teaming the grader
 
-A grader exploit is an answer that scores without being the work. Any working exploit is a blocker,
+A grader exploit is an answer that scores without being the work. It usually means the task or the
+scoring was underspecified, so the easiest way to raise the score is not what the designer meant.
+The aim is not to make hacking impossible; it is to make the honest path the easier one. Any working exploit is a blocker,
 not a note: reward hacking learned here transfers to other domains.
 
 ### E1. The family is in the attack suite [auto]
@@ -345,3 +350,19 @@ Before re-running, write which pinned rewards, attack scores and saved verdicts 
 which way. Anything else that moves is a bug in the change. Regressions are read before
 improvements.
 *Verify:* the report's "What was fixed" lists the prediction beside the result.
+
+### M5. Several rewards on one task can all be met by one perfect answer
+Where a task carries more than one reward, each is a binary function, none contradicts another,
+and the reference meets all of them. Observed rewards are expected to be a little noisy; the
+design does not depend on any single one being exact.
+*Verify:* the reference's score on each component; look for two components that pull opposite ways.
+
+### M6. What eval awareness does to the score was looked at
+A model that believes it is being tested behaves more cautiously, so its score here is not its
+behaviour in use, and training environments look like evals often enough that awareness should be
+assumed likely. Transcripts where the model remarks that this is a test are counted and compared
+with the rest; cleaner behaviour under suspicion is not reported as the true signal.
+*Verify:* grep calibration transcripts for the model saying it is in an eval, test or benchmark;
+report the share and whether scores differ. BLOCKED until a calibration run exists. Removing the
+tells themselves is rl-environment C11.
+

@@ -1,6 +1,6 @@
 ---
 name: task-generation
-description: Go from source data plus a sound grader to a larger set of RL tasks in rl/ that is valuable as a group and can be licensed to a lab — design the coverage grid, grow tasks from an expert seed without losing what made the seed good, keep every answer computed, make each task real, clear and solvable without guessing, add no-action twins, screen and tune difficulty into the band a policy learns from, convert tasks that teach nothing, check the set for redundancy, conflicting lessons and shared loopholes, hold the splits, and clear provenance and licences. Use this whenever the user wants to generate, scale, extend, diversify or prune tasks or a family; asks how many tasks, which variants, how hard, what the pass rates mean, or whether a set is worth licensing; mentions the generator, builder, seeds, variants, controls, calibration, screening, splits, manifests, provenance or a datasheet — even if they don't say "task generation". How answers are scored belongs to the grader-design skill, and what the agent can reach when a task runs to the rl-environment skill.
+description: Go from source data plus a sound grader to a larger set of RL tasks in rl/ that is valuable as a group and can be licensed to a lab — design the coverage grid, grow tasks from an expert seed without losing what made the seed good, keep every answer computed, make each task real, clear and solvable without guessing, add no-action twins, screen and tune difficulty into the band a policy learns from, keep task data point-in-time and free of outcomes the model memorised in training, convert tasks that teach nothing, check the set for redundancy, conflicting lessons and shared loopholes, hold the splits, and clear provenance and licences. Use this whenever the user wants to generate, scale, extend, diversify or prune tasks or a family; asks how many tasks, which variants, how hard, what the pass rates mean, or whether a set is worth licensing; mentions the generator, builder, seeds, variants, controls, calibration, screening, splits, held-out sets, look-ahead in the data, manifests, provenance or a datasheet — even if they don't say "task generation". How answers are scored belongs to the grader-design skill, and what the agent can reach when a task runs to the rl-environment skill.
 ---
 
 # Task generation
@@ -12,16 +12,18 @@ a policy learns from it, the splits hold, and the data behind them can be licens
 
 ## What this skill owns
 
-Three skills take a family to lab-ready, usually in this order, and each checklist item lives in
-exactly one:
+Three skills take a family to lab-ready, and each checklist item lives in exactly one. An
+environment is a verifier, a world and a task set, built in that order, so the skills are used in
+that order too, with the release gate last:
 
 - **`grader-design`: what the score pays for.** Do that first, on a handful of seed tasks.
   Generating at volume against a weak grader multiplies the weakness.
+- **`rl-environment`: the world a task runs in.** Realism, leaks, network, tools, resets, harness
+  and replay. Its release gate runs last and asks for this skill's report at the family's current
+  version (its item K7).
 - **`task-generation` (here): which tasks exist.** The generator, the instruction template, the
-  seed and its variants, solvability, difficulty, variety, splits, provenance and licences.
-- **`rl-environment`: what the agent can reach when a task runs.** Leaks, network, tools,
-  look-ahead, resets, harness, replay, and the release gate, which asks for this skill's report at
-  the family's current version (its item K7).
+  seed and its variants, solvability, difficulty, variety, point-in-time data, splits, provenance
+  and licences.
 
 A quick test: if the defect would still be there with a perfect sandbox and a perfect grader (the
 task is ambiguous, too easy, a copy of its neighbour, or built on data nobody may license), it is
@@ -62,7 +64,8 @@ grid. Start with twenty to fifty hand-checked tasks; volume comes after the grid
 
 ### 3. Generate from the seed, with computed answers
 
-- Each variant keeps the decision its seed turned on, not only the surface (T2).
+- Each variant keeps the decision its seed turned on, not only the surface (T2), and some tasks
+  have a surface variant that should not change the answer (T7).
 - Gold is computed by the builder or taken from source data; a model may write text but never
   decides the right answer (T3).
 - The standard for a good task is in the builder and `splits/check.py`, and a person reads a
@@ -113,11 +116,17 @@ Difficulty is moved by task design only, never by the grader.
   the interval, not the count: 0/4 is consistent with a 1-in-8 task about six times in ten.
 - Convert 0/k and k/k tasks before authoring new ones (T5).
 - Move difficulty with two or three non-fatal decisions and matched twins, never with length,
-  clutter, planted contradictions, hints or a single fatal gate (I1).
+  clutter, planted contradictions, hints, a withheld tool or a single fatal gate (I1).
+- If an exploit leaves the same end state as honest work, redesign the task; a grader patch will
+  not hold (I8).
 - For group-relative training aim for 1/8 to 3/8 on the model being trained; report the pass-rate
   curve either way, not only pass@1 (H4, H11).
 
 ### 7. Clear the data
+
+For dated tasks, every visible value is what was known at the as-of date (as first reported, the
+universe as it stood), the outcome is not something the calibration models could remember from
+training, and a held-out split exists that nothing here was tuned on (J10, J11, J12).
 
 Every gold input has a provenance entry, the source's licence allows the intended use, and
 person-level data was checked for quasi-identifiers (J6, J8, J9). These end in a person's
@@ -139,7 +148,7 @@ Write to `rl/runs/<family>/reviews/task_set_<YYYY-MM-DD>.md`:
 ## Open: needs a person      (the decision, the evidence, the exact command)
 ## Open: needs budget        (the command and what it will show)
 ## Residual risks accepted
-## Scorecard                 (every item T1–J9: status and one line of evidence)
+## Scorecard                 (every item T1–J12: status and one line of evidence)
 ```
 
 No item may be left `MANUAL`. The report goes in git: no gold, no model answers, no real company
@@ -166,6 +175,6 @@ around it.
 
 ## Reference
 
-- `references/checklist.md` — the full list, T1–J9. Read it in step 5.
+- `references/checklist.md` — the full list, T1–J12. Read it in step 5.
 - `../rl-environment/scripts/audit.py --skill task-generation` — the mechanical items and the
   scorecard.

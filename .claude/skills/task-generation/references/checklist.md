@@ -25,7 +25,7 @@ release gates, are on the `rl-environment` checklist.
 - B. Solvability and separation
 - H. Difficulty calibration
 - I. Difficulty design and variety
-- J. Splits, provenance and licences
+- J. Splits, point-in-time data, provenance and licences
 
 ---
 
@@ -35,7 +35,9 @@ release gates, are on the `rl-environment` checklist.
 A written grid of what varies (trap type, magnitude, which traps co-occur, typical against edge
 against adversarial, action against no-action, data holes) and which cells the set fills. A batch
 of near-duplicate queries is not a set. Twenty to fifty hand-checked tasks are enough to start;
-volume comes after the grid holds.
+volume comes after the grid holds. Write the grid as two things: the distribution of worlds
+(which data, which conditions) and the behaviour being asked for. Then generate a little, look at
+it, and adjust difficulty and variety in a loop before generating a lot.
 *Verify:* the grid exists (in the family's README or `family.yaml` notes) and every built task
 maps to a cell; list the empty cells and say which are deliberate.
 *Fix:* add generator parameters for a missing dimension; do not pad a filled cell.
@@ -57,7 +59,8 @@ right answer is.
 ### T4. The standard was written down before generating at volume
 What a good task is, in the family's own terms, is fixed first and enforced by the builder and
 `splits/check.py`, and a person reads a sample of every generated batch. Models write tasks more
-easily than they judge whether those tasks are fair, so an unread batch is unreviewed.
+easily than they judge whether those tasks are fair, so an unread batch is unreviewed. Each batch also passes the basic checks (reference passes, naive
+fails, split check) before anything is trained or calibrated on it.
 *Verify:* the family README states the standard; the report names who read which tasks of the
 batch.
 
@@ -76,6 +79,17 @@ out and stays secret, and what the set is meant for (training data, a capability
 regression set).
 *Verify:* the family's entry in the datasheet or `release/` notes has each of these, with numbers
 from this version.
+
+### T7. Surface variants exist that should not change the answer
+For a sample of tasks there is a variant with the same right outcome and a different surface:
+renamed entities, a reworded instruction, reordered files or columns, a different but equivalent
+format. A model that passes the original and fails the variant learned the surface, and a set with
+only one surface per idea cannot tell the difference. (H12 is the calibration run on these.)
+*Verify:* the builder can emit such a variant; the reference scores the same on both.
+
+### T8. Real traces can become tasks [optional]
+Where real usage exists, a failure seen in practice can be frozen into a replayable task. N/A
+until there is real usage to draw on.
 
 ---
 
@@ -109,8 +123,8 @@ sentence or to the `rubric_visibility` note.
 
 ### A6. The task is real work
 It is something the `role` in its metadata does at a fund, with the inputs they would have, not a
-puzzle built to be hard, and a better score on it would matter to someone doing that job. The
-environment mirrors the setup the work is done in: the files, tools and state the role would have.
+puzzle built to be hard, and a better score on it would matter to someone doing that job. (Whether
+the world it runs in is realistic is rl-environment A9 and A11.)
 *Verify:* the source's assignment and README; ask what decision a higher score would change.
 
 ### A7. No task can only be scored by guessing
@@ -124,20 +138,17 @@ passing answer and ask which of its choices the agent could not have justified f
 *Fix:* state the convention (A3), put the evidence in the data, or make "cannot be determined" a
 scored answer.
 
-### A9. Generated data does not read as generated
-Synthetic records carry the texture of real ones: uneven formatting, human-like errors,
-company-specific habits, gaps. Templated text, concatenated or implausible documents and values on
-a clean grid tell the model it is in a test, and it then behaves differently (rl-environment C11).
-*Verify:* show a sample of the visible data, with no context, to a model or a person and ask which
-rows are synthetic and why; fix what gives them away and repeat until nothing is singled out.
-Families built on real panels: N/A for the real rows, still applies to anything planted.
-
-### A10. Rules sit where they would at work [optional]
-At work a rule lives in a document, a record or a colleague's message, not in the request. A task
-can be built in two versions: full (every rule in the prompt) and realistic (the agent has to find
+### A10. Each task has a full and a realistic version [optional]
+At work a rule lives in a document, a record or a colleague's message, not in the request
+(rl-environment A11 puts it there). A task can then be built in two versions: full (every rule in the prompt) and realistic (the agent has to find
 the rule). Models break a rule more often when it sits in a document than when the user states it.
 *Verify:* where a family has both, run both and read the traces where the full version passed and
 the realistic one failed. N/A for families whose instruction is the whole assignment.
+
+### A12. Where the work is a job, the task is a job [optional]
+If the real work means getting something done across people, systems and several steps, a single
+isolated tool exercise does not stand in for it. N/A for families whose assignment is one
+self-contained piece of analysis: say so.
 
 ---
 
@@ -225,7 +236,8 @@ outcomes beats a cheap one at 0/8.
 pass^k (all k attempts pass) beside pass@k, both with bootstrap intervals (`calibrate.py report`
 gives these), and cost per correct outcome (spend divided by passing attempts) from the run
 records. Capability improves faster than reliability, and identical runs can differ many times
-over in cost, so the spread of cost per attempt is reported too.
+over in cost, so the spread of cost per attempt is reported too. Failed runs stay in the denominator of cost per
+correct outcome, or a cheap model that mostly fails looks efficient.
 
 ### H12. The result survives a reworded instruction [optional]
 A paraphrase of the instruction with the same content (reordered, different wording, same
@@ -245,7 +257,8 @@ What makes the task hard is two or three non-fatal sizing or calibration decisio
 the score part of the way. A single must-pass line used as the hardness dial turns pass rates into
 a cliff (0/8 or 8/8); what a zeroing gate may be used for is grader-design M1.
 Difficulty does not come from length, clutter, planted contradictions or hints either: frontier
-models read through all of these, and they raise cost, not signal.
+models read through all of these, and they raise cost, not signal. Withholding a tool or context
+the job would have is fake difficulty as well (rl-environment A11).
 A penalty for inefficiency (tokens, steps, time), if there is one, is bounded and small next to
 the outcome: its effect on behaviour is not linear in its size.
 *Verify:* name the decisions that separate a 0.4 answer from a 0.8 answer on a train task; if the
@@ -269,9 +282,16 @@ a single task), a lesson that only holds in this narrow setting.
 is rewarded in one task and punished in another with nothing visible to tell them apart; run each
 grader exploit found on one task (grader-design E4) across the whole split.
 
+### I8. A task whose shortcut and honest path end in the same state is redesigned
+If an exploit leaves exactly what honest work would leave, no grader can tell them apart and a
+patch will not hold. The task changes: a different deliverable, an input the shortcut cannot see,
+or a check on something only the honest path produces.
+*Verify:* for each exploit `grader-design` found (its E4), ask whether the end state differs from
+the reference's. Where it does not, the fix belongs here.
+
 ---
 
-## J. Splits, provenance and licences
+## J. Splits, point-in-time data, provenance and licences
 
 ### J1. `splits/check.py` passes for the family [auto]
 
@@ -297,3 +317,33 @@ train tasks so this does not come up.
 Where a source holds records about people, de-identification was checked for quasi-identifiers
 (dates, locations, rare combinations), not only for names. N/A for sources with no person-level
 rows: say which sources were checked.
+
+### J10. Task data is point-in-time
+For time-sensitive work every value the agent sees is what was known at the as-of date: figures
+as first reported, not as later restated; the universe of companies as it stood then, including
+the ones that later failed or were delisted; no label, flag or revision that was assigned
+afterwards. Where several tasks are cut from one dataset at different dates, a later task's
+visible data must not contain an earlier task's answer for a model trained on both: keep them in
+different splits or accept and state the overlap.
+*Verify:* for two dated train tasks, trace three visible values to their first-publication date;
+list task pairs in the same split whose windows overlap an outcome.
+*Fix:* at the source adapter or the builder; the sandbox clock is rl-environment C5.
+
+### J11. The model's own memory is not a look-ahead path
+Pinning the clock (rl-environment C5) stops the sandbox seeing the future; it does not stop a model that was trained
+after the as-of date from remembering it. For a dated task, the outcome being forecast is either
+later than the training cutoff of every model the task is meant for, or the company and period are
+disguised well enough that the model cannot place them, and the probe says so.
+*Verify:* `harness/memorisation.py` (named against disguised variants) and `canary_probe.py` (rl-environment J5);
+compare `as_of` with the cutoffs of the calibration models. Needs an API key: BLOCKED without one.
+*Fix:* disguise, or restrict the task to models whose cutoff precedes the outcome and say so in
+the datasheet.
+
+### J12. A held-out split exists that training never sees, and it looks like real use
+Part of the set is kept back with its own seeds, is never trained on, tuned against or shown to
+the vendor's own loop, and reflects how the work is really done, not only a public benchmark. A
+buyer will test on evals the seller never saw, and data that lifts only the seller's own benchmark
+reads as noise. Any claim of value says what it was measured on.
+*Verify:* the held-out manifest in `splits/`; that no calibration, tuning or fix in this version
+touched it (J4).
+

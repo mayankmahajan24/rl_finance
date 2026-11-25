@@ -1,6 +1,6 @@
 ---
 name: rl-environment
-description: Make the RL environment a task runs in sound enough to sell to a frontier lab, and run the final release gate — audit every way the agent could get the answer or an unfair edge without the grader being wrong (gold or tests in the image, leaked ids and metadata, network access, secret tool use such as web search or provider-side tools, look-ahead past the as-of date, outcomes the model memorised in training, sandbox escape to a live system, state left by a previous trial, a verifier sharing the agent's container, eval tells), plus harness faults, contamination canaries, reproducible images and replayable runs, then fix what is off and write the readiness report. Use this whenever the user asks to build, harden, audit or sign off an environment, sandbox, image or harness; asks whether a family is ready to ship, release, sell or train on; worries about cheating, leaks, the airgap, tools, point-in-time or look-ahead safety, contamination or reproducibility; or has just changed a Dockerfile, task config, harness or run arguments — even if they don't say "environment". How answers are scored belongs to the grader-design skill, and which tasks exist and how hard they are to the task-generation skill; this skill checks those reviews exist and does not repeat them.
+description: Make the RL environment a task runs in sound enough to sell to a frontier lab, and run the final release gate — audit whether the world is realistic (generated data that reads as generated, rules and tools where the job would keep them) and every way the agent could get the answer or an unfair edge without the grader being wrong (gold or tests in the image, leaked ids and metadata, network access, secret tool use such as web search or provider-side tools, a sandbox clock or git history that shows the future, sandbox escape to a live system, state left by a previous trial, a verifier sharing the agent's container, eval tells), plus harness faults, contamination canaries, reproducible images and replayable runs, then fix what is off and write the readiness report. Use this whenever the user asks to build, harden, audit or sign off an environment, sandbox, image or harness; asks whether a family is ready to ship, release, sell or train on; worries about cheating, leaks, the airgap, tools, point-in-time or look-ahead safety, contamination or reproducibility; or has just changed a Dockerfile, task config, harness or run arguments — even if they don't say "environment". How answers are scored belongs to the grader-design skill, and which tasks exist and how hard they are to the task-generation skill; this skill checks those reviews exist and does not repeat them.
 ---
 
 # RL environment
@@ -15,12 +15,15 @@ do, and the discipline around fixing.
 
 ## What this skill owns
 
-Three skills take a family to lab-ready, usually in this order, and each checklist item lives in
-exactly one:
+Three skills take a family to lab-ready, and each checklist item lives in exactly one. An
+environment is a verifier, a world and a task set, built in that order, so the skills are used in
+that order too, with the release gate last:
 
 - **`grader-design`: what the score pays for.** Verifiers, rubrics, judges, grader exploits.
-- **`task-generation`: which tasks exist.** Real, solvable, varied, calibrated, split, licensable.
-- **`rl-environment` (here): what the agent can reach when a task runs**, and the release gate.
+- **`rl-environment` (here): the world a task runs in**: realism, what the agent can see and
+  reach, resets, harness, replay. Its release gate runs last, after the task set exists.
+- **`task-generation`: which tasks exist.** Real, solvable, varied, calibrated, point-in-time,
+  split, licensable.
 
 Reward hacking has two halves. If the agent had something it should not have had (a file, a tool,
 the internet, the future, a hint in a file name), the hole is here. If the grader paid for
@@ -78,8 +81,10 @@ unfair edge:
   stands in for)
 - Which tools do I have that the task did not intend? (web search, a provider-side code or
   retrieval tool, an MCP server, memory between trials)
-- What do I already know? (the outcome of a dated task, the company behind a disguise, the
-  benchmark this was built from)
+- What does the disk remember? (git history, caches or files written after the task's as-of
+  point; what the model itself remembers is task-generation J11)
+- What is missing that the job would have? (a tool, a document, context: withheld as fake
+  difficulty)
 - What does the visible half give away? (file names, row order, mtimes, ids, float precision or
   rounding that marks planted values, an index that points at the records that matter)
 - What can I change that the verifier trusts? (the interpreter, an installed package, a process
@@ -92,8 +97,8 @@ attempt would not have scored: a model that learns to look will find the next on
 
 Two more that often find something:
 
-**Diff a planted task against its control (A5, A8).** Everything visible. The only differences
-should be the data itself.
+**Diff a planted task against its control (A5, A8, A9).** Everything visible. The only differences
+should be the data itself, and nothing in either should read as generated.
 
 **Read transcripts for reaching, once a calibration run exists (C9, C13).** List the distinct
 tools called and grep for `/tests`, history, the generator and network probes, across every model.

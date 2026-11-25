@@ -12,11 +12,11 @@ Last updated: 2026-11-25.
 - **Do not rebuild tasks** (`build.py`) until Mayank asks to rerun them. Source changes to the instruction, grader or
   builder wait in git. The built copies under `rl/tasks/proto/` stay as they are until a rerun is requested; rebuild
   then, check the data is unchanged, and note the rebuild here.
-- Do not run or grade anomaly_hindsight until asked.
+- anomaly_hindsight: hold lifted 2026-11-25 (H#9): rebuilt, runs and reference development started.
 - Add penalties to the grader as issues come up (log each one).
 - Log every piece of feedback verbatim in the task's feedback log the same turn.
 
-**Built tasks last rebuilt:** 2026-11-25. anomaly_hard's built instructions match the source as of #66; anomaly_hindsight's as of H#6 (H#8 instruction edits wait for the next rebuild).
+**Built tasks last rebuilt:** 2026-11-25. anomaly_hard's built instructions match the source as of #66; anomaly_hindsight rebuilt for H#9 (matches the source as of H#8).
 
 ---
 
@@ -27,7 +27,7 @@ panel code in `rl/families/_shared` and the source data, like every family).
 
 | | **anomaly_hard** | **anomaly_hindsight** |
 |---|---|---|
-| Status | **Active.** Graded; references and Opus results current | **Built, on hold.** Not run or graded (Mayank, hindsight #2) |
+| Status | **Active.** Graded; references and Opus results current | **Active, in progress** (H#9): rebuilt; 8 Opus runs and a fresh reference under way |
 | Code | `rl/experiments/anomaly_hard/` | `rl/experiments/anomaly_hindsight/` (copied 2026-11-25) |
 | Built tasks | `rl/tasks/proto/anomaly_hard{,_train}/anomhard-*` | `rl/tasks/proto/anomaly_hindsight{,_train}/anomhind-*` |
 | Cleaned series | point in time, like confidence | built in hindsight from the whole panel; confidence stays point in time |
@@ -234,6 +234,7 @@ active construction; "Retired" means it was later replaced (see section 3).
 | E24 | 11-25 | K6 and K9 false positives (epoch date, inequality) fixed (#65, H#5) | v8-t006 report 0.71 to 0.76 | Adopted (both tasks) |
 | E26 | 11-25 | No ticker-, source- or date-specific logic: instruction line plus K6 widened to source-id comparisons (#66, H#6) | Every existing solution (references, ceiling, 21 Opus runs) passes; tests cover 7 cases | Adopted (both tasks) |
 | E27 | 11-25 | anomaly_hindsight grader: cleaned series scored over each problem's whole span and on sub-visible problems; judge told every discarded stretch; instruction matched (H#8) | Not run (on hold); imports checked | Adopted (anomaly_hindsight only) |
+| E28 | 11-25 | anomaly_hindsight test bed (H#9): rebuild; 8 Opus runs (h1-*, one per train task plus a second on train-001 and train-002); grader check (answer key, probes); fresh reference from the practitioner, developed on the 15 tuning panels one general rule at a time (ph0 baseline, ph1 = four discard rules: never steady, steady start, company-wide outage, coverage break) | In progress | Running |
 | E25 | 11-25 | anomaly_hindsight copy with hindsight cleaning rules (#60, #61, H#1-H#4) | Built; every task has a thin start, 7 of 13 a company-wide break | Active, on hold |
 
 ---

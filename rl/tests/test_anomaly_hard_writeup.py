@@ -158,3 +158,10 @@ def test_a_short_section_fails_k1_but_a_short_output_does_not(ref):
 
 def test_table_text_counts_toward_a_section(ref):
     assert W.section_words('| a b c | d e |\n|---|---|\n| f g | h |') == 8
+
+
+@pytest.mark.parametrize('name', ['anomhard-train-001.md', 'anomhard-train-002.md'])
+def test_every_reference_report_passes_every_code_item(name):
+    text = (REPORTS / name).read_text()
+    assert set(items(text).values()) == {'pass'}, items(text)
+    assert W.WORD_MIN <= W.words(text) <= W.WORD_LIMIT

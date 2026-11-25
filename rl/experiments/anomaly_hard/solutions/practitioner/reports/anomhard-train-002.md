@@ -87,7 +87,9 @@ I planted 34 problems on established series.
 
 Of the 42 alerts on the planted panel, 24 touched a planted problem; the other 18 compare with the 19 alerts raised on the unplanted panel, some of which may be real problems. There is no look-ahead: a run on the panel cut at 60% of its dates gave the same output, up to the cut, as the full run. Run again on its own cleaned output, the method distrusted 69 rows, against 89 on the original data. Tuning used similar panels, so these results may flatter. The method fails when two sisters break together.
 
-These stretches are left blank or unrepaired; treat them as missing.
+## Open issues
+
+The output leaves these stretches blank or unrepaired; treat them as missing.
 
 | Series | Left blank or unrepaired | Why |
 |---|---|---|

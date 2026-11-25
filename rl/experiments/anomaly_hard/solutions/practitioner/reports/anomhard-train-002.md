@@ -63,7 +63,7 @@ level_change, rescaled, yearly_pattern, low_signal); `adj_ct`, `adj_ticket`: log
 | Imputation level window | 42 days (56 - 14) | tuned: longer is steadier, slower to follow growth |
 | Change end | offset under 1/3 of its peak | tuned: lower holds changes longer |
 | Expected-count window | 28-day median, 7 days minimum | four weeks keeps weekday balance |
-| Confidence values | 1, 0.3, 0.05, 0 | set: under 0.5 means distrust; lower is surer |
+| Confidence values | 1, 0.3, 0.05, 0 | requirement: under 0.5 means distrust; below it, only the order matters to a user filtering at 0.5 |
 | Log floors | 0.5 transactions, $0.01 | avoid log of zero |
 
 Tuned on practice panels with planted problems, one value at a time, for most problems caught per false alert.

@@ -50,17 +50,18 @@ level_change, rescaled, yearly_pattern, low_signal); `adj_ct`, `adj_ticket`: log
 
 | Parameter | Value | Rationale |
 |---|---|---|
-| Low-signal bar, drop bar, establishment | 20 a day, 16, 90 days | 20 given as the minimum; 16 and 90 tuned (hysteresis: less flicker, later start) |
-| Warm-up, noise window | 56, 120 days | tuned: shorter reacts faster, noisier sigma |
+| Low-signal bar, drop bar | 20, 16 transactions a day (28-day median) | 20 given as the minimum; 16 tuned (hysteresis: less flicker, later drop) |
+| Establishment | 90 days | tuned: longer drops more early history |
+| Warm-up, noise window | 56, 120 usable days | tuned: shorter reacts faster, noisier sigma |
 | Anchor | 112 days | tuned: longer is steadier, later start |
 | Spike bar, length | 6 sigmas, 3 days | tuned: lower catches more, adds false alerts |
-| CUSUM allowance, alarm, clip | 1, 12, 4 | allowance 1 sigma standard; 12 and 4 tuned (lower alarms earlier, more false changes) |
+| CUSUM allowance, alarm, clip | 1, 12, 4 sigmas | allowance 1 sigma standard; 12 and 4 tuned (lower alarms earlier, more false changes) |
 | Confirmation | 2 sigmas, 7 days | tuned: filters bursts, delays detection |
-| Distrust window, level median | 14 days, 14 | tuned: longer distrust costs history |
-| Yearly slack | 3 / 14 days | holidays move by days across years |
-| MAD scale, sigma floor | 1.4826, 0.02 | 1.4826 makes MAD a standard deviation; floor stops near-zero sigma |
-| Imputation level window | 42 days (56 - 14) | tuned |
-| Change end | 1/3 of peak | tuned: lower holds changes longer |
+| Distrust window, level median | 14 days, 14 days | tuned: longer distrust costs history |
+| Yearly lookback, slack | 1 and 2 years; 3 days (spikes), 14 days (changes) | yearly seasonality; holidays move by days across years |
+| MAD scale, sigma floor | 1.4826, 0.02 (log) | 1.4826 makes MAD a standard deviation; floor stops near-zero sigma |
+| Imputation level window | 42 days (56 - 14) | tuned: longer is steadier, slower to follow growth |
+| Change end | offset under 1/3 of its peak | tuned: lower holds changes longer |
 | Expected-count window | 28-day median, 7 days minimum | four weeks keeps weekday balance |
 | Confidence values | 1, 0.3, 0.05, 0 | set: under 0.5 means distrust; lower is surer |
 | Log floors | 0.5 transactions, $0.01 | avoid log of zero |

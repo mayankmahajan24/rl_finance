@@ -8,6 +8,16 @@ construction" true at all times. Verbatim feedback and each decision's details s
 
 Last updated: 2026-11-25.
 
+**Standing rules (Mayank):**
+- **Do not rebuild tasks** (`build.py`) until Mayank asks to rerun them. Source changes to the instruction, grader or
+  builder wait in git. The built copies under `rl/tasks/proto/` stay as they are until a rerun is requested; rebuild
+  then, check the data is unchanged, and note the rebuild here.
+- Do not run or grade anomaly_hindsight until asked.
+- Add penalties to the grader as issues come up (log each one).
+- Log every piece of feedback verbatim in the task's feedback log the same turn.
+
+**Built tasks last rebuilt:** 2026-11-25. Both tasks' built instructions match the source as of feedback #66 / H#6.
+
 ---
 
 ## 1. Active construction

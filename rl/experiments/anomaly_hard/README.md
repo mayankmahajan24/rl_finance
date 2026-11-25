@@ -80,16 +80,17 @@ own noise (`own_noise`) is measured on usable days only (28-day median at least 
 **Not scored:** series too low-volume to grade, short windows around company-wide natural breaks in the underlying
 data, and a few days either side of the thin start's edges.
 
-## Results (all 13 tasks, 2026-11-24)
+## Results (all 13 tasks, three hidden panels each, 2026-11-25)
 
 | Solution | What it is | All 13 | Held out (8) | Min |
 |---|---|---|---|---|
 | `oracle` | the answer key | 1.000 | 1.000 | 1.000 min |
 | `ceiling_ideal` | the ceiling with exact imputation | 0.999 | 0.999 | 0.995 min |
-| `ceiling` | gold-informed but realistic: a step caught on a 3-day median, ramps on a 14-day median, imputation with the source's own noise | 0.981 | 0.980 | 0.960 min |
-| **`reference`** | hand-built point-in-time scorer (`solutions/reference/writeup.md`) | **0.939** | **0.938** | 0.883 min |
-| `practitioner` | a plain ~200-line scorer: pairwise peer z-scores per weekday, CUSUM with rescaling, thin-start rule, yearly lookup, reason and adjustment columns (12 s a task) | 0.704 | | |
-| Opus runs (8, Nov 20 and 23, older instructions) | fresh model solutions | 0.28 (0.08-0.50) | | |
+| `ceiling` | gold-informed but realistic: a step caught on a 3-day median, ramps on a 14-day median, imputation with the source's own noise | 0.980 | | |
+| **`reference`** | hand-built point-in-time scorer (`solutions/reference/writeup.md`) | **0.933** | **0.937** | 0.852 min |
+| **`practitioner`** | a plain 258-line scorer, 12 knobs (`solutions/practitioner/writeup.md`): pairwise peer relation per weekday on the original basis, counting noise, spikes with one culprit, CUSUM changes confirmed on a 7-day median, yearly lookup, reason and adjustment columns (12 s a task) | **0.893** | **0.906** | 0.821 min |
+| Opus runs (4, Nov 25, current instruction) | fresh airgapped model solutions, one per tuning task | 0.44 (0.14, 0.28, 0.66, 0.69) | 0.41 | 0.0 min |
+| Opus runs (8, Nov 20 and 23, older instructions) | earlier model solutions | 0.26 (0.13-0.43) | | |
 | `trust_all_ref` | the reference's cleaned series, every row trusted | 0.231 | 0.250 | 1.0 on the 3 controls (correct there), 0 elsewhere |
 | `distrust_all_ref` | the reference's cleaned series, every row distrusted | 0.000 | 0.000 | 0.000 min |
 | `distrust_all` | every row distrusted, the answer key's cleaned series | 0.000 | 0.000 | 0.000 min |
@@ -98,27 +99,43 @@ data, and a few days either side of the thin start's edges.
 
 The exploit probes `exploit_memory` (memory between the grader's runs) and `exploit_selfrun` (recognising the re-run on its own cleaned series) score exactly the reference: neither channel exists.
 
-Reference per task (reward and its three components; the geometric mean for comparison; the ceiling):
+Reference per task (reward and its three components, means over the three panels) and the practitioner:
 
-| Task | Reward | Conf. | Cleaned | Stab. | Geometric | Ceiling |
-|---|---|---|---|---|---|---|
-| 001 * | 0.944 | 0.917 | 0.975 | 0.937 | 0.915 | 0.975 |
-| 002 | 0.883 | 0.789 | 0.927 | 0.984 | 0.848 | 0.966 |
-| 003 | 0.961 | 0.957 | 0.967 | 0.957 | 0.941 | 0.974 |
-| 004 * | 0.920 | 0.900 | 0.980 | 0.839 | 0.860 | 0.975 |
-| control-01 | 1.000 | 1.000 | 1.000 | 0.999 | 1.000 | 1.000 |
-| train-001 * | 0.926 | 0.917 | 0.902 | 0.991 | 0.905 | 0.991 |
-| train-002 * | 0.913 | 0.833 | 0.958 | 0.984 | 0.886 | 0.968 |
-| train-003 | 0.892 | 0.863 | 0.882 | 0.971 | 0.860 | 0.981 |
-| train-004 | 0.933 | 0.863 | 0.972 | 0.995 | 0.914 | 0.980 |
-| train-005 | 0.920 | 0.857 | 0.948 | 0.988 | 0.896 | 0.979 |
-| train-006 | 0.915 | 0.800 | 0.992 | 0.989 | 0.886 | 0.960 |
-| train-control-01 * | 1.000 | 1.000 | 1.000 | 1.000 | 0.999 | 1.000 |
-| train-control-02 | 0.999 | 0.999 | 0.999 | 1.000 | 0.999 | 1.000 |
+| Task | Reference | Conf. | Cleaned | Stab. | Practitioner |
+|---|---|---|---|---|---|
+| 001 * | 0.918 | 0.865 | 0.954 | 0.949 | 0.846 |
+| 002 | 0.909 | 0.828 | 0.954 | 0.980 | 0.860 |
+| 003 | 0.966 | 0.962 | 0.968 | 0.972 | 0.837 |
+| 004 * | 0.867 | 0.882 | 0.849 | 0.873 | 0.850 |
+| control-01 | 0.999 | 0.999 | 0.999 | 0.999 | 1.000 |
+| train-001 * | 0.939 | 0.916 | 0.933 | 0.994 | 0.841 |
+| train-002 * | 0.912 | 0.830 | 0.959 | 0.983 | 0.821 |
+| train-003 | 0.908 | 0.846 | 0.930 | 0.988 | 0.878 |
+| train-004 | 0.936 | 0.875 | 0.969 | 0.991 | 0.892 |
+| train-005 | 0.927 | 0.875 | 0.949 | 0.988 | 0.884 |
+| train-006 | 0.852 | 0.790 | 0.850 | 0.982 | 0.899 |
+| train-control-01 * | 1.000 | 1.000 | 1.000 | 1.000 | 0.999 |
+| train-control-02 | 0.999 | 0.999 | 0.999 | 0.999 | 0.999 |
 
-\* tuning tasks; the other eight are held out. On 45 newly generated train tasks (scale check): answer key 1.0 on all, do-nothing 0, ceiling 0.971 (min 0.878), reference 0.904 on a sample of nine (min 0.725: false alerts). The reference's main loss is false alerts (2-6 a task, around real company events, a source's early growth and inside slow ramps). What separates the three: false alerts per task (tuned reference 3, practitioner 17, Opus 120;
-alert precision 0.78, 0.37, 0.10) and the cleaned series (0.96, 0.69, 0.67). The gap from a plain, sound approach
-(0.70) to the tuned reference (0.94) is false-alert tuning and careful rescaling. The ceiling's gap to 1.0 is imputation noise (a repaired value carries the source's own noise): with exact imputation it scores 0.999.
+\* tuning tasks; the other eight are held out. On 45 newly generated train tasks (scale check): answer key 1.0 on all, do-nothing 0, ceiling 0.971 (min 0.878), reference 0.904 on a sample of nine (min 0.725: false alerts). The reference's main loss is false alerts (2-6 a task, around real company events, a source's early growth and inside slow ramps). What separates the three is mostly confidence (mean over panels: tuned reference 0.89, practitioner 0.82, the
+fresh Opus runs 0.32-0.53, with 2 to 29 of their 39 panels under the detection gate); the cleaned series is closer
+(0.93, 0.93, 0.83-0.96). The practitioner keeps about five false alerts a panel against the reference's three. The ceiling's gap to 1.0 is imputation noise (a repaired value carries the source's own noise): with exact imputation it scores 0.999.
+
+**Grader ablation (2026-11-25).** The cached outputs re-scored under six weaker graders (all 13 tasks, three panels):
+
+| Variant | Reference | Practitioner | Opus (4 fresh runs) |
+|---|---|---|---|
+| current | 0.933 | 0.893 | 0.14 / 0.69 / 0.28 / 0.66 |
+| no 14-day alert split | 0.933 | 0.894 | 0.42 / 0.73 / 0.76 / 0.68 |
+| alerts joined across 7-day gaps | 0.933 | 0.892 | 0.14 / 0.71 / 0.28 / 0.66 |
+| no stability (50/50) | 0.922 | 0.876 | 0.14 / 0.64 / 0.28 / 0.62 |
+| confidence = mean(precision, recall) | 0.937 | 0.902 | 0.43 / 0.83 / 0.80 / 0.73 |
+| no detection gate | 0.933 | 0.893 | 0.36 / 0.75 / 0.69 / 0.67 |
+| noise tolerance x2 | 0.941 | 0.900 | 0.14 / 0.69 / 0.28 / 0.66 |
+
+No part of the grader is dead weight that holds the practitioner back: the largest lift for it is +0.009. The alert
+split, the F1 and the detection gate are what keep Opus low (the two weak runs distrust long stretches; 29 and 26 of
+their 39 panels fail the gate). Keep the grader as it is.
 
 ## Run
 

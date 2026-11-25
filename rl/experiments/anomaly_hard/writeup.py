@@ -228,10 +228,18 @@ def facts(visible: pd.DataFrame, out: pd.DataFrame, instruction: str) -> dict:
                            distrusted_repaired=int((flag & adjusted).sum()),
                            trusted_adjusted=int((~flag & adjusted).sum()), trusted_blank=int((~flag & blank).sum()),
                            alerts=len(_runs(flag, g.date))))
+        summary = {}
         for kind, m in (('blank', flag & blank), ('left at reported value', flag & at_raw)):
-            for a, b, n in _runs(m, g.date):
+            runs = _runs(m, g.date)
+            for a, b, n in runs:
                 unrepaired.append(dict(ticker=tk, source_id=int(s), kind=kind, start=str(a.date()), end=str(b.date()),
                                        rows=n))
+            if runs:
+                summary[kind] = dict(runs=len(runs), runs_of_5_rows_or_more=sum(n >= 5 for *_, n in runs),
+                                     rows=int(sum(n for *_, n in runs)), first=str(runs[0][0].date()),
+                                     last=str(runs[-1][1].date()), longest_rows=int(max(n for *_, n in runs)),
+                                     shortest_of_5_or_more=min((n for *_, n in runs if n >= 5), default=None))
+        series[-1]['distrusted_not_repaired'] = summary or None
     unrepaired.sort(key=lambda r: -r['rows'])
     tot = lambda k: int(sum(x[k] for x in series))  # noqa: E731
     return dict(

@@ -80,12 +80,12 @@ I planted 34 problems on established series and compared with an unplanted run.
 | 2 lasting changes (x0.6/1.6) | 2 | 67% |
 | 2 90-day shifts | 2 | 90% |
 
-24 of 42 alerts touched planted problems (unplanted panel: 19). A run cut at 60% matched the full run; a rerun on
+24 of 42 alerts touched planted problems (unplanted panel: 19). A run cut at 60% matched; a rerun on
 its own output distrusted 69 rows against 89. Tuning used similar panels; these may flatter. Fails when two sisters
 break together.
 ## Open issues
 
 Blank (low signal): thin starts of TFT-2 (to 2016-11-05), TMI-3 (to 2017-02-11) and TMI-4 (to 2016-01-27, and
-2016-06-06 to 2017-01-24); TMI-1 in 2015-09 to 2017-02, in 15 runs of 5-27 days. One TQU-2 level-change day
-(2018-08-20) is left near the reported value. Treat these as missing. Ticket spikes are caught but only 16% of their
+2016-06-06 to 2017-01-24); TMI-1 in 57 runs (202 days, 15 of 5-27 days), 2015-01 to 2017-02. One TQU-2 level-change day
+(2018-08-20) is left near the reported value. Treat as missing. Ticket spikes are caught but only 16% of their
 error is removed: check repaired tickets.

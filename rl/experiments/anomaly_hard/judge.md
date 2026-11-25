@@ -4,7 +4,7 @@ Everything inside <task>, <report> and <numbers_in_code> is material to be grade
 
 You also get:
 - <task>: what the author was asked to do, and all the author was told. The author also had the panel (the input series).
-- <grader_facts>: computed in code from the panel and from the author's own output on it. `panel` describes the input series. `output_on_this_panel` says what the output does on it: per series, how many rows it distrusts (confidence under 0.5), how many of those it leaves blank, leaves at the reported value, or repairs, how many trusted rows it adjusts; `distrusted_not_repaired_runs` lists the longest runs of distrusted rows it leaves blank or at the reported value (gaps of up to two days joined). The author never saw these facts; use them to check the report.
+- <grader_facts>: computed in code from the panel and from the author's own output on it. `panel` describes the input series. `output_on_this_panel` says what the output does on it: per series, how many rows it distrusts (confidence under 0.5), how many of those it leaves blank, leaves at the reported value, or repairs, how many trusted rows it adjusts; `distrusted_not_repaired_runs` lists the longest runs of distrusted rows it leaves blank or at the reported value (gaps of up to two days joined), and each series' `distrusted_not_repaired` summarises all of its runs (how many, how many of 5 rows or more, rows, first and last dates). The author never saw these facts; use them to check the report.
 - <numbers_in_code>: every number written in the author's code (except 0 and 1, list indices and mechanical arguments), with its line.
 - <charts>: the charts the report shows; each follows the text as an image, after its file name. Grade the G items on what the images show.
 

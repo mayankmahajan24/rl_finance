@@ -79,13 +79,14 @@ I planted 34 problems on established series and compared with the unplanted run.
 | 2 lasting changes (x0.6/1.6) | 1 | 77% |
 | 2 90-day shifts | 2 | 88% |
 
-34 of 56 alerts touched planted problems (unplanted panel: 20). A run cut at 60% matched the full run; a
+34 of 56 alerts touched planted problems (unplanted panel: 20). A run cut at 60% matched; a
 rerun on its own output distrusted 97 rows against 101. Tuning used similar panels; these may flatter. It fails
 when two sisters break together.
 
 ## Open issues
 
-Blank (low signal): thin starts of TWM-1 (to 2012-11-06), TTZ-4 (to 2012-06-23), TKN-2 (to
-2011-03-21) and TWM-3 (to 2011-01-19); TWO-2 almost throughout (2011-01-05 to 2016-01-04, gaps 2012-05 to 2012-08
-and 2014-04 to 2014-08); TWM-2 in 2011-06 to 2013-02, in 21 runs of 5-62 days. One TTZ-2 level-change day (2014-10-15) is
-left near the reported value. Treat these as missing. Small ticket spikes are often missed.
+Blank (low signal): thin starts, TWM-1 (to 2012-11-06), TTZ-4 (to 2012-06-23), TKN-2 (to
+2011-03-21) and TWM-3 (to 2011-01-19); TWO-2 almost throughout (2011-01-05 to 2016-01-04, except 2012-05-21 to
+2012-08-16, 2014-04-14 to 2014-08-17, 2015-05-19 to 2015-07-18); TWM-2 in 58 runs (349 days, 17 of 5-62 days),
+2011-01 to 2013-02. One TTZ-2 level-change day (2014-10-15) is
+left near the reported value. Treat as missing. Small ticket spikes are often missed.

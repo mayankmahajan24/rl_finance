@@ -27,9 +27,11 @@ python /app/solution/score.py --input IN.csv --output OUT.csv
 `IN.csv` has the same columns as the data above. `OUT.csv` has one row per input row, with columns
 `date, ticker, source_id, confidence, clean_ct, clean_amt`:
 
-* `confidence`, in [0, 1]: does this row carry usable signal about what the company actually did that day, as
-  reported or after your adjustment? High means trust it; below 0.5 means do not. A change in a source's series can
-  be a temporary blip or a permanent shift.
+* `confidence`, in [0, 1]: the probability that this row carries usable signal about what the company actually did
+  that day, as reported or after your adjustment, worked out from the evidence in the data (how far the row sits from
+  what the source would normally report, given its own noise). High means trust it; below 0.5 means do not. A change
+  in a source's series can be a temporary blip or a permanent shift: once a shifted source has settled on its new
+  level and you have adjusted for it, its rows carry signal again.
 * `clean_ct`, `clean_amt`: a cleaned series for the row's ticker and source that is comparable like for like with
   that source's own history: what the source would have reported had it kept working the way it normally does.
   Where a row is fine, it equals the raw value. Where a row cannot be trusted, impute it. Leave a row blank only when
@@ -105,12 +107,13 @@ working normally.
 
 Your score is a weighted average of three parts: 40% confidence, 40% cleaned series, 20% stability.
 
-* **Confidence.** Counted per problem and per alert. Recall is the share of problems you catch (a problem is caught
-  if you score any of its untrustworthy days below 0.5; each kind of problem weighs the same). An alert is a run of
-  rows on one source scored below 0.5 (gaps of up to two days joined; a run longer than two weeks counts as one alert
-  per two weeks); precision is the share of your alerts that touch a real problem. The score is the F1 of the two. A
-  problem counts from the day it first shows in the data; one that builds up too slowly for its start to be dated
-  counts only in the cleaned series.
+* **Confidence.** Scored row by row, as a probability. On the rows a problem made untrustworthy, the lower your
+  confidence the better; on rows that are fine, the higher the better; both by the squared error of your confidence
+  against what the row is (0 untrustworthy, 1 fine), with the untrustworthy rows and the fine rows weighing half each
+  (and each kind of problem weighing the same). A constant 0.5 scores nothing. A problem counts from the day it first
+  shows in the data; after a lasting change, its first two weeks are untrustworthy, the weeks while it settles are
+  not scored, and from then on the new level counts as fine, so confidence should rise again. A problem that builds
+  up too slowly for its start to be dated counts only in the cleaned series.
 * **Cleaned series.** On rows a problem affected, how much of the gap between the raw value and what the source
   should have reported your cleaned value closes (in log terms, count and dollars, each kind of problem weighing the
   same; differences within the source's own day-to-day noise are not counted), multiplied by the share of rows that

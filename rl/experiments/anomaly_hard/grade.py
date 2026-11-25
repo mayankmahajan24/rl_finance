@@ -14,6 +14,7 @@ Gates (reward 0 if any fails):
   no_ai          no model or network client imported or shelled out to
   writeup        SOLUTION_DIR/../output/writeup.md (or --writeup) exists and is not empty
   low_signal_dropped  at least LOW_SIGNAL_SHARE of the thin beginning's rows distrusted (confidence < 0.5) and blank
+  continuous     confidence is a probability on a continuous scale, not a few levels (see continuous())
   detects        confidence score at least MIN_CONFIDENCE (repairing the series without detecting problems cannot pass)
 
 Data reward = W_CONF x confidence + W_CLEAN x cleaned series + W_STAB x stability (0.4 / 0.4 / 0.2). Also reported:
@@ -38,12 +39,12 @@ recurring_first). Timing, from what a point-in-time scorer could see (build.anno
     THIN_LO and THIN_HI x thin_ct and THIN_EDGE days either side of the stretch's edges are unscored. A source that
     thins after it was established is kept (scored for the cleaned series).
 
-Confidence = F1(alert precision, recall).
-  recall           share of problems with any untrustworthy day distrusted, per kind (the four one-day kinds are one
-                   kind), mean over kinds
-  alert precision  alerts are runs of distrusted scored days on a source, gaps up to ALERT_GAP days joined, split every
-                   ALERT_DAYS days; the share that touch an untrustworthy row
-  A panel with no untrustworthy rows (a control): the share of scored rows trusted.
+Confidence: read as the probability that a row is fine (carries the source's usual signal). Balanced Brier skill:
+  1 - (Brier on untrustworthy rows + Brier on fine rows) / 2 / 0.25, floored at 0, where an untrustworthy row's Brier
+  is confidence squared (the mean within each kind of problem, then over kinds) and a fine row's is (1 - confidence)
+  squared; a constant 0.5 scores 0. Fine rows include a new level after a lasting change once it has settled (above).
+  A panel with no untrustworthy rows (a control) is scored on its fine rows alone. Alert precision and problem recall
+  at 0.5 are reported, not scored.
 
 Cleaned series = gain x intact x kept, against the truth panel; a blank cleaned value counts as the raw value.
   gain    per kind, 1 - (cleaned error / raw error) pooled over the kind's problems' scored rows, each error = mean over
@@ -89,6 +90,8 @@ THIN_LO, THIN_HI, THIN_EDGE = 0.8, 1.25, 14   # thin: truth count's 28-day media
 # dropped (distrusted, left blank); between THIN_LO and THIN_HI x thin_ct, and the first THIN_EDGE days of a thin
 # stretch and the THIN_EDGE days after it, are not scored (the code cannot tell yet, point in time)
 LOW_SIGNAL_SHARE = 0.9   # gate: share of a task's thin-beginning rows that must be distrusted and left blank
+CONT_HI = 0.99           # gate continuous: rows scored under this (a probability near 1 can saturate) are checked
+CONT_DISTINCT, CONT_TOP = 20, 0.5   # ... at least this many distinct values; no value on more than this share
 MIN_CONFIDENCE = 0.25    # gate: the confidence score a solution must reach (it must actually detect problems)
 # imports or shell calls that reach a model or the network
 NO_AI = re.compile(r'\b(anthropic|openai|google\.generativeai|google\.genai|mistralai|cohere|ollama|litellm|langchain|'
@@ -309,29 +312,49 @@ def kind(t: str) -> str:
 
 
 def confidence_score(ev, scored):
+    """Balanced Brier skill of confidence read as the probability that a row is fine: Brier on the untrustworthy rows
+    (confidence squared; the mean within each kind of problem, then over kinds) and on the fine rows ((1 - confidence)
+    squared), half each, against a constant 0.5 (Brier 0.25): 1 - balanced Brier / 0.25, floored at 0. A panel with no
+    untrustworthy rows is scored on its fine rows alone. Alert precision and problem recall at 0.5 are reported too."""
     e_ = ev[ev.use]
-    flag, pos = e_.flag, e_.label
-    if not pos.any():
-        return float(1 - flag.mean()), dict(no_bad_rows=True, distrusted_share=round(float(flag.mean()), 4))
-    table = []
+    c = ev.confidence.astype(float).clip(0, 1)
+    fine = float(((1 - c[ev.use & ~ev.label]) ** 2).mean()) if (ev.use & ~ev.label).any() else 0.0
+    if not e_.label.any():
+        return max(0.0, 1 - fine / 0.25), dict(no_bad_rows=True, brier_fine=round(fine, 4),
+                                               distrusted_share=round(float(e_.flag.mean()), 4))
+    table, per_kind = [], {}
     for e, m in scored:
         days = ev.date[m & ev.flag]
-        table.append(dict(type=e['type'], kind=kind(e['type']), part=e.get('part', ''), ticker=e['ticker'],
+        k = kind(e['type'])
+        per_kind.setdefault(k, []).append(c[m] ** 2)
+        table.append(dict(type=e['type'], kind=k, part=e.get('part', ''), ticker=e['ticker'],
                           source_id=e['source_id'], start=e['start'], end=e['end'], days=int(m.sum()),
-                          distrusted_days=int((m & ev.flag).sum()),
+                          distrusted_days=int((m & ev.flag).sum()), mean_confidence=round(float(c[m].mean()), 3),
                           delay_days=int((days.min() - pd.Timestamp(e['start'])).days) if len(days) else None))
+    problems = float(np.mean([pd.concat(v).mean() for v in per_kind.values()]))
+    score = max(0.0, 1 - (0.5 * problems + 0.5 * fine) / 0.25)
     t = pd.DataFrame(table)
     t['caught'] = (t.distrusted_days > 0).astype(float)
     by_kind = t.groupby('kind').agg(events=('caught', 'size'), caught=('caught', 'mean'), days=('days', 'sum'),
-                                    distrusted_days=('distrusted_days', 'sum'))
-    # recall = share of problems caught (averaged within each kind, then over kinds); precision = share of alerts
-    # (runs of distrusted days on a source) that touch a problem
+                                    distrusted_days=('distrusted_days', 'sum'), mean_confidence=('mean_confidence', 'mean'))
+    by_kind['brier'] = pd.Series({k: float(pd.concat(v).mean()) for k, v in per_kind.items()})
     recall = float(by_kind.caught.mean())
     n_alerts, true_alerts = alerts(e_)
     alert_prec = true_alerts / n_alerts if n_alerts else 0.0
-    score = f1(alert_prec, recall)
-    return score, dict(alert_precision=round(alert_prec, 3), recall=round(recall, 3), alerts=n_alerts,
-                       true_alerts=true_alerts, by_kind=by_kind.round(3).reset_index().to_dict('records'), events=table)
+    return score, dict(brier_problems=round(problems, 4), brier_fine=round(fine, 4), alert_precision=round(alert_prec, 3),
+                       recall=round(recall, 3), alerts=n_alerts, true_alerts=true_alerts,
+                       by_kind=by_kind.round(4).reset_index().to_dict('records'), events=table)
+
+
+def continuous(ev) -> tuple[bool, dict]:
+    """Confidence is a probability on a continuous scale, not a few levels: among scored rows (thin beginning left out)
+    with confidence under CONT_HI (0 included: all-or-nothing scores are levels too), at least CONT_DISTINCT distinct values (3 decimals) and no
+    single value on more than CONT_TOP of them. A panel with no such rows passes."""
+    u = ev[ev.use & ~ev.thin & (ev.confidence < CONT_HI)].confidence.round(3)
+    if u.empty:
+        return True, dict(rows=0)
+    distinct, top = int(u.nunique()), float(u.value_counts(normalize=True).iloc[0])
+    return distinct >= CONT_DISTINCT and top <= CONT_TOP, dict(rows=len(u), distinct=distinct, top_share=round(top, 3))
 
 
 def own_noise(truth_panel: pd.DataFrame, thin_ct: float = 20) -> pd.DataFrame:
@@ -468,13 +491,14 @@ def score(truth: dict, data: pd.DataFrame, clean_truth: pd.DataFrame, sol: pathl
     dropped = (th & ev.flag & ev.clean_ct.isna() & ev.clean_amt.isna())
     low_share = float(dropped.sum() / th.sum()) if th.any() else 1.0
     gates['low_signal_dropped'] = low_share >= LOW_SIGNAL_SHARE
+    gates['continuous'], cont_d = continuous(ev)
     gates['detects'] = conf >= MIN_CONFIDENCE                          # cleaning alone cannot pass
     ok = all(gates.values())
     reward = (W_CONF * conf + W_CLEAN * cln + W_STAB * cons) * ok           # headline: a weighted average
     geo = float(np.sqrt(max(conf, 0.0) * max(cln * cons, 0.0))) * ok      # reported: the geometric mean
     return reward, dict(gates=gates, ai_hits=hits, changed_on_truncation=leaks, rows_scored=int(ev.use.sum()),
                         reward_geometric=round(geo, 3),
-                        low_signal=dict(rows=int(th.sum()), dropped_share=round(low_share, 3)),
+                        low_signal=dict(rows=int(th.sum()), dropped_share=round(low_share, 3)), continuity=cont_d,
                         confidence_score=round(conf, 3),
                         clean_score=round(cln, 3), stability=round(cons, 3), confidence=conf_d, clean=cln_d,
                         consistency=cons_d)

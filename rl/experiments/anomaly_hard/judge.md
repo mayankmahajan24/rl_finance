@@ -32,7 +32,7 @@ Rubric (pass if...):
 
 ## Output
 
-- O1: Describes every output column: what confidence measures, its range and what values under and over 0.5 mean; what clean_ct and clean_amt are (their units and basis); and every extra column or file the output has (grader_facts.output_on_this_panel.extra_columns), with its values.
+- O1: Describes every output column: what confidence measures, as a probability (the probability of what, and how it is worked out from the evidence), its range and what values under and over 0.5 mean; what clean_ct and clean_amt are (their units and basis); and every extra column or file the output has (grader_facts.output_on_this_panel.extra_columns), with its values.
 - O2: Says when the cleaned values are blank and what a blank means, and whether a user can tell from the output which rows were trusted as reported, which were repaired, and which were adjusted while trusted (e.g. rescaled after a lasting change); if they cannot, says so.
 - O3: Tells the downstream user how to use the output in a model: which rows to keep or weight, that the cleaned series is comparable within a source over time, and at least one thing not to do with it (e.g. compare levels across sources, which are on different scales).
 

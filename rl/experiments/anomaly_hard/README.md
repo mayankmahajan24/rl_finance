@@ -137,6 +137,12 @@ No part of the grader is dead weight that holds the practitioner back: the large
 split, the F1 and the detection gate are what keep Opus low (the two weak runs distrust long stretches; 29 and 26 of
 their 39 panels fail the gate). Keep the grader as it is.
 
+**The report (2026-11-25).** The write-up is now graded: a 150-400-word report for the data scientists who use the
+cleaned series, in six sections, with a chart of original vs cleaned series. Reward = data reward x (0.5 + 0.5 x report
+score); code checks plus a model judge (`writeup.py`, `judge.md`, review in
+`rl/runs/anomaly_hard/reviews/grader_2026-11-25.md`). The tables above are the data reward; the practitioner's
+reference reports (`solutions/practitioner/reports/`) score 1.0 on train-001 and train-002.
+
 ## Run
 
 ```bash

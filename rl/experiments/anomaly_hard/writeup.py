@@ -13,8 +13,8 @@ series, graded against its rubric (judge.md) on the task's visible panel, the pa
                companies, sources, levels), the solution's own output on it (what it distrusts, repairs, leaves at
                the reported value or blank, as runs), and every number written in the solution's code
 
-writeup_score = share of applicable items passed; 0 if a gate item fails (V5: the report misstates what its own
-output does on this panel); halved if the report is under WORD_MIN or over WORD_LIMIT words (tables and code
+writeup_score = share of applicable items passed; 0 if a gate item fails on every vote (V5: the report misstates what
+its own output does on this panel; a split fail counts as one failed item); halved if the report is under WORD_MIN or over WORD_LIMIT words (tables and code
 blocks not counted).
 The task reward is the data reward x (0.5 + 0.5 x writeup_score), so the report can halve the reward but never earn it
 on its own. When no judge can run, the reward is the data reward alone and the details say so.
@@ -359,7 +359,8 @@ def grade(task: pathlib.Path, sol: pathlib.Path, report_path: pathlib.Path, run,
         verdicts.update({i: dict(verdict='fail', reason='no chart shown') for i in CHART_ITEMS})
     applicable = [i for i in verdicts if verdicts[i]['verdict'] != 'na']
     passed = [i for i in applicable if verdicts[i]['verdict'] == 'pass']
-    gated = [i for i in GATES if verdicts.get(i, {}).get('verdict') == 'fail']
+    # a gate zeroes the report, so it fires only when every vote fails it; a split fail counts as one failed item
+    gated = [i for i in GATES if verdicts.get(i, {}).get('verdict') == 'fail' and not verdicts[i].get('split')]
     score = 0.0 if gated else len(passed) / len(applicable) * (0.5 if res['outside_length'] else 1.0)
     res.update(writeup_score=round(score, 4), gate_failed=gated, judge=dict(JUDGE, backend=how),
                judge_cost_usd=round(sum(v.get('cost_usd') or 0 for v in votes), 4),

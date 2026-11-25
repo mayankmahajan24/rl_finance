@@ -144,3 +144,17 @@ def test_source_specific_logic_fails(tmp_path, ref, code, bad):
     shutil.copytree(HERE / 'solutions' / 'practitioner', sol, ignore=shutil.ignore_patterns('reports'))
     (sol / 'special.py').write_text(code)
     assert (items(ref, sol)['K6'] == 'fail') is bad, W.hand_picked(sol, VISIBLE)
+
+
+def test_no_title_fails_k1(ref):
+    assert items(re.sub(r'^# .*\n', '', ref, count=1))['K1'] == 'fail'
+
+
+def test_a_short_section_fails_k1_but_a_short_output_does_not(ref):
+    short = '## Validation\n\nChecked on the panel with planted problems and it worked well.\n\n'
+    assert items(ref.replace(section(ref, 'Validation') + '\n', short))['K1'] == 'fail'
+    assert items(ref.replace(section(ref, 'Output') + '\n', '## Output\n\nOne row per input row.\n\n'))['K1'] == 'pass'
+
+
+def test_table_text_counts_toward_a_section(ref):
+    assert W.section_words('| a b c | d e |\n|---|---|\n| f g | h |') == 8

@@ -2,9 +2,11 @@
 
 ## Data
 
-Daily transaction count (`ct`) and dollar total (`amt`) per company and source, 2014-12-31 to 2019-12-30: four
-companies (TFT: United Airlines; TMI: American Airlines; TQU: T.J. Maxx and Marshalls; TWZ: Southwest Airlines),
-four sources each.
+The panel gives each source's daily transaction count (`ct`) and dollar total (`amt`) for four companies from
+2014-12-31 to 2019-12-30. Four sources report each company: United Airlines (TFT), American Airlines (TMI), T.J. Maxx
+and Marshalls (TQU) and Southwest Airlines (TWZ).
+
+A series is named by company and source: TMI-1 is TMI's source 1.
 
 | Property (measured) | Value |
 |---|---|
@@ -14,16 +16,17 @@ four sources each.
 | All four TMI sources jump together | about tenfold, early 2017 |
 | Average ticket | about $60 (TQU), $210-280 (airlines) |
 
-Limits: nothing records which days are wrong. A problem hitting two of four sources at once can pass as a company
-move; one common to all four (TMI, 2017) is always trusted.
+Nothing records which days are wrong. A problem hitting two of four
+sources at once can pass for a company move, and one shared by all four (TMI, 2017) cannot be told from one.
 ## Method
 
-Each source is compared with its three sisters in log count and log ticket (`amt`/`ct`): per pair, the day's log
-difference minus the pair's weekday median over their first 112 established days; `rel` is the median over pairs.
-Company-wide moves and weekday patterns cancel.
+Each source is compared with its three sisters, in log count and in log ticket size (`amt`/`ct`). For each pair,
+the day's log difference is compared with the pair's usual difference for that weekday over their first 112
+established days. The median over pairs is the deviation, `rel`, from which company-wide moves and weekday patterns
+cancel.
 
-`sigma` = 1.4826 x MAD (median absolute deviation) of `rel` over the trailing 120 usable days, floored at 0.02,
-widened by counting noise (1/expected count). `z = rel/sigma`.
+The noise, `sigma`, is 1.4826 times the median absolute deviation (MAD) of `rel` over the last 120 usable days,
+floored at 0.02, and widened for counting noise to sqrt(sigma^2 + 1/expected count). The score is `z = rel / sigma`.
 
 | Rule | Detection | Treatment |
 |---|---|---|
@@ -31,18 +34,21 @@ widened by counting noise (1/expected count). `z = rel/sigma`.
 | Spike | abs(z) > 6, at most 3 days | distrusted; imputed as the sisters' move at the source's own level (42-day median) |
 | Yearly pattern | same-sign spike within 3 days of the date 1 or 2 years earlier | trusted, kept |
 | Level change | spike lasting more than 3 days, or CUSUM (allowance 1, alarm 12, z clipped at 4) confirmed by a 7-day median 2 sigmas off; not if it alarmed within 14 days of the date 1-2 years earlier | distrusted 14 days, then trusted; rescaled to the original level by the 14-day median offset until it falls under 1/3 of its peak |
+| Warm-up | first 56 usable days of a source; a source with no anchored pair | not judged; trusted as reported |
 
-CUSUM sums deviations beyond an allowance and alarms past a threshold. Imputed values follow the sisters' move that
-day, so they keep the weekday and holiday pattern. A second pass uses the sisters' cleaned values. A source is judged after
-56 usable days; without an anchored pair it is trusted. Every step uses trailing data only. Not
-handled: drifts over months.
+CUSUM adds up deviations beyond an allowance and alarms when the total passes a threshold. Imputed values follow the
+sisters' move that day, so they keep the weekday and holiday pattern. A second pass repeats the comparison with the sisters'
+cleaned values, so one source's problem does not distort its sisters' scores. Every step uses only past data, in trailing windows. Slow drifts are not handled.
 
 ## Output
 
-`confidence`: 1 trusted, 0.3 new level change, 0.05 spike, 0 low signal. `clean_ct`,
-`clean_amt`: on the source's own basis; blank only for low signal. `reason` (ok, spike,
-level_change, rescaled, yearly_pattern, low_signal); `adj_ct`, `adj_ticket`: log adjustment. Model on confidence
-0.5+; never compare levels across sources.
+| Column | Meaning |
+|---|---|
+| `confidence` | 1 trusted; 0.3 new level change; 0.05 spike; 0 low signal (under 0.5 = distrust) |
+| `clean_ct`, `clean_amt` | the source's series on its own original basis; blank only for low signal |
+| `reason` | ok, spike, level_change, rescaled, yearly_pattern or low_signal |
+| `adj_ct`, `adj_ticket` | the log adjustment applied |
+| How to use | model on rows with confidence of 0.5 or more; never compare levels across sources |
 
 ![Every series: reported (grey) and cleaned (blue) daily transaction count, 2014-12-31 to 2019-12-30](figures/anomhard-train-002.png)
 
@@ -65,12 +71,11 @@ level_change, rescaled, yearly_pattern, low_signal); `adj_ct`, `adj_ticket`: log
 | Expected-count window | 28-day median, 7 days minimum | four weeks keeps weekday balance |
 | Confidence values | 1, 0.3, 0.05, 0 | requirement: under 0.5 means distrust; below it, only the order matters to a user filtering at 0.5 |
 | Log floors | 0.5 transactions, $0.01 | avoid log of zero |
-
-Tuned on practice panels with planted problems, one value at a time, for most problems caught per false alert.
+| How "tuned" values were set | practice panels with planted problems, one value at a time | most problems caught per false alert |
 
 ## Validation
 
-I planted 34 problems on established series and compared with an unplanted run.
+I planted 34 problems on established series.
 
 | Planted | Caught | Error removed |
 |---|---|---|
@@ -80,12 +85,16 @@ I planted 34 problems on established series and compared with an unplanted run.
 | 2 lasting changes (x0.6/1.6) | 2 | 67% |
 | 2 90-day shifts | 2 | 90% |
 
-24 of 42 alerts touched planted problems (unplanted panel: 19). A run cut at 60% matched; a rerun on
-its own output distrusted 69 rows against 89. Tuning used similar panels; these may flatter. Fails when two sisters
-break together.
-## Open issues
+Of the 42 alerts on the planted panel, 24 touched a planted problem; the other 18 compare with the 19 alerts raised on the unplanted panel, some of which may be real problems. There is no look-ahead: a run on the panel cut at 60% of its dates gave the same output, up to the cut, as the full run. Run again on its own cleaned output, the method distrusted 69 rows, against 89 on the original data. Tuning used similar panels, so these results may flatter. The method fails when two sisters break together.
 
-Blank (low signal): thin starts of TFT-2 (to 2016-11-05), TMI-3 (to 2017-02-11) and TMI-4 (to 2016-01-27, and
-2016-06-06 to 2017-01-24); TMI-1 in 57 runs (202 days, 15 of 5-27 days), 2015-01 to 2017-02. One TQU-2 level-change day
-(2018-08-20) is left near the reported value. Treat as missing. Ticket spikes are caught but only 16% of their
-error is removed: check repaired tickets.
+These stretches are left blank or unrepaired; treat them as missing.
+
+| Series | Left blank or unrepaired | Why |
+|---|---|---|
+| TFT-2 | to 2016-11-05 | thin start |
+| TMI-3 | to 2017-02-11 | thin start |
+| TMI-4 | to 2016-01-27, and 2016-06-06 to 2017-01-24 | thin start |
+| TMI-1 | 57 stretches from 2015-01 to 2017-02 (202 days; 15 last 5 to 27 days) | under 20 a day |
+| TQU-2 | 2018-08-20 | level-change day left near the reported value |
+
+The main remaining risk is repaired ticket sizes: only 16% of the planted ticket error was removed.

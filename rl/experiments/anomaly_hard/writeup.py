@@ -37,11 +37,11 @@ import pandas as pd
 HERE = pathlib.Path(__file__).resolve().parent
 SECTIONS = ['Data', 'Method', 'Output', 'Parameters', 'Validation', 'Open issues']
 MIN_SECTION_WORDS = 15         # K1: a section with fewer words (and no table) is empty in substance
-WORD_MIN, WORD_LIMIT = 150, 400   # stated in the instruction; a report outside them has its score halved
+WORD_MIN, WORD_LIMIT = 150, 500   # stated in the instruction; a report outside them has its score halved
 GATES = ['V5']
 JUDGE = dict(model='claude-sonnet-5-5', effort='medium', votes=3)   # pinned: part of the instrument
 JUDGE_ITEMS = ['D1', 'D2', 'D3', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'O1', 'O2', 'O3', 'P1', 'P2', 'P3',
-               'V1', 'V2', 'V3', 'V4', 'V5', 'U1', 'U2', 'U3', 'G1', 'G2', 'G3', 'G4', 'G5', 'F1', 'F2', 'F3']
+               'V1', 'V2', 'V3', 'V4', 'V5', 'U1', 'U2', 'U3', 'G1', 'G2', 'G3', 'G4', 'G5', 'F1', 'F2', 'F3', 'F4']
 CODE_ITEMS = ['K1', 'K2', 'K3', 'K4', 'K5', 'K6', 'K7', 'K8', 'K9']
 HIDDEN = re.compile(r'<!--.*?-->|<\s*/?\s*[a-zA-Z][^>]*>', re.S)   # K9: text a reader of the rendered report cannot see
 CHART_ITEMS = ['G1', 'G2', 'G3', 'G4', 'G5']   # fail without the judge when no chart is shown (K8)

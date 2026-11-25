@@ -67,7 +67,7 @@ python /app/solution/score.py --input IN.csv --output OUT.csv
    reported values drawn exactly as reported (not smoothed, resampled, clipped or filled in). Save each chart as a PNG
    in `/app/output/figures/` and show it in the report as `![what it shows](figures/name.png)`.
 
-   Between 150 and 400 words, not counting tables, code blocks and chart lines; a shorter or longer report loses credit. Write it for its reader:
+   Between 150 and 400 words, not counting tables, code blocks and chart lines; a shorter or longer report, a missing section or a missing chart each halve the report's score. Write it for its reader:
    leave out how this work is assessed, the assignment itself, and any script, file path, argument or command.
    State only what this page or the panel tells you, or what you computed from the panel: no facts about the
    companies, their events or their data from elsewhere (the dates are shifted, so real-world dates do not line up).

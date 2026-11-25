@@ -15,7 +15,7 @@ series, graded against its rubric (judge.md) on the task's visible panel, the pa
 
 writeup_score = share of applicable items passed; 0 if a gate item fails on every vote (V5: the report misstates what
 its own output does on this panel; a split fail counts as one failed item); halved if the report is under WORD_MIN or over WORD_LIMIT words (tables and code
-blocks not counted).
+blocks not counted), halved again if a section is missing (K1), and again if no chart is shown (K8).
 The task reward is the data reward x (0.5 + 0.5 x writeup_score), so the report can halve the reward but never earn it
 on its own. When no judge can run, the reward is the data reward alone and the details say so.
 """
@@ -361,10 +361,15 @@ def grade(task: pathlib.Path, sol: pathlib.Path, report_path: pathlib.Path, run,
     passed = [i for i in applicable if verdicts[i]['verdict'] == 'pass']
     # a gate zeroes the report, so it fires only when every vote fails it; a split fail counts as one failed item
     gated = [i for i in GATES if verdicts.get(i, {}).get('verdict') == 'fail' and not verdicts[i].get('split')]
-    score = 0.0 if gated else len(passed) / len(applicable) * (0.5 if res['outside_length'] else 1.0)
+    # required components: outside the word bounds, a section missing or no chart each halve the score
+    halved = [why for why, bad in (('length', res['outside_length']), ('section missing', verdicts['K1']['verdict'] == 'fail'),
+                                   ('no chart', verdicts['K8']['verdict'] == 'fail')) if bad]
+    res['halved_for'] = halved
+    score = 0.0 if gated else len(passed) / len(applicable) * 0.5 ** len(halved)
     res.update(writeup_score=round(score, 4), gate_failed=gated, judge=dict(JUDGE, backend=how),
                judge_cost_usd=round(sum(v.get('cost_usd') or 0 for v in votes), 4),
                items={k: v['verdict'] for k, v in verdicts.items()},
                reasons={k: v['reason'] for k, v in verdicts.items() if v['verdict'] == 'fail'},
-               splits={k: v['split'] for k, v in verdicts.items() if v.get('split')})
+               splits={k: v['split'] for k, v in verdicts.items() if v.get('split')},
+               votes=[v['verdicts'] for v in votes], code_reasons={k: verdicts[k]['reason'] for k in CODE_ITEMS})
     return res

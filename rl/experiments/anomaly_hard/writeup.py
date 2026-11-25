@@ -7,7 +7,7 @@ series, graded against its rubric (judge.md) on the task's visible panel, the pa
                the solution's code (no code in it names the report or writes a markdown file); K8 the report shows
                at least one chart, saved as a PNG under output/figures/; K9 no hidden text (HTML comments or tags)
   judge items  D1-D3 data, M1-M7 method, O1-O3 output, P1-P3 parameters, V1-V5 validation, U1-U3 open issues,
-               G1-G4 the chart of original against cleaned series (the judge sees the images), F1-F3 throughout
+               G1-G5 the chart of original against cleaned series (the judge sees the images), F1-F3 throughout
                (judge.md); a model judge, VOTES votes, the majority per item
   facts        computed in code for the judge, which never sees the hidden panels: the visible panel (dates,
                companies, sources, levels), the solution's own output on it (what it distrusts, repairs, leaves at
@@ -41,10 +41,10 @@ WORD_MIN, WORD_LIMIT = 150, 400   # stated in the instruction; a report outside 
 GATES = ['V5']
 JUDGE = dict(model='claude-sonnet-5-5', effort='medium', votes=3)   # pinned: part of the instrument
 JUDGE_ITEMS = ['D1', 'D2', 'D3', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'O1', 'O2', 'O3', 'P1', 'P2', 'P3',
-               'V1', 'V2', 'V3', 'V4', 'V5', 'U1', 'U2', 'U3', 'G1', 'G2', 'G3', 'G4', 'F1', 'F2', 'F3']
+               'V1', 'V2', 'V3', 'V4', 'V5', 'U1', 'U2', 'U3', 'G1', 'G2', 'G3', 'G4', 'G5', 'F1', 'F2', 'F3']
 CODE_ITEMS = ['K1', 'K2', 'K3', 'K4', 'K5', 'K6', 'K7', 'K8', 'K9']
 HIDDEN = re.compile(r'<!--.*?-->|<\s*/?\s*[a-zA-Z][^>]*>', re.S)   # K9: text a reader of the rendered report cannot see
-CHART_ITEMS = ['G1', 'G2', 'G3', 'G4']   # fail without the judge when no chart is shown (K8)
+CHART_ITEMS = ['G1', 'G2', 'G3', 'G4', 'G5']   # fail without the judge when no chart is shown (K8)
 MAX_FIGURES = 6
 PNG = b'\x89PNG\r\n\x1a\n'
 FIGURE = re.compile(r'!\[[^\]]*\]\(\s*(?:\./)?(figures/[^)\s]+\.png)\s*\)', re.I)

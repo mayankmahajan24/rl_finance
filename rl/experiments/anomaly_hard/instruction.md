@@ -62,7 +62,8 @@ python /app/solution/score.py --input IN.csv --output OUT.csv
       specific to these series.
 
    The report must include a line chart of the original series against the cleaned series: for every series in the
-   panel (small multiples are fine), the reported values and your cleaned values over the panel's whole history, in
+   panel, one panel per series (small multiples), drawing exactly two lines and nothing else (no other series, bands,
+   averages, thresholds or markers): the reported values and your cleaned values over the panel's whole history, in
    their own units (transactions a day, or dollars a day), with no log scale or other transformation, and the
    reported values drawn exactly as reported (not smoothed, resampled, clipped or filled in). Save each chart as a PNG
    in `/app/output/figures/` and show it in the report as `![what it shows](figures/name.png)`.

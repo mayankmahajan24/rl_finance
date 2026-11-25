@@ -4,7 +4,7 @@ A running record of what is built, what was tried, and what was retired, kept fo
 every change or experiment**: add a row to the experiment log, move anything replaced to "Retired", and keep "Active
 construction" true at all times. Verbatim feedback and each decision's details stay in the feedback logs
 (`rl/runs/anomaly_hard/reviews/feedback_log.md`, numbered #1-#66 so far; `rl/runs/anomaly_hindsight/reviews/feedback_log.md`,
-#1-#6). Branch `claude/nice-heisenberg-ukw1gi` (draft pull request mayankmahajan24/rl_finance#73).
+#1-#8). Branch `claude/nice-heisenberg-ukw1gi` (draft pull request mayankmahajan24/rl_finance#73).
 
 Last updated: 2026-11-25.
 
@@ -16,7 +16,7 @@ Last updated: 2026-11-25.
 - Add penalties to the grader as issues come up (log each one).
 - Log every piece of feedback verbatim in the task's feedback log the same turn.
 
-**Built tasks last rebuilt:** 2026-11-25. Both tasks' built instructions match the source as of feedback #66 / H#6.
+**Built tasks last rebuilt:** 2026-11-25. anomaly_hard's built instructions match the source as of #66; anomaly_hindsight's as of H#6 (H#8 instruction edits wait for the next rebuild).
 
 ---
 
@@ -142,7 +142,11 @@ With `WRITEUP_JUDGE=skip`, or when no judge can run, the total is the data rewar
     "longest like for like usable series").
 - **Cleaned series** = gain x intact x kept x **dropped** (the share of those rows left blank). The kept side of a
   coverage break is now scored for the cleaned series.
-- **Report rubric.** M5 asks which cleaned-series steps use later data.
+- **Cleaned series judged over each problem's whole span** (H#8): from its true start, pre-visible days and slow
+  build-ups included, and problems too small to see in real time included (error within the source's own noise still
+  not counted). Confidence keeps the point-in-time timing rules.
+- **Report rubric.** M5 asks which cleaned-series steps use later data. The judge's facts list every blank
+  (discarded) stretch, and U1 asks for them (H#8).
 - **Answer key** blanks the dropped rows.
 - **Not yet verified:** that the answer key scores 1.0 and that the references lose on these cases. References and
   reports are not adapted.
@@ -229,6 +233,7 @@ active construction; "Retired" means it was later replaced (see section 3).
 | E23 | 11-25 | Readable prose: instruction plus judge F4 (#62); limit raised to 500 words (#63) | Note-form reference fails F4 unanimously; rewritten reference passes | Adopted (both tasks) |
 | E24 | 11-25 | K6 and K9 false positives (epoch date, inequality) fixed (#65, H#5) | v8-t006 report 0.71 to 0.76 | Adopted (both tasks) |
 | E26 | 11-25 | No ticker-, source- or date-specific logic: instruction line plus K6 widened to source-id comparisons (#66, H#6) | Every existing solution (references, ceiling, 21 Opus runs) passes; tests cover 7 cases | Adopted (both tasks) |
+| E27 | 11-25 | anomaly_hindsight grader: cleaned series scored over each problem's whole span and on sub-visible problems; judge told every discarded stretch; instruction matched (H#8) | Not run (on hold); imports checked | Adopted (anomaly_hindsight only) |
 | E25 | 11-25 | anomaly_hindsight copy with hindsight cleaning rules (#60, #61, H#1-H#4) | Built; every task has a thin start, 7 of 13 a company-wide break | Active, on hold |
 
 ---

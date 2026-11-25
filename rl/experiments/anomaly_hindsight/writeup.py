@@ -235,7 +235,7 @@ def facts(visible: pd.DataFrame, out: pd.DataFrame, instruction: str) -> dict:
     """What the judge needs to check the report against the panel and the solution's own output on it."""
     v = visible.merge(out, on=['date', 'ticker', 'source_id'], how='left')
     noise = 0.02                                  # within 2%: a cleaned value left at the reported one
-    series, unrepaired = [], []
+    series, unrepaired, discarded = [], [], []
     for (tk, s), g in v.groupby(['ticker', 'source_id']):
         g = g.sort_values('date')
         flag = g.confidence < 0.5
@@ -264,6 +264,11 @@ def facts(visible: pd.DataFrame, out: pd.DataFrame, instruction: str) -> dict:
                                      last=str(runs[-1][1].date()), longest_rows=int(max(n for *_, n in runs)),
                                      shortest_of_5_or_more=min((n for *_, n in runs if n >= 5), default=None))
         series[-1]['distrusted_not_repaired'] = summary or None
+        b_runs = _runs(blank, g.date)                  # every blank stretch, distrusted or not: what the output discards
+        series[-1]['blank'] = dict(rows=int(blank.sum()), runs=len(b_runs), first=str(b_runs[0][0].date()),
+                                   last=str(b_runs[-1][1].date())) if b_runs else None
+        for a, b, n in b_runs:
+            discarded.append(dict(ticker=tk, source_id=int(s), start=str(a.date()), end=str(b.date()), rows=n))
     unrepaired.sort(key=lambda r: -r['rows'])
     tot = lambda k: int(sum(x[k] for x in series))  # noqa: E731
     return dict(
@@ -278,7 +283,8 @@ def facts(visible: pd.DataFrame, out: pd.DataFrame, instruction: str) -> dict:
             rows_distrusted_left_at_reported=tot('distrusted_left_at_reported'),
             rows_distrusted_repaired=tot('distrusted_repaired'), rows_trusted_adjusted=tot('trusted_adjusted'),
             alerts=tot('alerts'), per_series=series,
-            distrusted_not_repaired_runs=unrepaired[:MAX_RUNS], distrusted_not_repaired_runs_total=len(unrepaired)))
+            distrusted_not_repaired_runs=unrepaired[:MAX_RUNS], distrusted_not_repaired_runs_total=len(unrepaired),
+            blank_runs=sorted(discarded, key=lambda r: -r['rows'])[:MAX_RUNS], blank_runs_total=len(discarded)))
 
 
 def in_report(value, report: str) -> bool:

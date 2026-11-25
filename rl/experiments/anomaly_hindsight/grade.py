@@ -370,7 +370,7 @@ def clean_score(truth, ev, scored_rows, drop=None):
     err_raw = 0.5 * ((lg(ev.ct) - lg(ev.tct)).abs() + (lg(ev.amt) - lg(ev.tamt)).abs())
     err_cln = 0.5 * ((lg(cc) - lg(ev.tct)).abs() + (lg(ca) - lg(ev.tamt)).abs())
     changed = err_raw > 1e-6
-    unscored = pd.Series(False, index=ev.index)        # rows of problems before they show (not scored)
+    unscored = pd.Series(False, index=ev.index)        # (point-in-time version only; every problem row is scored here)
     gains = []
     sig_a = np.hypot(ev.sig_c, ev.sig_t)              # dollars = count x ticket: their noises add
     beyond = lambda d, s: (d.abs() - s).clip(lower=0)  # noqa: E731   error beyond the source's own noise
@@ -378,12 +378,8 @@ def clean_score(truth, ev, scored_rows, drop=None):
         ser = (ev.ticker == e['ticker']) & (ev.source_id == e['source_id'])
         first = pd.Timestamp(e.get('shift_start', e['start']))
         span = ser & ev.date.between(first, pd.Timestamp(e['end']))
-        if e.get('unscored'):
-            unscored |= span                              # not scored, and not counted as untouched rows either
-            continue
-        if e.get('visible'):                              # before it was visible, it is not scored
-            unscored |= span & (ev.date < pd.Timestamp(e['visible']))
-            span &= ev.date >= pd.Timestamp(e['visible'])
+        # hindsight: the cleaned series is judged over the whole problem, from its true start, however late it became
+        # visible in real time and however small (error within the source's own noise is still not counted)
         er = 0.5 * (beyond(lg(ev.ct) - lg(ev.tct), ev.sig_c) + beyond(lg(ev.amt) - lg(ev.tamt), sig_a))
         ec = 0.5 * (beyond(lg(cc) - lg(ev.tct), ev.sig_c) + beyond(lg(ca) - lg(ev.tamt), sig_a))
         m = span & changed & scored_rows & ~ev.thin & (er > 1e-6)

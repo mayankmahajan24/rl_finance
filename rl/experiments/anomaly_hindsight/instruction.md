@@ -62,7 +62,7 @@ python /app/solution/score.py --input IN.csv --output OUT.csv
       and what moving it trades off). A table is fine.
    5. `## Validation`: how you checked the flags and the cleaned series, with the numbers, on what data, and where the
       method would fail.
-   6. `## Open issues`: everything your output on this panel distrusts but does not repair (left blank or at the
+   6. `## Open issues`: everything your output on this panel discards (leaves blank) or distrusts but does not repair (left blank or at the
       reported value), with the series, the dates and why, and what a user should do about each; and any other risk
       specific to these series.
 
@@ -112,7 +112,8 @@ Your score is a weighted average of three parts: 40% confidence, 40% cleaned ser
   per two weeks); precision is the share of your alerts that touch a real problem. The score is the F1 of the two. A
   problem counts from the day it first shows in the data; one that builds up too slowly for its start to be dated
   counts only in the cleaned series.
-* **Cleaned series.** On rows a problem affected, how much of the gap between the raw value and what the source
+* **Cleaned series.** On every row a problem affected, from the day it started (even before it could be seen in real
+  time, and over the whole of a slow build-up), how much of the gap between the raw value and what the source
   should have reported your cleaned value closes (in log terms, count and dollars, each kind of problem weighing the
   same; differences within the source's own day-to-day noise are not counted), multiplied by the share of rows that
   were fine and that your cleaned series leaves within the source's own noise, and by the share of rows that should be
@@ -131,7 +132,8 @@ must be distrusted and left blank there (at least 90% of those rows). A source t
 established is kept: those rows count in the cleaned-series score, so blanking them costs history.
 
 Not scored: the panel's first year (history for your code to learn from), rows near the twenty-a-day line, the two
-weeks either side of a discarded stretch's edges, problems too small to stand out from a source's own noise, and
+weeks either side of a discarded stretch's edges, problems too small to stand out from a source's own noise (for
+confidence only: the cleaned series is judged on them too), and
 other debatable rows.
 
 **The report.** That total is then multiplied by 0.5 + 0.5 x the report's score, so a weak report can halve it but a

@@ -44,8 +44,10 @@ Confidence: read as the probability that a row is fine (carries the source's usu
   1 - (Brier on untrustworthy rows + Brier on fine rows) / 2 / 0.25, floored at 0, where an untrustworthy row's Brier
   is confidence squared (the mean within each kind of problem, then over kinds) and a fine row's is (1 - confidence)
   squared; a constant 0.5 scores 0. Fine rows include a new level after a lasting change once it has settled (above).
-  A panel with no untrustworthy rows (a control) is scored on its fine rows alone. Alert precision and problem recall
-  at 0.5 are reported, not scored.
+  That skill is multiplied by (0.5 + 0.5 x alert precision), so false alerts cost up to half: an alert is a run of
+  distrusted scored days on a source (gaps up to ALERT_GAP days joined, split every ALERT_DAYS days), precision the
+  share that touch an untrustworthy row. A panel with no untrustworthy rows (a control) is scored on its fine rows
+  alone. Problem recall at 0.5 is reported, not scored.
 
 Cleaned series = gain x intact x kept, against the truth panel; a blank cleaned value counts as the raw value.
   gain    per kind, 1 - (cleaned error / raw error) pooled over the kind's problems' scored rows, each error = mean over
@@ -321,7 +323,8 @@ def confidence_score(ev, scored):
     """Balanced Brier skill of confidence read as the probability that a row is fine: Brier on the untrustworthy rows
     (confidence squared; the mean within each kind of problem, then over kinds) and on the fine rows ((1 - confidence)
     squared), half each, against a constant 0.5 (Brier 0.25): 1 - balanced Brier / 0.25, floored at 0. A panel with no
-    untrustworthy rows is scored on its fine rows alone. Alert precision and problem recall at 0.5 are reported too."""
+    untrustworthy rows is scored on its fine rows alone. Times (0.5 + 0.5 x alert precision): false alerts cost up to
+    half. Problem recall at 0.5 is reported too."""
     e_ = ev[ev.use]
     c = ev.confidence.astype(float).clip(0, 1)
     fine = float(((1 - c[ev.use & ~ev.label]) ** 2).mean()) if (ev.use & ~ev.label).any() else 0.0
@@ -338,7 +341,7 @@ def confidence_score(ev, scored):
                           distrusted_days=int((m & ev.flag).sum()), mean_confidence=round(float(c[m].mean()), 3),
                           delay_days=int((days.min() - pd.Timestamp(e['start'])).days) if len(days) else None))
     problems = float(np.mean([pd.concat(v).mean() for v in per_kind.values()]))
-    score = max(0.0, 1 - (0.5 * problems + 0.5 * fine) / 0.25)
+    skill = max(0.0, 1 - (0.5 * problems + 0.5 * fine) / 0.25)
     t = pd.DataFrame(table)
     t['caught'] = (t.distrusted_days > 0).astype(float)
     by_kind = t.groupby('kind').agg(events=('caught', 'size'), caught=('caught', 'mean'), days=('days', 'sum'),
@@ -347,7 +350,8 @@ def confidence_score(ev, scored):
     recall = float(by_kind.caught.mean())
     n_alerts, true_alerts = alerts(e_)
     alert_prec = true_alerts / n_alerts if n_alerts else 0.0
-    return score, dict(brier_problems=round(problems, 4), brier_fine=round(fine, 4), alert_precision=round(alert_prec, 3),
+    score = skill * (0.5 + 0.5 * alert_prec)            # false alerts cost up to half
+    return score, dict(brier_skill=round(skill, 4), brier_problems=round(problems, 4), brier_fine=round(fine, 4), alert_precision=round(alert_prec, 3),
                        recall=round(recall, 3), alerts=n_alerts, true_alerts=true_alerts,
                        by_kind=by_kind.round(4).reset_index().to_dict('records'), events=table)
 

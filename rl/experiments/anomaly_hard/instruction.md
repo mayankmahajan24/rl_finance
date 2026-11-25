@@ -110,7 +110,10 @@ Your score is a weighted average of three parts: 40% confidence, 40% cleaned ser
 * **Confidence.** Scored row by row, as a probability. On the rows a problem made untrustworthy, the lower your
   confidence the better; on rows that are fine, the higher the better; both by the squared error of your confidence
   against what the row is (0 untrustworthy, 1 fine), with the untrustworthy rows and the fine rows weighing half each
-  (and each kind of problem weighing the same). A constant 0.5 scores nothing. A problem counts from the day it first
+  (and each kind of problem weighing the same). A constant 0.5 scores nothing. False alarms also cost: that
+  score is multiplied by one half plus half the share of your alerts that touch a real problem (an alert is a run of
+  rows on one source scored below 0.5, gaps of up to two days joined, a run longer than two weeks counting once per
+  two weeks). A problem counts from the day it first
   shows in the data; after a lasting change, its first two weeks are untrustworthy, the weeks while it settles are
   not scored, and from then on the new level counts as fine, so confidence should rise again. A problem that builds
   up too slowly for its start to be dated counts only in the cleaned series.

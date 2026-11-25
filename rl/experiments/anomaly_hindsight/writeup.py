@@ -290,6 +290,8 @@ def facts(visible: pd.DataFrame, out: pd.DataFrame, instruction: str) -> dict:
             rows_blank=tot_blank, rows_changed_at_all=tot('changed_at_all'),
             share_distrusted=round(float((v.confidence < 0.5).mean()), 3),
             share_distrusted_after_first_year=round(float((v[v.date >= v.date.min() + pd.Timedelta(days=365)].confidence < 0.5).mean()), 3),
+            rows_after_first_year=int((v.date >= v.date.min() + pd.Timedelta(days=365)).sum()),
+            rows_distrusted_after_first_year=int(((v.date >= v.date.min() + pd.Timedelta(days=365)) & (v.confidence < 0.5)).sum()),
             alerts=tot('alerts'), per_series=series,
             distrusted_not_repaired_runs=unrepaired[:MAX_RUNS], distrusted_not_repaired_runs_total=len(unrepaired),
             blank_runs=sorted(discarded, key=lambda r: -r['rows'])[:MAX_RUNS], blank_runs_total=len(discarded)))

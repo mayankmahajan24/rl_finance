@@ -43,7 +43,7 @@ JUDGE = dict(model='claude-sonnet-5-5', effort='medium', votes=3)   # pinned: pa
 JUDGE_ITEMS = ['D1', 'D2', 'D3', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'O1', 'O2', 'O3', 'P1', 'P2', 'P3',
                'V1', 'V2', 'V3', 'V4', 'V5', 'U1', 'U2', 'U3', 'G1', 'G2', 'G3', 'G4', 'G5', 'F1', 'F2', 'F3', 'F4']
 CODE_ITEMS = ['K1', 'K2', 'K3', 'K4', 'K5', 'K6', 'K7', 'K8', 'K9']
-HIDDEN = re.compile(r'<!--.*?-->|<\s*/?\s*[a-zA-Z][^>]*>', re.S)   # K9: text a reader of the rendered report cannot see
+HIDDEN = re.compile(r'<!--.*?-->|</?[a-zA-Z][a-zA-Z0-9-]*(?:\s[^<>\n]*)?/?>', re.S)   # a comment, or a tag: < then a letter, on one line   # K9: text a reader of the rendered report cannot see
 CHART_ITEMS = ['G1', 'G2', 'G3', 'G4', 'G5']   # fail without the judge when no chart is shown (K8)
 MAX_FIGURES = 6
 PNG = b'\x89PNG\r\n\x1a\n'
@@ -136,6 +136,8 @@ def _py_files(sol: pathlib.Path) -> list[pathlib.Path]:
 def hand_picked(sol: pathlib.Path, visible: pd.DataFrame) -> list[str]:
     """String literals in the solution's code that name a visible ticker code or a date (a case picked by hand)."""
     tickers = set(visible.ticker.astype(str))
+    d = pd.to_datetime(visible.date)            # a date inside the panel's range (an epoch or sentinel date is mechanics)
+    lo, hi = str(d.min().date()), str(d.max().date())
     out = []
     for f in _py_files(sol):
         try:
@@ -145,7 +147,7 @@ def hand_picked(sol: pathlib.Path, visible: pd.DataFrame) -> list[str]:
         for node in ast.walk(tree):
             if isinstance(node, ast.Constant) and isinstance(node.value, str):
                 s = node.value
-                if s in tickers or re.fullmatch(r'(19|20)\d\d-\d\d-\d\d', s.strip()):
+                if s in tickers or (re.fullmatch(r'(19|20)\d\d-\d\d-\d\d', s.strip()) and lo <= s.strip() <= hi):
                     out.append(f'{f.name}:{node.lineno} {s!r}')
     return out
 

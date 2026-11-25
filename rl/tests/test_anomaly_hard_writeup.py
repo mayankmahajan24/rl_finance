@@ -117,3 +117,16 @@ def test_markup_inside_code_blocks_is_not_hidden_text(ref):
                                               (12, 'a window of 112 days', False), (0.5, 'the 0.55 bar', False)])
 def test_numbers_are_found_in_the_report_in_any_usual_spelling(value, text, found):
     assert W.in_report(value, text) is found
+
+
+def test_an_inequality_in_prose_is_not_hidden_text(ref):
+    line = 'A change ends when its offset < max(0.10, sigma) for a week, and starts when it is > 2 sigma.'
+    assert items(ref.replace('## Output\n', f'## Output\n\n{line}\n', 1))['K9'] == 'pass'
+
+
+def test_an_epoch_date_in_code_is_not_a_hand_picked_case(tmp_path, ref):
+    sol = tmp_path / 'sol'
+    shutil.copytree(HERE / 'solutions' / 'practitioner', sol, ignore=shutil.ignore_patterns('reports'))
+    (sol / 'epoch.py').write_text("ORIGIN = '1970-01-01'\nPICKED = '2011-01-05'\n")
+    picked = W.hand_picked(sol, VISIBLE)
+    assert any('2011-01-05' in p for p in picked) and not any('1970-01-01' in p for p in picked)

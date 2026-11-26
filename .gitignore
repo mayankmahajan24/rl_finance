@@ -32,3 +32,6 @@ CLAUDE.md
 
 # raw SEC filings fetched by fetch_xbrl.py; regenerated, not committed
 rl/sources/txn_panel/build/sec_xbrl/sec/
+
+# local notes for future LLM sessions (not committed)
+llm_notes/

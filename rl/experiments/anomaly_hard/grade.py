@@ -31,11 +31,10 @@ recurring_first; in practice that year falls in the warm-up). Timing, from what 
     a 7-day median of the source's relation to its sisters); a level change that never does is `unscored`; one that takes over SETTLE_DAYS to show is `slow`
     (cleaned series only; for confidence unscored until settled, then trusted)
   * one-day problems: every day untrustworthy
-  * a ramp (a shift built up over ramp_days): untrustworthy from the day it is visible until it is fully built
-    (shift_start + ramp_days; at least CHANGE_DAYS if it shows only once built), then RAMP_GRACE (7) days unscored, then
-    the new level is fine (flagging it is a false positive)
-  * level changes: the first CHANGE_DAYS from when visible untrustworthy, unscored up to SETTLE_DAYS while the code
-    decides, then the new level trusted; after a temporary change ends, RETURN_DAYS (14) unscored, then trusted
+  * level changes, at once (step) or built up over ramp_days (ramp): untrustworthy from the day visible until the new
+    level has held steady for CHANGE_DAYS (a step: CHANGE_DAYS from visible; a ramp: until CHANGE_DAYS after it is fully
+    built, shift_start + ramp_days), then GRACE_DAYS (7) unscored, then the new level is fine (distrusting it is a false
+    positive); after a temporary change ends, RETURN_DAYS (14) unscored, then trusted
   * thin beginning: before a source is established (its truth count's centred 28-day median has held thin_ct for
     THIN_ESTABLISHED days), rows with that median under THIN_LO x thin_ct must be dropped (the gate); rows between
     THIN_LO and THIN_HI x thin_ct and THIN_EDGE days either side of the stretch's edges are unscored. A source that
@@ -86,7 +85,7 @@ import writeup as writeup_grade  # the write-up rubric (writeup.py, judge.md)
 KEYS = ['date', 'ticker', 'source_id']
 OUT_COLS = ['confidence', 'clean_ct', 'clean_amt']
 CHANGE_DAYS, SETTLE_DAYS = 14, 45
-RAMP_GRACE = 7              # after a ramp is fully built: unscored this long (time to see it stopped), then fine
+GRACE_DAYS = 7              # after a level change's untrustworthy days: unscored this long, then the new level is fine
 RETURN_DAYS = CHANGE_DAYS   # after a temporary change ends: unscored this long, then the source must be trusted
 W_CONF, W_CLEAN, W_STAB = 0.4, 0.4, 0.2   # headline reward weights (confidence, cleaned series, stability)
 ALERT_GAP = 2            # days of trust that still join two distrusted runs into one alert
@@ -293,23 +292,16 @@ def label_rows(truth: dict, ev: pd.DataFrame, clean_truth: pd.DataFrame | None =
         if not e['regime']:
             parts.append((e, ser & ev.date.between(a, b)))
             continue
-        if e.get('ramp_days'):
-            # a ramp: untrustworthy from the day it shows while it builds (flag it early, and keep flagging it while it
-            # moves); then RAMP_GRACE days unscored (time to see that it has stopped); then the new level is fine
-            built = pd.Timestamp(e.get('shift_start', e['start'])) + D(int(e['ramp_days']))
-            on_end = min(built if built > a else a + D(CHANGE_DAYS - 1), b)
-            parts.append((dict(e, part='ramp', end=str(on_end.date())), ser & ev.date.between(a, on_end)))
-            quiet |= ser & (ev.date > on_end) & (ev.date <= min(on_end + D(RAMP_GRACE), b))
-            if not e.get('permanent'):
-                quiet |= ser & (ev.date > b) & (ev.date <= b + D(RETURN_DAYS))
-            continue
-        settle = max(a + D(SETTLE_DAYS - 1), pd.Timestamp(e.get('settle', a)))
-        on_end = min(a + D(CHANGE_DAYS - 1), b)
-        quiet |= ser & (ev.date > on_end) & (ev.date <= min(settle, b))
+        # a level change, at once or building up: untrustworthy from the day it shows until its new level has held
+        # steady for CHANGE_DAYS (a step holds at once; a ramp from the day it is fully built); then GRACE_DAYS unscored
+        # (time to see it has settled); then the new level is fine (distrusting it is a false positive)
+        steady = pd.Timestamp(e.get('shift_start', e['start'])) + D(int(e.get('ramp_days') or 0))
+        on_end = min(max(steady, a) + D(CHANGE_DAYS - 1), b)
         parts.append((dict(e, part='onset', end=str(on_end.date())), ser & ev.date.between(a, on_end)))
+        quiet |= ser & (ev.date > on_end) & (ev.date <= min(on_end + D(GRACE_DAYS), b))
         if not e.get('permanent'):
             # back on its old level: the data is right again, so distrusting the return is neither required nor
-            # penalised for RETURN_DAYS (time to see the return, as for a change's onset); after that it must be trusted
+            # penalised for RETURN_DAYS (time to see the return); after that it must be trusted
             quiet |= ser & (ev.date > b) & (ev.date <= b + D(RETURN_DAYS))
     ev['use'] &= ~quiet
     for tk, s, m in thin_parts:           # thin beginnings not excluded for another reason: must be dropped (a gate)

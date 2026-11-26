@@ -6,12 +6,15 @@ You have a daily panel of card transactions: several independent data sources (s
 daily transaction count and dollar total. Sources sometimes misreport. Build code that says, for every row, whether
 it can be trusted, and that produces a cleaned version of every series.
 
-A source can go wrong in two ways. It can be wrong for a day or a few: too high (a batch counted twice, a flood of tiny
-test transactions, a few outsized tickets) or too low (a failed transmission). Or its level can change: at once or
-building up over days or weeks, for a while or for good. A problem can affect the count, the dollars or both, so the
-average ticket (dollars per transaction) can be off while the count looks normal. Not problems: moves that every
-source of a company shares (promotions, store openings or closures, holidays), a source's dip on the same date every
-year, slow drift between sources, and a source's thin early history (see Low-signal data below).
+You should assume every source tracks the same fundamental momentum of the business (abnormal data notwithstanding):
+growth or decline, seasonality, promotions, stores opening or closing and holidays show up in all of a company's
+sources. A source can go wrong in two ways. It can be wrong for a day or a few: too high (a batch counted twice, a flood
+of tiny test transactions, a few outsized tickets) or too low (a failed transmission). Or it can stop tracking the
+business at its usual level: at once or building up over days or weeks, for a while or for good. A problem can affect
+the count, the dollars or both, so the average ticket (dollars per transaction) can be off while the count looks
+normal. Not problems: the business's own moves, a source's dip on the same date every year, small slow drift between
+sources, and a source's thin early history (see Low-signal data below). A source that drifts far from where it should
+be over months need not be distrusted, but should still be brought back in the cleaned series.
 
 The point is a usable, like-for-like series for every source with as much of its history as possible. Some segments
 of the data carry too little signal to be worth keeping, and those may be discarded; everything else should be kept,
@@ -36,9 +39,9 @@ python /app/solution/score.py --input IN.csv --output OUT.csv
 
 * `confidence`, in [0, 1]: the probability that this row carries usable signal about what the company actually did
   that day, as reported or after your adjustment, worked out from the evidence in the data (how far the row sits from
-  what the source would normally report, given its own noise). High means trust it; below 0.5 means do not. A change
-  in a source's level, temporary or lasting, is untrustworthy while it is new: once the source has settled on its new
-  level and you have adjusted for it, its rows carry signal again.
+  what the source would normally report, given its own noise). High means trust it; below 0.5 means do not. A source that stops
+  tracking the business at its usual level is untrustworthy while its new level is in doubt: once it has held steady
+  and you have adjusted for it, its rows carry signal again.
 * `clean_ct`, `clean_amt`: a cleaned series for the row's ticker and source that is comparable like for like with
   that source's own history: what the source would have reported had it kept working the way it normally does.
   Where nothing went wrong with a row, it equals the raw value. On a source whose level has changed, every row is
@@ -127,12 +130,11 @@ Your score is a weighted average of three parts: 40% confidence, 40% cleaned ser
   score is multiplied by one half plus half the share of your alerts that touch a real problem (an alert is a run of
   rows on one source scored below 0.5, gaps of up to two days joined, a run longer than two weeks counting once per
   two weeks). A problem counts from the day it first
-  shows in the data (stands out from the source's own noise); after a change of level, temporary or lasting, its
-  first two weeks are untrustworthy, the weeks while it settles are
-  not scored, and from then on the new level counts as fine, so confidence should rise again. A shift can also build
-  up over days or weeks: it is untrustworthy from the day it first shows in the data until it stops growing; the week
-  after that is not scored, and from then on the new level counts as fine. When a temporary change
-  ends, the two weeks after it are not scored; from then on the source counts as fine. A change that builds up
+  shows in the data (stands out from the source's own noise). A source that stops tracking the business at its usual
+  level, at once or building up over days or weeks, is untrustworthy from then until its new level has held steady
+  for two weeks; the week after that is not scored, and from then on it counts as fine, so confidence should rise
+  again (it is still adjusted in the cleaned series). When it comes back to its usual level, the two weeks after are
+  not scored; from then on it counts as fine. A change that builds up
   too slowly for its start to be dated is not scored for confidence until it has settled; after that its rows count
   as fine. It counts in full in the cleaned series.
 * **Cleaned series.** On rows a problem affected, how much of the gap between the raw value and what the source

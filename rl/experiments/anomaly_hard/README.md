@@ -62,9 +62,9 @@ over its three hidden panels (each with its own planted problems and disguise, s
 * A level change counts from the day it shows: its trailing 7-day median deviation reaches 3x the noise of a 7-day
   median of the source's relation to its sisters (`build.annotate_events`). One that never shows is unscored; one
   that takes over 45 days, or a slow shift, is scored for confidence only once settled (then fine).
-* A step: first 14 days untrustworthy, unscored to day 45, then the new level is fine (still rescaled in the cleaned
-  series).
-* A ramp: untrustworthy from the day it shows until it is fully built, then 7 days unscored, then fine (#84, #86).
+* A level change, step or ramp: untrustworthy from the day it shows until its new level has held steady for 14 days
+  (a step: 14 days; a ramp: until 14 days after it is fully built), then 7 days unscored, then the new level is fine
+  (still rescaled in the cleaned series) (#84, #86, #88).
 * After a temporary change ends: 14 days unscored, then fine (#83).
 * One-day problems: every day untrustworthy. Yearly closures must be trusted.
 

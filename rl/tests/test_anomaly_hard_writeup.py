@@ -178,11 +178,12 @@ def test_a_temporary_change_return_is_unscored_for_two_weeks_then_trusted():
     G.label_rows(truth, ev, None)
     on = lambda d: ev.loc[ev.date == pd.Timestamp(d)].iloc[0]  # noqa: E731
     assert on('2016-03-01').label and on('2016-03-14').label and not on('2016-03-15').use
+    assert not on('2016-03-21').use and on('2016-03-22').use and not on('2016-03-22').label   # a week, then fine
     assert not on('2016-07-01').use and not on('2016-07-14').use            # the return: two weeks unscored
     assert on('2016-07-15').use and not on('2016-07-15').label              # then the source must be trusted
 
 
-def test_a_ramp_is_untrustworthy_while_it_builds_then_fine_after_a_week():
+def test_a_ramp_is_untrustworthy_until_its_new_level_has_held_two_weeks():
     import grade as G
     days = pd.date_range('2015-01-01', '2017-12-31')
     ev = pd.DataFrame(dict(date=days, ticker='TAG', source_id=1))
@@ -192,9 +193,9 @@ def test_a_ramp_is_untrustworthy_while_it_builds_then_fine_after_a_week():
     G.label_rows(truth, ev, None)
     on = lambda d: ev.loc[ev.date == pd.Timestamp(d)].iloc[0]  # noqa: E731
     assert not on('2016-03-09').use                                         # before it shows: not scored
-    assert on('2016-03-10').label and on('2016-03-31').label                # from visible until fully built (03-31)
-    assert not on('2016-04-01').use and not on('2016-04-07').use            # a week to see that it stopped
-    assert on('2016-04-08').use and not on('2016-04-08').label              # then flagging it is a false positive
+    assert on('2016-03-10').label and on('2016-04-13').label                # built 03-31, held steady two weeks
+    assert not on('2016-04-14').use and not on('2016-04-20').use            # a week unscored
+    assert on('2016-04-21').use and not on('2016-04-21').label              # then flagging it is a false positive
 
 
 @pytest.mark.parametrize('code,hit', [('"""Counts from refund requests."""\nx = 1\n', False),

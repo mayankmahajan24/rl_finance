@@ -80,7 +80,7 @@ import writeup as writeup_grade  # the write-up rubric (writeup.py, judge.md)
 
 KEYS = ['date', 'ticker', 'source_id']
 OUT_COLS = ['confidence', 'clean_ct', 'clean_amt']
-SETTLE_DAYS = 45            # build: a change slower than this to show is a slow build-up (cleaned series only)
+SETTLE_DAYS = 45            # build: marks a change slower than this to show as `slow` (informational; scored like any)
 NOISE_WRONG = 2.0           # a cleaned value this many times the source's own noise off the truth is wrong (1x: right)
 AFTER_DAYS = 30             # a wrong row within this many days after a problem ends is still that problem's
 W_CONF, W_CLEAN, W_STAB = 0.4, 0.4, 0.2   # headline reward weights (confidence, cleaned series, stability)
@@ -93,7 +93,8 @@ THIN_LO, THIN_HI, THIN_EDGE = 0.8, 1.25, 14   # thin: truth count's 28-day media
 # stretch and the THIN_EDGE days after it, are not scored (the code cannot tell yet, point in time)
 LOW_SIGNAL_SHARE = 0.9   # gate: share of a task's thin-beginning rows that must be distrusted and left blank
 CONT_LO, CONT_HI = 0.01, 0.99   # gate continuous: rows scored strictly between these are checked (saturated ends left out)
-CONT_DISTINCT, CONT_TOP = 20, 0.5   # ... at least this many distinct values; no value on more than this share
+CONT_DISTINCT, CONT_TOP = 20, 0.5   # at least this many distinct values over all scored rows; between the ends, no
+CONT_MIN_BETWEEN = 50               # value on more than this share (tested once this many rows fall between them)
 # imports or shell calls that reach a model or the network
 NO_AI = re.compile(r'\b(anthropic|openai|google\.generativeai|google\.genai|mistralai|cohere|ollama|litellm|langchain|'
                    r'transformers|requests|httpx|aiohttp|urllib\.request|urllib3|http\.client|socket|websocket|'
@@ -295,8 +296,8 @@ def cleaned_right(truth, ev, scored_rows) -> tuple[pd.Series, pd.Series, pd.Seri
     """What confidence is scored against: is the row's cleaned value right? Right (1): within the source's own noise
     of the truth in count and in ticket size; wrong (0): beyond NOISE_WRONG times it in either; between: too close to
     call (NaN). A blank cleaned value counts as the raw value. Returns (target, kind, scored): the kind of planted
-    problem a wrong row belongs to ('other' when none: the cleaning damaged a good row), and the rows scored (the
-    cleaned series' stretches, not the thin beginning, not a problem's days before it shows in the data)."""
+    problem whose span (start to end plus AFTER_DAYS) covers the row, 'fine' outside every span; and the rows scored
+    (the cleaned series' stretches, not the thin beginning, not a problem's days before it shows in the data)."""
     lg = lambda x: np.log(np.maximum(x.astype(float), 0.01))  # noqa: E731
     cc = ev.clean_ct.where(ev.clean_ct.notna(), ev.ct)
     ca = ev.clean_amt.where(ev.clean_amt.notna(), ev.amt)
@@ -304,7 +305,7 @@ def cleaned_right(truth, ev, scored_rows) -> tuple[pd.Series, pd.Series, pd.Seri
     dt = ((lg(ca) - lg(cc)) - (lg(ev.tamt) - lg(ev.tct))).abs() / ev.sig_t
     worst = np.maximum(dc, dt)
     target = pd.Series(np.where(worst <= 1, 1.0, np.where(worst >= NOISE_WRONG, 0.0, np.nan)), index=ev.index)
-    k = pd.Series('other', index=ev.index)
+    k = pd.Series('fine', index=ev.index)
     hidden = pd.Series(False, index=ev.index)
     D = pd.Timedelta(days=1)
     for e in sorted(truth['events'], key=lambda e: -(pd.Timestamp(e['end']) - pd.Timestamp(e['start'])).days):
@@ -321,41 +322,45 @@ def cleaned_right(truth, ev, scored_rows) -> tuple[pd.Series, pd.Series, pd.Seri
 
 
 def confidence_score(ev, target, kinds, scored):
-    """Confidence read as the probability that the row's cleaned value is right. Balanced Brier skill: 1 - (Brier on
-    wrong rows, the mean within each kind of problem then over kinds + Brier on right rows) / 2 / 0.25, floored at 0
-    (a constant 0.5 scores 0), times (0.5 + 0.5 x alert precision): an alert is a run of distrusted scored days on a
-    source (gaps up to ALERT_GAP days joined, split every ALERT_DAYS days), precision the share that touch a wrong
-    row. A panel where every scored cleaned value is right is scored on those rows alone."""
+    """Confidence read as the probability that the row's cleaned value is right. Brier against right (1) or wrong (0)
+    in strata fixed before the outcome is known, so a calibrated probability scores best: each kind of planted problem
+    (every scored row in its spans, right or wrong) and the fine rows outside every span. Balanced Brier skill:
+    1 - (mean over kinds of their Brier + Brier on fine rows) / 2 / 0.25, floored at 0 (a constant 0.5 scores 0),
+    times (0.5 + 0.5 x alert precision): an alert is a run of distrusted scored days on a source (gaps up to ALERT_GAP
+    days joined, split every ALERT_DAYS days), true if it touches a wrong row inside a problem's span. A panel without
+    planted problems is scored on its fine rows alone."""
     c = ev.confidence.astype(float).clip(0, 1)
-    right, wrong = scored & (target == 1), scored & (target == 0)
-    fine = float(((1 - c[right]) ** 2).mean()) if right.any() else 0.0
-    if not wrong.any():
-        return max(0.0, 1 - fine / 0.25), dict(no_wrong_rows=True, brier_right=round(fine, 4),
+    b = (c - target) ** 2
+    fine_rows = scored & (kinds == 'fine')
+    prob_rows = scored & (kinds != 'fine')
+    fine = float(b[fine_rows].mean()) if fine_rows.any() else 0.0
+    if not prob_rows.any():
+        return max(0.0, 1 - fine / 0.25), dict(no_problem_rows=True, brier_fine=round(fine, 4),
                                                distrusted_share=round(float(ev.flag[scored].mean()), 4) if scored.any() else 0.0)
-    per_kind = (c[wrong] ** 2).groupby(kinds[wrong]).mean()
+    per_kind = b[prob_rows].groupby(kinds[prob_rows]).mean()
     problems = float(per_kind.mean())
     skill = max(0.0, 1 - (0.5 * problems + 0.5 * fine) / 0.25)
-    e_ = ev[scored].assign(hit=wrong[scored])
+    e_ = ev[scored].assign(hit=(prob_rows & (target == 0))[scored])
     n_alerts, true_alerts = alerts(e_)
     prec = true_alerts / n_alerts if n_alerts else 0.0
-    by_kind = pd.DataFrame(dict(rows=wrong.groupby(kinds).sum(), brier=per_kind,
-                                mean_confidence=c[wrong].groupby(kinds[wrong]).mean())).dropna().round(4)
-    return skill * (0.5 + 0.5 * prec), dict(brier_skill=round(skill, 4), brier_wrong=round(problems, 4),
-                                             brier_right=round(fine, 4), right_rows=int(right.sum()),
-                                             wrong_rows=int(wrong.sum()), alert_precision=round(prec, 3),
-                                             alerts=n_alerts, true_alerts=true_alerts,
+    wrong = scored & (target == 0)
+    by_kind = pd.DataFrame(dict(rows=prob_rows.groupby(kinds).sum(), wrong_rows=wrong.groupby(kinds).sum(), brier=per_kind,
+                                mean_confidence=c[prob_rows].groupby(kinds[prob_rows]).mean())).dropna().round(4)
+    return skill * (0.5 + 0.5 * prec), dict(brier_skill=round(skill, 4), brier_problems=round(problems, 4),
+                                             brier_fine=round(fine, 4), damaged_fine_rows=int((fine_rows & (target == 0)).sum()),
+                                             alert_precision=round(prec, 3), alerts=n_alerts, true_alerts=true_alerts,
                                              by_kind=by_kind.reset_index(names='kind').to_dict('records'))
 
 
 def continuous(ev) -> tuple[bool, dict]:
-    """Confidence is a probability on a continuous scale, not a few levels: among scored rows (thin beginning left out)
-    with confidence strictly between CONT_LO and CONT_HI (a probability can saturate near 0 or 1), at least CONT_DISTINCT distinct values (3 decimals) and no
-    single value on more than CONT_TOP of them. A panel with no such rows passes."""
-    u = ev[ev.use & ~ev.thin & (ev.confidence > CONT_LO) & (ev.confidence < CONT_HI)].confidence.round(3)
-    if u.empty:
-        return True, dict(rows=0)
-    distinct, top = int(u.nunique()), float(u.value_counts(normalize=True).iloc[0])
-    return distinct >= CONT_DISTINCT and top <= CONT_TOP, dict(rows=len(u), distinct=distinct, top_share=round(top, 3))
+    """Confidence is a probability on a continuous scale, not a few levels: over the scored rows (thin beginning left
+    out), at least CONT_DISTINCT distinct values (3 decimals); and once CONT_MIN_BETWEEN rows fall strictly between
+    CONT_LO and CONT_HI (a probability can saturate near 0 or 1), no single value on more than CONT_TOP of those."""
+    allv = ev[ev.use & ~ev.thin].confidence.round(3)
+    u = allv[(allv > CONT_LO) & (allv < CONT_HI)]
+    distinct = int(allv.nunique())
+    top = float(u.value_counts(normalize=True).iloc[0]) if len(u) >= CONT_MIN_BETWEEN else 0.0
+    return distinct >= CONT_DISTINCT and top <= CONT_TOP, dict(rows_between=len(u), distinct=distinct, top_share=round(top, 3))
 
 
 def own_noise(truth_panel: pd.DataFrame, thin_ct: float = 20) -> pd.DataFrame:

@@ -53,7 +53,7 @@ over its three hidden panels (each with its own planted problems and disguise, s
 
 | Part | How |
 |---|---|
-| Confidence | read as the probability that the row's cleaned value is right: within the source's own noise of the truth panel in count and ticket (right), beyond 2x in either (wrong), in between not scored. Balanced Brier skill (wrong rows per kind of problem, then averaged; right rows), floored at 0, times (0.5 + 0.5 x alert precision), an alert touching a wrong row being true. No timing windows (#89). |
+| Confidence | read as the probability that the row's cleaned value is right: within the source's own noise of the truth panel in count and ticket (right), beyond 2x in either (wrong), in between not scored. Brier in strata fixed before the outcome (each kind of planted problem: every row in its spans, right or wrong; and the fine rows outside every span), so a calibrated probability scores best; balanced skill (kinds averaged, then half and half with fine rows), floored at 0, times (0.5 + 0.5 x alert precision), an alert being true only if it touches a wrong row inside a problem's span. No timing windows (#89, #90). |
 | Cleaned series | gain x intact x kept. Gain: per kind, the share of the raw log error (count and ticket, beyond the source's own noise) on problem rows that the cleaned series removes, mean over kinds. Intact: share of untouched rows left within the source's noise. Kept: share of rows to keep not left blank (blank counts as raw). |
 | Stability | the code re-run on its own cleaned series (counts rounded, dollars to the cent, blanks dropped) and on the truth panel: 1 - (extra alerts on its own output) / (the panel's planted problems), floored at 0. |
 

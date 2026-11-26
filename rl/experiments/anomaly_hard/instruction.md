@@ -10,11 +10,11 @@ You should assume every source tracks the same fundamental momentum of the busin
 growth or decline, seasonality, promotions, stores opening or closing and holidays show up in all of a company's
 sources. A source can go wrong in two ways. It can be wrong for a day or a few: too high (a batch counted twice, a flood
 of tiny test transactions, a few outsized tickets) or too low (a failed transmission). Or it can stop tracking the
-business at its usual level: at once or building up over days or weeks, for a while or for good. A problem can affect
+business at its usual level: at once or building up over days, weeks or months, for a while or for good. A problem can affect
 the count, the dollars or both, so the average ticket (dollars per transaction) can be off while the count looks
 normal. Not problems: the business's own moves, a source's dip on the same date every year, small slow drift between
-sources, and a source's thin early history (see Low-signal data below). A source that drifts far from where it should be over months should
-still be brought back in the cleaned series.
+sources, and a source's thin early history (see Low-signal data below). A source that drifts far from where it should be over months is a problem too:
+until your cleaned series brings it back, its cleaned values are not right.
 
 The point is a usable, like-for-like series for every source with as much of its history as possible. Some segments
 of the data carry too little signal to be worth keeping, and those may be discarded; everything else should be kept,

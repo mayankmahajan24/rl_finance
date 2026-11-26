@@ -245,3 +245,40 @@ def test_confidence_rewards_knowing_when_the_cleaned_value_is_wrong():
     assert G.confidence_score(knows, target, kinds, scored)[0] > 0.95
     assert G.confidence_score(half, target, kinds, scored)[0] == 0.0
 
+
+
+def _strata_panel(n_fine=2000, damage=0):
+    """Fine rows, plus a one-day problem kind of 9 repaired rows (7 right, 2 wrong by chance)."""
+    rows = n_fine + 9
+    ev = pd.DataFrame(dict(date=pd.date_range('2016-01-01', periods=rows), ticker='TAG', source_id=1))
+    target = pd.Series(1.0, index=ev.index)
+    kinds = pd.Series('fine', index=ev.index)
+    kinds.iloc[n_fine:] = 'one_day'
+    target.iloc[n_fine + 7:] = 0.0
+    target.iloc[:damage] = 0.0                                    # rows the code damaged on purpose
+    return ev, target, kinds, pd.Series(True, index=ev.index)
+
+
+def test_calibrated_confidence_on_repairs_beats_distrusting_them():
+    import grade as G
+    ev, target, kinds, scored = _strata_panel()
+    cal = ev.assign(confidence=np.where(kinds == 'one_day', 0.78, 0.99))
+    zero = ev.assign(confidence=np.where(kinds == 'one_day', 0.002, 0.99))
+    for d in (cal, zero):
+        d['flag'] = d.confidence < 0.5
+    assert G.confidence_score(cal, target, kinds, scored)[0] > G.confidence_score(zero, target, kinds, scored)[0]
+
+
+def test_damaging_good_rows_and_flagging_them_does_not_pay():
+    import grade as G
+    ev, target, kinds, scored = _strata_panel()
+    honest = ev.assign(confidence=np.where(target == 0, 0.002, 0.99)); honest['flag'] = honest.confidence < 0.5
+    ev2, target2, kinds2, scored2 = _strata_panel(damage=40)   # the same rule, plus 40 good rows damaged and flagged
+    gamed = ev2.assign(confidence=np.where(target2 == 0, 0.002, 0.99)); gamed['flag'] = gamed.confidence < 0.5
+    assert G.confidence_score(gamed, target2, kinds2, scored2)[0] < G.confidence_score(honest, target, kinds, scored)[0]
+
+
+def test_two_level_confidence_fails_continuity():
+    import grade as G
+    two = np.r_[np.full(300, 0.005), np.full(5000, 0.995)]
+    assert not G.continuous(_conf_panel(two))[0]

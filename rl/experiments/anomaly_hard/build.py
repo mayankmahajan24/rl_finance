@@ -12,7 +12,7 @@ the gold (tests/gold.json: every planted problem, exact) and the hidden panel be
 
 Every source is rebuilt on its company's real daily move (background.semi_real), so the only source-level oddities are
 the planted ones: normal behaviour (yearly closures, a thin beginning, company-wide real events) and problems
-(one-day problems, steps, slow ramps; 2-8 week ramps were dropped, #80).
+(one-day problems, steps, ramps, slow ramps).
 """
 from __future__ import annotations
 
@@ -39,7 +39,7 @@ import perturb as P  # noqa: E402
 OUT = RL / "tasks" / "proto" / "anomaly_hard"
 EVAL_START_DAYS = 365   # one year of warm-up: enough history for levels, noise and a yearly pattern
 THIN_CT = 20   # a source's thin beginning (28-day median count under this, before it is established) must be dropped
-N_POINTS, SHIFTS = 2, [('step', 2)]   # per panel: 2 of each point kind and 2 step level shifts (ramps dropped: #80)
+N_POINTS, SHIFTS = 2, [('step', 2), ('ramp', 2)]   # per panel: 2 of each point kind, 2 step and 2 ramp level shifts
 N_PANELS = 3           # hidden panels a task is graded on (the reward is their mean): fresh draws of problems
 N_RECURRING, N_SLOW = 2, 2   # per panel: planted yearly closures (normal) and slow panel ramps (problems)
 

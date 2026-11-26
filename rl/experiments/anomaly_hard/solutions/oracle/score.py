@@ -1,7 +1,6 @@
-"""Grader check only, not a solution: the answer key. Reads the gold of the task folder in ORACLE_TASK. Confidence near 0 (0 to 0.039, spread so it is a
-probability rather than two levels) on
-the rows the grader labels untrustworthy (grade.label_rows) where the input differs from the truth panel, and on the
-thin beginning; 1 elsewhere. The cleaned series is the truth panel, left blank on the thin beginning. Run on its own
+"""Grader check only, not a solution: the answer key. Reads the gold of the task folder in ORACLE_TASK. The cleaned
+series is the truth panel (blank on the thin beginning), so every cleaned value is right: confidence near 1 everywhere
+(0.99-1.0, spread so it is a probability rather than one level) and near 0 on the thin beginning. Run on its own
 cleaned series (the truth) it distrusts nothing new. It should score 1.0 everywhere."""
 import argparse
 import json
@@ -23,7 +22,7 @@ truth = pd.read_csv(tests / 'truth_panel.csv.gz', parse_dates=['date'])
 label_rows(gold, df, truth)
 df = df.merge(truth[KEYS + ['ct', 'amt']].rename(columns={'ct': 'clean_ct', 'amt': 'clean_amt'}), on=KEYS, how='left')
 differs = ~np.isclose(df.ct, df.clean_ct, rtol=1e-6) | ~np.isclose(df.amt, df.clean_amt, rtol=1e-6)
-bad = ((df.label & differs) | df.thin).to_numpy()
+bad = df.thin.to_numpy()                                       # its cleaned value is the truth: right everywhere else
 spread = (np.arange(len(df)) % 40) / 1000                     # a probability, not two levels: 0 to 0.039 when bad
 df['confidence'] = np.where(bad, spread, 1.0 - spread / 4)
 df.loc[df.thin, ['clean_ct', 'clean_amt']] = np.nan          # the thin beginning is dropped

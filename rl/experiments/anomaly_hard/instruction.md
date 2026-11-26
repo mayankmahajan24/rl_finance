@@ -13,8 +13,8 @@ of tiny test transactions, a few outsized tickets) or too low (a failed transmis
 business at its usual level: at once or building up over days or weeks, for a while or for good. A problem can affect
 the count, the dollars or both, so the average ticket (dollars per transaction) can be off while the count looks
 normal. Not problems: the business's own moves, a source's dip on the same date every year, small slow drift between
-sources, and a source's thin early history (see Low-signal data below). A source that drifts far from where it should
-be over months need not be distrusted, but should still be brought back in the cleaned series.
+sources, and a source's thin early history (see Low-signal data below). A source that drifts far from where it should be over months should
+still be brought back in the cleaned series.
 
 The point is a usable, like-for-like series for every source with as much of its history as possible. Some segments
 of the data carry too little signal to be worth keeping, and those may be discarded; everything else should be kept,
@@ -37,11 +37,8 @@ python /app/solution/score.py --input IN.csv --output OUT.csv
 `IN.csv` has the same columns as the data above. `OUT.csv` has one row per input row, with columns
 `date, ticker, source_id, confidence, clean_ct, clean_amt`:
 
-* `confidence`, in [0, 1]: the probability that this row carries usable signal about what the company actually did
-  that day, as reported or after your adjustment, worked out from the evidence in the data (how far the row sits from
-  what the source would normally report, given its own noise). High means trust it; below 0.5 means do not. A source that stops
-  tracking the business at its usual level is untrustworthy while its new level is in doubt: once it has held steady
-  and you have adjusted for it, its rows carry signal again.
+* `confidence`, in [0, 1]: the probability that your cleaned value for this row is right, that is, what the source
+  would have reported had it been working normally. High means trust it; below 0.5 means do not.
 * `clean_ct`, `clean_amt`: a cleaned series for the row's ticker and source that is comparable like for like with
   that source's own history: what the source would have reported had it kept working the way it normally does.
   Where nothing went wrong with a row, it equals the raw value. On a source whose level has changed, every row is
@@ -87,12 +84,10 @@ python /app/solution/score.py --input IN.csv --output OUT.csv
    each as a PNG in `/app/output/figures/` and show both in the report as `![what it shows](figures/name.png)` (at
    most six figures are read).
 
-   Between 150 and 500 words, not counting tables, code blocks and chart lines; a shorter or longer report, a missing section or a missing chart each halve the report's score (and the checks of
-   the missing part fail as well). Write it for its reader, in plain, complete sentences they can follow without the code (no note-form
-   fragments, unexplained shorthand or symbols standing in for words; tables may be terse):
-   leave out how this work is assessed, the assignment itself, and any script, file path, argument or command.
-   State only what this page or the panel tells you, or what you computed from the panel: no facts about the
-   companies, their events or their data from elsewhere (the dates are shifted, so real-world dates do not line up).
+   Write 150 to 500 words (tables, code blocks and chart lines not counted), in plain, complete sentences a reader
+   can follow without the code (tables may be terse). Leave out how this work is assessed and any script, file path
+   or command, and state only what this page or the panel tells you (the dates are shifted, so outside facts about
+   the companies do not apply).
 
 ## Requirements
 
@@ -123,45 +118,28 @@ working normally.
 
 Your score is a weighted average of three parts: 40% confidence, 40% cleaned series, 20% stability.
 
-* **Confidence.** Scored row by row, as a probability. On the rows a problem made untrustworthy, the lower your
-  confidence the better; on rows that are fine, the higher the better; both by the squared error of your confidence
-  against what the row is (0 untrustworthy, 1 fine), with the untrustworthy rows and the fine rows weighing half each
-  (and each kind of problem weighing the same). A constant 0.5 scores nothing. False alarms also cost: that
-  score is multiplied by one half plus half the share of your alerts that touch a real problem (an alert is a run of
-  rows on one source scored below 0.5, gaps of up to two days joined, a run longer than two weeks counting once per
-  two weeks). A problem counts from the day it first
-  shows in the data (stands out from the source's own noise). A source that stops tracking the business at its usual
-  level, at once or building up over days or weeks, is untrustworthy from then until its new level has held steady
-  for two weeks; the week after that is not scored, and from then on it counts as fine, so confidence should rise
-  again (it is still adjusted in the cleaned series). When it comes back to its usual level, the two weeks after are
-  not scored; from then on it counts as fine. A change that builds up
-  too slowly for its start to be dated is not scored for confidence until it has settled; after that its rows count
-  as fine. It counts in full in the cleaned series.
-* **Cleaned series.** On rows a problem affected, how much of the gap between the raw value and what the source
-  should have reported your cleaned value closes (in log terms, count and dollars, each kind of problem weighing the
-  same; differences within the source's own day-to-day noise are not counted), multiplied by the share of rows no
-  problem touched that your cleaned series leaves within the source's own noise, and by the share of rows that should be
-  kept and that you did not leave blank. A blank cleaned value on a row with a problem counts as the raw value, so a
-  row left blank where it should have been imputed earns nothing.
-* **Stability.** Your script is run again on its own cleaned series (same columns; counts rounded to whole numbers
-  and dollars to cents; blank rows left out) and on clean data, and the cleaned series should not be distrusted more
-  often than clean data (extra distrusted rows count against you in proportion to the rows the panel's problems make
-  untrustworthy).
+* **Confidence.** Scored row by row against whether your cleaned value turned out right (within the source's own
+  day-to-day noise of what it should have reported): high confidence where it is right, low where it is not, as a
+  probability; each kind of problem weighs the same, and false alarms cost extra. So a problem your code has not yet
+  caught or corrected should carry low confidence; once your cleaned value is back on track, confidence should be
+  high again, and a company's real moves, which your cleaned series keeps, should never be distrusted. Days before a
+  problem stands out from the source's own noise are not scored: nobody could know of it yet.
+* **Cleaned series.** How much of each problem your cleaned values repair (in count and in dollars, beyond the
+  source's own noise), without moving rows that were fine and without leaving rows blank that should be kept.
+* **Stability.** Your script is run again on its own cleaned series (counts rounded to whole numbers, dollars to
+  cents, blank rows left out) and on clean data: it should raise no more alarms on the first than on the second.
 
 The total is set to zero if the outputs are malformed, if the point-in-time check fails, if the code imports or shells
 out to a model or network client, or if the report is missing. A panel's score is set to zero if low-signal data is
-not dropped on it: a source that reports
-fewer than about twenty transactions a day before it has built up steady coverage (its early history, or all of it)
-must be distrusted and left blank there (at least 90% of those rows). A source that dips that low after it was
-established is kept: those rows count in the cleaned-series score, so blanking them costs history.
+not dropped on it: a source that reports fewer than about twenty transactions a day before it has built up steady
+coverage (its early history, or all of it) must be distrusted and left blank there (at least 90% of those rows). A
+source that dips that low after it was established is kept: those rows count in the cleaned-series score.
 
-Not scored: the panel's first year (history for your code to learn from), rows near the twenty-a-day line, the two
-weeks either side of a low-signal stretch's edges, problems too small to stand out from a source's own noise, and
-other debatable rows.
+Not scored: the panel's first year (history for your code to learn from), rows near the twenty-a-day line, and short
+stretches around moves of the underlying data that are too ambiguous to grade.
 
 **The report.** That total is then multiplied by 0.5 + 0.5 x the report's score, so a weak report can halve it but a
-good report cannot earn anything on its own. The report is checked against what is asked for above, on this panel
-and your code's output on it: each section there, in order, with its content; every number set in the code explained;
-what the output leaves unrepaired listed; claims about the output that match it; nothing from outside this page and
-the panel. A report that misstates what its own output does scores zero, and so does the report if your code fails
-on the panel you were given.
+good report cannot earn anything on its own. The report is checked against what is asked for above, on the panel you
+were given and your code's output on it. A report outside the word range, missing a section or missing its charts
+loses half its score for each; one that misstates what its own output does scores zero, and so does the report if
+your code fails on the panel you were given.

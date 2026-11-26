@@ -168,36 +168,6 @@ def test_every_reference_report_passes_every_code_item(name):
     assert W.WORD_MIN <= W.words(text) <= W.WORD_LIMIT
 
 
-def test_a_temporary_change_return_is_unscored_for_two_weeks_then_trusted():
-    import grade as G
-    days = pd.date_range('2015-01-01', '2017-12-31')
-    ev = pd.DataFrame(dict(date=days, ticker='TAG', source_id=1))
-    e = dict(type='level_shift_step', ticker='TAG', source_id=1, start='2016-03-01', end='2016-06-30', regime=True,
-             permanent=False, visible='2016-03-01', settle='2016-03-15', ramp_days=0, shift_start='2016-03-01')
-    truth = dict(eval_start='2015-06-01', ignore_series=[], exclusions=[], events=[e])
-    G.label_rows(truth, ev, None)
-    on = lambda d: ev.loc[ev.date == pd.Timestamp(d)].iloc[0]  # noqa: E731
-    assert on('2016-03-01').label and on('2016-03-14').label and not on('2016-03-15').use
-    assert not on('2016-03-21').use and on('2016-03-22').use and not on('2016-03-22').label   # a week, then fine
-    assert not on('2016-07-01').use and not on('2016-07-14').use            # the return: two weeks unscored
-    assert on('2016-07-15').use and not on('2016-07-15').label              # then the source must be trusted
-
-
-def test_a_ramp_is_untrustworthy_until_its_new_level_has_held_two_weeks():
-    import grade as G
-    days = pd.date_range('2015-01-01', '2017-12-31')
-    ev = pd.DataFrame(dict(date=days, ticker='TAG', source_id=1))
-    e = dict(type='level_shift_ramp', ticker='TAG', source_id=1, start='2016-03-10', end='2017-12-31', regime=True,
-             permanent=True, visible='2016-03-10', settle='2016-04-14', ramp_days=30, shift_start='2016-03-01')
-    truth = dict(eval_start='2015-06-01', ignore_series=[], exclusions=[], events=[e])
-    G.label_rows(truth, ev, None)
-    on = lambda d: ev.loc[ev.date == pd.Timestamp(d)].iloc[0]  # noqa: E731
-    assert not on('2016-03-09').use                                         # before it shows: not scored
-    assert on('2016-03-10').label and on('2016-04-13').label                # built 03-31, held steady two weeks
-    assert not on('2016-04-14').use and not on('2016-04-20').use            # a week unscored
-    assert on('2016-04-21').use and not on('2016-04-21').label              # then flagging it is a false positive
-
-
 @pytest.mark.parametrize('code,hit', [('"""Counts from refund requests."""\nx = 1\n', False),
                                       ('# we never import requests here\nx = 1\n', False),
                                       ('import requests\n', True), ('from openai import OpenAI\n', True),
@@ -238,3 +208,40 @@ def test_code_that_fails_on_the_visible_panel_gets_a_zero_report(monkeypatch):
     monkeypatch.delenv('WRITEUP_JUDGE', raising=False)
     reward, d = G.grade_task(task, task, task / 'instruction.md')
     assert d['writeup']['writeup_score'] == 0.0 and abs(reward - 0.4) < 1e-9
+
+
+def _target_panel():
+    """One series: a step x1.6 on 2016-03-01 (visible 03-03) to the end; cleaned corrected from 03-10."""
+    import grade as G  # noqa: F401
+    days = pd.date_range('2015-01-01', '2016-06-30')
+    ct = np.full(len(days), 1000.0)
+    raw = np.where(days >= pd.Timestamp('2016-03-01'), 1600.0, 1000.0)
+    clean = np.where((days >= pd.Timestamp('2016-03-01')) & (days < pd.Timestamp('2016-03-10')), 1600.0, 1000.0)
+    ev = pd.DataFrame(dict(date=days, ticker='TAG', source_id=1, ct=raw, amt=raw * 50, tct=ct, tamt=ct * 50,
+                           clean_ct=clean, clean_amt=clean * 50, sig_c=0.1, sig_t=0.1, thin=False))
+    e = dict(type='level_shift_step', ticker='TAG', source_id=1, start='2016-03-01', end='2016-06-30', regime=True,
+             permanent=True, visible='2016-03-03', shift_start='2016-03-01', ramp_days=0)
+    truth = dict(eval_start='2015-06-01', ignore_series=[], exclusions=[], events=[e])
+    return ev, truth
+
+
+def test_confidence_target_is_whether_the_cleaned_value_is_right():
+    import grade as G
+    ev, truth = _target_panel()
+    target, kinds, scored = G.cleaned_right(truth, ev, pd.Series(True, index=ev.index))
+    on = lambda d: ev.index[ev.date == pd.Timestamp(d)][0]  # noqa: E731
+    assert not scored[on('2016-03-02')]                                    # before it shows: nobody could know
+    assert scored[on('2016-03-05')] and target[on('2016-03-05')] == 0      # shown, not yet corrected: wrong
+    assert target[on('2016-03-15')] == 1 and target[on('2015-08-01')] == 1  # corrected, and untouched: right
+    assert kinds[on('2016-03-05')] == 'level_shift_step'
+
+
+def test_confidence_rewards_knowing_when_the_cleaned_value_is_wrong():
+    import grade as G
+    ev, truth = _target_panel()
+    target, kinds, scored = G.cleaned_right(truth, ev, pd.Series(True, index=ev.index))
+    knows = ev.assign(confidence=np.where(target == 0, 0.02, 0.99)); knows['flag'] = knows.confidence < 0.5
+    half = ev.assign(confidence=0.5, flag=False)
+    assert G.confidence_score(knows, target, kinds, scored)[0] > 0.95
+    assert G.confidence_score(half, target, kinds, scored)[0] == 0.0
+

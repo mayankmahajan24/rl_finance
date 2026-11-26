@@ -53,20 +53,16 @@ over its three hidden panels (each with its own planted problems and disguise, s
 
 | Part | How |
 |---|---|
-| Confidence | read as the probability a row is fine. Balanced Brier skill: 1 - (Brier on untrustworthy rows, per kind of problem then averaged + Brier on fine rows) / 2 / 0.25, floored at 0 (a constant 0.5 scores 0), times (0.5 + 0.5 x alert precision): an alert is a run of distrusted scored days on a source (gaps up to 2 days joined, split every 14 days), precision the share that touch an untrustworthy row. A control panel is scored on its fine rows. |
-| Cleaned series | gain x intact x kept. Gain: per kind, the share of the raw log error (count and ticket, beyond the source's own noise) on problem rows that the cleaned series removes, mean over kinds; every day of a problem counts, settling days included. Intact: share of untouched rows left within the source's noise. Kept: share of rows to keep not left blank (blank counts as raw). |
-| Stability | the code re-run on its own cleaned series (counts rounded, dollars to the cent, blanks dropped) and on the truth panel: 1 - (extra rows distrusted on its own output) / (the panel's untrustworthy rows), floored at 0. |
+| Confidence | read as the probability that the row's cleaned value is right: within the source's own noise of the truth panel in count and ticket (right), beyond 2x in either (wrong), in between not scored. Balanced Brier skill (wrong rows per kind of problem, then averaged; right rows), floored at 0, times (0.5 + 0.5 x alert precision), an alert touching a wrong row being true. No timing windows (#89). |
+| Cleaned series | gain x intact x kept. Gain: per kind, the share of the raw log error (count and ticket, beyond the source's own noise) on problem rows that the cleaned series removes, mean over kinds. Intact: share of untouched rows left within the source's noise. Kept: share of rows to keep not left blank (blank counts as raw). |
+| Stability | the code re-run on its own cleaned series (counts rounded, dollars to the cent, blanks dropped) and on the truth panel: 1 - (extra alerts on its own output) / (the panel's planted problems), floored at 0. |
 
-**Timing rules** (what a point-in-time scorer could know; `label_rows`):
-* Scoring starts after a one-year warm-up.
-* A level change counts from the day it shows: its trailing 7-day median deviation reaches 3x the noise of a 7-day
-  median of the source's relation to its sisters (`build.annotate_events`). One that never shows is unscored; one
-  that takes over 45 days, or a slow shift, is scored for confidence only once settled (then fine).
-* A level change, step or ramp: untrustworthy from the day it shows until its new level has held steady for 14 days
-  (a step: 14 days; a ramp: until 14 days after it is fully built), then 7 days unscored, then the new level is fine
-  (still rescaled in the cleaned series) (#84, #86, #88).
-* After a temporary change ends: 14 days unscored, then fine (#83).
-* One-day problems: every day untrustworthy. Yearly closures must be trusted.
+**What is not scored** (no point-in-time code could know, or too ambiguous to grade): the one-year warm-up; series too
+low-volume to grade; short windows around company-wide natural breaks in the underlying data; a source's thin
+beginning (its own gate); a planted problem's days before it shows in the data (its trailing 7-day median deviation
+reaches 3x the noise of a 7-day median of the source's relation to its sisters, `build.annotate_events`), and a problem
+that never does. Everything else is scored by whether the cleaned value is right: a step is wrong until corrected, a
+ramp while the correction lags, a return while the code still rescales; a company's real growth is never wrong.
 
 **The report** multiplies the data reward by 0.5 + 0.5 x its score (`writeup.py`, `judge.md`: code items K1-K9 and a
 model judge; 150-500 words; halved for a length outside that, a missing section or a missing chart). If the code fails

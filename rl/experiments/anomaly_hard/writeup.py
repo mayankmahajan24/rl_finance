@@ -31,7 +31,6 @@ import shutil
 import subprocess
 from collections import Counter
 
-import numpy as np
 import pandas as pd
 
 HERE = pathlib.Path(__file__).resolve().parent

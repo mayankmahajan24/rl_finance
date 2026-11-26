@@ -11,7 +11,7 @@ company and each of two measures (log count, log ticket = log dollars per transa
   level  the source's standing gap: the median gap of the last 28 days if that agrees with the last 14 and 7, else of
          the last 14 or 7; zero unless it is clear of the noise of such a median.
   day    a day whose gap is far from the level is imputed from the sisters; a day that did the same on the same
-         date a year ago is kept as reported. A report that repeats yesterday's count and dollars exactly is imputed.
+         date a year ago is kept as reported. A third identical report in a row (count and dollars) is imputed, and each one after it.
 
 cleaned = reported - level (or the sisters' value on an imputed day). Everything for day t uses days <= t only.
 """
@@ -34,6 +34,7 @@ SHORT, MID, LONG = 7, 14, 28  # windows of the level medians (days)
 MIN_SD = 0.02        # floor on a source's noise sd (log units)
 DEFAULT_SD = 0.15    # noise sd before there is history to measure it
 MIN_HIST = 30        # observations needed to measure a noise sd
+STUCK_DAYS = 3       # identical reports in a row before a feed counts as stuck
 STUCK_MIN = 5        # a repeat of count and dollars counts as stuck from this many transactions
 THIN_CT = 20         # transactions a day below which a new source carries no signal
 THIN_EDGE = 0.8      # a last-7-day median at this share of THIN_CT already counts as growing out of thin
@@ -227,8 +228,10 @@ def score_company(g):
     thin = (~established & ~(med28 >= THIN_CT) & ~(med7 >= THIN_EDGE * THIN_CT)).to_numpy()   # too few, not yet growing
     est = established.to_numpy()
     pred = ct.shift(1).rolling(LONG, min_periods=1).median().to_numpy()
-    # a stuck feed: yesterday's count and dollars reported again, to the cent
-    stuck = ((ct == ct.shift(1)) & (amt == amt.shift(1)) & (ct >= STUCK_MIN)).to_numpy()
+    # a stuck feed: the same count and dollars, to the cent, for STUCK_DAYS days running (flagged from the last of them)
+    same = (ct == ct.shift(1)) & (amt == amt.shift(1))
+    stuck = (same.astype(int).rolling(STUCK_DAYS - 1).sum() == STUCK_DAYS - 1) & (ct >= STUCK_MIN)
+    stuck = stuck.to_numpy()
     Cc, Zc, Sc, Mc, Nc = one_measure(lc.to_numpy(), est, pred, stuck, ct.to_numpy())
     Ct, Zt, St, Mt, Nt = one_measure(lt.to_numpy(), est, None, stuck)
     conf = np.minimum(confidence(Zc, Sc, Mc, Nc), confidence(Zt, St, Mt, Nt))

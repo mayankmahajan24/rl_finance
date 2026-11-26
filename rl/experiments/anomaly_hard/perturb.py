@@ -10,7 +10,7 @@ reported, from the panel as it was before these were planted):
     volume block   4-10 days too high or too low, then straight back ("a day or a few", stretched)
     outage         4-21 days at 1-5% of normal: the reported value carries no signal to rescale
     intermittent   3-8 weeks in which a third or so of the days are doubled or mostly lost, the rest fine
-    stuck          one day's count and dollars repeated for the next 3-7 days
+    stuck          one day's count and dollars repeated for the next 3-7 days (scored from the third identical day)
     rollup         2-3 days nearly empty, their volume reported on the following day
     phantom        a fixed number of tiny extra transactions every day for 1-4 months (a level shift whose size in
                    log terms depends on the day's volume)
@@ -40,6 +40,7 @@ from families._shared.panel_perturb import _fmt
 
 DAY = pd.Timedelta(days=1)
 VISIBLE = 0.14   # log size from which a ramping shift is labelled: about the 90th-percentile slow drift
+STUCK_DAYS = 3   # identical reports in a row from which a feed counts as stuck (the days before are not scored)
 POINT_K, SHIFT_K = 6.0, 3.0   # a one-day problem is at least 6x the source's own day-to-day noise; a level shift 3x
 
 
@@ -178,7 +179,8 @@ def stuck(F, t, s, day):
     rest = F.mask(t, s, day + DAY, day + k * DAY)
     F.df.loc[rest, 'ct'] = int(F.df.loc[first, 'ct'].iloc[0])
     F.df.loc[rest, 'amt'] = float(F.df.loc[first, 'amt'].iloc[0])
-    return [_ev('stuck', t, s, day + DAY, day + k * DAY, repeated=k)]
+    # two identical days can be chance; the feed counts as stuck from the third (STUCK_DAYS), scored from then
+    return [_ev('stuck', t, s, day + DAY, day + k * DAY, repeated=k, visible=_fmt(day + (STUCK_DAYS - 1) * DAY))]
 
 
 def rollup(F, t, s, day):

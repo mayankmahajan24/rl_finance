@@ -105,7 +105,7 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
                 elif f == 'slow':
                     lo, hi = day(0.3, 0.6), d1
                     # one level change at a time per company, so every change can be told from its peers
-                    if free((t, s), lo, hi) and free(('chg', t), lo, lo + pd.Timedelta(days=330)):
+                    if free((t, s), lo, hi) and free(('chg', t), lo, d1):   # its whole span: it lasts to the end
                         ev = background.slow_ramp(F, rng, t, s, lo, d1)
                         if ev:
                             events += ev
@@ -120,8 +120,8 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
                     hi = d1 if permanent else lo + pd.Timedelta(days=length + 45)
                 if not free((t, s), lo, hi) or not free(t, lo, lo + pd.Timedelta(days=3)):
                     continue
-                if not callable(f) and not free(('chg', t), lo, lo + pd.Timedelta(days=90)):
-                    continue                     # one level change at a time per company
+                if not callable(f) and not free(('chg', t), lo, hi):
+                    continue                     # one level change at a time per company, over its whole span
                 ev = f(F, t, s, lo) if callable(f) else P.level_shift(F, t, s, lo, f, length, d1)
                 if ev:
                     events += ev

@@ -3,20 +3,20 @@
 A running record of what is built, what was tried, and what was retired, kept for the final report. **Update it with
 every change or experiment**: add a row to the experiment log, move anything replaced to "Retired", and keep "Active
 construction" true at all times. Verbatim feedback and each decision's details stay in the feedback logs
-(`rl/runs/anomaly_hard/reviews/feedback_log.md`, numbered #1-#66 so far; `rl/runs/anomaly_hindsight/reviews/feedback_log.md`,
-#1-#8). Branch `claude/nice-heisenberg-ukw1gi` (draft pull request mayankmahajan24/rl_finance#73).
+(`rl/runs/anomaly_hard/reviews/feedback_log.md`, numbered #1-#98 so far; anomaly_hindsight's log was
+#1-#12 and is in git history). Branch `claude/nice-heisenberg-ukw1gi` (draft pull request mayankmahajan24/rl_finance#73).
 
-Last updated: 2026-11-25.
+Last updated: 2026-11-26.
 
 **Standing rules (Mayank):**
 - **Do not rebuild tasks** (`build.py`) until Mayank asks to rerun them. Source changes to the instruction, grader or
   builder wait in git. The built copies under `rl/tasks/proto/` stay as they are until a rerun is requested; rebuild
   then, check the data is unchanged, and note the rebuild here.
-- anomaly_hindsight: hold lifted 2026-11-25 (H#9): rebuilt, runs and reference development started.
+- anomaly_hindsight: **dropped 2026-11-26** (#98). Its source and feedback log were removed from the branch; they stay in git history (last at commit cac9097).
 - Add penalties to the grader as issues come up (log each one).
 - Log every piece of feedback verbatim in the task's feedback log the same turn.
 
-**Built tasks last rebuilt:** 2026-11-25. anomaly_hard's built instructions match the source as of #66; anomaly_hindsight rebuilt for H#9 (matches the source as of H#8).
+**Built tasks last rebuilt:** 2026-11-26 for the v11 runs (unscaled data, #95). Source changes since (#96 continuity wording, #97 overlapping problems) are not built.
 
 ---
 
@@ -27,7 +27,7 @@ panel code in `rl/families/_shared` and the source data, like every family).
 
 | | **anomaly_hard** | **anomaly_hindsight** |
 |---|---|---|
-| Status | **Active, redesigned 2026-11-26** (E36-E41): confidence scored against whether the cleaned value is right; source changes committed, **rebuild pending**; reference and Opus results to redo | **Active, in progress** (H#9): rebuilt; 8 Opus runs and a fresh reference under way |
+| Status | **Active, redesigned 2026-11-26** (E36-E44): confidence scored against whether the cleaned value is right; reference r2 0.720 against ungated Opus about 0.72; next: the thin-start boundary and difficulty | **Dropped 2026-11-26** (#98); in git history only |
 | Code | `rl/experiments/anomaly_hard/` | `rl/experiments/anomaly_hindsight/` (copied 2026-11-25) |
 | Built tasks | `rl/tasks/proto/anomaly_hard{,_train}/anomhard-*` | `rl/tasks/proto/anomaly_hindsight{,_train}/anomhind-*` |
 | Cleaned series | point in time, like confidence | built in hindsight from the whole panel; confidence stays point in time |
@@ -134,7 +134,7 @@ data reward is the mean over its three hidden panels.
 **Total reward = data reward x (0.5 + 0.5 x writeup_score).** A report can halve the reward but never earn it alone.
 With `WRITEUP_JUDGE=skip`, or when no judge can run, the total is the data reward alone.
 
-### 1.3 Grader, anomaly_hindsight (differences only)
+### 1.3 Grader, anomaly_hindsight (differences only; dropped 2026-11-26, #98, kept for the record)
 
 - **Point in time** covers confidence only.
 - **`grade.hindsight` like-for-like rules.** The cleaned series must be blank on:
@@ -251,7 +251,10 @@ active construction; "Retired" means it was later replaced (see section 3).
 | E39 | 11-26 | Confidence = the probability that the cleaned value is right (#89): all timing windows removed; instruction states intent, not formulas (2,300 to about 1,900 words) | Oracle 1.0 on train-001 (after E41); h2 0.354 then 0.526: TUL had two planted slow shifts (half the company drifting), h2 rescaled the two good sources for years at 99.5% confidence | Active |
 | E40 | 11-26 | Second independent review (#90): confidence was improper (strata by outcome paid for distrusting correct repairs); damaging good rows and flagging them paid (+0.12 a panel); slow shifts counted but the text said otherwise; continuity let 0.005/0.995 through | Strata fixed before the outcome; damage outside planted spans counts with fine rows and alerts are true only inside spans; instruction: a far drift is a problem until brought back; continuity fixed; regression tests | Active |
 | E41 | 11-26 | Oracle check and placement (#91-#94): no alerts = full precision; continuity judged on doubted rows; a level change checks its company is free over its whole span (two slow shifts on one company could land before); weights 45/45/10; Not scored lists thin series and a problem's days before it shows | Oracle 1.0, 1.0, 1.0; scratch build: no overlapping changes, steps and ramps 2 a panel, slow shifts 0.78 a panel (were 2) | Active; rebuild pending |
-| E25 | 11-25 | anomaly_hindsight copy with hindsight cleaning rules (#60, #61, H#1-H#4) | Built; every task has a thin start, 7 of 13 a company-wide break | Active, on hold |
+| E42 | 11-26 | Unscaled build (#95) and v11 Opus runs (8) on it; fresh reference r0-r3 on the tuning panels (#96) | Reference: h2 0.645, r1 (confidence = P(cleaned value right)) 0.698, **r2 (+ 2-sigma minimum shift) 0.720** (confidence 0.64, cleaned 0.87, stability 0.41), r3 0.673. Opus (6 graded): every run zeroed on most panels by the continuity gate, which the instruction did not then state (a flat 0.95 on normal rows); ungated 0.61-0.74 (confidence about 0.45, cleaned 0.93-0.94). Continuity rule now stated in the instruction | Reference r2 in scratch; Opus too easy once the gate is known |
+| E43 | 11-26 | Harder data, option 2 (#97): one-offs inside a level change on the same source (2 a panel), a step stacked on an earlier level change (1 a panel); instruction: "Problems can overlap" | Coded, not built or tested. Read of the Opus solutions: forward trackers with a running level against the sisters handle both with the same machinery, so little effect expected | On hold |
+| E44 | 11-26 | Where Opus loses points (v11, own task) against r2 (tuning panels) | Opus Brier skill 0.94 (r2 0.78); per-kind Brier 0.02 (r2 0.09); cleaning gain on steps 0.99 (r2 0.83). Alert precision 0.01 (r2 0.43): about 24 false alerts a panel, almost all its blank thin-start rows at 0.02 that the grader already scores (its "established" rule needs two steady months, the grader's boundary is earlier); it never puts a planted problem below 0.5 (imputed days 0.70). Weak points of the method: sister median when several sisters are wrong, 0.10 / 1-sigma shift floor, shifts soon after a source is established, the same-date-last-year exception | Next: decide whether the thin-start edge should be scored; then target those weak points, not option 2 |
+| E25 | 11-25 | anomaly_hindsight copy with hindsight cleaning rules (#60, #61, H#1-H#4) | Built; every task has a thin start, 7 of 13 a company-wide break | Dropped 2026-11-26 (#98) |
 
 ---
 

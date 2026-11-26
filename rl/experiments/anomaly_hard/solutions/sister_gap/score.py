@@ -37,7 +37,7 @@ MIN_HIST = 30        # observations needed to measure a noise sd
 STUCK_DAYS = 3       # identical reports in a row before a feed counts as stuck
 STUCK_MIN = 5        # a repeat of count and dollars counts as stuck from this many transactions
 THIN_CT = 20         # transactions a day below which a new source carries no signal
-THIN_EDGE = 0.8      # a last-7-day median at this share of THIN_CT already counts as growing out of thin
+THIN_EDGE = 0.8      # 7- and 28-day medians both at this share of THIN_CT already count as growing out of thin
 THIN_DAYS = 90       # days at or above THIN_CT (28-day median) before a source counts as established
 RECUR_SHARE = 0.5    # a gap at least this share of today's, same sign, a year ago: a yearly pattern, kept
 MAD = 1.4826         # median absolute deviation -> standard deviation, for normal noise
@@ -225,7 +225,8 @@ def score_company(g):
     run = held.apply(lambda h: h.groupby((h == 0).cumsum()).cumsum())   # days running at or above THIN_CT
     established = (run >= THIN_DAYS).cummax()
     med7 = ct.rolling(SHORT, min_periods=1).median()
-    thin = (~established & ~(med28 >= THIN_CT) & ~(med7 >= THIN_EDGE * THIN_CT)).to_numpy()   # too few, not yet growing
+    growing = (med7 >= THIN_EDGE * THIN_CT) & (med28 >= THIN_EDGE * THIN_CT)   # both medians near the line: on its way up
+    thin = (~established & ~(med28 >= THIN_CT) & ~growing).to_numpy()            # too few a day, not yet growing
     est = established.to_numpy()
     pred = ct.shift(1).rolling(LONG, min_periods=1).median().to_numpy()
     # a stuck feed: the same count and dollars, to the cent, for STUCK_DAYS days running (flagged from the last of them)

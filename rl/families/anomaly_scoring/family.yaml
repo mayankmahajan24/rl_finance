@@ -1,7 +1,7 @@
 id: anomaly_scoring
 task_prefix: anomaly
-description: Online (no-foresight) anomaly scoring of sensor data
-version: 3.0.0          # bump when the family's tasks change in a way results can't be compared across
+description: Panel quality, monitor mode - write a scorer that flags bad rows in new transaction data as they arrive, with no foresight
+version: 0.2.0          # bump when the family's tasks change in a way results can't be compared across
 authors:
   - name: Mayank Mahajan
 role: [quant_researcher]
@@ -16,7 +16,8 @@ verifier: verifier/anomaly_verify.py
 verifier_timeout_sec: 3900   # three 20-minute scorer runs, plus the write-up judge
 gold_file: gold.json
 reward: >-
-  F1 on a hidden panel's planted spikes, drops and level shifts x coverage, zeroed if the no-foresight check
+  Mean of row F1 (every day of a planted level shift is positive) and event F1 (row precision vs event recall
+  with shift-delay credit) on a hidden panel x coverage, zeroed if the no-foresight check
   fails (code, no judge). Never blended in: the W1-W9 write-up rubric (LLM judge; left out when the judge can't run)
 rubric_visibility: partial  # the instruction asks for the note but not the rubric's judgment items; draft rubric,
                             # Mayank to confirm

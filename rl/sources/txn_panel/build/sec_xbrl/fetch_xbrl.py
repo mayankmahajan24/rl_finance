@@ -1,8 +1,10 @@
-"""Pull revenue-like XBRL facts (with dimensions) from every 10-Q/10-K a company filed in a date window.
+"""Pull every numeric XBRL fact (with dimensions) from every 10-Q/10-K a company filed in a date window.
 
 usage: python fetch_xbrl.py <cik> [<cik> ...]
 writes sec/facts/CIK<cik>.csv: one row per fact, keeping segment/product dimensions so
-2018 ASC 606 disaggregations and segment KPIs are available, not just consolidated totals.
+2018 ASC 606 disaggregations and segment KPIs are available, not just consolidated totals. Every
+numeric fact is kept (revenue, segment revenue, EPS, operating expenses and the rest), so a later
+choice of KPI needs no refetch.
 """
 import json, os, re, sys, time, urllib.request
 import xml.etree.ElementTree as ET
@@ -11,7 +13,6 @@ import csv
 UA = {"User-Agent": "research-analysis contact@example.com"}
 HERE = os.path.dirname(os.path.abspath(__file__))
 FILED_FROM, FILED_TO = "2014-01-01", "2019-06-30"
-CONCEPT_RE = re.compile(r"(Revenue|Sales)", re.I)
 
 
 def get(url, binary=False):
@@ -28,7 +29,11 @@ def get(url, binary=False):
 
 
 def filings(cik):
-    sub = json.load(open(f"{HERE}/sec/submissions/CIK{cik:010d}.json"))
+    path = f"{HERE}/sec/submissions/CIK{cik:010d}.json"
+    if not os.path.exists(path):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        open(path, "w").write(get(f"https://data.sec.gov/submissions/CIK{cik:010d}.json"))
+    sub = json.load(open(path))
     blocks = [sub["filings"]["recent"]]
     for f in sub["filings"].get("files", []):
         blocks.append(json.loads(get("https://data.sec.gov/submissions/" + f["name"])))
@@ -66,7 +71,7 @@ def parse(xml_bytes):
         if "}" not in tag or el.get("contextRef") is None:
             continue
         ns, local = tag[1:].split("}")
-        if not CONCEPT_RE.search(local) or el.get("unitRef") is None:
+        if el.get("unitRef") is None:
             continue
         try:
             val = float(el.text)

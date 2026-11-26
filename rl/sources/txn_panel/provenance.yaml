@@ -71,3 +71,34 @@
     reviewed_at: null
     reason: null
   note: 'companies, sensor tickers and KPI series: the split unit'
+- path: sources/txn_panel/annotations/pro_forma.csv
+  kind: annotation
+  produced_by:
+    type: model
+    who: Claude (2026-11-09), transcribed from Macy's Fiscal 2017 and 2016 Pro Forma Financial Information (2018-05-16), at the URL in each row
+  produced_at: '2026-11-09'
+  sha256: 897845a412216452271a6824ab31c1b8431e5edfcdc83f99cae83276a1bc1995
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  evidence:
+  - each row's url (the company's investor-relations PDF) and published date
+  note: Macy's FY2016-17 quarterly net sales recast for the FY2018 revenue and pension standards; merged into Macy's actuals from its publication date
+- path: sources/txn_panel/annotations/consensus.csv
+  kind: annotation
+  produced_by:
+    type: model
+    who: Claude (web search, 2026-11-09), from Zacks and Thomson Reuters consensus figures in preview articles published before each release
+  produced_at: '2026-11-09'
+  sha256: 4dc6b38a0b5e0426d800a85e9190ea239c37129d6b31bc11be6503d044ef7e0d
+  review:
+    status: draft
+    reviewer: null
+    reviewed_at: null
+    reason: null
+  evidence:
+  - each row's url and published date (the article, dated on or before the task's as-of date)
+  - each row's note (what the article printed, and why the line is net sales or total sales)
+  note: 'analyst revenue consensus for 39 retailer quarters (M, JCP, KSS, ROST), the 7 release-dated targets plus earlier quarters for the consensus history. Excluded 5 targets (date unconfirmed or a different line), 3 rows with no named provider, JCP FY2018 Q2 (net sales or total revenue unclear)'

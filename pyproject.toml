@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 name = "rl-finance"
 version = "0.1.0"
 description = "RL environments and evals for buy-side financial services"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 dynamic = ["dependencies", "optional-dependencies"]
 
 [project.scripts]

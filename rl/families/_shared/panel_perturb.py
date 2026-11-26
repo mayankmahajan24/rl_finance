@@ -112,15 +112,15 @@ def _fmt(d):
 # Artifact injectors (operate on Frame.df in place, return a ground-truth item)
 # --------------------------------------------------------------------------------------------------
 def inj_duplicate_rows(F, t, s):
-    start = F.pick_date(); end = start + pd.Timedelta(days=int(F.rng.integers(20, 60)))
+    start = F.pick_date(); end = start + pd.Timedelta(days=int(F.rng.integers(10, 45)))
     rows = F.df[F.mask(t, s, start, end)]
-    dup = rows.sample(frac=float(F.rng.uniform(0.5, 1.0)), random_state=int(F.rng.integers(1e9)))
+    dup = rows.sample(frac=float(F.rng.uniform(0.1, 0.4)), random_state=int(F.rng.integers(1e9)))
     F.df = pd.concat([F.df, dup], ignore_index=True)
     return dict(type='duplicate_rows', ticker=t, source_id=s, start=_fmt(dup.date.min()), end=_fmt(dup.date.max()))
 
 
 def inj_swapped_columns(F, t, s):
-    start = F.pick_date(); end = start + pd.Timedelta(days=int(F.rng.integers(20, 90)))
+    start = F.pick_date(); end = start + pd.Timedelta(days=int(F.rng.integers(5, 30)))
     m = F.mask(t, s, start, end)
     ct, amt = F.df.loc[m, 'ct'].values.copy(), F.df.loc[m, 'amt'].values.copy()
     F.df.loc[m, 'ct'] = np.round(amt).astype(int); F.df.loc[m, 'amt'] = ct.astype(float)
@@ -128,19 +128,89 @@ def inj_swapped_columns(F, t, s):
 
 
 def inj_unit_scale(F, t, s):
-    start = F.pick_date()
-    m = F.mask(t, s, start)
+    start = F.pick_date(); end = start + pd.Timedelta(days=int(F.rng.integers(14, 180)))
+    m = F.mask(t, s, start, end)
     F.df.loc[m, 'amt'] = (F.df.loc[m, 'amt'] * 100).round(2)
-    return dict(type='unit_scale', ticker=t, source_id=s, start=_fmt(start), end=None, note='amount reported in cents')
+    return dict(type='unit_scale', ticker=t, source_id=s, start=_fmt(start), end=_fmt(end), note='amount reported in cents')
 
 
 def inj_date_shift(F, t, s):
     start = F.pick_date()
+    k = int(F.rng.choice([-1, 1]))
+    redate(F, t, s, start, None, k)
     gmax = F.df.date.max()
-    m = F.mask(t, s, start)
-    F.df.loc[m, 'date'] = F.df.loc[m, 'date'] + DAY
+    # the days a repair has to fill in: the one left empty, and the one that took two days' rows
+    impute = [start, gmax] if k > 0 else [start - DAY]
+    return dict(type='date_shift', ticker=t, source_id=s, start=_fmt(start + min(k, 0) * DAY), end=None,
+                note=f'dates off by {k:+d} day', impute_days=[_fmt(d) for d in impute])
+
+
+def redate(F, t, s, start, end, k):
+    """Move one series' rows from start to end (inclusive; None = to the end of the panel) by k days, merging
+    a row that lands on an existing day into it; rows pushed past the end of the panel are lost."""
+    gmax = F.df.date.max()
+    m = F.mask(t, s, start, end)
+    F.df.loc[m, 'date'] = F.df.loc[m, 'date'] + k * DAY
     F.df = F.df[F.df.date <= gmax]
-    return dict(type='date_shift', ticker=t, source_id=s, start=_fmt(start), end=None, note='dates off by +1 day')
+    ser = F.mask(t, s)
+    one = F.df[ser].groupby('date', as_index=False).agg(
+        {c: ('sum' if c in ('ct', 'amt') else 'first') for c in F.df.columns if c != 'date'})
+    F.df = pd.concat([F.df[~ser], one[F.df.columns]], ignore_index=True)
+
+
+def dst_windows(d0, d1):
+    """US daylight-saving periods [second Sunday of March, first Sunday of November) inside [d0, d1]."""
+    out = []
+    for y in range(d0.year, d1.year + 1):
+        mar, nov = pd.Timestamp(y, 3, 8), pd.Timestamp(y, 11, 1)
+        a = mar + pd.Timedelta(days=(6 - mar.weekday()) % 7)
+        b = nov + pd.Timedelta(days=(6 - nov.weekday()) % 7)
+        if a - DAY >= d0 and b <= d1:
+            out.append((a, b))
+    return out
+
+
+def inj_dst_shift(F, t, s):
+    """From some year on, the source cuts each day's batch at a fixed UTC time but stamps it with the local date
+    at the cut. While clocks are on summer time the cut falls on the other side of local midnight, so every
+    summer day carries the next day's date (k=+1) or, for a cut just before midnight, the previous day's (k=-1).
+    One item per summer."""
+    wins = dst_windows(F.df.date.min(), F.df.date.max())
+    first = max(0, len(wins) - int(F.rng.integers(2, 4)))   # the last two or three summers
+    k = int(F.rng.choice([-1, 1]))
+    items = []
+    for a, b in wins[first:]:
+        redate(F, t, s, a, b - DAY, k)
+        lo, hi = (a, b) if k > 0 else (a - DAY, b - DAY)
+        items.append(dict(type='dst_shift', ticker=t, source_id=s, start=_fmt(lo), end=_fmt(hi),
+                          note=f'summer dates off by {k:+d} day', impute_days=[_fmt(lo), _fmt(hi)]))
+    return items
+
+
+def inj_amount_shift(F, t, s):
+    """From some date the source's amounts include fees and tax, or come in another currency: amt steps 20-40%
+    overnight, ct doesn't."""
+    start = F.pick_date()
+    end = None if F.rng.random() < 0.5 else start + pd.Timedelta(days=int(F.rng.integers(60, 365)))
+    mult = float(F.rng.uniform(1.2, 1.4))   # smaller steps are lost in the sources' normal ticket-size noise
+    m = F.mask(t, s, start, end)
+    F.df.loc[m, 'amt'] = (F.df.loc[m, 'amt'] * mult).round(2)
+    return dict(type='amount_shift', ticker=t, source_id=s, start=_fmt(start), end=_fmt(end), mult=round(mult, 3),
+                note='amounts include tax or fees')
+
+
+def inj_source_outage(F, s, exclude=()):
+    """One source drops out or goes near-dark for every company at once: a vendor-side failure. One item per
+    ticker (`exclude`: series whose items the gold leaves out, e.g. low-volume ones)."""
+    start = F.pick_date(); end = start + pd.Timedelta(days=int(F.rng.integers(8, 30)))
+    keep = 0.0 if F.rng.random() < 0.5 else float(F.rng.uniform(0.05, 0.2))
+    m = (F.df.source_id == s) & (F.df.date >= start) & (F.df.date <= end)
+    tickers = sorted(F.df.loc[m, 'ticker'].unique())
+    F.df.loc[m, 'ct'] = np.round(F.df.loc[m, 'ct'] * keep).astype(int)
+    F.df.loc[m, 'amt'] = (F.df.loc[m, 'amt'] * keep).round(2)
+    F.df = F.df[F.df.ct > 0]
+    return [dict(type='outage', ticker=t, source_id=s, start=_fmt(start), end=_fmt(end), note='source-wide')
+            for t in tickers if (t, s) not in exclude]
 
 
 def inj_series_swap(F, t, s, t2):
@@ -156,21 +226,33 @@ def inj_series_swap(F, t, s, t2):
 
 
 def inj_double_count(F, t, s):
-    start = F.pick_date(); end = start + pd.Timedelta(days=int(F.rng.integers(60, 150)))
+    start = F.pick_date(); end = start + pd.Timedelta(days=int(F.rng.integers(30, 120)))
+    share = float(F.rng.uniform(0.4, 1.0))   # the share of transactions counted twice (under 40% is lost in noise)
     m = F.mask(t, s, start, end)
-    F.df.loc[m, 'ct'] *= 2; F.df.loc[m, 'amt'] = (F.df.loc[m, 'amt'] * 2).round(2)
-    return dict(type='double_count', ticker=t, source_id=s, start=_fmt(start), end=_fmt(end))
+    F.df.loc[m, 'ct'] = np.round(F.df.loc[m, 'ct'] * (1 + share)).astype(int)
+    F.df.loc[m, 'amt'] = (F.df.loc[m, 'amt'] * (1 + share)).round(2)
+    return dict(type='double_count', ticker=t, source_id=s, start=_fmt(start), end=_fmt(end), share=round(share, 2))
 
 
 def inj_outage(F, t, s):
-    start = F.pick_date(); end = start + pd.Timedelta(days=int(F.rng.integers(14, 60)))
-    F.df = F.df[~F.mask(t, s, start, end)]
+    start = F.pick_date(); end = start + pd.Timedelta(days=int(F.rng.integers(8, 40)))
+    m = F.mask(t, s, start, end)
+    if F.rng.random() < 0.5:                  # missing
+        F.df = F.df[~m]
+    else:                                     # near-dark: a thin trickle of rows still arrives
+        keep = float(F.rng.uniform(0.05, 0.2))
+        F.df.loc[m, 'ct'] = np.round(F.df.loc[m, 'ct'] * keep).astype(int)
+        F.df.loc[m, 'amt'] = (F.df.loc[m, 'amt'] * keep).round(2)
+        F.df = F.df[F.df.ct > 0]
     return dict(type='outage', ticker=t, source_id=s, start=_fmt(start), end=_fmt(end))
 
 
 def inj_level_shift(F, t, s, mult=None, length=None):
     start = F.pick_date()
-    mult = mult or float(F.rng.choice([0.45, 0.55, 1.7, 1.9]))
+    if mult is None:   # data_audit: a smaller step, temporary half the time; smaller than 1.4x either way is
+        # lost in the steps real sources show against each other in this panel
+        mult = float(F.rng.choice([F.rng.uniform(0.6, 0.72), F.rng.uniform(1.4, 1.65)]))
+        length = None if F.rng.random() < 0.5 else int(F.rng.integers(60, 240))
     end = None if length is None else start + pd.Timedelta(days=length)
     m = F.mask(t, s, start, end)
     F.df.loc[m, 'ct'] = np.maximum(np.round(F.df.loc[m, 'ct'] * mult), 0).astype(int)
@@ -188,5 +270,43 @@ def inj_ticker_remap(F, t):
 
 
 AUDIT_TYPES = ['duplicate_rows', 'swapped_columns', 'unit_scale', 'date_shift', 'series_swap',
-               'double_count', 'outage', 'level_shift']
+               'double_count', 'outage', 'level_shift', 'dst_shift', 'amount_shift']
+
+
+# --------------------------------------------------------------------------------------------------
+# Real events (decoys): planted in every source of a ticker, so they are business activity, not problems.
+# They change the clean panel too, before any problem is planted.
+# --------------------------------------------------------------------------------------------------
+def _scale(F, m, ct_mult, amt_mult):
+    F.df.loc[m, 'ct'] = np.maximum(np.round(F.df.loc[m, 'ct'] * ct_mult), 0).astype(int)
+    F.df.loc[m, 'amt'] = (F.df.loc[m, 'amt'] * amt_mult).round(2)
+    F.df = F.df[F.df.ct > 0]
+
+
+def real_industry_shock(F, industry):
+    """A few days of lower sales across every source of every company in one industry (e.g. a storm)."""
+    start = F.pick_date(0.1, 0.9); end = start + pd.Timedelta(days=int(F.rng.integers(1, 5)))
+    mult = float(F.rng.uniform(0.5, 0.8))
+    m = (F.df.industry == industry) & (F.df.date >= start) & (F.df.date <= end)
+    tickers = sorted(F.df.loc[m, 'ticker'].unique())
+    _scale(F, m, mult, mult)
+    return dict(kind='industry_shock', industry=industry, tickers=tickers, start=_fmt(start), end=_fmt(end),
+                mult=round(mult, 2))
+
+
+def real_promotion(F, t, recurring):
+    """A promotion in every source of one company: more transactions at a lower ticket. A recurring one runs in
+    the same week every year."""
+    d0, d1 = F.df.date.min(), F.df.date.max()
+    start = F.pick_date(0.05, 0.95); days = int(F.rng.integers(3, 10))
+    ct_mult, ticket = float(F.rng.uniform(1.3, 1.8)), float(F.rng.uniform(0.8, 0.9))
+    starts = [start]
+    if recurring:
+        starts = [start + pd.DateOffset(years=y) for y in range(d0.year - start.year, d1.year - start.year + 1)]
+        starts = [pd.Timestamp(a) for a in starts if d0 <= a and a + pd.Timedelta(days=days) <= d1]
+    for a in starts:
+        _scale(F, F.mask(t, None, a, a + pd.Timedelta(days=days)), ct_mult, ct_mult * ticket)
+    return dict(kind='recurring_promotion' if recurring else 'promotion', ticker=t,
+                periods=[[_fmt(a), _fmt(a + pd.Timedelta(days=days))] for a in starts],
+                ct_mult=round(ct_mult, 2), ticket_mult=round(ticket, 2))
 

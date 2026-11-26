@@ -15,9 +15,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "eff7debcc5a3",
-  "gold_fingerprint": "95fc3fa577a7",
-  "content_sha256": "408ebeb11c3d747a39edb89f4997167ab900ae9139c06ff96ee69377157780c6"
+  "fingerprint": "1df68518aa73",
+  "gold_fingerprint": "c9499eba492f",
+  "content_sha256": "c2c3d1b1f0c1404d76f1afc93168f7da67a8203ced9a2ba2829a6591584694d1"
  },
  "audit-bench-002": {
   "split": "bench",
@@ -35,9 +35,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "e4e62b190d0f",
-  "gold_fingerprint": "9bc98700846a",
-  "content_sha256": "fd6eee46f2bd1ae2f6819f094f98ac6f3c965117f1ce95edba7cdbd8efaa3a0e"
+  "fingerprint": "c6c87e51da4f",
+  "gold_fingerprint": "c6b5d6035877",
+  "content_sha256": "00a099d17437c38dcfda2595072acdeee44dcb9bbeae8357ab2dc03f13b81a65"
  },
  "audit-bench-003": {
   "split": "bench",
@@ -55,9 +55,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "a175230ca147",
-  "gold_fingerprint": "fc0e2bbf18ab",
-  "content_sha256": "486145835d1c0393f1b28c593f8bd211d6752c123ec1c1532318f9211aa24b41"
+  "fingerprint": "693c1eca56da",
+  "gold_fingerprint": "3edfa0812999",
+  "content_sha256": "bb8b1ccbbcf221438d9e6f012953d52a4b374e4f9eeac740b0b0f8768f26a4cb"
  },
  "audit-bench-004": {
   "split": "bench",
@@ -75,9 +75,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "01feefaa6ed6",
-  "gold_fingerprint": "c516c26f94d0",
-  "content_sha256": "e8b9b185ec1282a0d243a78b5f11b5c993ebde651c186c4992aad16839beafb8"
+  "fingerprint": "61d1ebab06fa",
+  "gold_fingerprint": "0e29385f8fab",
+  "content_sha256": "f7e30c90883895cb2d55f4fb21b822f50b5e7d97e938c0fbb901eee9934da771"
  },
  "audit-bench-005": {
   "split": "bench",
@@ -95,9 +95,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "7065ced35d3c",
-  "gold_fingerprint": "0ddc2c845434",
-  "content_sha256": "d58e5e33b236c0ea5300062c1bf1d5020919be013864408789cd6eb2948f37b2"
+  "fingerprint": "a460a7b10a7b",
+  "gold_fingerprint": "6f68592b6597",
+  "content_sha256": "c11d779d13ff3543eb0c84abf4582b1f137cb868b187861f142ffaeff8cab0b3"
  },
  "audit-bench-006": {
   "split": "bench",
@@ -115,9 +115,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "9e3bfc1f79bd",
-  "gold_fingerprint": "3778e291f4ff",
-  "content_sha256": "86e756c5e0b91bcdf03e686443e55e248d27dd7fd34207ca1311a1f0a79de99c"
+  "fingerprint": "9f6f9a575654",
+  "gold_fingerprint": "d0fa51fd1361",
+  "content_sha256": "2729fb76f5ba5d3ae62bda7b1d0c148a8a1271340b0574ab5ab4bcc218dc3cd3"
  },
  "audit-bench-007": {
   "split": "bench",
@@ -135,9 +135,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "6db811ec0137",
-  "gold_fingerprint": "89065b042fe6",
-  "content_sha256": "04ab5c024c79e95b3b0f817203190de1d9ba973aff00482fa8049a70eb83577c"
+  "fingerprint": "55311f0bb32f",
+  "gold_fingerprint": "b17ada6aed05",
+  "content_sha256": "3a296e469aebf32a6a5daeab7118919940013d55323a1d92d0ffe5268002e0ba"
  },
  "audit-bench-008": {
   "split": "bench",
@@ -155,9 +155,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "0a7372a8a11e",
-  "gold_fingerprint": "c17974ef69c9",
-  "content_sha256": "fd63e9e7a71c5c66a9bb6f6910b7bc086f5d2adf01e733e6c7b339dbdd6894ad"
+  "fingerprint": "bdd83279b182",
+  "gold_fingerprint": "ce52196c1056",
+  "content_sha256": "2b8dc019f7ec1ea5d25f66af5b81f8c4ad29b011ba38bc843b04ba81003bd0b6"
  },
  "audit-bench-009": {
   "split": "bench",
@@ -175,9 +175,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "06e1f542a5c4",
-  "gold_fingerprint": "955037668fb9",
-  "content_sha256": "f243433854b9a12f80bfce129889f006f71fd8a612076e4ef1948f5efd133e15"
+  "fingerprint": "e47d55785544",
+  "gold_fingerprint": "efce9add7dba",
+  "content_sha256": "395ef91e8e85c31ea6fb4b2aa89208ebfe1837debf8c6e270cc59665c1f11ba5"
  },
  "audit-bench-010": {
   "split": "bench",
@@ -195,9 +195,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "82902d4a59d6",
-  "gold_fingerprint": "1109ece76493",
-  "content_sha256": "b96b3c111ea6f3460a723c2f463357ab2384728caef82c6fd21a2beae4d81bde"
+  "fingerprint": "7c9a7a224c54",
+  "gold_fingerprint": "6cc7f3f34730",
+  "content_sha256": "ffcab5fdd62e4b0352365cbdf13c2dcb874876416633fd3882b4bbf82a30ffca"
  },
  "audit-bench-control-01": {
   "split": "bench",
@@ -215,9 +215,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "50b032694bf5",
-  "gold_fingerprint": "d8351670a0f7",
-  "content_sha256": "1ac3141361e05aa12380d6b72ec1361f313ad5736f06d0f9e93d788c65d9d04f"
+  "fingerprint": "52b4fbfcefa6",
+  "gold_fingerprint": "53aed824de53",
+  "content_sha256": "71a188fd1d0bc2a3611f02bae1553ce3f6b90231fed1e12c9ed316565f67b602"
  },
  "audit-bench-control-02": {
   "split": "bench",
@@ -235,9 +235,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "22d8fb5cce08",
-  "gold_fingerprint": "12fa8453ecb9",
-  "content_sha256": "69638e52f90c5c60c692bad03e69be264b8bf0a7cc5e11e136438d7c38273e71"
+  "fingerprint": "b5f174106a1e",
+  "gold_fingerprint": "d552d41a5de9",
+  "content_sha256": "945a928fa1844ae65a442bbb7acdb937bb4a813787323a4bd3953bafb0b6e5f5"
  },
  "audit-heldout-001": {
   "split": "heldout",
@@ -256,7 +256,7 @@
   ],
   "fingerprint": "88b1ecf18625",
   "gold_fingerprint": "d9337191616c",
-  "content_sha256": "736d51558546d34488405c2f3b9fd76036bce9cf4b30fc4b7316b85d28e0507d"
+  "content_sha256": "e2eed1b6b4f9b339a82115ab5e790534ae32f5001a5d10c9b9d8f01bd2b2dd3d"
  },
  "audit-heldout-002": {
   "split": "heldout",
@@ -275,7 +275,7 @@
   ],
   "fingerprint": "1d8c1ce665eb",
   "gold_fingerprint": "5c10ba11f6e0",
-  "content_sha256": "fc207236ab4ed5356b4082874ed8006e4445b79818dff92b5fa8d09837ecdeb1"
+  "content_sha256": "e4d1e578ebfb5ad8074f98c4db36e6c5807af18ff545b68767644a3ba6a665db"
  },
  "audit-heldout-003": {
   "split": "heldout",
@@ -294,7 +294,7 @@
   ],
   "fingerprint": "9aa1275e5626",
   "gold_fingerprint": "e91db46f87b6",
-  "content_sha256": "b7ed226160b5ef28654cdec178d581e7a8631c1f046b35783006b357423e6c2e"
+  "content_sha256": "19d277938c9043e19d3774991df93d32c43bbc8b817cf42324ecdebb8de86c3b"
  },
  "audit-heldout-004": {
   "split": "heldout",
@@ -313,7 +313,7 @@
   ],
   "fingerprint": "39974e1b7430",
   "gold_fingerprint": "88d8de2e8265",
-  "content_sha256": "2d6dcec4566b3c0085a60b871680fc6712528760e0135e9a76c4d5c5b54e608a"
+  "content_sha256": "988669cbee68071620284bcd272c2ce0b950e7e79213cf4601efb27007d15de5"
  },
  "audit-heldout-005": {
   "split": "heldout",
@@ -332,7 +332,7 @@
   ],
   "fingerprint": "f134309e3251",
   "gold_fingerprint": "8e6d90d3ea77",
-  "content_sha256": "92faf1faa21cb6fc527e717466ff7be6dbeb8a06f47512d2ab50456955c6ecb9"
+  "content_sha256": "444ef78acb4c5735a21799d647b64b5aea0bf96397a57f46f3afffb3b4916b72"
  },
  "audit-heldout-006": {
   "split": "heldout",
@@ -351,7 +351,7 @@
   ],
   "fingerprint": "f277db1a473f",
   "gold_fingerprint": "030a5ca74cbd",
-  "content_sha256": "400f164c88d535d75f55b8cf1b0955b699966507cd2292af8811c7e96d4a827d"
+  "content_sha256": "84d35ec668ceef6c7bd3729d9140224be4601f1c4cdd0a656a863800648448ea"
  },
  "audit-heldout-007": {
   "split": "heldout",
@@ -370,7 +370,7 @@
   ],
   "fingerprint": "7686f10c6755",
   "gold_fingerprint": "d2ec999eb652",
-  "content_sha256": "be456131f34d9ab6878336fc7c5b5f3f4e2bc0d9f830277d29e6aac1fc5f95fb"
+  "content_sha256": "22809fd75506461f727f42dc80422637920e34f6a11946816b5770543d0a1a95"
  },
  "audit-heldout-008": {
   "split": "heldout",
@@ -389,7 +389,7 @@
   ],
   "fingerprint": "d2d799c84437",
   "gold_fingerprint": "a6445f76a577",
-  "content_sha256": "7632bda0a65afcc69c950bba6a38c510e7bb8dc2ad79d9d8c674e3a57e6bff52"
+  "content_sha256": "707053bf0a0b20b7105b9621d96c544a5b81df55b319f9d566fd5549e8ab6448"
  },
  "audit-heldout-009": {
   "split": "heldout",
@@ -408,7 +408,7 @@
   ],
   "fingerprint": "553af42e8543",
   "gold_fingerprint": "a91e848aee6d",
-  "content_sha256": "5a007b168f84ee319eeb73d10aa23fd8da20a145f1984d7042b5f4b614d781d4"
+  "content_sha256": "e8234ccff39f1bbcef9a1a70cd74a9b8a0e6ccf8fdfc4c2306823270519545fd"
  },
  "audit-heldout-010": {
   "split": "heldout",
@@ -427,7 +427,7 @@
   ],
   "fingerprint": "e5f11f2fd5a9",
   "gold_fingerprint": "46a9d94982ed",
-  "content_sha256": "c96d14d3b8a35f59c0961fce4b054c61fa52a92ef247602f19136f00ae781dcb"
+  "content_sha256": "8fbfe428579da8f17585639768c2ae5fa4242c3c604ccbede5c31b065149a820"
  },
  "audit-heldout-control-01": {
   "split": "heldout",
@@ -446,7 +446,7 @@
   ],
   "fingerprint": "47a2c4fd7901",
   "gold_fingerprint": "572e679afb30",
-  "content_sha256": "4a70220f2681e6a7ae2c570e252179e002f9b8c96be29d293331831b432983a0"
+  "content_sha256": "b86740a0808841ae1cf05309ca3d6abe389cd4f2b47f4440c269a4046386cb62"
  },
  "audit-heldout-control-02": {
   "split": "heldout",
@@ -465,7 +465,7 @@
   ],
   "fingerprint": "329442abbb2f",
   "gold_fingerprint": "6a817fdd67a1",
-  "content_sha256": "d82ae952590d40953e84d6a818b33faacac5fba145b837db262639813b4b5f3c"
+  "content_sha256": "2e1429a5488c9b979065edde5d8ed8dc79d60762092e896928b0a7dc91ee5931"
  },
  "audit-train-001": {
   "split": "train",
@@ -487,9 +487,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "5227c9315202",
-  "gold_fingerprint": "ca76dd1afe23",
-  "content_sha256": "bb42d2c80ca5e9ba2c1dc2f994809b76a361e062a471a8d5e12e90a2b8ee6c84"
+  "fingerprint": "bec1d79c1bea",
+  "gold_fingerprint": "11c10de67c73",
+  "content_sha256": "86f15d4b18e74147177040274bd625482260a22ab7ed0967665165225320dd3e"
  },
  "audit-train-002": {
   "split": "train",
@@ -511,9 +511,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "434e3f1eb834",
-  "gold_fingerprint": "06b3e919686c",
-  "content_sha256": "6763958f2ae03ebdd155d294691f0f83ca870e9744f29e2e8242e90c60a20d90"
+  "fingerprint": "18479be75071",
+  "gold_fingerprint": "ee7d7cecfede",
+  "content_sha256": "f69aa6f2833fab7bd453fafba4325bf5a8af2b58000ebb9f20cb0ca8212c1357"
  },
  "audit-train-003": {
   "split": "train",
@@ -535,9 +535,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "35b3cede7272",
-  "gold_fingerprint": "7a2e01aef87d",
-  "content_sha256": "ea12925bfc0fa47e5ad8631e36d2ef3e4336bd577168af8909b75b95c7b269e4"
+  "fingerprint": "b3c4a5f15152",
+  "gold_fingerprint": "ea2f632f0a48",
+  "content_sha256": "ecc485c6c33c0e4fd92fb51cf5f22b65f6892f246e846f5b0a5591009c797e13"
  },
  "audit-train-control-01": {
   "split": "train",
@@ -559,8 +559,8 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "a98bf9a7490d",
-  "gold_fingerprint": "1d0c65b3f113",
-  "content_sha256": "4f5f04648b2dd10247e544f04823806e124fa8e2119029d3393b7ef5ce161dce"
+  "fingerprint": "1a125f62cb7b",
+  "gold_fingerprint": "449d4f35912c",
+  "content_sha256": "834c9b257464d98bf67766c30b827629328b092f1b5b5b959bc30a5cef61d301"
  }
 }

@@ -15,6 +15,7 @@ import yaml
 HERE = pathlib.Path(__file__).resolve().parent
 RAW = HERE / "raw" / "sensor_panel.csv.gz"
 BRIEF = HERE / "assignment" / "brief.txt"
+STATEMENTS = HERE / "raw" / "statement_facts.csv.gz"   # income statements as filed (build/sec_xbrl/assemble_statements.py)
 GRADER_ONLY = HERE / "grader_only"
 ANNOTATIONS = HERE / "annotations"
 PANEL_END = "2018-12-31"   # last date in the raw panel

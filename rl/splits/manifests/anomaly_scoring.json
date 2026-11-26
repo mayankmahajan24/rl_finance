@@ -15,9 +15,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "990cc72c44a0",
-  "gold_fingerprint": "4d48da49f967",
-  "content_sha256": "78d6d2535aa46b58eaba95d5b2c6aebea3c02e033cd842e471c25a162a6c616f"
+  "fingerprint": "5576b1a83588",
+  "gold_fingerprint": "69460f0a631c",
+  "content_sha256": "264f0b84f5884622b4b0119d74ed5d39cddd5341833eb0711a0e3f666c2abcc4"
  },
  "anomaly-bench-002": {
   "split": "bench",
@@ -35,9 +35,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "abab0e5b398a",
-  "gold_fingerprint": "7751bea8cdd1",
-  "content_sha256": "d0fbd9e8796e4bbbcfbc26ae781ebf45c2b6753de78e091ffc9c44a858d5b501"
+  "fingerprint": "1337df120b43",
+  "gold_fingerprint": "3139bef130cc",
+  "content_sha256": "11615263a82c281ade7120e95054cfab795fb133ed3860aa2124a8c7fd65a397"
  },
  "anomaly-bench-003": {
   "split": "bench",
@@ -55,9 +55,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "0fab663ed528",
-  "gold_fingerprint": "c88541ed2551",
-  "content_sha256": "33ebdf49fbb6d0173aa0d0bc9e3af7c9bcc9d7b01e8726e967aa8b7699843927"
+  "fingerprint": "13f86bb9d050",
+  "gold_fingerprint": "054eab71d44a",
+  "content_sha256": "18aabba03522ec5b157414f24aa01ab4eccc0f19e0af45ad936d01bb83af1653"
  },
  "anomaly-bench-004": {
   "split": "bench",
@@ -75,9 +75,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "e6e92a89a37e",
-  "gold_fingerprint": "ba8c815e4a75",
-  "content_sha256": "cb41b800d4374c5e40f644adda21b9903f2cbeeaa8e29e292cb73ed0f1ae104d"
+  "fingerprint": "a809728e4367",
+  "gold_fingerprint": "96a79fd29238",
+  "content_sha256": "f4c1fc01476047df4de6d2c805ecca6f3cdc8a4f3ab71789da62fccfc67b4833"
  },
  "anomaly-bench-005": {
   "split": "bench",
@@ -95,9 +95,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "7b3b9bf9d76b",
-  "gold_fingerprint": "20d06b87b42d",
-  "content_sha256": "90151bc8cc1a3b1d3673fed362fb294c4e6b5f1e1b03aeaf85abe0270b04edd2"
+  "fingerprint": "ce2e6b15a6cd",
+  "gold_fingerprint": "87fc460a7b40",
+  "content_sha256": "9abfcb4cb498d6e00ee985f9b18fbcabed252080ef823b87d018894871d1075a"
  },
  "anomaly-bench-006": {
   "split": "bench",
@@ -115,9 +115,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "d133811f4543",
-  "gold_fingerprint": "2fdd66bfd41b",
-  "content_sha256": "70cb913a78a5268886e165487f4a0231579046b5fc5484867219abb0587a17d2"
+  "fingerprint": "2600c04a57ec",
+  "gold_fingerprint": "f75bd44809c7",
+  "content_sha256": "c587b26e39b3b0be020305c2c45d04691531f1c9c79db11bf41f9aa2d3238103"
  },
  "anomaly-bench-007": {
   "split": "bench",
@@ -135,9 +135,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "c4e64625739a",
-  "gold_fingerprint": "bc523a929961",
-  "content_sha256": "de105956221c86de989a36dc811d07d5d4080263603a502dfcdc2de7c9f32140"
+  "fingerprint": "15b63a8e13ac",
+  "gold_fingerprint": "3a282bfabb07",
+  "content_sha256": "2ea53e0df6bb2d16979fbb8153673d772dd37ec4f254d496a40c1fa4ed6ba0ab"
  },
  "anomaly-bench-008": {
   "split": "bench",
@@ -155,9 +155,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "e88ab077f853",
-  "gold_fingerprint": "e7e729334f55",
-  "content_sha256": "8ace6f539f3427a3209642cb09f6d57811950dcbab83902ce392d040dd9c1029"
+  "fingerprint": "854d22eb734a",
+  "gold_fingerprint": "8bc7814eb22c",
+  "content_sha256": "3b92f7b187df35e3fde4317adff7200fb1934bc0b6e581852fd3fe539b017167"
  },
  "anomaly-bench-009": {
   "split": "bench",
@@ -175,9 +175,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "659414090ce2",
-  "gold_fingerprint": "d2cb37716469",
-  "content_sha256": "a544eeb6557bb4f868f93d06db52052d699f77e5fc459efbc137af97b8faabc3"
+  "fingerprint": "e755febfa00f",
+  "gold_fingerprint": "67b7f601652d",
+  "content_sha256": "1dc4e3601d29d0a8b3e0d0cf212391d795e87b2b74f8512b217d3636474622d1"
  },
  "anomaly-bench-010": {
   "split": "bench",
@@ -195,9 +195,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "df43fc103347",
-  "gold_fingerprint": "118645b39e85",
-  "content_sha256": "807587d713ea7869f77a22b0eacdb0a11d682a8f11708a097aa5d50d3f477923"
+  "fingerprint": "07f1d7e6a810",
+  "gold_fingerprint": "9ca7eb768c6a",
+  "content_sha256": "da968630ba6e977c770b50b4fc5e076334ab0bc74961ee16643a5fe4750c1edf"
  },
  "anomaly-bench-control-01": {
   "split": "bench",
@@ -215,9 +215,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "1c7371037ae2",
-  "gold_fingerprint": "92dc68b5d5b9",
-  "content_sha256": "61bf8ebf109d4db93415dd6c5d001b6ed7a0255e845d4dec5d4c7a7cfcebab9c"
+  "fingerprint": "3c6afce57e80",
+  "gold_fingerprint": "2e17238078cb",
+  "content_sha256": "fbe600e2e700bbd08c685c99accfe7db0e0d257f23438e467c86f05bc06c28a5"
  },
  "anomaly-bench-control-02": {
   "split": "bench",
@@ -235,9 +235,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "d94ffddc0f41",
-  "gold_fingerprint": "2d9ea5a4f204",
-  "content_sha256": "bdc825928f234a1a376c99b2d36feba1463c54f5c06694c854bbc7d8a7f91ddd"
+  "fingerprint": "d7458858c6fb",
+  "gold_fingerprint": "5133c840fb76",
+  "content_sha256": "fdbf2020d3edb70689f0a4521b7ee1bd388c3bdfa21baf921b20b64d71b11ddd"
  },
  "anomaly-heldout-001": {
   "split": "heldout",
@@ -256,7 +256,7 @@
   ],
   "fingerprint": "3e9e4cdb55e5",
   "gold_fingerprint": "a9db99905683",
-  "content_sha256": "c1b865d1bbb000949ad5cb94dc17e20ebf9e6e5f95135f848846cb9396e7c537"
+  "content_sha256": "00ddb8a746a3a84fdf79bf950028059ae991c4724f017671ca06ea9a408d6709"
  },
  "anomaly-heldout-002": {
   "split": "heldout",
@@ -275,7 +275,7 @@
   ],
   "fingerprint": "2c9f17d20627",
   "gold_fingerprint": "38838095ab7c",
-  "content_sha256": "0f4e0f2606c9313ef290a3495716229ceed7b99bcacc6cba15b45b415e07748d"
+  "content_sha256": "9c40d60e8ffc48c56f76281985898ffdc1898fc626aa85de0f4c18ef1731bd87"
  },
  "anomaly-heldout-003": {
   "split": "heldout",
@@ -294,7 +294,7 @@
   ],
   "fingerprint": "5399abb194ba",
   "gold_fingerprint": "a0439dbde0d2",
-  "content_sha256": "a36b80e4dddbdbad5a06863eb404cd6ba950c9f8e39d75547b363ab54bacd68a"
+  "content_sha256": "ee745d6f2d670fd34f18b05b4d26d21e364f792ed817bcc480597fc87870fe77"
  },
  "anomaly-heldout-004": {
   "split": "heldout",
@@ -313,7 +313,7 @@
   ],
   "fingerprint": "b8be7a381a4f",
   "gold_fingerprint": "0abd39754960",
-  "content_sha256": "60f4e6a435cf09e617f5fbfa5c21d7e0d5f009b7b3b5ce6c9326600966d8d327"
+  "content_sha256": "c1bfb15952156857e24c0c3b64b9f82bf99ab8603e8edfdcc93ed94b52bc760c"
  },
  "anomaly-heldout-005": {
   "split": "heldout",
@@ -332,7 +332,7 @@
   ],
   "fingerprint": "76038ac6fbb3",
   "gold_fingerprint": "2a07bcca2fa2",
-  "content_sha256": "361eafd117b2d8eb2208edf6cf85b9d0f3c58b68fc1c6c7f4161cd79f42def99"
+  "content_sha256": "a18a6c46ac99abcb884f4a5610c6f81f729c1161e2b8f4fa9478472c71497c09"
  },
  "anomaly-heldout-006": {
   "split": "heldout",
@@ -351,7 +351,7 @@
   ],
   "fingerprint": "18a4c7e8c777",
   "gold_fingerprint": "1c4cd1c6e56e",
-  "content_sha256": "ad1e0366335f6aad2fb433aabe9985dc1390d27a9a8646a38b2d0effe4831d21"
+  "content_sha256": "4cf3287712fd7103cbdb33f2c2642390d4a187d2c52ac2f90e490608b4602113"
  },
  "anomaly-heldout-007": {
   "split": "heldout",
@@ -370,7 +370,7 @@
   ],
   "fingerprint": "99b156f4b9b4",
   "gold_fingerprint": "f85a81a04f5e",
-  "content_sha256": "74b6d8e7bbea1bbc6871333e07f3e5e1b05d0e3931dab41fcda6e189af2063e1"
+  "content_sha256": "41777765eca1754d0166a33febe86922725c8c9b3feeb9f5b14b62d0ced0e4a8"
  },
  "anomaly-heldout-008": {
   "split": "heldout",
@@ -389,7 +389,7 @@
   ],
   "fingerprint": "c450df3a8002",
   "gold_fingerprint": "8cc166911667",
-  "content_sha256": "dee6e1c97e28dedfc0203243a3965b9d6fb31ea74c4892fa4245588f3faa96bf"
+  "content_sha256": "1d841f15fe86a465f528c8c38bd2eca4155dff8e81d413b9bbdf014ecd6b564b"
  },
  "anomaly-heldout-009": {
   "split": "heldout",
@@ -408,7 +408,7 @@
   ],
   "fingerprint": "1ce81fdb95ed",
   "gold_fingerprint": "d279e672c76c",
-  "content_sha256": "3ecaafcace7abc3e8947ba983984000e8860445e2cafddd7bcf0f8a020a2590b"
+  "content_sha256": "ee0b80deee23e553f66bb53f35cdfba24082f5607f8359f564894cd98dc0c62e"
  },
  "anomaly-heldout-010": {
   "split": "heldout",
@@ -427,7 +427,7 @@
   ],
   "fingerprint": "3f51b8e3b863",
   "gold_fingerprint": "a74ba318829d",
-  "content_sha256": "95136c6b4442af8dd229ca7c1cc2a68654b8a5d4af7c924e1e1438479ab02326"
+  "content_sha256": "7f904ccdb4b28b97d22fe2525164c6ad8d306dd0484eee3b7ed3d8903055593f"
  },
  "anomaly-heldout-control-01": {
   "split": "heldout",
@@ -446,7 +446,7 @@
   ],
   "fingerprint": "f064806052a6",
   "gold_fingerprint": "d271c763d3a5",
-  "content_sha256": "311378ca3bcbdeb2ba4a7ef9bae16c12b9d5b37c0b83c03f68ce5af0a694860d"
+  "content_sha256": "1e588ee381e1ce65507f08bc08473981afe9da1a2bba8f739aab09059762cd6a"
  },
  "anomaly-heldout-control-02": {
   "split": "heldout",
@@ -465,7 +465,7 @@
   ],
   "fingerprint": "0980bcb3ae37",
   "gold_fingerprint": "b44b0796d2a0",
-  "content_sha256": "ef32c28120b1e0550c8cd49a038a0c7faf40ff896ae22f0c0b53018ad4e000db"
+  "content_sha256": "312bf8e6aa47daf15ad5d8e47be3ec83326213874b5be432e510f9519723ca43"
  },
  "anomaly-train-001": {
   "split": "train",
@@ -487,9 +487,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "df14bc2b85b9",
-  "gold_fingerprint": "c8e06967b742",
-  "content_sha256": "4a8a214b958a4320e46648c9015d2cd7164faf8e3390fba640931adaae15efec"
+  "fingerprint": "8eabf6616c61",
+  "gold_fingerprint": "0ceee27c322e",
+  "content_sha256": "f1f47379fec92fda76172574877d724077e63c1bc3b0eb5d771c467dd60e1d4f"
  },
  "anomaly-train-002": {
   "split": "train",
@@ -511,9 +511,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "3a682f39578f",
-  "gold_fingerprint": "d3d6b72bbb31",
-  "content_sha256": "f073e74425ea34873ef631a2f644bcc3a716470e82a0b0a1fccf7f69bc1e552d"
+  "fingerprint": "e7c7e1f104fa",
+  "gold_fingerprint": "cb823e55af20",
+  "content_sha256": "05842a802e9b1adb6a77e6c768e20d27bf501708cb9da2c12e3402df905aacd3"
  },
  "anomaly-train-003": {
   "split": "train",
@@ -535,9 +535,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "363125c73d78",
-  "gold_fingerprint": "c0b621640ad9",
-  "content_sha256": "1e9d3b673c2b36ab028961743fee3fbe328e6f5daff5b6f5ccb209cb07af2f7f"
+  "fingerprint": "5410f3edb4b3",
+  "gold_fingerprint": "1e0300db689c",
+  "content_sha256": "5fec4c21553e007bddb9087c345404c00244afae190e5b577bdf3a1c471d3148"
  },
  "anomaly-train-control-01": {
   "split": "train",
@@ -559,8 +559,8 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "75bde78ed051",
-  "gold_fingerprint": "1a38b73955b0",
-  "content_sha256": "914a8954a97495b014af6d4b1d16b35e6b5966e365da4206f6adcf6bd4ad88d8"
+  "fingerprint": "8f1187751a50",
+  "gold_fingerprint": "e1e2b2981b24",
+  "content_sha256": "4e113c4d110171db9f5c2decb04154a5967bce2a28f1b3b08c7aea69339b121c"
  }
 }

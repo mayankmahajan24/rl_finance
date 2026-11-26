@@ -100,7 +100,8 @@ def answer_for(task) -> str:
         g = json.loads((d / "tests" / "gold.json").read_text())
         fc = {"target_period": g["target_period"].replace(" ", ""), "unit": g["unit"], "point": g["actual"],
               "low": g["actual"] * 0.98, "high": g["actual"] * 1.02, "interval_level": 0.95, "in_sample": [],
-              "vs_consensus": "no_consensus"}
+              "vs_consensus": "no_consensus",
+              "metric_history": [{"period_end": e, "value": v[-1]} for e, v in g["metric_history"].items()]}
         files = {"output/answer.md": f"Estimate.\n\n```json\n{json.dumps(fc)}\n```"}
     else:
         files = {"output/response.json": json.dumps({"winner": "A", "confidence": 3, "goal_type": "single_name_kpi",

@@ -125,9 +125,10 @@ def test_bad_scorer_scores_zero(case, offline):
 KN = "kn-produce-SAVE-2018Q2"
 
 
-def kn_answer(gold: dict, point: float, width: float = 0.1) -> str:
+def kn_answer(gold: dict, point: float, width: float = 0.1, history: bool = True) -> str:
     fc = {"target_period": gold["target_period"], "point": point, "low": point * (1 - width),
-          "high": point * (1 + width), "interval_level": 0.95, "in_sample": []}
+          "high": point * (1 + width), "interval_level": 0.95, "in_sample": [],
+          "metric_history": [{"period_end": e, "value": v[-1]} for e, v in gold["metric_history"].items()] if history else []}
     return f"Write-up.\n\n```json\n{json.dumps(fc)}\n```\n"
 
 
@@ -136,7 +137,7 @@ def test_kpi_exact_forecast(offline):
     gold = json.loads((task / "tests" / "gold.json").read_text())
     rewards, details = run_verifier(task, output={"answer.md": kn_answer(gold, gold["actual"])})
     assert rewards["schema_ok"] == 1 and rewards["abs_pct_error"] == 0 and rewards["covered"] == 1
-    assert rewards["skill_vs_naive"] == 1 and rewards["reward"] == 1
+    assert rewards["metric_ok"] == 1 and rewards["skill_vs_naive"] == 1 and rewards["reward"] == 1
     assert "writeup_score" not in rewards and details["judge"].startswith("not graded")
 
 
@@ -153,6 +154,21 @@ def test_kpi_naive_forecast_earns_nothing(offline):
     gold = json.loads((task / "tests" / "gold.json").read_text())
     rewards, _ = run_verifier(task, output={"answer.md": kn_answer(gold, gold["naive_forecast"])})
     assert rewards["skill_vs_naive"] == 0 and rewards["reward"] == 0
+
+
+def test_kpi_writeup_scales_reward():
+    from families.kpi_nowcast import grader as G
+    assert G.blend({"accuracy_reward": 0.6, "writeup_score": 1.0})["reward"] == 0.6
+    assert G.blend({"accuracy_reward": 0.6, "writeup_score": 0.0})["reward"] == 0.3
+    assert G.blend({"accuracy_reward": 0.0, "writeup_score": 1.0})["reward"] == 0.0
+    assert G.blend({"reward": 0.6, "accuracy_reward": 0.6})["reward"] == 0.6   # not judged: accuracy alone
+
+
+def test_kpi_wrong_metric_earns_nothing(offline):
+    task = built("bench", KN)
+    gold = json.loads((task / "tests" / "gold.json").read_text())
+    rewards, _ = run_verifier(task, output={"answer.md": kn_answer(gold, gold["actual"], history=False)})
+    assert rewards["metric_ok"] == 0 and rewards["abs_pct_error"] == 0 and rewards["reward"] == 0
 
 
 @pytest.mark.parametrize("answer", [None, "no json here", "```json\n{\"point\": 1}\n```",

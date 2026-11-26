@@ -6,7 +6,7 @@ reported, from the panel as it was before these were planted):
   point anomalies, 1-3 days then straight back:  volume spike, volume dropout to near zero, count flood, dollar spike
   level shifts, immediate (step) or over 2-8 weeks (ramp), in volume, count only or dollars only; temporary
   (60-240 days, then back) or permanent (a new baseline to the end of the panel)
-  problems the instruction already covers but no single-day or steady-level model fits (feedback #98):
+  problems the instruction already covers but no single-day or steady-level model fits (feedback #102):
     volume block   4-10 days too high or too low, then straight back ("a day or a few", stretched)
     outage         4-21 days at 1-5% of normal: the reported value carries no signal to rescale
     intermittent   3-8 weeks in which a third or so of the days are doubled or mostly lost, the rest fine

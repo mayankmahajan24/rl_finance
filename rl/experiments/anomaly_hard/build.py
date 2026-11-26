@@ -150,7 +150,7 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
                         # a lasting change holds the company to the end; a temporary one until it is over
                         busy.append((('chg', t), lo, d1 if length is None else lo + pd.Timedelta(days=length + 45)))
                     break
-        # several-day problems that are not a steady level (feedback #98): on a source with no level change, thin
+        # several-day problems that are not a steady level (feedback #102): on a source with no level change, thin
         # start or closure in their span, away from company events, one at a time per company
         for f, longest in [x for x in P.MULTI for _ in range(N_MULTI)]:
             for _ in range(500):
@@ -350,7 +350,7 @@ def build_task(ctx, d: pathlib.Path, seed: int, control: bool) -> dict:
     each with its own planted problems, disguise, truth panel and gold (panel 1 in tests/, panel k in tests/panel-k/).
     Returns panel 1's gold."""
     tmpl = (HERE / 'instruction.md').read_text()
-    text = tmpl.format(firm=build_panel.FIRM, schema=build_panel.SCHEMA, copy_note=COPY_NOTE, companies='{companies}')
+    text = tmpl.format(firm=build_panel.FIRM, schema=(HERE / 'panel_schema.md').read_text().rstrip('\n'), copy_note=COPY_NOTE, companies='{companies}')
     vis, hid = company_groups(ctx, seed)
     shown, _, shown_map, _ = plant(np.random.default_rng(seed), control, ctx, sensors=vis)
     hidden, truth, mapping, clean = plant(np.random.default_rng([seed, 1]), control, ctx, sensors=hid)

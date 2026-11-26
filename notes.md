@@ -3,20 +3,20 @@
 A running record of what is built, what was tried, and what was retired, kept for the final report. **Update it with
 every change or experiment**: add a row to the experiment log, move anything replaced to "Retired", and keep "Active
 construction" true at all times. Verbatim feedback and each decision's details stay in the feedback logs
-(`rl/runs/anomaly_hard/reviews/feedback_log.md`, numbered #1-#66 so far; `rl/runs/anomaly_hindsight/reviews/feedback_log.md`,
-#1-#8). Branch `claude/nice-heisenberg-ukw1gi` (draft pull request mayankmahajan24/rl_finance#73).
+(`rl/runs/anomaly_hard/reviews/feedback_log.md`, numbered #1-#98 so far; anomaly_hindsight's log was
+#1-#12 and is in git history). Branch `claude/nice-heisenberg-ukw1gi` (draft pull request mayankmahajan24/rl_finance#73).
 
-Last updated: 2026-11-25.
+Last updated: 2026-11-26.
 
 **Standing rules (Mayank):**
 - **Do not rebuild tasks** (`build.py`) until Mayank asks to rerun them. Source changes to the instruction, grader or
   builder wait in git. The built copies under `rl/tasks/proto/` stay as they are until a rerun is requested; rebuild
   then, check the data is unchanged, and note the rebuild here.
-- anomaly_hindsight: hold lifted 2026-11-25 (H#9): rebuilt, runs and reference development started.
+- anomaly_hindsight: **dropped 2026-11-26** (#98). Its source and feedback log were removed from the branch; they stay in git history (last at commit cac9097).
 - Add penalties to the grader as issues come up (log each one).
 - Log every piece of feedback verbatim in the task's feedback log the same turn.
 
-**Built tasks last rebuilt:** 2026-11-25. anomaly_hard's built instructions match the source as of #66; anomaly_hindsight rebuilt for H#9 (matches the source as of H#8).
+**Built tasks last rebuilt:** 2026-11-26 for the v11 runs (unscaled data, #95). Source changes since (#96 continuity wording, #97 overlapping problems) are not built.
 
 ---
 
@@ -27,7 +27,7 @@ panel code in `rl/families/_shared` and the source data, like every family).
 
 | | **anomaly_hard** | **anomaly_hindsight** |
 |---|---|---|
-| Status | **Active, redesigned 2026-11-26** (E36-E41): confidence scored against whether the cleaned value is right; source changes committed, **rebuild pending**; reference and Opus results to redo | **Active, in progress** (H#9): rebuilt; 8 Opus runs and a fresh reference under way |
+| Status | **Active, redesigned 2026-11-26** (E36-E44): confidence scored against whether the cleaned value is right; reference r2 0.720 against ungated Opus about 0.72; next: the thin-start boundary and difficulty | **Dropped 2026-11-26** (#98); in git history only |
 | Code | `rl/experiments/anomaly_hard/` | `rl/experiments/anomaly_hindsight/` (copied 2026-11-25) |
 | Built tasks | `rl/tasks/proto/anomaly_hard{,_train}/anomhard-*` | `rl/tasks/proto/anomaly_hindsight{,_train}/anomhind-*` |
 | Cleaned series | point in time, like confidence | built in hindsight from the whole panel; confidence stays point in time |
@@ -134,7 +134,7 @@ data reward is the mean over its three hidden panels.
 **Total reward = data reward x (0.5 + 0.5 x writeup_score).** A report can halve the reward but never earn it alone.
 With `WRITEUP_JUDGE=skip`, or when no judge can run, the total is the data reward alone.
 
-### 1.3 Grader, anomaly_hindsight (differences only)
+### 1.3 Grader, anomaly_hindsight (differences only; dropped 2026-11-26, #98, kept for the record)
 
 - **Point in time** covers confidence only.
 - **`grade.hindsight` like-for-like rules.** The cleaned series must be blank on:
@@ -161,8 +161,8 @@ With `WRITEUP_JUDGE=skip`, or when no judge can run, the total is the data rewar
 |---|---|---|---|
 | Answer key (oracle) | 1.000 | 1.000 | grader check |
 | Ceiling (gold-informed, realistic imputation) | 0.980 | | |
-| Tuned reference (`solutions/reference`) | 0.933 | 0.937 | old-style write-up (not adapted to the report rubric) |
-| **Practitioner reference (`solutions/practitioner`)** | **0.893** | **0.906** | the reference Opus is compared with; 258 lines, 12 named settings; reports in `solutions/practitioner/reports/` score 1.0 (train-001) and 0.90-1.0 (train-002) under the current rubric |
+| Tuned reference (removed, #99) | 0.933 | 0.937 | old-style write-up (not adapted to the report rubric) |
+| **Practitioner reference (removed, #99; kept as the report tests' fixture `rl/tests/fixtures/anomaly_hard_report`)** | **0.893** | **0.906** | the reference Opus is compared with; 258 lines, 12 named settings; its reports score 1.0 (train-001) and 0.90-1.0 (train-002) under the current rubric |
 | Trust everything (reference's cleaned series) | 0.231 | | 1.0 on the 3 controls (correct there), 0 elsewhere |
 | Do nothing; distrust everything (reference's or answer key's series) | 0.000 | | |
 | Exploit probes (read the gold, keep memory between runs, recognise the self-run) | 0 or same as reference | | the channels are closed |
@@ -198,9 +198,8 @@ The runs were airgapped and used the subscription. Total = data reward x (0.5 + 
 2. Slow shifts: 0.78 a panel after the placement fix (were 2); place them first if 2 a panel is wanted.
 3. Judge calibration: label the calibration page (https://claude.ai/artifact/4Wbhocf2wEDgdXvzSX6FRp, 6 reports x 12
    items + 4 planted errors, blind); then trim the report rubric (42 items) to what earns its place.
-4. Pull request mayankmahajan24/rl_finance#73: title and description predate most of this work; rewrite, or split.
-5. Register anomaly_hard as a family; pass threshold; data_audit CI pins; anomaly_hindsight (not updated for any
-   of E34-E41).
+4. Pull request mayankmahajan24/rl_finance#73: title and description rewritten 2026-11-26 (#98); consider splitting.
+5. Register anomaly_hard as a family; pass threshold.
 
 ---
 
@@ -239,19 +238,24 @@ active construction; "Retired" means it was later replaced (see section 3).
 | E27 | 11-25 | anomaly_hindsight grader: cleaned series scored over each problem's whole span and on sub-visible problems; judge told every discarded stretch; instruction matched (H#8) | Not run (on hold); imports checked | Adopted (anomaly_hindsight only) |
 | E28 | 11-25 | anomaly_hindsight test bed (H#9): rebuild; grader check; 8 Opus runs (h1-*); fresh reference developed on the 15 tuning panels, one general rule at a time | Grader check: answer key 1.000 on all 13 tasks, do-nothing 0, distrust-everything 0, unmodified practitioner 0.817. Reference path: ph0 practitioner 0.797; **ph1 + four discard rules 0.846 (adopted)**; ph2-ph4 general two-sided rescale 0.765-0.779 (damages good rows); ph5 backfill detected changes 0.847 and ph6 centred offset inside changes 0.842 (no gain). Remaining loss: ramped shifts (repair gain 0.56), mostly undetected in real time. Three Opus runs killed by an infrastructure interruption at 06:38 and resumed in their own sessions | Done. Reference on all 13 tasks 0.869 (tuning 0.846, held-out 0.883). 8 Opus runs: data 0.324 (0.19-0.47), report 0.679, total 0.271 (anomaly_hard: 0.467 / 0.818 / 0.422). Main loss: the low-signal gate fails on 8-16 of 39 panels per run (82-92% of thin rows distrusted and blank; misses are blanked but still trusted, or distrusted but imputed); the detection gate fails on 4-10 tasks for half the runs |
 | E29 | 11-25 | anomaly_hindsight judge V5 false fails: two correct reports zeroed (every-row counts and after-first-year share read as contradictions; a dark stretch called blank). Facts now give rows_blank, rows_changed_at_all, distrusted shares and counts after the first year, per-series no-row stretches; V5 checks every reasonable reading and ignores word choice on a matching number | Re-judged all 8: no V5 gate; reports 0.64-0.71. Probe (one count changed to a wrong value): V5 still fails on 2 of 3 votes | Active |
-| E30 | 11-25 | Library-based references for anomaly_hard (#69, #70): practitioner with one part swapped for ruptures, Rbeast, statsmodels MSTL, statsforecast AutoETS or Prophet; tuning panels | Practitioner 0.871; MSTL 0.760; statsforecast 0.741; ruptures 0.738 (stricter 0.65-0.68); Rbeast 0.721 (stricter 0.693); Prophet 0.540 (on the sisters' median as regressor 0.398). Break finders miss ramps and slow drifts in real time, which leak out as one-day spikes (false alerts 15-19 a panel against 5.8); MSTL removes seasonality the sister comparison already removed; Prophet moves when a sister enters or leaves. Rbeast's first result in a process differs from later ones (warm-up call needed for point in time). None shorter in a way that matters | Retired; kept in `solutions/library/` |
+| E30 | 11-25 | Library-based references for anomaly_hard (#69, #70): practitioner with one part swapped for ruptures, Rbeast, statsmodels MSTL, statsforecast AutoETS or Prophet; tuning panels | Practitioner 0.871; MSTL 0.760; statsforecast 0.741; ruptures 0.738 (stricter 0.65-0.68); Rbeast 0.721 (stricter 0.693); Prophet 0.540 (on the sisters' median as regressor 0.398). Break finders miss ramps and slow drifts in real time, which leak out as one-day spikes (false alerts 15-19 a panel against 5.8); MSTL removes seasonality the sister comparison already removed; Prophet moves when a sister enters or leaves. Rbeast's first result in a process differs from later ones (warm-up call needed for point in time). None shorter in a way that matters | Retired; removed from the branch (#99), in git history |
 | E31 | 11-25 | Pinned task image for both tasks (#71, H#10) | Image built (python:3.12-slim by digest, full lockfile, pip check) and checked with no network: every library imports, a chart renders, the practitioner and every library variant run. The earlier Opus runs used the container's Python 3.13 (pandas 3.0.6) unpinned | Active; built tasks get it at the next rebuild |
 | E32 | 11-25 | anomaly_hard judge V5 fix ported; K1 needs a title and 25 words a section (#72); all reports re-judged; calibration page v2 (#73) | Opus reports now 0.76-0.93 (mean 0.846; none zeroed). Practitioner train-001 1.0; train-002 had lost its `## Open issues` heading in the readability rewrite (0.43), restored, 1.0; a test now checks both references. Planted errors under the fixed judge: the wrong claim still zeroed by V5, outside fact 0.95, no rationale 0.93 (P2, P3), generic report zeroed. Page: 6 real reports (2 reference, 4 Opus) x 12 contested items (V5, U1, P1-P3, O1-O3, M3, V4, F4, G5) labelled blind, plus 4 planted-error verdicts; labels in collection labels_v2 (the 32 earlier labels kept in labels) | Waiting on Mayank's labels |
 | E33 | 11-25 | Count and spend charts (#74, H#12): every series needs a count panel and a spend panel; G1-G5 grade both; reference reports redrawn (two figures, plain axis numbers) | Re-judged the six calibration reports: references 1.0 and 0.976 (one F4 vote); the four Opus reports already charted both measures and pass G1-G5 (0.76-0.90). The same Opus report moved 0.881 to 0.762 between two judge runs on non-chart items (M2-M4, F2, F4): judge run-to-run variance worth measuring. Calibration page refreshed with the new verdicts and charts | Active |
 | E34 | 11-25 | Confidence as a probability (#76, #77): balanced row Brier skill; continuity gate; practitioner made probabilistic (p0-p6) | Practitioner p3 0.811 tuning, 0.890 held-out (old discrete one: 0, fails the gate). 8 Opus runs (v9) on the rebuilt tasks; grading paused at t001-t004 (#80) | Superseded by E35 |
-| E35 | 11-26 | Fresh reference (#78-#82). Ramps scored for confidence only once fully built (#78); fresh probabilistic reference f1-f12 (one-off and shift posteriors, distrust until a new level settles, minimum shift 2.5 sigma, moves away from the original basis): best f11 0.888 with ramps (old reference under the same grader 0.769). Ramps dropped from the build (#80, #81): f11 0.922 tuning, 0.918 held-out; 4 Opus runs on ramp-free tasks 0.86-0.94 (too easy: false alerts nearly free). Confidence x (0.5 + 0.5 x alert precision) (#82): f11 0.807, Opus 0.45-0.81. Precision work g1-g3, h1-h3: shorter distrust window, yearly patterns, second pass for confidence, same-day culprit rule: false alerts 50 to 11 a panel, but Brier skill falls as precision rises (g3 0.86 x 0.26 precision; h3 0.76 x 0.48); best h2 0.836 tuning | Reference h2 kept in solutions/fresh (not yet the active reference); awaiting a decision on the target |
+| E35 | 11-26 | Fresh reference (#78-#82). Ramps scored for confidence only once fully built (#78); fresh probabilistic reference f1-f12 (one-off and shift posteriors, distrust until a new level settles, minimum shift 2.5 sigma, moves away from the original basis): best f11 0.888 with ramps (old reference under the same grader 0.769). Ramps dropped from the build (#80, #81): f11 0.922 tuning, 0.918 held-out; 4 Opus runs on ramp-free tasks 0.86-0.94 (too easy: false alerts nearly free). Confidence x (0.5 + 0.5 x alert precision) (#82): f11 0.807, Opus 0.45-0.81. Precision work g1-g3, h1-h3: shorter distrust window, yearly patterns, second pass for confidence, same-day culprit rule: false alerts 50 to 11 a panel, but Brier skill falls as precision rises (g3 0.86 x 0.26 precision; h3 0.76 x 0.48); best h2 0.836 tuning | h2 was kept in solutions/fresh; removed (#99), in git history |
 | E36 | 11-26 | Grader timing rules, one at a time (#83-#88): return after a temporary change 14 days unscored (was 45); ramps scored from visible until fully built, then a 7-day grace (was: only the 14 days after built); ramps planted again with the rule in the instruction (#85); one rule for every level change (until the new level has held two weeks, a week unscored, then fine); instruction framing: every source tracks the same fundamental momentum of the business (no method named) | Each rule needed its own window and wording; the windows read as rules to learn | Superseded by E39 (windows removed) |
 | E37 | 11-26 | First independent review (skills checklist): 14 findings | Applied (#87): report scored 0 when the code fails on the visible panel (was a free pass); continuity values strictly between 0.01 and 0.99; stability scaled to untrustworthy rows; parsed no-AI scan; shift visibility against a 7-day median's noise (train: scored steps and ramps 54 to 70 of 72); volume shifts get the size floor; instruction: kinds of problems and of normal behaviour, gates zero a panel, stability input as it is, temporary and lasting changes alike, report asks (count and spend figures, a not-to-do, point-in-time and self-run checks, a source with no sister); K5 and K7 narrowed; README rewritten; detection gate removed | Active |
 | E38 | 11-26 | Simplification pass (#87): keep every check that guards a real property, drop what is redundant | Detection gate and dead code removed; report rubric size left alone until the calibration labels exist | Active |
 | E39 | 11-26 | Confidence = the probability that the cleaned value is right (#89): all timing windows removed; instruction states intent, not formulas (2,300 to about 1,900 words) | Oracle 1.0 on train-001 (after E41); h2 0.354 then 0.526: TUL had two planted slow shifts (half the company drifting), h2 rescaled the two good sources for years at 99.5% confidence | Active |
 | E40 | 11-26 | Second independent review (#90): confidence was improper (strata by outcome paid for distrusting correct repairs); damaging good rows and flagging them paid (+0.12 a panel); slow shifts counted but the text said otherwise; continuity let 0.005/0.995 through | Strata fixed before the outcome; damage outside planted spans counts with fine rows and alerts are true only inside spans; instruction: a far drift is a problem until brought back; continuity fixed; regression tests | Active |
 | E41 | 11-26 | Oracle check and placement (#91-#94): no alerts = full precision; continuity judged on doubted rows; a level change checks its company is free over its whole span (two slow shifts on one company could land before); weights 45/45/10; Not scored lists thin series and a problem's days before it shows | Oracle 1.0, 1.0, 1.0; scratch build: no overlapping changes, steps and ramps 2 a panel, slow shifts 0.78 a panel (were 2) | Active; rebuild pending |
-| E25 | 11-25 | anomaly_hindsight copy with hindsight cleaning rules (#60, #61, H#1-H#4) | Built; every task has a thin start, 7 of 13 a company-wide break | Active, on hold |
+| E42 | 11-26 | Unscaled build (#95) and v11 Opus runs (8) on it; fresh reference r0-r3 on the tuning panels (#96) | Reference: h2 0.645, r1 (confidence = P(cleaned value right)) 0.698, **r2 (+ 2-sigma minimum shift) 0.720** (confidence 0.64, cleaned 0.87, stability 0.41), r3 0.673. Opus (6 graded): every run zeroed on most panels by the continuity gate, which the instruction did not then state (a flat 0.95 on normal rows); ungated 0.61-0.74 (confidence about 0.45, cleaned 0.93-0.94). Continuity rule now stated in the instruction | Reference r2 in scratch; Opus too easy once the gate is known |
+| E43 | 11-26 | Harder data, option 2 (#97): one-offs inside a level change on the same source (2 a panel), a step stacked on an earlier level change (1 a panel); instruction: "Problems can overlap" | Coded, not built or tested. Read of the Opus solutions: forward trackers with a running level against the sisters handle both with the same machinery, so little effect expected | On hold |
+| E46 | 11-26 | Pull request narrowed to anomaly_hard (#100): data_audit, anomaly_scoring and growth_thesis changes, their review logs, manifests and reward pins, and the shared-code changes they needed reverted to main | anomaly_hard keeps its own copy of the data-table text (`panel_schema.md`, "source" wording). A scratch build of train-001 on main's shared code is byte-identical to one on the branch's | Done |
+| E45 | 11-26 | Experimental solutions removed (#99): reference, practitioner, fresh (h2), library variants | The grader's check solutions stay (oracle, ceiling, naive, constant policies, exploit probes); the practitioner's code and reports moved to `rl/tests/fixtures/anomaly_hard_report` for the report tests. Reference r2 is in scratch only | Done |
+| E44 | 11-26 | Where Opus loses points (v11, own task) against r2 (tuning panels) | Opus Brier skill 0.94 (r2 0.78); per-kind Brier 0.02 (r2 0.09); cleaning gain on steps 0.99 (r2 0.83). Alert precision 0.01 (r2 0.43): about 24 false alerts a panel, almost all its blank thin-start rows at 0.02 that the grader already scores (its "established" rule needs two steady months, the grader's boundary is earlier); it never puts a planted problem below 0.5 (imputed days 0.70). Weak points of the method: sister median when several sisters are wrong, 0.10 / 1-sigma shift floor, shifts soon after a source is established, the same-date-last-year exception | Next: decide whether the thin-start edge should be scored; then target those weak points, not option 2 |
+| E25 | 11-25 | anomaly_hindsight copy with hindsight cleaning rules (#60, #61, H#1-H#4) | Built; every task has a thin start, 7 of 13 a company-wide break | Dropped 2026-11-26 (#98) |
 
 ---
 
@@ -263,7 +267,7 @@ active construction; "Retired" means it was later replaced (see section 3).
 | Detection gate (confidence at least 0.25) | 11-26 | Redundant (no detection scores 0) and zeroed good panels | Removed (E38) |
 | Stability over all problem rows | 11-26 | Near-free (every solution 0.95-1.0) | Alerts per planted problem, 10% weight (E39, #93) |
 | Ramp-free task (scratch build) and reference h3 on it | 11-26 | Reference reached 0.92 but Opus 0.86-0.94: too easy | Ramps planted again with the E39 scoring |
-| Reference candidates p0-p6, f1-f12, g1-g3, h1-h3 | 11-26 | Built for earlier confidence targets | A fresh reference against the E39 score (pending); h2 kept in solutions/fresh |
+| Reference candidates p0-p6, f1-f12, g1-g3, h1-h3 | 11-26 | Built for earlier confidence targets | A fresh reference against the E39 score (pending); h2 removed with the other experimental solutions (#99) |
 | Library-based references (ruptures, Rbeast, MSTL, statsforecast, Prophet) | 11-25 | Below the practitioner on the tuning panels (0.54-0.76 against 0.871), E30 | Practitioner (CUSUM) kept |
 | Real-data background, reviewed real problems, quirk events, hindsight reference, review/triage tools | 11-23 / 11-24 | Debatable labels; no exact truth | Semi-real background with planted problems (E5) |
 | Per-alert precision weighting, event F1, the "fixed" metric, row-level F1 | 11-23 | Restated other parts or rewarded spraying flags | Alert F1 with the 14-day split |

@@ -1,6 +1,6 @@
 """anomaly_hard write-up grader, the parts checked in code (rl/experiments/anomaly_hard/writeup.py): offline, no judge.
 
-  - the reference report (solutions/practitioner/reports) passes every code item, and is within the word bounds
+  - the reference report (tests/fixtures/anomaly_hard_report/reports) passes every code item, and is within the word bounds
   - each near-miss fails the item it breaks, and only that one: a section dropped, two sections swapped, a mention of
     how the work is assessed or how to run the code, no chart, code that writes the report, a ticker hand-coded
   - the word count leaves out tables, code blocks and chart lines; the numbers listed for the judge skip mechanics
@@ -20,14 +20,15 @@ HERE = pathlib.Path(__file__).resolve().parents[1] / 'experiments' / 'anomaly_ha
 sys.path[:0] = [str(HERE)]
 import writeup as W  # noqa: E402
 
-REPORTS = HERE / 'solutions' / 'practitioner' / 'reports'
+FIX = pathlib.Path(__file__).resolve().parent / 'fixtures' / 'anomaly_hard_report'   # a known-good scorer and its reports
+REPORTS = FIX / 'reports'
 REF = REPORTS / 'anomhard-train-001.md'
 VISIBLE = pd.DataFrame({'date': pd.to_datetime(['2011-01-05']), 'ticker': ['TAG'], 'source_id': [1], 'ct': [1],
                         'amt': [1.0], 'industry': ['x']})
 
 
 def items(text: str, sol: pathlib.Path | None = None, figs=True) -> dict:
-    sol = sol or HERE / 'solutions' / 'practitioner'
+    sol = sol or FIX
     f = W.figures(text, REF) if figs else []
     return {k: v['verdict'] for k, v in W.code_items(text, sol, VISIBLE, f).items()}
 
@@ -81,14 +82,14 @@ def test_no_chart_fails(ref):
 
 def test_code_that_writes_the_report_fails(tmp_path, ref):
     sol = tmp_path / 'sol'
-    shutil.copytree(HERE / 'solutions' / 'practitioner', sol, ignore=shutil.ignore_patterns('reports'))
+    shutil.copytree(FIX, sol, ignore=shutil.ignore_patterns('reports'))
     (sol / 'make.py').write_text("open('/app/output/writeup.md', 'w').write('report')\n")
     assert items(ref, sol)['K7'] == 'fail'
 
 
 def test_hand_coded_ticker_fails(tmp_path, ref):
     sol = tmp_path / 'sol'
-    shutil.copytree(HERE / 'solutions' / 'practitioner', sol, ignore=shutil.ignore_patterns('reports'))
+    shutil.copytree(FIX, sol, ignore=shutil.ignore_patterns('reports'))
     (sol / 'special.py').write_text("SKIP = {'TAG': 1}\n")
     assert items(ref, sol)['K6'] == 'fail'
 
@@ -127,7 +128,7 @@ def test_an_inequality_in_prose_is_not_hidden_text(ref):
 
 def test_an_epoch_date_in_code_is_not_a_hand_picked_case(tmp_path, ref):
     sol = tmp_path / 'sol'
-    shutil.copytree(HERE / 'solutions' / 'practitioner', sol, ignore=shutil.ignore_patterns('reports'))
+    shutil.copytree(FIX, sol, ignore=shutil.ignore_patterns('reports'))
     (sol / 'epoch.py').write_text("ORIGIN = '1970-01-01'\nPICKED = '2011-01-05'\n")
     picked = W.hand_picked(sol, VISIBLE)
     assert any('2011-01-05' in p for p in picked) and not any('1970-01-01' in p for p in picked)
@@ -142,7 +143,7 @@ def test_an_epoch_date_in_code_is_not_a_hand_picked_case(tmp_path, ref):
                                       ("n = df.groupby('source_id').size()\nok = n == 1\n", False)])
 def test_source_specific_logic_fails(tmp_path, ref, code, bad):
     sol = tmp_path / 'sol'
-    shutil.copytree(HERE / 'solutions' / 'practitioner', sol, ignore=shutil.ignore_patterns('reports'))
+    shutil.copytree(FIX, sol, ignore=shutil.ignore_patterns('reports'))
     (sol / 'special.py').write_text(code)
     assert (items(ref, sol)['K6'] == 'fail') is bad, W.hand_picked(sol, VISIBLE)
 

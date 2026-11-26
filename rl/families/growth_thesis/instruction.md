@@ -8,7 +8,7 @@ company's real activity, not of any one data vendor's panel.
 
 {schema}
 
-This panel is simulated for the exercise: the airlines, their activity and the data sources are generated, using a real
+This panel is simulated for the exercise: the airlines, their activity and the sensors are generated, using a real
 airline seasonal pattern, and dates are shifted by a whole multiple of 364 days. Treat it as you would real vendor data.
 
 ## What to deliver

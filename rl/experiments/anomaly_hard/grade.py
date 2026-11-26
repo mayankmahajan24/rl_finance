@@ -137,6 +137,15 @@ def _sandboxed(cmd: list[str], work: pathlib.Path) -> list[str]:
     return ['unshare', '-n', '-m', '--propagation', 'private', '--', 'sh', '-c', f'{mounts} cd {shlex.quote(str(work))} && exec {inner}']
 
 
+def panel_csv(panel: pd.DataFrame) -> str:
+    """The panel as text. A count column that carries dollars on some rows (a column swap) is written row by row:
+    whole counts without a decimal point, so the other rows read as they always have."""
+    if panel.ct.dtype.kind == 'f':
+        panel = panel.assign(ct=pd.Series([int(v) if float(v).is_integer() else v for v in panel.ct],
+                                           index=panel.index, dtype=object))
+    return panel.to_csv(index=False, date_format='%Y-%m-%d')
+
+
 def run(script: pathlib.Path, panel: pd.DataFrame, cache: pathlib.Path | None = None, keep_extra: bool = False) -> pd.DataFrame:
     if cache and cache.exists():
         return pd.read_csv(cache, parse_dates=['date'])
@@ -145,7 +154,7 @@ def run(script: pathlib.Path, panel: pd.DataFrame, cache: pathlib.Path | None = 
     work = pathlib.Path(tempfile.mkdtemp(dir=WORK_ROOT if ISOLATE else None))
     try:
         work.chmod(0o777)
-        panel.to_csv(work / 'in.csv', index=False, date_format='%Y-%m-%d')
+        (work / 'in.csv').write_text(panel_csv(panel))
         (work / 'in.csv').chmod(0o644)
         env = {'PATH': os.environ['PATH'], 'HOME': str(work)}            # no proxy settings: no network
         cmd = [sys.executable, str(script), '--input', str(work / 'in.csv'), '--output', str(work / 'out.csv')]

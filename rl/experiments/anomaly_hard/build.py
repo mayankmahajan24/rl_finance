@@ -61,6 +61,10 @@ N_RECURRING, N_SLOW = 2, 2   # per panel: planted yearly closures (normal) and s
 N_MULTI = 1            # per panel: one of each several-day problem (perturb.MULTI)
 N_PHANTOM, N_SMALL, N_CHAIN = 1, 1, 1   # per panel: a phantom-count stretch, a small step on a clean source, and a
 #                                         one-off planted a week or two before a level change on the same source
+N_STUCK_ONE = 1        # per panel: one count-only and one dollars-only stuck stretch (perturb.stuck_one)
+N_SWAP = 2             # per panel: a source with count and dollars swapped, one for its whole history, one from a date on
+N_SOURCE_WIDE = 1      # per panel: a temporary step on one source across its companies at once (perturb.source_step)
+SWAP_MIN_CT = 1.5 * THIN_CT   # a swapped series is never near the low-signal line (its count column is unreadable)
 
 
 def plant(rng, control, ctx, n_tickers=8, sensors=None):
@@ -112,6 +116,35 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
     truth_df = F.df.copy()
     if not control:
         cands = F.candidates(exclude_series=art_series)
+        # the series whose count and dollars are swapped for its whole history is set aside now (nothing else is
+        # planted on it) and swapped last; it is never near the low-signal line, whose rule reads the count
+        med28 = truth_df.sort_values('date').groupby(['ticker', 'source_id']).ct.apply(
+            lambda x: x.rolling(28, min_periods=1).median().min())
+        whole_swap = None
+        if N_SWAP:
+            for _ in range(500):
+                t, s = cands[int(rng.integers(len(cands)))]
+                if med28.get((t, s), 0) >= SWAP_MIN_CT and free((t, s), d0, d1) and free(('pt', t, s), d0, d1):
+                    whole_swap = (t, s)
+                    busy += [((t, s), d0, d1), (('pt', t, s), d0, d1)]
+                    break
+        # one source, every company at once: a temporary step that starts and ends on the same days everywhere.
+        # Placed first, while each company still has a free stretch; each company's series is one level-shift event
+        for _ in range(N_SOURCE_WIDE):
+            for _ in range(500):
+                s = int(rng.choice(sorted({s_ for _, s_ in cands})))
+                lo, length = day(0.32, 0.8), int(rng.integers(30, 91))
+                hi = lo + pd.Timedelta(days=length + 45)
+                mult = float(rng.choice([rng.uniform(0.55, 0.75), rng.uniform(1.4, 1.8)]))
+                have = [t for t, s_ in cands if s_ == s]
+                ok = [t for t in have if free((t, s), lo, hi) and free(('pt', t, s), lo, hi) and free(t, lo, hi)
+                      and free(('chg', t), lo, hi) and abs(np.log(mult)) >= P.SHIFT_K * P.own_noise(F, t, s)['ct']]
+                if len(ok) < max(2, min(3, len(have))):
+                    continue
+                events += P.source_step(F, s, ok, lo, length, mult)
+                for t in ok:
+                    busy += [((t, s), lo, hi), (('chg', t), lo, hi)]
+                break
         jobs = [(f, None) for f in P.POINTS for _ in range(N_POINTS)] + [(mode, None) for mode, n in SHIFTS
                                                                         for _ in range(n)]
         jobs += [('slow', None) for _ in range(N_SLOW)]
@@ -161,6 +194,20 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
                                    and free(('multi', t), lo, hi)):
                     continue
                 ev = f(F, t, s, lo)
+                if ev:
+                    events += ev
+                    busy += [(k_, lo, hi) for k_ in ((t, s), ('pt', t, s), ('multi', t))]
+                    break
+        # one measure stuck while the other keeps moving: once on the count, once on the dollars
+        for col in ['ct', 'amt'] * N_STUCK_ONE:
+            for _ in range(500):
+                t, s = cands[int(rng.integers(len(cands)))]
+                lo = day(0.32, 0.93)
+                hi = lo + pd.Timedelta(days=8)
+                if hi > d1 or not (free((t, s), lo, hi) and free(('pt', t, s), lo, hi) and free(t, lo, hi)
+                                   and free(('multi', t), lo, hi)):
+                    continue
+                ev = P.stuck_one(F, t, s, lo, col)
                 if ev:
                     events += ev
                     busy += [(k_, lo, hi) for k_ in ((t, s), ('pt', t, s), ('multi', t))]
@@ -234,6 +281,21 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
                     if ev:
                         events += ev
                         break
+    if not control:
+        # count and dollars swapped in one source, last of all: the series set aside above for its whole history,
+        # and one more, on another company, from a date on (nothing else planted on it from 45 days before)
+        if whole_swap:
+            events += P.column_swap(F, *whole_swap, d0)
+        for _ in range(500 if N_SWAP > 1 else 0):
+            t, s = cands[int(rng.integers(len(cands)))]
+            lo = day(0.35, 0.85)
+            if (whole_swap and t == whole_swap[0]) or med28.get((t, s), 0) < SWAP_MIN_CT or any(
+                    b[0] in ((t, s), ('pt', t, s)) and b[2] >= lo - pd.Timedelta(days=45) for b in busy):
+                continue
+            ev = P.column_swap(F, t, s, lo)
+            if ev:
+                events += ev
+                break
     # company-wide natural breaks (every source at once: nothing to recover them from) are not scored
     excl = [dict(ticker=i['ticker'], source_id=i['source_id'], lo=i['start'],
                  hi=i['end'] or F.d(ctx.panel_end)) for i in req]
@@ -358,9 +420,9 @@ def build_task(ctx, d: pathlib.Path, seed: int, control: bool) -> dict:
     for f in ('Dockerfile', 'requirements.lock'):     # the pinned task image (environment/ in this folder)
         shutil.copy(HERE / 'environment' / f, d / 'environment' / f)
     (d / 'tests').mkdir()
-    shown.to_csv(d / 'environment' / 'data' / 'transactions.csv', index=False, date_format='%Y-%m-%d')
+    (d / 'environment' / 'data' / 'transactions.csv').write_text(grade.panel_csv(shown))
     (d / 'tests' / 'eval_panel.csv.gz').write_bytes(gzip.compress(
-        hidden.to_csv(index=False, date_format='%Y-%m-%d').encode(), mtime=0))
+        grade.panel_csv(hidden).encode(), mtime=0))
     (d / 'tests' / 'truth_panel.csv.gz').write_bytes(gzip.compress(
         clean.to_csv(index=False, date_format='%Y-%m-%d').encode(), mtime=0))
     (d / 'tests' / 'gold.json').write_text(json.dumps(dict(truth, seed=seed), indent=1))
@@ -368,7 +430,7 @@ def build_task(ctx, d: pathlib.Path, seed: int, control: bool) -> dict:
         h, t, _, c = plant(np.random.default_rng([seed, k]), control, ctx, sensors=hid)
         pk = d / 'tests' / f'panel-{k}'
         pk.mkdir()
-        pk.joinpath('eval_panel.csv.gz').write_bytes(gzip.compress(h.to_csv(index=False, date_format='%Y-%m-%d').encode(), mtime=0))
+        pk.joinpath('eval_panel.csv.gz').write_bytes(gzip.compress(grade.panel_csv(h).encode(), mtime=0))
         pk.joinpath('truth_panel.csv.gz').write_bytes(gzip.compress(c.to_csv(index=False, date_format='%Y-%m-%d').encode(), mtime=0))
         pk.joinpath('gold.json').write_text(json.dumps(dict(t, seed=seed, panel=k), indent=1))
     (d / 'tests').chmod(0o700)          # grader-only: the scorer runs as nobody and cannot read it

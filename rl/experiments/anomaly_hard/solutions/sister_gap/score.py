@@ -35,6 +35,13 @@ MIN_SD = 0.02        # floor on a source's noise sd (log units)
 DEFAULT_SD = 0.15    # noise sd before there is history to measure it
 MIN_HIST = 30        # observations needed to measure a noise sd
 STUCK_DAYS = 3       # identical reports in a row before a feed counts as stuck
+STUCK_ONE_DAYS = 4   # identical reports in a row of one measure alone (count or dollars) before it counts as stuck
+STUCK_ONE_MIN = 30   # a count repeating on its own counts as stuck from this many transactions (chance repeats below)
+SWAP_TICKET = 1.0    # dollars per transaction under this: the two columns may be swapped
+SWAP_BAND = 3.0      # ... if the reverse ratio is within this factor of the sisters' ticket that day
+POOL_OFF = 3.0       # a level this many day-spreads from zero is far enough for "back at zero" to mean something
+POOL_BACK = 1.5      # back at the usual relation: the day's gap within this many spreads of zero
+POOL_MIN, POOL_SHARE = 2, 0.75   # a source is released when this many of its shifted companies, and this share, are back
 STUCK_MIN = 5        # a repeat of count and dollars counts as stuck from this many transactions
 THIN_CT = 20         # transactions a day below which a new source carries no signal
 THIN_EDGE = 0.8      # 7- and 28-day medians both at this share of THIN_CT already count as growing out of thin
@@ -82,10 +89,12 @@ def gaps(x, adj, base, bad):
     return g, n
 
 
-def one_measure(X, est, pred_ct=None, stuck=None, cnt=None):
+def one_measure(X, est, pred_ct=None, stuck=None, cnt=None, release=None):
     """X: days x sources, log values (blank where no row). Returns the cleaned log values, z (gap from level in
     noise sds), state (0 as reported, 1 imputed day, 2 rescaled level, 3 yearly pattern kept), moving (level taken
-    from the 7-day median) and n (sisters used)."""
+    from the 7-day median), n (sisters used), and for pooling across companies the raw gap, its spread and the
+    level in force. `release` (days x sources): the source's level is dropped that day and measured afresh from
+    there, because its other companies came back to their usual relation on the same day."""
     T, S = X.shape
     X = np.where(est, X, np.nan)               # a source has a usual level only once it is established
     C = X.copy()                               # cleaned history, feeds the usual relation
@@ -99,6 +108,8 @@ def one_measure(X, est, pred_ct=None, stuck=None, cnt=None):
     ST = np.zeros((T, S), int)
     MV = np.zeros((T, S), bool)
     NS = np.zeros((T, S), int)
+    SD = np.full((T, S), np.nan)
+    since = np.zeros(S, int)                   # first day the level may be measured from
     sd_e = sd_7 = sd_14 = sd_28 = None
     for t in range(T):
         x = X[t]
@@ -129,6 +140,9 @@ def one_measure(X, est, pred_ct=None, stuck=None, cnt=None):
         sd14 = np.maximum(np.where(np.isnan(sd_14), 0.5 * sd, sd_14), 0.32 * sd)
         sd28 = np.maximum(np.where(np.isnan(sd_28), 0.4 * sd, sd_28), 0.25 * sd)
         prev = LV[t - 1] if t else np.zeros(S)
+        if release is not None and release[t].any():
+            since = np.where(release[t], t, since)
+            prev = np.where(release[t], 0.0, prev)
         adj = x - prev                         # sisters at their usual level, by yesterday's level
         bad = np.zeros(S, bool)
         g, n = gaps(x, adj, base, bad)
@@ -141,9 +155,15 @@ def one_measure(X, est, pred_ct=None, stuck=None, cnt=None):
             g2, n2 = gaps(x, adj, base, bad)
             g = np.where(bad, g, g2)
             n = np.where(bad, n, n2)
-        G[t], NS[t] = g, n
+        G[t], NS[t], SD[t] = g, n, sd
         # the standing level, from the gap's recent medians
-        w7, w14, w28 = (G[max(t - w + 1, 0):t + 1] for w in (SHORT, MID, LONG))
+        r0 = max(t - LONG + 1, 0)
+        w28 = G[r0:t + 1]
+        if (since > r0).any():                 # after a release, days before it no longer count towards the level
+            w28 = w28.copy()
+            for s in np.flatnonzero(since > r0):
+                w28[:since[s] - r0, s] = np.nan
+        w7, w14 = w28[-SHORT:], w28[-MID:]
         q7 = np.where((~np.isnan(w7)).sum(axis=0) >= 4, nanmed(w7, axis=0), np.nan)
         q14 = np.where((~np.isnan(w14)).sum(axis=0) >= 8, nanmed(w14, axis=0), np.nan)
         q28 = np.where((~np.isnan(w28)).sum(axis=0) >= 14, nanmed(w28, axis=0), np.nan)
@@ -187,7 +207,7 @@ def one_measure(X, est, pred_ct=None, stuck=None, cnt=None):
             else:
                 ST[t, s] = 2 if on[s] else 0
                 C[t, s] = x[s] - lv[s]
-    return C, Z, ST, MV, NS
+    return C, Z, ST, MV, NS, (G, SD, LV)
 
 
 def recurs(E, t, s, e, sd):
@@ -212,11 +232,23 @@ def confidence(z, st, mv, n):
     return np.where(n >= 1, c, 0.97)                         # no sister to compare with: kept as reported
 
 
-def score_company(g):
+def score_company(g, release=None):
+    """One company. `release`: (count, ticket) frames of days x sources on which a source's level is dropped (see
+    pooled). Returns the output rows and, per measure, the gap, spread and level in force for pooling."""
     ct = g.pivot(index='date', columns='source_id', values='ct').astype(float)
     amt = g.pivot(index='date', columns='source_id', values='amt').astype(float)
     days = pd.date_range(ct.index.min(), ct.index.max(), freq='D')   # every calendar day, so weekdays line up
     ct, amt = ct.reindex(days).rename_axis('date'), amt.reindex(days).rename_axis('date')
+    # columns swapped: dollars per transaction under SWAP_TICKET, and the reverse ratio in line with the other
+    # sources that day (or, with none to compare, with this source's own earlier days): the row is swapped back
+    # before anything else looks at it
+    tk, back = amt / ct, ct / amt
+    good = tk.where(tk >= SWAP_TICKET)
+    ref = pd.DataFrame({s: good.drop(columns=s).median(axis=1) for s in good.columns})
+    ref = ref.where(ref.notna(), good.shift(1).rolling(LONG, min_periods=1).median().ffill())
+    swapped = (tk < SWAP_TICKET) & (back >= SWAP_TICKET) & (
+        ref.isna() | ((back / ref >= 1 / SWAP_BAND) & (back / ref <= SWAP_BAND)))
+    ct, amt = ct.where(~swapped, amt), amt.where(~swapped, ct)
     ct = ct.where(ct > 0)
     lc = np.log(ct)
     lt = np.log(amt.where(amt > 0)) - lc
@@ -233,13 +265,22 @@ def score_company(g):
     same = (ct == ct.shift(1)) & (amt == amt.shift(1))
     stuck = (same.astype(int).rolling(STUCK_DAYS - 1).sum() == STUCK_DAYS - 1) & (ct >= STUCK_MIN)
     stuck = stuck.to_numpy()
-    Cc, Zc, Sc, Mc, Nc = one_measure(lc.to_numpy(), est, pred, stuck, ct.to_numpy())
-    Ct, Zt, St, Mt, Nt = one_measure(lt.to_numpy(), est, None, stuck)
+    # one measure stuck while the other moves: the same count, or the same dollars to the cent, STUCK_ONE_DAYS running
+    rep = lambda v: (v == v.shift(1)).astype(int).rolling(STUCK_ONE_DAYS - 1).sum() == STUCK_ONE_DAYS - 1   # noqa: E731
+    stuck_c = (rep(ct) & (ct >= STUCK_ONE_MIN)).to_numpy() & ~stuck
+    stuck_a = (rep(amt) & (ct >= STUCK_MIN)).to_numpy() & ~stuck
+    rel_c, rel_t = (None, None) if release is None else (r.reindex(index=days, columns=ct.columns).fillna(False)
+                                                         .to_numpy(bool) for r in release)
+    Cc, Zc, Sc, Mc, Nc, Dc = one_measure(lc.to_numpy(), est, pred, stuck | stuck_c, ct.to_numpy(), rel_c)
+    Ct, Zt, St, Mt, Nt, Dt = one_measure(lt.to_numpy(), est, None, stuck | stuck_c | stuck_a, None, rel_t)
     conf = np.minimum(confidence(Zc, Sc, Mc, Nc), confidence(Zt, St, Mt, Nt))
     same_c = np.isin(Sc, (0, 3))
     same_t = np.isin(St, (0, 3))
     clean_ct = np.where(same_c, ct.to_numpy(), np.exp(Cc))
     clean_amt = np.where(same_c & same_t, amt.to_numpy(), clean_ct * np.exp(Ct))
+    one_c = stuck_c & (Sc == 1) & (St == 1)      # count stuck, dollars good: the count is dollars / usual ticket
+    clean_ct = np.where(one_c, amt.to_numpy() / np.exp(Ct), clean_ct)
+    clean_amt = np.where(one_c, amt.to_numpy(), clean_amt)
     conf = np.where(thin, 0.05, conf)
     clean_ct = np.where(thin, np.nan, clean_ct)
     clean_amt = np.where(thin, np.nan, clean_amt)
@@ -247,11 +288,52 @@ def score_company(g):
     rank = np.array([0, 3, 2, 1])                                   # as reported < yearly < rescaled < imputed
     worst = np.where(rank[Sc] >= rank[St], Sc, St)
     treat = np.array(['as reported', 'imputed', 'rescaled', 'yearly pattern kept'], dtype=object)[worst]
+    treat = np.where(swapped.to_numpy() & (worst == 0), 'columns swapped back', treat)
     treat = np.where(thin, 'discarded', treat)
     out = []
     for k, name in ((conf, 'confidence'), (clean_ct, 'clean_ct'), (clean_amt, 'clean_amt'), (treat, 'treatment')):
         out.append(pd.DataFrame(k, index=ct.index, columns=ct.columns).stack(future_stack=True).rename(name))
-    return pd.concat(out, axis=1).reset_index()
+    diag = [tuple(pd.DataFrame(a, index=ct.index, columns=ct.columns) for a in d) for d in (Dc, Dt)]
+    return pd.concat(out, axis=1).reset_index(), diag
+
+
+def pooled(diags):
+    """A source's problem that hits all its companies ends for all of them on one day. For each measure, day and
+    source: of the companies whose series stood at a level well away from zero (POOL_OFF spreads) coming into the
+    day, count those whose gap is back at zero today (within POOL_BACK spreads). With POOL_MIN or more back, and
+    POOL_SHARE of them, every shifted series of that source that is nearer zero than its old level is released:
+    its level is dropped that day instead of waiting for its own week of evidence. Uses the day and earlier only."""
+    out = {tk: [] for tk in diags}
+    for m in (0, 1):
+        on, back, near = {}, {}, {}
+        for tk, d in diags.items():
+            G, SD, LV = d[m]
+            prev = LV.shift(1)
+            on[tk] = prev.abs() >= POOL_OFF * SD
+            back[tk] = on[tk] & (G.abs() <= POOL_BACK * SD)
+            near[tk] = (prev != 0) & prev.notna() & (G.abs() < (G - prev).abs())
+        idx = sorted(set().union(*[x.index for x in on.values()]))
+        cols = sorted(set().union(*[x.columns for x in on.values()]))
+        tot = lambda d: sum(x.reindex(index=idx, columns=cols).fillna(False).astype(int) for x in d.values())   # noqa: E731
+        n_on, n_back = tot(on), tot(back)
+        go = (n_back >= POOL_MIN) & (n_back >= POOL_SHARE * n_on)
+        for tk in diags:
+            out[tk].append(near[tk] & go.reindex(index=near[tk].index, columns=near[tk].columns).fillna(False))
+    return out
+
+
+def score_panel(df):
+    """Every company once; then again, with the pooled releases, for the companies that have one."""
+    first = {tk: score_company(g) for tk, g in df.groupby('ticker', sort=False)}
+    release = pooled({tk: d for tk, (_, d) in first.items()})
+    parts = []
+    for tk, g in df.groupby('ticker', sort=False):
+        r = first[tk][0]
+        if any(x.to_numpy().any() for x in release[tk]):
+            r = score_company(g, release[tk])[0]
+        r.insert(1, 'ticker', tk)
+        parts.append(r)
+    return pd.concat(parts)
 
 
 def main():
@@ -261,12 +343,7 @@ def main():
     a = ap.parse_args()
     df = pd.read_csv(a.input)
     df['date'] = pd.to_datetime(df['date'])
-    parts = []
-    for tk, g in df.groupby('ticker', sort=False):
-        r = score_company(g)
-        r.insert(1, 'ticker', tk)
-        parts.append(r)
-    res = pd.concat(parts)
+    res = score_panel(df)
     out = df[['date', 'ticker', 'source_id']].merge(res, on=['date', 'ticker', 'source_id'], how='left')
     out['confidence'] = out['confidence'].fillna(0.5).clip(0, 1).round(4)
     blank = out.clean_ct.isna() & (out.confidence >= 0.5)       # no usable reading (e.g. zero count): keep as reported

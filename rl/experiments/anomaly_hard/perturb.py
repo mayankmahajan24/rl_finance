@@ -212,6 +212,55 @@ def rollup(F, t, s, day):
     return [_ev('rollup', t, s, day, day + k * DAY, frac=frac, held_days=k)]
 
 
+STUCK_ONE_DAYS = 4   # identical reports in a row of ONE measure from which it counts as stuck (three repeats)
+
+
+def stuck_one(F, t, s, day, col):
+    """Half a stuck feed: one measure (`col`: 'ct' or 'amt') is reported again, exactly, on each of the next 3-7 days
+    while the other keeps moving. A count can repeat by chance, so it counts as stuck from the fourth identical day."""
+    k = int(F.rng.integers(3, 8))
+    m = _rows(F, t, s, day, day + k * DAY)
+    if m is None:
+        return []
+    first = F.mask(t, s, day, day)
+    rest = F.mask(t, s, day + DAY, day + k * DAY)
+    v = F.df.loc[first, col].iloc[0]
+    if col == 'ct' and (F.df.loc[rest, 'ct'] == v).all() or col == 'amt' and (F.df.loc[rest, 'amt'] == v).all():
+        return []
+    F.df.loc[rest, col] = int(v) if col == 'ct' else float(v)
+    return [_ev('stuck', t, s, day + DAY, day + k * DAY, repeated=k, measure='count' if col == 'ct' else 'dollars',
+                visible=_fmt(day + (STUCK_ONE_DAYS - 1) * DAY))]
+
+
+def column_swap(F, t, s, start):
+    """A mislabelled feed: from `start` to the end of the panel the source's count column carries its dollars and its
+    dollar column its count. Applied last (nothing else is planted on swapped rows)."""
+    m = F.mask(t, s, start)
+    if not m.any():
+        return []
+    F.df['ct'] = F.df.ct.astype(float)
+    F.df.loc[m, ['ct', 'amt']] = F.df.loc[m, ['amt', 'ct']].to_numpy(float)
+    days = F.df.loc[m, 'date']
+    return [_ev('column_swap', t, s, days.min(), days.max(), whole=bool(days.min() == F.df.loc[F.mask(t, s), 'date'].min()))]
+
+
+def source_step(F, s, tickers, start, length, mult):
+    """One source changes its panel for every company at once: count and dollars x`mult` on each of `tickers` from
+    `start` for `length` days, then back on the same day everywhere. One level-shift event per company, marked
+    `source_wide`."""
+    end = start + pd.Timedelta(days=length)
+    out = []
+    for t in tickers:
+        m = F.mask(t, s, start, end)
+        if not m.any():
+            continue
+        _scale(F, m, mult, mult)
+        out += [_ev('level_shift_step', t, s, start, end, regime=True, permanent=False, measure='volume', ct_mult=mult,
+                    amt_mult=mult, ramp_days=0, shift_start=_fmt(start), settle=_fmt(start + pd.Timedelta(days=14)),
+                    source_wide=True)]
+    return out
+
+
 MULTI = [(volume_block, 10), (outage, 21), (intermittent, 56), (stuck, 8), (rollup, 4)]   # injector, longest span
 
 

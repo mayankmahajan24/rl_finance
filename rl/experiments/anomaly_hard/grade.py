@@ -15,7 +15,6 @@ Gates (reward 0 if any fails):
   writeup        SOLUTION_DIR/../output/writeup.md (or --writeup) exists and is not empty
   low_signal_dropped  at least LOW_SIGNAL_SHARE of the thin beginning's rows distrusted (confidence < 0.5) and blank
   continuous     confidence is a probability on a continuous scale, not a few levels (see continuous())
-  detects        confidence score at least MIN_CONFIDENCE (repairing the series without detecting problems cannot pass)
 
 Data reward = W_CONF x confidence + W_CLEAN x cleaned series + W_STAB x stability (0.4 / 0.4 / 0.2). Also reported:
 the three components and the geometric mean sqrt(confidence x cleaned series x stability) (reward_geometric).
@@ -63,11 +62,12 @@ Stability: score.py run again on its own cleaned series (blank rows dropped) and
 distrusted on its cleaned series beyond those distrusted on the truth panel) / (rows of the task's scored problems,
 in either score; a panel with none: its scored rows), floored at 0. If a run fails, 0.
 
-The write-up must exist (a gate); its content is read by a reviewer, not scored here.
+The write-up must exist (a gate); it is scored by writeup.py (see Reward above).
 """
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import os
 import pathlib
@@ -97,17 +97,12 @@ THIN_LO, THIN_HI, THIN_EDGE = 0.8, 1.25, 14   # thin: truth count's 28-day media
 # dropped (distrusted, left blank); between THIN_LO and THIN_HI x thin_ct, and the first THIN_EDGE days of a thin
 # stretch and the THIN_EDGE days after it, are not scored (the code cannot tell yet, point in time)
 LOW_SIGNAL_SHARE = 0.9   # gate: share of a task's thin-beginning rows that must be distrusted and left blank
-CONT_HI = 0.99           # gate continuous: rows scored under this (a probability near 1 can saturate) are checked
+CONT_LO, CONT_HI = 0.01, 0.99   # gate continuous: rows scored strictly between these are checked (saturated ends left out)
 CONT_DISTINCT, CONT_TOP = 20, 0.5   # ... at least this many distinct values; no value on more than this share
-MIN_CONFIDENCE = 0.25    # gate: the confidence score a solution must reach (it must actually detect problems)
 # imports or shell calls that reach a model or the network
 NO_AI = re.compile(r'\b(anthropic|openai|google\.generativeai|google\.genai|mistralai|cohere|ollama|litellm|langchain|'
                    r'transformers|requests|httpx|aiohttp|urllib\.request|urllib3|http\.client|socket|websocket|'
                    r'curl|wget)\b')
-
-
-def f1(p, r):
-    return 2 * p * r / (p + r) if p + r else 0.0
 
 
 class GateError(Exception):
@@ -199,13 +194,31 @@ def check_format(panel, s):
 
 
 def scan_no_ai(sol: pathlib.Path) -> list[str]:
-    """Lines that import a model or network client, or shell out to one."""
+    """Imports of a model or network client, or calls that load or shell out to one (parsed, so prose and comments
+    that mention one are not hits; a file that does not parse is read line by line)."""
     hits = []
     for f in sorted(sol.rglob('*.py')):
-        for i, line in enumerate(f.read_text(errors='replace').splitlines(), 1):
-            code = line.split('#', 1)[0]
-            if re.search(r'\b(import|from|subprocess|os\.system|os\.popen)\b', code) and NO_AI.search(code):
-                hits.append(f'{f.name}:{i}: {line.strip()[:120]}')
+        src = f.read_text(errors='replace')
+        try:
+            tree = ast.parse(src)
+        except SyntaxError:
+            for k, line in enumerate(src.splitlines(), 1):
+                code = line.split('#', 1)[0]
+                if re.search(r'\b(import|from|subprocess|os\.system|os\.popen)\b', code) and NO_AI.search(code):
+                    hits.append(f'{f.name}:{k}: {line.strip()[:120]}')
+            continue
+        for n in ast.walk(tree):
+            names = []
+            if isinstance(n, ast.Import):
+                names = [a.name for a in n.names]
+            elif isinstance(n, ast.ImportFrom):
+                names = [n.module or '']
+            elif isinstance(n, ast.Call):
+                fn = ast.unparse(n.func)
+                if fn.split('.')[0] in ('subprocess', 'os') or fn in ('__import__', 'importlib.import_module'):
+                    names = [ast.unparse(a) for a in n.args]
+            if any(NO_AI.search(x) for x in names):
+                hits.append(f'{f.name}:{n.lineno}: {(ast.get_source_segment(src, n) or "")[:120]}')
     return hits
 
 
@@ -367,9 +380,9 @@ def confidence_score(ev, scored):
 
 def continuous(ev) -> tuple[bool, dict]:
     """Confidence is a probability on a continuous scale, not a few levels: among scored rows (thin beginning left out)
-    with confidence under CONT_HI (0 included: all-or-nothing scores are levels too), at least CONT_DISTINCT distinct values (3 decimals) and no
+    with confidence strictly between CONT_LO and CONT_HI (a probability can saturate near 0 or 1), at least CONT_DISTINCT distinct values (3 decimals) and no
     single value on more than CONT_TOP of them. A panel with no such rows passes."""
-    u = ev[ev.use & ~ev.thin & (ev.confidence < CONT_HI)].confidence.round(3)
+    u = ev[ev.use & ~ev.thin & (ev.confidence > CONT_LO) & (ev.confidence < CONT_HI)].confidence.round(3)
     if u.empty:
         return True, dict(rows=0)
     distinct, top = int(u.nunique()), float(u.value_counts(normalize=True).iloc[0])
@@ -503,7 +516,7 @@ def score(truth: dict, data: pd.DataFrame, clean_truth: pd.DataFrame, sol: pathl
     scored = label_rows(truth, ev, clean_truth)
     conf, conf_d = confidence_score(ev, scored)
     cln, cln_d = clean_score(truth, ev, stretches)
-    problem_rows = max(int((ev.use & ev.label).sum()), sum(x['rows'] for x in cln_d.get('events', [])))
+    problem_rows = int((ev.use & ev.label).sum())   # the scale of what is wrong: the untrustworthy rows confidence scores
     cons, cons_d = consistency_score(sol, data, clean_truth, full, ev, stretches, c_, problem_rows)
     # low signal dropped: a source's thin beginning distrusted and left blank
     th = ev.thin
@@ -511,7 +524,6 @@ def score(truth: dict, data: pd.DataFrame, clean_truth: pd.DataFrame, sol: pathl
     low_share = float(dropped.sum() / th.sum()) if th.any() else 1.0
     gates['low_signal_dropped'] = low_share >= LOW_SIGNAL_SHARE
     gates['continuous'], cont_d = continuous(ev)
-    gates['detects'] = conf >= MIN_CONFIDENCE                          # cleaning alone cannot pass
     ok = all(gates.values())
     reward = (W_CONF * conf + W_CLEAN * cln + W_STAB * cons) * ok           # headline: a weighted average
     geo = float(np.sqrt(max(conf, 0.0) * max(cln * cons, 0.0))) * ok      # reported: the geometric mean
@@ -600,7 +612,9 @@ def grade_task(task: pathlib.Path, sol: pathlib.Path, writeup: pathlib.Path, cac
         h = home or task
         try:
             w = writeup_grade.grade(h, sol, writeup, run, (cache.parent / f'writeup-{h.name}') if cache else None)
-        except (GateError, RuntimeError) as e:
+        except GateError as e:                 # the code failed on the visible panel: no report can be checked
+            w = dict(writeup_score=0.0, judge=f'score.py failed on the visible panel: {str(e)[-300:]}')
+        except RuntimeError as e:              # the judge itself could not run: the data reward stands alone
             w = dict(writeup_score=None, judge=f'not graded: {str(e)[-300:]}')
     ws = (w or {}).get('writeup_score')
     reward = data_reward * (0.5 + 0.5 * ws) if ws is not None else data_reward

@@ -122,8 +122,7 @@ Your score is a weighted average of three parts: 45% confidence, 45% cleaned ser
   day-to-day noise of what it should have reported): high confidence where it is right, low where it is not, as a
   probability; each kind of problem weighs the same, and false alarms cost extra. So a problem your code has not yet
   caught or corrected should carry low confidence; once your cleaned value is back on track, confidence should be
-  high again, and a company's real moves, which your cleaned series keeps, should never be distrusted. Days before a
-  problem stands out from the source's own noise are not scored: nobody could know of it yet.
+  high again, and a company's real moves, which your cleaned series keeps, should never be distrusted.
 * **Cleaned series.** How much of each problem your cleaned values repair (in count and in dollars, beyond the
   source's own noise), without moving rows that were fine and without leaving rows blank that should be kept.
 * **Stability.** Your script is run again on its own cleaned series (counts rounded to whole numbers, dollars to
@@ -135,8 +134,9 @@ not dropped on it: a source that reports fewer than about twenty transactions a 
 coverage (its early history, or all of it) must be distrusted and left blank there (at least 90% of those rows). A
 source that dips that low after it was established is kept: those rows count in the cleaned-series score.
 
-Not scored: the panel's first year (history for your code to learn from), rows near the twenty-a-day line, and short
-stretches around moves of the underlying data that are too ambiguous to grade.
+Not scored: the panel's first year (history for your code to learn from), series too thin to grade, rows near the
+twenty-a-day line, a problem's days before it stands out from the source's own noise (nobody could know of it yet),
+and short stretches around moves of the underlying data that are too ambiguous to grade.
 
 **The report.** That total is then multiplied by 0.5 + 0.5 x the report's score, so a weak report can halve it but a
 good report cannot earn anything on its own. The report is checked against what is asked for above, on the panel you

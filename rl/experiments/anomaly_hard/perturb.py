@@ -9,7 +9,8 @@ reported, from the panel as it was before these were planted):
   problems the instruction already covers but no single-day or steady-level model fits (feedback #102):
     volume block   4-10 days too high or too low, then straight back ("a day or a few", stretched)
     outage         4-21 days at 1-5% of normal: the reported value carries no signal to rescale
-    intermittent   3-8 weeks in which a third or so of the days are doubled or mostly lost, the rest fine
+    intermittent   3-8 weeks in which about 40% of the days, in runs of 1-4, are doubled or mostly lost and the
+                   rest are fine; some weeks are mostly bad
     stuck          one day's count and dollars repeated for the next 3-7 days (scored from the third identical day)
     rollup         2-3 days nearly empty, their volume reported on the following day
     phantom        a fixed number of tiny extra transactions every day for 1-4 months (a level shift whose size in
@@ -40,6 +41,7 @@ from families._shared.panel_perturb import _fmt
 
 DAY = pd.Timedelta(days=1)
 VISIBLE = 0.14   # log size from which a ramping shift is labelled: about the 90th-percentile slow drift
+INTERMITTENT_RUN = 4   # the longest run of bad days in an intermittent fault (longer is a volume block)
 STUCK_DAYS = 3   # identical reports in a row from which a feed counts as stuck (the days before are not scored)
 POINT_K, SHIFT_K = 6.0, 3.0   # a one-day problem is at least 6x the source's own day-to-day noise; a level shift 3x
 
@@ -152,21 +154,33 @@ def outage(F, t, s, day):
 
 
 def intermittent(F, t, s, day):
-    """A flaky feed: for 3-8 weeks, 30-45% of the days (at random, at least five) are doubled or mostly lost; the
-    days in between are reported correctly."""
+    """A flaky feed: for 3-8 weeks the source keeps falling into the fault and coming back. Bad days come in runs of
+    1-4 (after a bad day the next is bad 6 times in 10, after a good day 3 in 10: about 40% of the days overall), so
+    some weeks are mostly bad and others nearly clean, and at least one 7-day window has four or more bad days. Bad
+    days are doubled or mostly lost; the days in between are reported correctly."""
     k = int(F.rng.integers(21, 57))
     m = _rows(F, t, s, day, day + (k - 1) * DAY)
     if m is None:
         return []
     mult = _clear(F, t, s, 2.0, 3.0)
-    idx = F.df.index[m]
-    n = max(5, int(round(k * F.rng.uniform(0.30, 0.45))))
-    bad = np.sort(F.rng.choice(len(idx), n, replace=False))
+    for _ in range(50):
+        bad, run = np.zeros(k, bool), 0
+        for i in range(k):
+            p = 0.0 if run >= INTERMITTENT_RUN else (0.6 if run else 0.3)
+            bad[i] = F.rng.random() < p
+            run = run + 1 if bad[i] else 0
+        week = np.convolve(bad, np.ones(7, int), 'valid').max()
+        if bad.sum() >= 5 and week >= 4 and bad.mean() <= 0.5:      # under half the days: never the source's new level
+            break
+    else:
+        return []
+    idx = F.df.loc[m].sort_values('date').index
     hit = pd.Series(False, index=F.df.index)
     hit[idx[bad]] = True
     _scale(F, hit, mult, mult)
     days = sorted(F.df.loc[hit, 'date'])
-    return [_ev('intermittent', t, s, days[0], days[-1], mult=mult, days=[_fmt(x) for x in days])]
+    return [_ev('intermittent', t, s, days[0], days[-1], mult=mult, days=[_fmt(x) for x in days],
+                share=float(bad.mean()), worst_week=int(week))]
 
 
 def stuck(F, t, s, day):

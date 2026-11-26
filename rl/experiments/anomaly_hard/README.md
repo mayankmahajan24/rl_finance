@@ -31,7 +31,7 @@ is exact. `truth_panel.csv.gz` is the hidden panel before the problems were plan
 | 2 steps, 2 ramps (2-8 weeks) | one source's level moves (volume, count only, or dollars only), temporary or permanent | first 14 days untrustworthy; then rescale to the old level and trust |
 | up to 2 slow ramps | one source moves x1.5-3 or x0.35-0.6 over 4-10 months, for good | cleaned series only (no datable onset) |
 | 1 each: volume block, outage (feedback #102) | one source, 4-10 days x2-4 or x0.25-0.5; 4-21 days at 1-5% | one kind (`multi_day`): untrustworthy; impute |
-| 1 intermittent (#102) | one source, 3-8 weeks in which 30-45% of the days are doubled or mostly lost, the rest fine | its own kind: the bad days imputed, the good days kept |
+| 1 intermittent (#102) | one source, 3-8 weeks in which about 40% of the days (runs of 1-4, at least one week with four or more) are doubled or mostly lost, the rest fine | its own kind: the bad days imputed, the good days kept |
 | 1 stuck feed (#102) | one day's count and dollars repeated to the cent for the next 3-7 days | its own kind; scored from the third identical day in a row, on the days the repeat is beyond the source's noise |
 | 1 rollup (#102) | 2-3 days at 1-5%, their volume reported on the following day | with the one-day problems |
 | 1 phantom count, 1 small step (#102) | a fixed number of tiny extra transactions a day for 1-4 months; a step 3-5x the source's noise against its sisters on a cleaner source | with the steps (onset from the day it shows) |

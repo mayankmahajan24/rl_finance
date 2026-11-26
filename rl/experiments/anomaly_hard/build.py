@@ -56,6 +56,7 @@ EVAL_START_DAYS = 365   # one year of warm-up: enough history for levels, noise 
 THIN_CT = 20   # a source's thin beginning (28-day median count under this, before it is established) must be dropped
 N_POINTS, SHIFTS = 2, [('step', 2), ('ramp', 2)]   # per panel: 2 of each point kind, 2 step and 2 ramp level shifts
 N_PANELS = 3           # hidden panels a task is graded on (the reward is their mean): fresh draws of problems
+N_INSIDE, N_STACKED = 2, 1   # per panel: one-offs placed inside a level change, and a step stacked on one
 N_RECURRING, N_SLOW = 2, 2   # per panel: planted yearly closures (normal) and slow panel ramps (problems)
 
 
@@ -133,18 +134,50 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
                     lo = day(0.3, 0.8 if permanent else 0.7)
                     length = None if permanent else int(rng.integers(60, 241))
                     hi = d1 if permanent else lo + pd.Timedelta(days=length + 45)
-                if not free((t, s), lo, hi) or not free(t, lo, lo + pd.Timedelta(days=3)):
+                own = ('pt', t, s) if callable(f) else (t, s)    # one-offs may land inside a level change
+                if not free(own, lo, hi) or not free(t, lo, lo + pd.Timedelta(days=3)):
                     continue
                 if not callable(f) and not free(('chg', t), lo, hi):
                     continue                     # one level change at a time per company, over its whole span
                 ev = f(F, t, s, lo) if callable(f) else P.level_shift(F, t, s, lo, f, length, d1)
                 if ev:
                     events += ev
-                    busy.append(((t, s), lo, hi))
+                    busy.append((own, lo, hi))
                     if not callable(f):
                         # a lasting change holds the company to the end; a temporary one until it is over
                         busy.append((('chg', t), lo, d1 if length is None else lo + pd.Timedelta(days=length + 45)))
                     break
+        # overlapping problems in one source (feedback #97): one-offs inside a level change, and a step on top of an
+        # earlier level change, each in the same source while its sisters stay clean
+        levels = [e for e in events if e.get('regime') or e['type'] == 'level_shift_slow']
+        for k in range(N_INSIDE + N_STACKED):
+            for _ in range(200):
+                if not levels:
+                    break
+                e = levels[int(rng.integers(len(levels)))]
+                t, s = e['ticker'], e['source_id']
+                a = pd.Timestamp(e.get('shift_start', e['start'])) + pd.Timedelta(days=30)
+                b = min(pd.Timestamp(e['end']), d1) - pd.Timedelta(days=60)
+                if b <= a:
+                    continue
+                lo = a + pd.Timedelta(days=int(rng.integers(0, (b - a).days + 1)))
+                if k < N_INSIDE:                            # a one-off inside the level change
+                    f = P.POINTS[int(rng.integers(len(P.POINTS)))]
+                    if not free(('pt', t, s), lo, lo + pd.Timedelta(days=3)) or not free(t, lo, lo + pd.Timedelta(days=3)):
+                        continue
+                    ev = f(F, t, s, lo)
+                    if ev:
+                        events += ev
+                        busy.append((('pt', t, s), lo, lo + pd.Timedelta(days=3)))
+                        break
+                else:                                       # a temporary step on top of the level change, same source
+                    length = int(rng.integers(30, 121))
+                    if lo + pd.Timedelta(days=length + 45) > min(pd.Timestamp(e['end']), d1):
+                        continue
+                    ev = P.level_shift(F, t, s, lo, 'step', length, d1)
+                    if ev:
+                        events += ev
+                        break
     # company-wide natural breaks (every source at once: nothing to recover them from) are not scored
     excl = [dict(ticker=i['ticker'], source_id=i['source_id'], lo=i['start'],
                  hi=i['end'] or F.d(ctx.panel_end)) for i in req]

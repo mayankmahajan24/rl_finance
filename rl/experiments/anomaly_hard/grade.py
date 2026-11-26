@@ -26,9 +26,9 @@ earn it alone. The data reward alone when no judge can run (details.writeup says
 
 Scored rows (label_rows): from eval_start (one year in), not on low-volume series (ignore_series), not near
 company-wide natural breaks (exclusions with no source), not on a closure's first year (exclusions of kind
-recurring_first). Timing, from what a point-in-time scorer could see (build.annotate_events, written into the gold):
-  * a problem is scored from the day it becomes `visible` (its trailing 7-day median deviation reaches 3x the source's
-    own noise); a level change that never does is `unscored`; one that takes over SETTLE_DAYS to show is `slow`
+recurring_first; in practice that year falls in the warm-up). Timing, from what a point-in-time scorer could see (build.annotate_events, written into the gold):
+  * a problem is scored from the day it becomes `visible` (its trailing 7-day median deviation reaches 3x the noise of
+    a 7-day median of the source's relation to its sisters); a level change that never does is `unscored`; one that takes over SETTLE_DAYS to show is `slow`
     (cleaned series only; for confidence unscored until settled, then trusted)
   * one-day problems: every day untrustworthy
   * a ramp (a shift built up over ramp_days): untrustworthy from the day it is visible until it is fully built

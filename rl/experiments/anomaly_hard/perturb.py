@@ -132,6 +132,8 @@ def level_shift(F, t, s, start, mode, length, d1):
         cm, am = 1.0, float(F.rng.uniform(*MEASURES['dollars'][1]))
     sig = own_noise(F, t, s)
     floor = SHIFT_K * (sig['ct'] if measure != 'dollars' else sig['tkt'])
+    if measure == 'volume' and abs(np.log(cm)) < floor:     # every shift stands clear of the source's own noise
+        cm = am = float(np.exp(np.sign(np.log(cm)) * floor))
     if measure == 'count' and np.log(cm) < floor:
         cm = float(np.exp(floor))
     if measure == 'dollars' and -np.log(am) < floor:

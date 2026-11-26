@@ -152,10 +152,13 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
     return df, truth, mapping, truth_df
 
 
+MEDIAN7_SD = 1.2533 / np.sqrt(7)   # a 7-day median's noise, as a share of one day's (normal noise)
+
+
 def annotate_events(truth, df, truth_df):
     """What a point-in-time scorer could see, written into each level change: it becomes `visible` on the first day its
-    deviation (raw against the truth panel, trailing 7-day median) reaches P.SHIFT_K times the source's own noise, in
-    count or ticket; its onset is scored from then (earlier days unscored). A change that never gets there is
+    deviation (raw against the truth panel, trailing 7-day median) reaches P.SHIFT_K times the noise of a 7-day median
+    of the source's relation to its sisters (MEDIAN7_SD of its daily noise), in count or ticket; its onset is scored from then (earlier days unscored). A change that never gets there is
     `unscored`. A planted slow ramp, or a change that took longer than grade.SETTLE_DAYS to become visible, is `slow`:
     scored on the cleaned series only. The noise is the grader's (grade.own_noise), so what is scored is what the
     grader can tell apart from the source's normal variation against its sister sources."""
@@ -183,7 +186,7 @@ def annotate_events(truth, df, truth_df):
         dc = lg(j.ct) - lg(j.ct_x)
         dt = (lg(j.amt) - lg(j.ct)) - (lg(j.amt_x) - lg(j.ct_x))
         z = np.maximum(dc.rolling(7, min_periods=1).median().abs() / sc, dt.rolling(7, min_periods=1).median().abs() / st)
-        seen = z[z >= P.SHIFT_K]
+        seen = z[z >= P.SHIFT_K * MEDIAN7_SD]              # against the noise of a 7-day median, not of one day
         if seen.empty:
             e['unscored'] = True
         else:

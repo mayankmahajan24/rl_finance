@@ -40,38 +40,37 @@ problems (closures, thin start and real events only). 13 tasks: 5 bench (001-004
 
 ## The grader (`grade.py`)
 
-**Gates** (reward 0 if any fails): output format; point in time (outputs on truncated panels must match the full run,
-all three columns); no model or network client in the code; a write-up; low signal dropped (at least 90% of the thin
-start's rows distrusted and blank); detects (a confidence score of at least 0.25, so repairing
-the series without detecting its problems cannot pass).
+**Gates.** The task's reward is 0 if the output is malformed, the point-in-time check fails (outputs on truncated
+panels must match the full run, all three columns), the code imports or calls a model or network client (parsed, so
+prose that names one does not count), or the write-up is missing. A panel's reward is 0 if low signal is not dropped
+(at least 90% of the thin start's rows distrusted and blank) or confidence is not a probability on a continuous scale
+(rows scored strictly between 0.01 and 0.99 need at least 20 distinct values, none on more than half; not stated in
+the instruction, #76/#77). The earlier detection gate (confidence at least 0.25) was removed: detecting nothing now
+scores 0 on confidence by itself.
 
-**What is graded**, six things:
+**Reward** (per panel) = 0.4 x confidence + 0.4 x cleaned series + 0.2 x stability; the task's data reward is the mean
+over its three hidden panels (each with its own planted problems and disguise, so tuning to one does not pay).
 
-| # | Measures | How |
-|---|---|---|
-| 1 | Catch the problems | recall: share of problems with any untrustworthy day distrusted; per kind (one-day kinds pooled), mean over kinds |
-| 2 | No false alarms | alert precision: runs of distrusted days on a source (gaps up to 2 days joined, split every 14 days) that touch a problem |
-| 3 | Repair problem rows | gain: per kind, share of the raw log error beyond the source's own noise that the cleaned series removes (pooled over the kind's problems), mean over kinds |
-| 4 | Don't damage good rows | intact: share of untouched rows left within the source's own noise of the truth |
-| 5 | Keep the history | kept: share of rows that should be kept not left blank |
-| 6 | Stability | the scorer re-run on its own cleaned series raises no more alarms than on clean data (excess scaled by the size of the task's problems) |
+| Part | How |
+|---|---|
+| Confidence | read as the probability a row is fine. Balanced Brier skill: 1 - (Brier on untrustworthy rows, per kind of problem then averaged + Brier on fine rows) / 2 / 0.25, floored at 0 (a constant 0.5 scores 0), times (0.5 + 0.5 x alert precision): an alert is a run of distrusted scored days on a source (gaps up to 2 days joined, split every 14 days), precision the share that touch an untrustworthy row. A control panel is scored on its fine rows. |
+| Cleaned series | gain x intact x kept. Gain: per kind, the share of the raw log error (count and ticket, beyond the source's own noise) on problem rows that the cleaned series removes, mean over kinds; every day of a problem counts, settling days included. Intact: share of untouched rows left within the source's noise. Kept: share of rows to keep not left blank (blank counts as raw). |
+| Stability | the code re-run on its own cleaned series (counts rounded, dollars to the cent, blanks dropped) and on the truth panel: 1 - (extra rows distrusted on its own output) / (the panel's untrustworthy rows), floored at 0. |
 
-**Three hidden panels.** Each task is graded on three hidden panels of the same companies, each with its own
-planted problems and disguise; the reward is their mean. Tuning to particular panels stops paying.
-
-**Reward** (per panel) = 0.4 x confidence + 0.4 x cleaned series + 0.2 x stability, where confidence = F1(1, 2) and cleaned
-series = 3 x 4 x 5. An ordinary weighted average; the three components are in the detailed metrics (and the
-geometric mean, the reward before feedback #45, as `reward_geometric`), so a lopsided solution is visible. The
-detection gate keeps cleaning-only solutions from scoring: without it, the reference's cleaned series with every row
-trusted or distrusted would score 0.67 and 0.59.
-
-**Timing rules** (what a point-in-time scorer could know):
+**Timing rules** (what a point-in-time scorer could know; `label_rows`):
 * Scoring starts after a one-year warm-up.
-* A problem counts from the day it first shows (trailing 7-day median deviation at 3x the source's noise); one that
-  never shows is unscored; one that takes over 45 days to show is a slow build-up (cleaned series only).
-* A level change: first 14 days untrustworthy, unscored to day 45 while the code decides, then trusted. After a
-  temporary change ends, 45 days unscored, then trusted.
-* The first yearly closure is unscored; later ones must be trusted.
+* A level change counts from the day it shows: its trailing 7-day median deviation reaches 3x the noise of a 7-day
+  median of the source's relation to its sisters (`build.annotate_events`). One that never shows is unscored; one
+  that takes over 45 days, or a slow shift, is scored for confidence only once settled (then fine).
+* A step: first 14 days untrustworthy, unscored to day 45, then the new level is fine (still rescaled in the cleaned
+  series).
+* A ramp: untrustworthy from the day it shows until it is fully built, then 7 days unscored, then fine (#84, #86).
+* After a temporary change ends: 14 days unscored, then fine (#83).
+* One-day problems: every day untrustworthy. Yearly closures must be trusted.
+
+**The report** multiplies the data reward by 0.5 + 0.5 x its score (`writeup.py`, `judge.md`: code items K1-K9 and a
+model judge; 150-500 words; halved for a length outside that, a missing section or a missing chart). If the code fails
+on the visible panel the report scores 0; only an unavailable judge leaves the data reward alone.
 
 **Isolation.** The grader runs agent code as `nobody`, with no network, in its own mount namespace where every shared
 writable folder is empty (no memory between its five runs), and the task's `tests/` folder is root-only. A source's
@@ -81,6 +80,10 @@ own noise (`own_noise`) is measured on usable days only (28-day median at least 
 data, and a few days either side of the thin start's edges.
 
 ## Results (all 13 tasks, three hidden panels each, 2026-11-25)
+
+> **Superseded.** Every number below was scored with the earlier confidence score (F1 of recall and alert precision)
+> and the detection gate, before the changes of 2026-11-25/26 (#76-#87). They are kept for the record; current results
+> are in notes.md (E34-E35) until this section is redone.
 
 | Solution | What it is | All 13 | Held out (8) | Min |
 |---|---|---|---|---|
@@ -137,7 +140,7 @@ No part of the grader is dead weight that holds the practitioner back: the large
 split, the F1 and the detection gate are what keep Opus low (the two weak runs distrust long stretches; 29 and 26 of
 their 39 panels fail the gate). Keep the grader as it is.
 
-**The report (2026-11-25).** The write-up is now graded: a 150-400-word report for the data scientists who use the
+**The report (2026-11-25).** The write-up is now graded: a 150-500-word report for the data scientists who use the
 cleaned series, in six sections, with a chart of original vs cleaned series. Reward = data reward x (0.5 + 0.5 x report
 score); code checks plus a model judge (`writeup.py`, `judge.md`, review in
 `rl/runs/anomaly_hard/reviews/grader_2026-11-25.md`). The tables above are the data reward; the practitioner's

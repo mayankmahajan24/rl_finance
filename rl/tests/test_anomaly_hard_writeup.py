@@ -12,6 +12,7 @@ import re
 import shutil
 import sys
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -194,3 +195,45 @@ def test_a_ramp_is_untrustworthy_while_it_builds_then_fine_after_a_week():
     assert on('2016-03-10').label and on('2016-03-31').label                # from visible until fully built (03-31)
     assert not on('2016-04-01').use and not on('2016-04-07').use            # a week to see that it stopped
     assert on('2016-04-08').use and not on('2016-04-08').label              # then flagging it is a false positive
+
+
+@pytest.mark.parametrize('code,hit', [('"""Counts from refund requests."""\nx = 1\n', False),
+                                      ('# we never import requests here\nx = 1\n', False),
+                                      ('import requests\n', True), ('from openai import OpenAI\n', True),
+                                      ("m = __import__('requests')\n", True),
+                                      ("import subprocess\nsubprocess.run(['curl', 'x'])\n", True)])
+def test_no_ai_scan_reads_code_not_prose(tmp_path, code, hit):
+    import grade as G
+    (tmp_path / 'score.py').write_text(code)
+    assert bool(G.scan_no_ai(tmp_path)) is hit, G.scan_no_ai(tmp_path)
+
+
+def _conf_panel(values):
+    n = len(values)
+    return pd.DataFrame(dict(confidence=values, use=True, thin=False), index=range(n))
+
+
+def test_continuity_passes_a_sharp_probability_and_fails_a_few_levels():
+    import grade as G
+    rng = np.random.default_rng(0)
+    sharp = np.r_[np.zeros(500), rng.uniform(0.02, 0.98, 60), np.full(5000, 0.999)]   # mostly saturated, graded between
+    assert G.continuous(_conf_panel(sharp))[0]
+    levels = np.r_[np.full(300, 0.05), np.full(200, 0.3), np.full(5000, 1.0)]
+    assert not G.continuous(_conf_panel(levels))[0]
+
+
+def test_code_that_fails_on_the_visible_panel_gets_a_zero_report(monkeypatch):
+    import grade as G
+    task = HERE.parents[1] / 'tasks' / 'proto' / 'anomaly_hard_train' / 'anomhard-train-001'
+    if not task.exists():
+        pytest.skip('tasks not built')
+    ok = dict(format=True, point_in_time=True, no_ai=True, writeup=True)
+    monkeypatch.setattr(G, 'score', lambda *a, **k: (0.8, dict(gates=dict(ok), confidence_score=.5, clean_score=.5,
+                                                                stability=.5, reward_geometric=.5)))
+
+    def fails(*a, **k):
+        raise G.GateError('score.py failed: exit 1')
+    monkeypatch.setattr(G.writeup_grade, 'grade', fails)
+    monkeypatch.delenv('WRITEUP_JUDGE', raising=False)
+    reward, d = G.grade_task(task, task, task / 'instruction.md')
+    assert d['writeup']['writeup_score'] == 0.0 and abs(reward - 0.4) < 1e-9

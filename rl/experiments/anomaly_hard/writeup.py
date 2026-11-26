@@ -7,7 +7,7 @@ series, graded against its rubric (judge.md) on the task's visible panel, the pa
                the solution's code (no code in it names the report or writes a markdown file); K8 the report shows
                at least one chart, saved as a PNG under output/figures/; K9 no hidden text (HTML comments or tags)
   judge items  D1-D3 data, M1-M7 method, O1-O3 output, P1-P3 parameters, V1-V5 validation, U1-U3 open issues,
-               G1-G5 the chart of original against cleaned series (the judge sees the images), F1-F3 throughout
+               G1-G5 the chart of original against cleaned series (the judge sees the images), F1-F4 throughout
                (judge.md); a model judge, VOTES votes, the majority per item
   facts        computed in code for the judge, which never sees the hidden panels: the visible panel (dates,
                companies, sources, levels), the solution's own output on it (what it distrusts, repairs, leaves at
@@ -52,8 +52,8 @@ MAX_RUNS = 40                  # runs of distrusted-but-unrepaired rows listed f
 MAX_NUMBERS = 150              # numbers from the code listed for the judge
 # K5: the report is for its reader: nothing about how the work is assessed, the assignment, or how to run code
 META = re.compile(r'\b(?:RL|reinforcement learning|grader|graded|grading|reward|rubric|hidden panels?|held[- ]out|'
-                  r'instructions?|prompt|assignment|LLM|language model|the task)\b|'
-                  r'\b[\w/.-]+\.(?:py|sh)\b|(?<![\w-])--[a-z][\w-]*|/app/|\bpython3?\b|\bpip\b', re.I)
+                  r'assignment|LLM|language model|this task)\b|'
+                  r'\b[\w/.-]+\.(?:py|sh)\b|(?<![\w-])--[a-z][\w-]*|/app/|\bpython3? +\S|\bpip install\b', re.I)
 MECHANICAL_KW = {'axis', 'ddof', 'decimals', 'ndigits', 'level', 'n', 'indent', 'skiprows', 'nrows', 'verbose'}
 
 
@@ -186,7 +186,7 @@ def report_writers(sol: pathlib.Path) -> list[str]:
     out = []
     for f in _py_files(sol):
         for i, ln in enumerate(f.read_text().splitlines(), 1):
-            if re.search(r'writeup|\.md\b', ln, re.I):
+            if re.search(r'writeup|\.md\b', ln.split('#', 1)[0], re.I):      # code, not a comment
                 out.append(f'{f.name}:{i}')
     return out
 

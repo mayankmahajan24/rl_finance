@@ -282,3 +282,13 @@ def test_two_level_confidence_fails_continuity():
     import grade as G
     two = np.r_[np.full(300, 0.005), np.full(5000, 0.995)]
     assert not G.continuous(_conf_panel(two))[0]
+
+
+def test_confident_everywhere_passes_continuity_and_no_alerts_is_full_precision():
+    import grade as G
+    sure = np.r_[np.full(3000, 0.995), np.full(3000, 1.0)]
+    assert G.continuous(_conf_panel(sure))[0]
+    ev, target, kinds, scored = _strata_panel()
+    target[:] = 1.0                                               # every cleaned value right
+    ev = ev.assign(confidence=0.995, flag=False)
+    assert G.confidence_score(ev, target, kinds, scored)[0] > 0.99

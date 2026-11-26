@@ -342,7 +342,7 @@ def confidence_score(ev, target, kinds, scored):
     skill = max(0.0, 1 - (0.5 * problems + 0.5 * fine) / 0.25)
     e_ = ev[scored].assign(hit=(prob_rows & (target == 0))[scored])
     n_alerts, true_alerts = alerts(e_)
-    prec = true_alerts / n_alerts if n_alerts else 0.0
+    prec = true_alerts / n_alerts if n_alerts else 1.0       # no alerts: no false alarms
     wrong = scored & (target == 0)
     by_kind = pd.DataFrame(dict(rows=prob_rows.groupby(kinds).sum(), wrong_rows=wrong.groupby(kinds).sum(), brier=per_kind,
                                 mean_confidence=c[prob_rows].groupby(kinds[prob_rows]).mean())).dropna().round(4)
@@ -353,14 +353,19 @@ def confidence_score(ev, target, kinds, scored):
 
 
 def continuous(ev) -> tuple[bool, dict]:
-    """Confidence is a probability on a continuous scale, not a few levels: over the scored rows (thin beginning left
-    out), at least CONT_DISTINCT distinct values (3 decimals); and once CONT_MIN_BETWEEN rows fall strictly between
-    CONT_LO and CONT_HI (a probability can saturate near 0 or 1), no single value on more than CONT_TOP of those."""
+    """Confidence is a probability on a continuous scale, not a few levels. Judged on the rows the code doubts
+    (confidence under CONT_HI, thin beginning left out), once there are CONT_MIN_BETWEEN of them: at least CONT_DISTINCT
+    distinct values (3 decimals), and, once CONT_MIN_BETWEEN fall strictly between CONT_LO and CONT_HI, no single
+    value on more than CONT_TOP of those. A code confident almost everywhere passes."""
     allv = ev[ev.use & ~ev.thin].confidence.round(3)
-    u = allv[(allv > CONT_LO) & (allv < CONT_HI)]
-    distinct = int(allv.nunique())
+    doubt = allv[allv < CONT_HI]                     # the rows the code doubts: where a few fixed levels would show
+    if len(doubt) < CONT_MIN_BETWEEN:                # confident almost everywhere: nothing to judge
+        return True, dict(rows_doubted=len(doubt))
+    u = doubt[doubt > CONT_LO]
+    distinct = int(doubt.nunique())
     top = float(u.value_counts(normalize=True).iloc[0]) if len(u) >= CONT_MIN_BETWEEN else 0.0
-    return distinct >= CONT_DISTINCT and top <= CONT_TOP, dict(rows_between=len(u), distinct=distinct, top_share=round(top, 3))
+    return distinct >= CONT_DISTINCT and top <= CONT_TOP, dict(rows_doubted=len(doubt), rows_between=len(u),
+                                                                distinct=distinct, top_share=round(top, 3))
 
 
 def own_noise(truth_panel: pd.DataFrame, thin_ct: float = 20) -> pd.DataFrame:

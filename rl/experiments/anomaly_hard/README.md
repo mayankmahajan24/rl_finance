@@ -44,8 +44,8 @@ problems (closures, thin start and real events only). 13 tasks: 5 bench (001-004
 panels must match the full run, all three columns), the code imports or calls a model or network client (parsed, so
 prose that names one does not count), or the write-up is missing. A panel's reward is 0 if low signal is not dropped
 (at least 90% of the thin start's rows distrusted and blank) or confidence is not a probability on a continuous scale
-(rows scored strictly between 0.01 and 0.99 need at least 20 distinct values, none on more than half; not stated in
-the instruction, #76/#77). The earlier detection gate (confidence at least 0.25) was removed: detecting nothing now
+(rows scored strictly between 0.01 and 0.99 need at least 20 distinct values, none on more than half; stated in the
+instruction since #96). The earlier detection gate (confidence at least 0.25) was removed: detecting nothing now
 scores 0 on confidence by itself.
 
 **Reward** (per panel) = 0.45 x confidence + 0.45 x cleaned series + 0.1 x stability; the task's data reward is the mean

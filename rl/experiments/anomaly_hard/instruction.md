@@ -38,7 +38,9 @@ python /app/solution/score.py --input IN.csv --output OUT.csv
 `date, ticker, source_id, confidence, clean_ct, clean_amt`:
 
 * `confidence`, in [0, 1]: the probability that your cleaned value for this row is right, that is, what the source
-  would have reported had it been working normally. High means trust it; below 0.5 means do not.
+  would have reported had it been working normally. High means trust it; below 0.5 means do not. It must be a
+  probability on a continuous scale, worked out from the evidence for each row, not a few fixed levels: rows you are
+  sure of may sit at 0.99 or above, but below that confidence should vary from row to row with the evidence.
 * `clean_ct`, `clean_amt`: a cleaned series for the row's ticker and source that is comparable like for like with
   that source's own history: what the source would have reported had it kept working the way it normally does.
   Where nothing went wrong with a row, it equals the raw value. On a source whose level has changed, every row is
@@ -129,8 +131,9 @@ Your score is a weighted average of three parts: 45% confidence, 45% cleaned ser
   cents, blank rows left out) and on clean data: it should raise no more alarms on the first than on the second.
 
 The total is set to zero if the outputs are malformed, if the point-in-time check fails, if the code imports or shells
-out to a model or network client, or if the report is missing. A panel's score is set to zero if low-signal data is
-not dropped on it: a source that reports fewer than about twenty transactions a day before it has built up steady
+out to a model or network client, or if the report is missing. A panel's score is set to zero if its confidence
+is not on a continuous scale (on the rows scored below 0.99, at least 20 different values, and no single value
+between 0.01 and 0.99 on more than half of them), or if low-signal data is not dropped on it: a source that reports fewer than about twenty transactions a day before it has built up steady
 coverage (its early history, or all of it) must be distrusted and left blank there (at least 90% of those rows). A
 source that dips that low after it was established is kept: those rows count in the cleaned-series score.
 

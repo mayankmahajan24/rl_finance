@@ -86,8 +86,8 @@ data, and a few days either side of the thin start's edges.
 | `oracle` | the answer key | 1.000 | 1.000 | 1.000 min |
 | `ceiling_ideal` | the ceiling with exact imputation | 0.999 | 0.999 | 0.995 min |
 | `ceiling` | gold-informed but realistic: a step caught on a 3-day median, ramps on a 14-day median, imputation with the source's own noise | 0.980 | | |
-| **`reference`** | hand-built point-in-time scorer (`solutions/reference/writeup.md`) | **0.933** | **0.937** | 0.852 min |
-| **`practitioner`** | a plain 258-line scorer, 12 knobs (`solutions/practitioner/writeup.md`): pairwise peer relation per weekday on the original basis, counting noise, spikes with one culprit, CUSUM changes confirmed on a 7-day median, yearly lookup, reason and adjustment columns (12 s a task) | **0.893** | **0.906** | 0.821 min |
+| **`reference`** | hand-built point-in-time scorer (removed from the branch, #99; in git history) | **0.933** | **0.937** | 0.852 min |
+| **`practitioner`** | a plain 258-line scorer, 12 knobs (removed, #99; its code and reports are kept as the report tests' fixture, `rl/tests/fixtures/anomaly_hard_report/`): pairwise peer relation per weekday on the original basis, counting noise, spikes with one culprit, CUSUM changes confirmed on a 7-day median, yearly lookup, reason and adjustment columns (12 s a task) | **0.893** | **0.906** | 0.821 min |
 | Opus runs (4, Nov 25, current instruction) | fresh airgapped model solutions, one per tuning task | 0.44 (0.14, 0.28, 0.66, 0.69) | 0.41 | 0.0 min |
 | Opus runs (8, Nov 20 and 23, older instructions) | earlier model solutions | 0.26 (0.13-0.43) | | |
 | `trust_all_ref` | the reference's cleaned series, every row trusted | 0.231 | 0.250 | 1.0 on the 3 controls (correct there), 0 elsewhere |
@@ -140,7 +140,7 @@ their 39 panels fail the gate). Keep the grader as it is.
 cleaned series, in six sections, with a chart of original vs cleaned series. Reward = data reward x (0.5 + 0.5 x report
 score); code checks plus a model judge (`writeup.py`, `judge.md`, review in
 `rl/runs/anomaly_hard/reviews/grader_2026-11-25.md`). The tables above are the data reward; the practitioner's
-reference reports (`solutions/practitioner/reports/`) score 1.0 on train-001 and train-002.
+reference reports (`rl/tests/fixtures/anomaly_hard_report/reports/`) score 1.0 on train-001 and train-002.
 
 **Run-to-run variance (2026-11-25).** Opus runs on the same instruction vary widely: 11 fully graded runs score
 0.14 to 0.86 on the data reward (mean 0.44, standard deviation 0.26). Two runs on the same task and instruction
@@ -161,7 +161,7 @@ change was adopted (feedback #64). What the spread means:
 ```bash
 python rl/experiments/anomaly_hard/build.py --n 4 --controls 1                 # bench tasks -> rl/tasks/proto/anomaly_hard/ (gitignored)
 python rl/experiments/anomaly_hard/build.py --split train --n 6 --controls 2   # train tasks
-python rl/experiments/anomaly_hard/grade.py rl/tasks/proto/anomaly_hard/anomhard-001 rl/experiments/anomaly_hard/solutions/reference
+python rl/experiments/anomaly_hard/grade.py rl/tasks/proto/anomaly_hard/anomhard-001 path/to/solution
 ```
 
 Model runs: `rl/experiments/anomaly_hard/runner/run.sh` (airgapped through `runner/offline.sh`).

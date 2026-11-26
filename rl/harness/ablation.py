@@ -30,6 +30,8 @@ import run_solutions  # noqa: E402
 AUDIT_STEPS = {"1 duplicates": {"duplicate_rows"}, "2 ticket size": {"swapped_columns", "unit_scale"},
                "3 outages": {"outage"}, "4 date shift": {"date_shift"}, "5 ticker-wide breaks": {"ticker_remap"},
                "6 peer steps": {"series_swap", "double_count", "level_shift"}}
+# anomaly_scoring's verifier labels the first 60 days of a planted level shift positive
+SHIFT_DAYS = 60
 GOLD_SCORER = """import argparse, json
 from pathlib import Path
 import pandas as pd
@@ -97,9 +99,10 @@ def audit_ablation(task: pathlib.Path, truth: dict) -> list[str]:
 
 
 def anomaly_credit(task: pathlib.Path, truth: dict) -> list[str]:
+    import pandas as pd
     windows = [dict(ticker=p["ticker"], source_id=p["source_id"], start=p["date"], end=p["date"]) for p in truth["points"]]
-    # anomaly_scoring's verifier labels every day of a planted level shift positive
-    windows += [dict(ticker=s["ticker"], source_id=s["source_id"], start=s["start"], end=s["end"]) for s in truth["shifts"]]
+    windows += [dict(ticker=s["ticker"], source_id=s["source_id"], start=s["start"],
+                     end=str((pd.Timestamp(s["start"]) + pd.Timedelta(days=SHIFT_DAYS - 1)).date())) for s in truth["shifts"]]
     return leave_one_out(task, windows, lambda ws: {"solution/score.py": GOLD_SCORER, "solution/windows.json": json.dumps(ws)})
 
 

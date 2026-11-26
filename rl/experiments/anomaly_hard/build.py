@@ -294,7 +294,7 @@ def build_task(ctx, d: pathlib.Path, seed: int, control: bool) -> dict:
     each with its own planted problems, disguise, truth panel and gold (panel 1 in tests/, panel k in tests/panel-k/).
     Returns panel 1's gold."""
     tmpl = (HERE / 'instruction.md').read_text()
-    text = tmpl.format(firm=build_panel.FIRM, schema=build_panel.SCHEMA, copy_note=COPY_NOTE, companies='{companies}')
+    text = tmpl.format(firm=build_panel.FIRM, schema=(HERE / 'panel_schema.md').read_text().rstrip('\n'), copy_note=COPY_NOTE, companies='{companies}')
     vis, hid = company_groups(ctx, seed)
     shown, _, shown_map, _ = plant(np.random.default_rng(seed), control, ctx, sensors=vis)
     hidden, truth, mapping, clean = plant(np.random.default_rng([seed, 1]), control, ctx, sensors=hid)

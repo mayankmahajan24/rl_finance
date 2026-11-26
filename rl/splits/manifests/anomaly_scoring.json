@@ -15,9 +15,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "5576b1a83588",
-  "gold_fingerprint": "69460f0a631c",
-  "content_sha256": "264f0b84f5884622b4b0119d74ed5d39cddd5341833eb0711a0e3f666c2abcc4"
+  "fingerprint": "990cc72c44a0",
+  "gold_fingerprint": "4d48da49f967",
+  "content_sha256": "99cad8c06adfed7d529039b39c49bcb24a8bedb1ef99b143232160cbe27972de"
  },
  "anomaly-bench-002": {
   "split": "bench",
@@ -35,9 +35,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "1337df120b43",
-  "gold_fingerprint": "3139bef130cc",
-  "content_sha256": "11615263a82c281ade7120e95054cfab795fb133ed3860aa2124a8c7fd65a397"
+  "fingerprint": "abab0e5b398a",
+  "gold_fingerprint": "7751bea8cdd1",
+  "content_sha256": "4cd7d7fedeb3fdf8c6f12178557e624f131b1a084bfb0f649a3d9e4c4b67803a"
  },
  "anomaly-bench-003": {
   "split": "bench",
@@ -55,9 +55,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "13f86bb9d050",
-  "gold_fingerprint": "054eab71d44a",
-  "content_sha256": "18aabba03522ec5b157414f24aa01ab4eccc0f19e0af45ad936d01bb83af1653"
+  "fingerprint": "0fab663ed528",
+  "gold_fingerprint": "c88541ed2551",
+  "content_sha256": "a4613c626a56d53b842cbe728bf222591c2bfc5aa9b962055ba10762bbaff254"
  },
  "anomaly-bench-004": {
   "split": "bench",
@@ -75,9 +75,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "a809728e4367",
-  "gold_fingerprint": "96a79fd29238",
-  "content_sha256": "f4c1fc01476047df4de6d2c805ecca6f3cdc8a4f3ab71789da62fccfc67b4833"
+  "fingerprint": "e6e92a89a37e",
+  "gold_fingerprint": "ba8c815e4a75",
+  "content_sha256": "22d99f91bd1704b75c0c1c3d80cd287b1857bded080faad10617d16e487d1a08"
  },
  "anomaly-bench-005": {
   "split": "bench",
@@ -95,9 +95,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "ce2e6b15a6cd",
-  "gold_fingerprint": "87fc460a7b40",
-  "content_sha256": "9abfcb4cb498d6e00ee985f9b18fbcabed252080ef823b87d018894871d1075a"
+  "fingerprint": "7b3b9bf9d76b",
+  "gold_fingerprint": "20d06b87b42d",
+  "content_sha256": "a5f16b2c8c7f61c3e059566799d455b8cb2f6022bad6e20e3499b3ea1bc32af5"
  },
  "anomaly-bench-006": {
   "split": "bench",
@@ -115,9 +115,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "2600c04a57ec",
-  "gold_fingerprint": "f75bd44809c7",
-  "content_sha256": "c587b26e39b3b0be020305c2c45d04691531f1c9c79db11bf41f9aa2d3238103"
+  "fingerprint": "d133811f4543",
+  "gold_fingerprint": "2fdd66bfd41b",
+  "content_sha256": "b963721666818a64192330681ed9d203cacbc3246ac8761be131f62104723348"
  },
  "anomaly-bench-007": {
   "split": "bench",
@@ -135,9 +135,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "15b63a8e13ac",
-  "gold_fingerprint": "3a282bfabb07",
-  "content_sha256": "2ea53e0df6bb2d16979fbb8153673d772dd37ec4f254d496a40c1fa4ed6ba0ab"
+  "fingerprint": "c4e64625739a",
+  "gold_fingerprint": "bc523a929961",
+  "content_sha256": "42e3c65b64c6985b0e274414d181b02b68af148a18709e7340ba23cbdc96a724"
  },
  "anomaly-bench-008": {
   "split": "bench",
@@ -155,9 +155,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "854d22eb734a",
-  "gold_fingerprint": "8bc7814eb22c",
-  "content_sha256": "3b92f7b187df35e3fde4317adff7200fb1934bc0b6e581852fd3fe539b017167"
+  "fingerprint": "e88ab077f853",
+  "gold_fingerprint": "e7e729334f55",
+  "content_sha256": "ff505f76ed60bd1f6253f29d05fcbd835474fb0015c8f088c0c3b4ef761675d3"
  },
  "anomaly-bench-009": {
   "split": "bench",
@@ -175,9 +175,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "e755febfa00f",
-  "gold_fingerprint": "67b7f601652d",
-  "content_sha256": "1dc4e3601d29d0a8b3e0d0cf212391d795e87b2b74f8512b217d3636474622d1"
+  "fingerprint": "659414090ce2",
+  "gold_fingerprint": "d2cb37716469",
+  "content_sha256": "49162fe7beb09b1a6a820467d63c9440cf006c000ca2bd5c50915ac6d96e9fc8"
  },
  "anomaly-bench-010": {
   "split": "bench",
@@ -195,9 +195,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "07f1d7e6a810",
-  "gold_fingerprint": "9ca7eb768c6a",
-  "content_sha256": "da968630ba6e977c770b50b4fc5e076334ab0bc74961ee16643a5fe4750c1edf"
+  "fingerprint": "df43fc103347",
+  "gold_fingerprint": "118645b39e85",
+  "content_sha256": "f27d05aa82adf4e63eb88beb7ae558b05e29d21a5c6b61e83452758cff835b64"
  },
  "anomaly-bench-control-01": {
   "split": "bench",
@@ -215,9 +215,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "3c6afce57e80",
-  "gold_fingerprint": "2e17238078cb",
-  "content_sha256": "fbe600e2e700bbd08c685c99accfe7db0e0d257f23438e467c86f05bc06c28a5"
+  "fingerprint": "1c7371037ae2",
+  "gold_fingerprint": "92dc68b5d5b9",
+  "content_sha256": "676db466382fc34cb9b9a9cd6e6b6ac9cbd40d896915afc62921a07e67226ac7"
  },
  "anomaly-bench-control-02": {
   "split": "bench",
@@ -235,9 +235,9 @@
    "M",
    "DDS"
   ],
-  "fingerprint": "d7458858c6fb",
-  "gold_fingerprint": "5133c840fb76",
-  "content_sha256": "fdbf2020d3edb70689f0a4521b7ee1bd388c3bdfa21baf921b20b64d71b11ddd"
+  "fingerprint": "d94ffddc0f41",
+  "gold_fingerprint": "2d9ea5a4f204",
+  "content_sha256": "bb329421149dbdc94781c5357a2aee4b48f957922e3163d80b5657720eaf94a7"
  },
  "anomaly-heldout-001": {
   "split": "heldout",
@@ -487,9 +487,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "8eabf6616c61",
-  "gold_fingerprint": "0ceee27c322e",
-  "content_sha256": "f1f47379fec92fda76172574877d724077e63c1bc3b0eb5d771c467dd60e1d4f"
+  "fingerprint": "df14bc2b85b9",
+  "gold_fingerprint": "c8e06967b742",
+  "content_sha256": "c218b1744f02a73a6e88a4021e19640927692a7a3a9089d68a5b9c5ab9246d2f"
  },
  "anomaly-train-002": {
   "split": "train",
@@ -511,9 +511,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "e7c7e1f104fa",
-  "gold_fingerprint": "cb823e55af20",
-  "content_sha256": "05842a802e9b1adb6a77e6c768e20d27bf501708cb9da2c12e3402df905aacd3"
+  "fingerprint": "3a682f39578f",
+  "gold_fingerprint": "d3d6b72bbb31",
+  "content_sha256": "8c27e0d1f0284f8bf7c0c79861ec9aa165aba09ccf00b478824ce6fae6d77cca"
  },
  "anomaly-train-003": {
   "split": "train",
@@ -535,9 +535,9 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "5410f3edb4b3",
-  "gold_fingerprint": "1e0300db689c",
-  "content_sha256": "5fec4c21553e007bddb9087c345404c00244afae190e5b577bdf3a1c471d3148"
+  "fingerprint": "363125c73d78",
+  "gold_fingerprint": "c0b621640ad9",
+  "content_sha256": "7f7b051842d962d9cc93a46bf15f5b24419151dbd1de404883fe1545a36be923"
  },
  "anomaly-train-control-01": {
   "split": "train",
@@ -559,8 +559,8 @@
    "ROST",
    "TJX"
   ],
-  "fingerprint": "8f1187751a50",
-  "gold_fingerprint": "e1e2b2981b24",
-  "content_sha256": "4e113c4d110171db9f5c2decb04154a5967bce2a28f1b3b08c7aea69339b121c"
+  "fingerprint": "75bde78ed051",
+  "gold_fingerprint": "1a38b73955b0",
+  "content_sha256": "03ece726401cf63322f8868c0c4d6e63d7ac48e0c0bc7fc995e89cc325133ef3"
  }
 }

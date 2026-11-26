@@ -35,6 +35,9 @@ is exact. `truth_panel.csv.gz` is the hidden panel before the problems were plan
 | 1 stuck feed (#102) | one day's count and dollars repeated to the cent for the next 3-7 days | its own kind; scored from the third identical day in a row, on the days the repeat is beyond the source's noise |
 | 1 rollup (#102) | 2-3 days at 1-5%, their volume reported on the following day | with the one-day problems |
 | 1 phantom count, 1 small step (#102) | a fixed number of tiny extra transactions a day for 1-4 months; a step 3-5x the source's noise against its sisters on a cleaner source | with the steps (onset from the day it shows) |
+| 1 count-only and 1 dollars-only stuck stretch (#103) | one measure repeated exactly for the next 3-7 days while the other keeps moving | with the stuck feed; scored from the fourth identical day in a row |
+| 2 column swaps (#103) | a source's count column carries its dollars and its dollar column its count: one series for its whole history, one from a date on; never on a series near the low-signal line, nothing else planted on the swapped rows | its own kind (`column_swap`); the truth is the two columns swapped back |
+| 1 source-wide step (#103) | count and dollars x0.55-0.75 or x1.4-1.8 on one source for 30-90 days, starting and ending on the same days for every company it covers (two or more) | with the steps, one event per company (`source_wide`) |
 | 1 one-off before a change (#102) | a one-day problem 5-14 days before a level change on the same source | with the one-day problems |
 | 2 yearly closures | one source drops to 5-30% on the same date every year | normal: trust and keep (first year unscored) |
 | 1 thin start | one source starts at 6-14 transactions a day for 450-700 days, then grows into coverage | low signal: must be dropped |

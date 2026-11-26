@@ -155,3 +155,108 @@ def test_agent_code_cannot_read_the_answer_key(task, monkeypatch, tmp_path):
         pytest.skip("the grader isolates agent code only as root with namespaces (the Harbor verifier does it there)")
     reward, _ = grade_sol(task, SOL / "exploit_gold_read", monkeypatch, tmp=tmp_path)
     assert reward == 0.0
+
+
+# ---------------------------------------------------------------- the problems added by feedback #103
+# column swaps, one measure stuck, and a step on one source across its companies. Each test edits the answer key on
+# the rows of one of them. `i` is the input the script was given (row for row with its output `o`), `ev` the events.
+ON_EVENTS = """import json, os
+i = pd.read_csv(a[a.index('--input') + 1])
+ev = json.loads((pathlib.Path(os.environ['ORACLE_TASK']) / 'tests' / 'gold.json').read_text())['events']
+def rows(pick):
+    m = np.zeros(len(o), bool)
+    for e in ev:
+        if pick(e):
+            m |= ((o.ticker == e['ticker']) & (o.source_id == e['source_id'])
+                  & (o.date >= e.get('shift_start', e['start'])) & (o.date <= e['end'])).to_numpy()
+    return m
+def as_reported(m):
+    o.loc[m, 'clean_ct'] = i.ct.to_numpy()[m]
+    o.loc[m, 'clean_amt'] = i.amt.to_numpy()[m]
+"""
+SWAP = "lambda e: e['type'] == 'column_swap'"
+STUCK_ONE = "lambda e: e['type'] == 'stuck' and e.get('measure') in ('count', 'dollars')"
+SOURCE_WIDE = "lambda e: bool(e.get('source_wide'))"
+
+
+def _events(task, pick):
+    return [e for e in json.loads((task / "tests" / "gold.json").read_text())["events"] if pick(e)]
+
+
+def _gains(d, events):
+    """The cleaned-series gain the grader gave each of `events` (those it scored)."""
+    key = {(e["type"], e["ticker"], e["source_id"], e["start"]) for e in events}
+    return [g["gain"] for g in d["clean"]["events"] if (g["type"], g["ticker"], g["source_id"], g["start"]) in key]
+
+
+def _kind(d, part, kind):
+    return next(r for r in d[part]["by_kind"] if r["kind"] == kind)
+
+
+def test_new_problems_are_planted(task):
+    swaps = _events(task, eval(SWAP))
+    assert sorted(e["whole"] for e in swaps) == [False, True]
+    assert len({e["ticker"] for e in swaps}) == 2                      # on two different companies
+    assert sorted(e["measure"] for e in _events(task, eval(STUCK_ONE))) == ["count", "dollars"]
+    wide = _events(task, eval(SOURCE_WIDE))
+    assert len(wide) >= 2 and len({e["ticker"] for e in wide}) == len(wide)
+    assert len({(e["source_id"], e["start"], e["end"], e["ct_mult"]) for e in wide}) == 1   # one source, same days
+
+
+def test_answer_key_is_scored_on_the_new_problems(task, monkeypatch):
+    _, d = grade_sol(task, SOL / "oracle", monkeypatch, trusted=True, tmp=task)
+    for pick in (SWAP, STUCK_ONE, SOURCE_WIDE):
+        g = _gains(d, _events(task, eval(pick)))
+        assert g and all(x == pytest.approx(1.0, abs=1e-3) for x in g), (pick, g)
+    assert _kind(d, "clean", "column_swap")["events"] == 2
+
+
+def test_swapped_columns_left_as_reported_fail(task, monkeypatch, tmp_path):
+    # the answer key everywhere else, the swapped series as reported and still trusted
+    sol = variant(tmp_path, "swap_raw", ON_EVENTS + f"as_reported(rows({SWAP}))")
+    reward, d = grade_sol(task, sol, monkeypatch, trusted=True)
+    assert _kind(d, "clean", "column_swap")["gain"] == 0.0
+    c = _kind(d, "confidence", "column_swap")
+    assert c["wrong_rows"] == c["rows"] and c["brier"] > 0.9          # every row wrong, and trusted
+    assert reward < 0.85, (d["confidence_score"], d["clean_score"])
+
+
+def test_swap_with_only_the_count_put_right_fails(task, monkeypatch, tmp_path):
+    # a near miss: the true count, but the dollar column still carrying the count
+    sol = variant(tmp_path, "swap_half", ON_EVENTS + f"m = rows({SWAP})\no.loc[m, 'clean_amt'] = i.amt.to_numpy()[m]")
+    _, d = grade_sol(task, sol, monkeypatch, trusted=True)
+    assert _kind(d, "clean", "column_swap")["gain"] < 0.6
+    c = _kind(d, "confidence", "column_swap")
+    assert c["wrong_rows"] == c["rows"]                               # the ticket is still wrong on every row
+
+
+def test_one_measure_stuck_left_as_reported_fails(task, monkeypatch, tmp_path):
+    sol = variant(tmp_path, "stuck_raw", ON_EVENTS + f"as_reported(rows({STUCK_ONE}))")
+    _, d = grade_sol(task, sol, monkeypatch, trusted=True)
+    g = _gains(d, _events(task, eval(STUCK_ONE)))
+    assert g and all(x == 0.0 for x in g), g
+    assert _kind(d, "clean", "stuck")["gain"] < 1.0
+
+
+def test_source_wide_step_left_as_reported_fails(task, monkeypatch, tmp_path):
+    sol = variant(tmp_path, "wide_raw", ON_EVENTS + f"as_reported(rows({SOURCE_WIDE}))")
+    _, d = grade_sol(task, sol, monkeypatch, trusted=True)
+    wide = _events(task, eval(SOURCE_WIDE))
+    g = _gains(d, wide)
+    assert len(g) == len(wide) and all(x == 0.0 for x in g), g
+
+
+def test_counts_are_written_whole_beside_a_swapped_series(task):
+    import grade
+    data = pd.read_csv(task / "tests" / "eval_panel.csv.gz", parse_dates=["date"])
+    assert data.ct.dtype.kind == "f"                                   # the swapped rows carry dollars and cents
+    text = grade.panel_csv(data)
+    back = pd.read_csv(pd.io.common.StringIO(text), dtype=str)
+    swapped = pd.Series(False, index=data.index)
+    for e in _events(task, eval(SWAP)):
+        swapped |= (data.ticker == e["ticker"]) & (data.source_id == e["source_id"]) & (data.date >= e["start"])
+    assert not back.ct[~swapped.to_numpy()].str.contains(r"\.", regex=True).any()   # 36, not 36.0
+    assert back.ct[swapped.to_numpy()].str.contains(r"\.", regex=True).mean() > 0.9
+    assert (pd.to_numeric(back.ct) == data.ct).all()
+    whole = pd.DataFrame(dict(date=pd.to_datetime(["2020-01-01"]), ct=[36], amt=[1.5]))
+    assert grade.panel_csv(whole).splitlines()[1] == "2020-01-01,36,1.5"

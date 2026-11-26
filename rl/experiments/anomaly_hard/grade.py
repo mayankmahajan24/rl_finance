@@ -86,7 +86,8 @@ AFTER_DAYS = 30             # a wrong row within this many days after a problem 
 W_CONF, W_CLEAN, W_STAB = 0.45, 0.45, 0.1   # headline reward weights (confidence, cleaned series, stability)
 ALERT_GAP = 2            # days of trust that still join two distrusted runs into one alert
 ALERT_DAYS = 14           # an alert longer than two weeks counts as several
-ONE_DAY = {'volume_spike', 'dropout', 'count_flood', 'dollar_spike'}   # planted one-day problems: one kind
+ONE_DAY = {'volume_spike', 'dropout', 'count_flood', 'dollar_spike', 'rollup'}   # planted one-day problems: one kind
+MULTI_DAY = {'volume_block', 'outage'}   # a week or weeks too high or too low, then straight back: one kind
 THIN_ESTABLISHED = 90    # a source is established once its median has held at thin_ct or more this many days running
 THIN_LO, THIN_HI, THIN_EDGE = 0.8, 1.25, 14   # thin: truth count's 28-day median under THIN_LO x thin_ct must be
 # dropped (distrusted, left blank); between THIN_LO and THIN_HI x thin_ct, and the first THIN_EDGE days of a thin
@@ -289,7 +290,7 @@ def excluded_thin(truth, ev, tk, s):
 
 
 def kind(t: str) -> str:
-    return 'one_day' if t in ONE_DAY else t
+    return 'one_day' if t in ONE_DAY else 'multi_day' if t in MULTI_DAY else t
 
 
 def cleaned_right(truth, ev, scored_rows) -> tuple[pd.Series, pd.Series, pd.Series]:

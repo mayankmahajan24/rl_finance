@@ -1,10 +1,20 @@
-"""Planted problems for the anomaly_hard prototype. Only data moving up or down: no volume shifted between days.
+"""Planted problems for the anomaly_hard prototype. Data moving up or down; one kind (rollup) also moves a weekend-length
+stretch of volume onto the next day.
 
 Problems in ONE source (labelled: the rows cannot be trusted, and the grader knows what the source should have
 reported, from the panel as it was before these were planted):
   point anomalies, 1-3 days then straight back:  volume spike, volume dropout to near zero, count flood, dollar spike
   level shifts, immediate (step) or over 2-8 weeks (ramp), in volume, count only or dollars only; temporary
   (60-240 days, then back) or permanent (a new baseline to the end of the panel)
+  problems the instruction already covers but no single-day or steady-level model fits (feedback #98):
+    volume block   4-10 days too high or too low, then straight back ("a day or a few", stretched)
+    outage         4-21 days at 1-5% of normal: the reported value carries no signal to rescale
+    intermittent   3-8 weeks in which a third or so of the days are doubled or mostly lost, the rest fine
+    stuck          one day's count and dollars repeated for the next 3-7 days
+    rollup         2-3 days nearly empty, their volume reported on the following day
+    phantom        a fixed number of tiny extra transactions every day for 1-4 months (a level shift whose size in
+                   log terms depends on the day's volume)
+    small step     a step a few times the source's noise against its sisters, however small that is in percent
 Real events in EVERY source of one company (decoys: trusted, and the cleaned series should keep them):
   a pull-forward wave (spike, then a trough that gives it back) and a company-wide step (stores opening or closing)
 
@@ -111,6 +121,84 @@ def dollar_spike(F, t, s, day):
 POINTS = [volume_spike, dropout, count_flood, dollar_spike]
 
 
+# ---------------------------------------------------------------- one source: several days, not a steady level
+def _clear(F, t, s, lo, hi):
+    """A multiplier that stands POINT_K times clear of the source's own noise: drawn in [lo, hi] (up) or its inverse."""
+    up = bool(F.rng.random() < 0.5)
+    mult = max(float(F.rng.uniform(lo, hi)), float(np.exp(POINT_K * own_noise(F, t, s)['ct'])))
+    return mult if up else 1.0 / mult
+
+
+def volume_block(F, t, s, day):
+    """A backlog loaded over a week, or a partial feed: count and dollars x2-4 or x0.25-0.5 for 4-10 days."""
+    k = int(F.rng.integers(4, 11))
+    m = _rows(F, t, s, day, day + (k - 1) * DAY)
+    if m is None:
+        return []
+    mult = _clear(F, t, s, 2.0, 4.0)
+    _scale(F, m, mult, mult)
+    return [_ev('volume_block', t, s, day, day + (k - 1) * DAY, mult=mult)]
+
+
+def outage(F, t, s, day):
+    """The feed all but down for 4-21 days: count and dollars at 1-5% of normal, so nothing is left to rescale."""
+    k, frac = int(F.rng.integers(4, 22)), float(F.rng.uniform(0.01, 0.05))
+    m = _rows(F, t, s, day, day + (k - 1) * DAY)
+    if m is None:
+        return []
+    _scale(F, m, frac, frac)
+    return [_ev('outage', t, s, day, day + (k - 1) * DAY, frac=frac)]
+
+
+def intermittent(F, t, s, day):
+    """A flaky feed: for 3-8 weeks, 30-45% of the days (at random, at least five) are doubled or mostly lost; the
+    days in between are reported correctly."""
+    k = int(F.rng.integers(21, 57))
+    m = _rows(F, t, s, day, day + (k - 1) * DAY)
+    if m is None:
+        return []
+    mult = _clear(F, t, s, 2.0, 3.0)
+    idx = F.df.index[m]
+    n = max(5, int(round(k * F.rng.uniform(0.30, 0.45))))
+    bad = np.sort(F.rng.choice(len(idx), n, replace=False))
+    hit = pd.Series(False, index=F.df.index)
+    hit[idx[bad]] = True
+    _scale(F, hit, mult, mult)
+    days = sorted(F.df.loc[hit, 'date'])
+    return [_ev('intermittent', t, s, days[0], days[-1], mult=mult, days=[_fmt(x) for x in days])]
+
+
+def stuck(F, t, s, day):
+    """A stuck feed: the day's count and dollars are reported again, to the cent, on each of the next 3-7 days."""
+    k = int(F.rng.integers(3, 8))
+    m = _rows(F, t, s, day, day + k * DAY)
+    if m is None:
+        return []
+    first = F.mask(t, s, day, day)
+    rest = F.mask(t, s, day + DAY, day + k * DAY)
+    F.df.loc[rest, 'ct'] = int(F.df.loc[first, 'ct'].iloc[0])
+    F.df.loc[rest, 'amt'] = float(F.df.loc[first, 'amt'].iloc[0])
+    return [_ev('stuck', t, s, day + DAY, day + k * DAY, repeated=k)]
+
+
+def rollup(F, t, s, day):
+    """A batch held back: 2-3 days at 1-5% of normal, and the volume they lost reported on the following day."""
+    k, frac = int(F.rng.integers(2, 4)), float(F.rng.uniform(0.01, 0.05))
+    m = _rows(F, t, s, day, day + k * DAY)
+    if m is None:
+        return []
+    held = F.mask(t, s, day, day + (k - 1) * DAY)
+    last = F.mask(t, s, day + k * DAY, day + k * DAY)
+    ct0, amt0 = F.df.loc[held, 'ct'].sum(), F.df.loc[held, 'amt'].sum()
+    _scale(F, held, frac, frac)
+    F.df.loc[last, 'ct'] = int(F.df.loc[last, 'ct'].iloc[0] + round(ct0 - F.df.loc[held, 'ct'].sum()))
+    F.df.loc[last, 'amt'] = round(float(F.df.loc[last, 'amt'].iloc[0] + amt0 - F.df.loc[held, 'amt'].sum()), 2)
+    return [_ev('rollup', t, s, day, day + k * DAY, frac=frac, held_days=k)]
+
+
+MULTI = [(volume_block, 10), (outage, 21), (intermittent, 56), (stuck, 8), (rollup, 4)]   # injector, longest span
+
+
 # ---------------------------------------------------------------- one source: level shifts
 MEASURES = {   # measure -> (multiplier range for count, for dollars); one draw u in [0, 1] places it in the range
     'volume': None,                        # count and dollars together: x0.55-0.75 or x1.4-1.8
@@ -119,11 +207,38 @@ MEASURES = {   # measure -> (multiplier range for count, for dollars); one draw 
 }
 
 
-def level_shift(F, t, s, start, mode, length, d1):
+def phantom(F, t, s, start, length):
+    """A test or fee stream left running: a fixed number of tiny extra transactions every day (0.4-1.2 times the
+    source's median daily count, $0.50-2.00 each) for `length` days. A level shift in count and ticket whose size in
+    log terms is larger on quiet days and smaller on busy ones."""
+    end = start + pd.Timedelta(days=length)
+    m = _rows(F, t, s, start, end)
+    if m is None:
+        return []
+    base = float(F.df.loc[F.mask(t, s), 'ct'].median())
+    n, u = base * float(F.rng.uniform(0.4, 1.2)), float(F.rng.uniform(0.5, 2.0))
+    dn = F.rng.poisson(n, int(m.sum()))
+    ct0 = F.df.loc[m, 'ct'].to_numpy(float)
+    F.df.loc[m, 'ct'] = (ct0 + dn).astype(int)
+    F.df.loc[m, 'amt'] = (F.df.loc[m, 'amt'].to_numpy(float) + dn * u).round(2)
+    return [_ev('level_shift_step', t, s, start, end, regime=True, permanent=False, measure='phantom',
+                ct_mult=float(np.median((ct0 + dn) / ct0)), amt_mult=1.0, ramp_days=0, shift_start=_fmt(start),
+                settle=_fmt(start + pd.Timedelta(days=14)), extra_per_day=n)]
+
+
+def level_shift(F, t, s, start, mode, length, d1, small=None):
     """A source's level changes, at once (mode 'step') or over 2-8 weeks ('ramp'), in volume, count only or dollars
-    only; temporary (length days, then back) or permanent (length None: to the end of the panel)."""
+    only; temporary (length days, then back) or permanent (length None: to the end of the panel). `small` (the
+    source's noise against its sisters, count and ticket): a step of 3-5 times that noise, whatever it is in percent."""
     measure = str(F.rng.choice(list(MEASURES)))
-    if measure == 'volume':
+    if small is not None:
+        k = float(F.rng.uniform(3.0, 5.0))
+        sc, st = k * small['ct'], k * small['tkt']
+        sign = float(F.rng.choice([-1.0, 1.0]))
+        cm, am = {'volume': (np.exp(sign * sc),) * 2, 'count': (float(np.exp(sc)), 1.0),
+                  'dollars': (1.0, float(np.exp(-st)))}[measure]
+        cm, am = float(cm), float(am)
+    elif measure == 'volume':
         m_ = float(F.rng.choice([F.rng.uniform(0.55, 0.75), F.rng.uniform(1.4, 1.8)]))
         cm, am = m_, m_
     elif measure == 'count':
@@ -131,7 +246,7 @@ def level_shift(F, t, s, start, mode, length, d1):
     else:
         cm, am = 1.0, float(F.rng.uniform(*MEASURES['dollars'][1]))
     sig = own_noise(F, t, s)
-    floor = SHIFT_K * (sig['ct'] if measure != 'dollars' else sig['tkt'])
+    floor = 0.0 if small is not None else SHIFT_K * (sig['ct'] if measure != 'dollars' else sig['tkt'])
     if measure == 'volume' and abs(np.log(cm)) < floor:     # every shift stands clear of the source's own noise
         cm = am = float(np.exp(np.sign(np.log(cm)) * floor))
     if measure == 'count' and np.log(cm) < floor:
@@ -148,7 +263,7 @@ def level_shift(F, t, s, start, mode, length, d1):
     lab = start + pd.Timedelta(days=int(np.ceil(ramp * min(VISIBLE / size, 1.0)))) if ramp else start
     return [_ev(f'level_shift_{mode}', t, s, lab, end, regime=True, permanent=length is None, measure=measure,
                 ct_mult=cm, amt_mult=am, ramp_days=ramp, shift_start=_fmt(start),
-                settle=_fmt(start + pd.Timedelta(days=ramp + 14)))]
+                settle=_fmt(start + pd.Timedelta(days=ramp + 14)), **(dict(small=True) if small is not None else {}))]
 
 
 # ---------------------------------------------------------------- every source of one company: real events (decoys)

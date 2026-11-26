@@ -58,6 +58,9 @@ N_POINTS, SHIFTS = 2, [('step', 2), ('ramp', 2)]   # per panel: 2 of each point 
 N_PANELS = 3           # hidden panels a task is graded on (the reward is their mean): fresh draws of problems
 N_INSIDE, N_STACKED = 2, 1   # per panel: one-offs placed inside a level change, and a step stacked on one
 N_RECURRING, N_SLOW = 2, 2   # per panel: planted yearly closures (normal) and slow panel ramps (problems)
+N_MULTI = 1            # per panel: one of each several-day problem (perturb.MULTI)
+N_PHANTOM, N_SMALL, N_CHAIN = 1, 1, 1   # per panel: a phantom-count stretch, a small step on a clean source, and a
+#                                         one-off planted a week or two before a level change on the same source
 
 
 def plant(rng, control, ctx, n_tickers=8, sensors=None):
@@ -146,6 +149,59 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
                     if not callable(f):
                         # a lasting change holds the company to the end; a temporary one until it is over
                         busy.append((('chg', t), lo, d1 if length is None else lo + pd.Timedelta(days=length + 45)))
+                    break
+        # several-day problems that are not a steady level (feedback #98): on a source with no level change, thin
+        # start or closure in their span, away from company events, one at a time per company
+        for f, longest in [x for x in P.MULTI for _ in range(N_MULTI)]:
+            for _ in range(500):
+                t, s = cands[int(rng.integers(len(cands)))]
+                lo = day(0.32, 0.93)
+                hi = lo + pd.Timedelta(days=longest)
+                if hi > d1 or not (free((t, s), lo, hi) and free(('pt', t, s), lo, hi) and free(t, lo, hi)
+                                   and free(('multi', t), lo, hi)):
+                    continue
+                ev = f(F, t, s, lo)
+                if ev:
+                    events += ev
+                    busy += [(k_, lo, hi) for k_ in ((t, s), ('pt', t, s), ('multi', t))]
+                    break
+        # level changes of two more shapes: a fixed number of phantom transactions a day, and a step sized against
+        # the source's noise to its sisters, on one of the panel's cleaner sources
+        sig = grade.own_noise(truth_df).set_index(['ticker', 'source_id'])
+        clean_half = [c for c in cands if c in sig.index and sig.loc[c, 'sig_c'] <= sig.reindex(cands).sig_c.median()]
+        for what in ['phantom'] * N_PHANTOM + ['small'] * N_SMALL:
+            for _ in range(500):
+                pool_ = clean_half if what == 'small' and clean_half else cands
+                t, s = pool_[int(rng.integers(len(pool_)))]
+                lo = day(0.3, 0.7)
+                length = int(rng.integers(30, 121)) if what == 'phantom' else int(rng.integers(90, 241))
+                hi = lo + pd.Timedelta(days=length + 45)
+                if not (free((t, s), lo, hi) and free(('pt', t, s), lo, hi) and free(t, lo, lo + pd.Timedelta(days=3))
+                        and free(('chg', t), lo, hi)):
+                    continue
+                ev = P.phantom(F, t, s, lo, length) if what == 'phantom' else P.level_shift(
+                    F, t, s, lo, 'step', length, d1, small=dict(ct=float(sig.loc[(t, s), 'sig_c']),
+                                                                tkt=float(sig.loc[(t, s), 'sig_t'])))
+                if ev:
+                    events += ev
+                    busy += [((t, s), lo, hi), (('chg', t), lo, hi)]
+                    break
+        # problems in quick succession: a one-off 5-14 days before a level change on the same source
+        firsts = [e for e in events if e.get('regime') and not e.get('small') and e.get('measure') != 'phantom']
+        for _ in range(N_CHAIN):
+            for _ in range(200):
+                if not firsts:
+                    break
+                e = firsts[int(rng.integers(len(firsts)))]
+                t, s = e['ticker'], e['source_id']
+                lo = pd.Timestamp(e.get('shift_start', e['start'])) - pd.Timedelta(days=int(rng.integers(5, 15)))
+                if lo < d0 + pd.Timedelta(days=EVAL_START_DAYS) or not free(('pt', t, s), lo, lo + pd.Timedelta(days=3)) \
+                        or not free(t, lo, lo + pd.Timedelta(days=3)) or not free((t, s), lo, lo, pad=0):
+                    continue
+                ev = P.POINTS[int(rng.integers(len(P.POINTS)))](F, t, s, lo)
+                if ev:
+                    events += [dict(x, before_change=True) for x in ev]
+                    busy.append((('pt', t, s), lo, lo + pd.Timedelta(days=3)))
                     break
         # overlapping problems in one source (feedback #97): one-offs inside a level change, and a step on top of an
         # earlier level change, each in the same source while its sisters stay clean

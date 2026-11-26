@@ -11,7 +11,7 @@ company and each of two measures (log count, log ticket = log dollars per transa
   level  the source's standing gap: the median gap of the last 28 days if that agrees with the last 14 and 7, else of
          the last 14 or 7; zero unless it is clear of the noise of such a median.
   day    a day whose gap is far from the level is imputed from the sisters; a day that did the same on the same
-         date a year ago is kept as reported.
+         date a year ago is kept as reported. A report that repeats yesterday's count and dollars exactly is imputed.
 
 cleaned = reported - level (or the sisters' value on an imputed day). Everything for day t uses days <= t only.
 """
@@ -24,12 +24,17 @@ YEAR = 365           # trailing window for the usual relation and for noise (day
 WEEKS = 52           # same-weekday observations in the usual relation
 K_DAY = 4.0          # a day's gap beyond this many noise sds is imputed
 LONE = 2.0           # times K_DAY to impute a day when only one sister vouches or several sources are off
+K_FLAKY = 2.5        # the day bar once FLAKY_N days were imputed in the last FLAKY_DAYS
+FLAKY_N, FLAKY_DAYS = 3, 14
+NEAR, STEADY = 2.5, 0.7   # a level needs this share of the last week within NEAR spreads of it
+FAINT = 2.0          # under a level, a count whose counting noise exceeds this many spreads is imputed, not rescaled
 K_LEVEL = 4.0        # a 7- or 28-day median gap beyond this many of its own sds is a level change
 AGREE = 1.5          # the 28-day median is used while within this many 7-day sds of the 7-day median
 SHORT, MID, LONG = 7, 14, 28  # windows of the level medians (days)
 MIN_SD = 0.02        # floor on a source's noise sd (log units)
 DEFAULT_SD = 0.15    # noise sd before there is history to measure it
 MIN_HIST = 30        # observations needed to measure a noise sd
+STUCK_MIN = 5        # a repeat of count and dollars counts as stuck from this many transactions
 THIN_CT = 20         # transactions a day below which a new source carries no signal
 THIN_EDGE = 0.8      # a last-7-day median at this share of THIN_CT already counts as growing out of thin
 THIN_DAYS = 90       # days at or above THIN_CT (28-day median) before a source counts as established
@@ -76,7 +81,7 @@ def gaps(x, adj, base, bad):
     return g, n
 
 
-def one_measure(X, est, pred_ct=None):
+def one_measure(X, est, pred_ct=None, stuck=None, cnt=None):
     """X: days x sources, log values (blank where no row). Returns the cleaned log values, z (gap from level in
     noise sds), state (0 as reported, 1 imputed day, 2 rescaled level, 3 yearly pattern kept), moving (level taken
     from the 7-day median) and n (sisters used)."""
@@ -148,6 +153,13 @@ def one_measure(X, est, pred_ct=None):
         lvl = np.where(agree, q28, np.where(ok14, q14, q7))
         thr = K_LEVEL * np.where(agree, sd28, np.where(ok14, sd14, sd7))
         on = ~np.isnan(lvl) & (np.abs(lvl) > thr)
+        # a level is a state the source sits in: most of the last week must be near it (a fault that comes and goes
+        # leaves the week split between two values, and is treated day by day instead)
+        near = (np.abs(w7 - lvl) <= NEAR * sd).sum(axis=0) / np.maximum((~np.isnan(w7)).sum(axis=0), 1)
+        on &= near >= STEADY
+        # after several repaired days in two weeks, a further fault is likelier: a lower bar for the day
+        flaky = (ST[max(t - FLAKY_DAYS, 0):t] == 1).sum(axis=0) >= FLAKY_N
+        kday = np.where(flaky, K_FLAKY, K_DAY)
         lv = np.where(on, lvl, 0.0)
         LV[t] = lv
         MV[t] = on & ~agree
@@ -159,7 +171,12 @@ def one_measure(X, est, pred_ct=None):
             if np.isnan(x[s]) or np.isnan(g[s]):
                 continue
             lone = n[s] < 2 or bad.sum() > 1    # one sister only, or several sources off at once: less sure whose fault
-            if abs(z[s]) > K_DAY * (LONE if lone else 1):
+            faint = on[s] and cnt is not None and 1.0 / np.sqrt(max(cnt[t, s], 1.0)) > FAINT * sd[s]
+            if (stuck is not None and stuck[t, s]) or faint:
+                ST[t, s] = 1                    # a repeated report, or too few transactions left to rescale: impute
+                C[t, s] = x[s] - g[s]
+                Z[t, s] = np.sign(z[s] or 1.0) * max(abs(z[s]), 1.5 * K_DAY)
+            elif abs(z[s]) > kday[s] * (LONE if lone else 1):
                 if recurs(E, t, s, e[s], sd[s]):
                     ST[t, s] = 3
                     C[t, s] = x[s] - lv[s]
@@ -210,8 +227,10 @@ def score_company(g):
     thin = (~established & ~(med28 >= THIN_CT) & ~(med7 >= THIN_EDGE * THIN_CT)).to_numpy()   # too few, not yet growing
     est = established.to_numpy()
     pred = ct.shift(1).rolling(LONG, min_periods=1).median().to_numpy()
-    Cc, Zc, Sc, Mc, Nc = one_measure(lc.to_numpy(), est, pred)
-    Ct, Zt, St, Mt, Nt = one_measure(lt.to_numpy(), est)
+    # a stuck feed: yesterday's count and dollars reported again, to the cent
+    stuck = ((ct == ct.shift(1)) & (amt == amt.shift(1)) & (ct >= STUCK_MIN)).to_numpy()
+    Cc, Zc, Sc, Mc, Nc = one_measure(lc.to_numpy(), est, pred, stuck, ct.to_numpy())
+    Ct, Zt, St, Mt, Nt = one_measure(lt.to_numpy(), est, None, stuck)
     conf = np.minimum(confidence(Zc, Sc, Mc, Nc), confidence(Zt, St, Mt, Nt))
     same_c = np.isin(Sc, (0, 3))
     same_t = np.isin(St, (0, 3))

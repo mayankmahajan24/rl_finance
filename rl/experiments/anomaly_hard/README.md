@@ -30,6 +30,12 @@ is exact. `truth_panel.csv.gz` is the hidden panel before the problems were plan
 | 2 each: volume spike, dropout, count flood, dollar spike | one source, 1-3 days (x2-5; to 1-5%; count x3-7; dollars x1.8-3) | untrustworthy; impute |
 | 2 steps, 2 ramps (2-8 weeks) | one source's level moves (volume, count only, or dollars only), temporary or permanent | first 14 days untrustworthy; then rescale to the old level and trust |
 | up to 2 slow ramps | one source moves x1.5-3 or x0.35-0.6 over 4-10 months, for good | cleaned series only (no datable onset) |
+| 1 each: volume block, outage (feedback #98) | one source, 4-10 days x2-4 or x0.25-0.5; 4-21 days at 1-5% | one kind (`multi_day`): untrustworthy; impute |
+| 1 intermittent (#98) | one source, 3-8 weeks in which 30-45% of the days are doubled or mostly lost, the rest fine | its own kind: the bad days imputed, the good days kept |
+| 1 stuck feed (#98) | one day's count and dollars repeated to the cent for the next 3-7 days | its own kind; scored only on the days the repeat is beyond the source's noise |
+| 1 rollup (#98) | 2-3 days at 1-5%, their volume reported on the following day | with the one-day problems |
+| 1 phantom count, 1 small step (#98) | a fixed number of tiny extra transactions a day for 1-4 months; a step 3-5x the source's noise against its sisters on a cleaner source | with the steps (onset from the day it shows) |
+| 1 one-off before a change (#98) | a one-day problem 5-14 days before a level change on the same source | with the one-day problems |
 | 2 yearly closures | one source drops to 5-30% on the same date every year | normal: trust and keep (first year unscored) |
 | 1 thin start | one source starts at 6-14 transactions a day for 450-700 days, then grows into coverage | low signal: must be dropped |
 | 1 pull-forward wave, 1 company step | every source of one company | real events: trust and keep |

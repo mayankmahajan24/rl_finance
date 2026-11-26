@@ -115,7 +115,8 @@ Your score is a weighted average of three parts: 40% confidence, 40% cleaned ser
   rows on one source scored below 0.5, gaps of up to two days joined, a run longer than two weeks counting once per
   two weeks). A problem counts from the day it first
   shows in the data; after a lasting change, its first two weeks are untrustworthy, the weeks while it settles are
-  not scored, and from then on the new level counts as fine, so confidence should rise again. A problem that builds
+  not scored, and from then on the new level counts as fine, so confidence should rise again. When a temporary change
+  ends, the two weeks after it are not scored; from then on the source counts as fine. A problem that builds
   up too slowly for its start to be dated counts only in the cleaned series.
 * **Cleaned series.** On rows a problem affected, how much of the gap between the raw value and what the source
   should have reported your cleaned value closes (in log terms, count and dollars, each kind of problem weighing the

@@ -165,3 +165,17 @@ def test_every_reference_report_passes_every_code_item(name):
     text = (REPORTS / name).read_text()
     assert set(items(text).values()) == {'pass'}, items(text)
     assert W.WORD_MIN <= W.words(text) <= W.WORD_LIMIT
+
+
+def test_a_temporary_change_return_is_unscored_for_two_weeks_then_trusted():
+    import grade as G
+    days = pd.date_range('2015-01-01', '2017-12-31')
+    ev = pd.DataFrame(dict(date=days, ticker='TAG', source_id=1))
+    e = dict(type='level_shift_step', ticker='TAG', source_id=1, start='2016-03-01', end='2016-06-30', regime=True,
+             permanent=False, visible='2016-03-01', settle='2016-03-15', ramp_days=0, shift_start='2016-03-01')
+    truth = dict(eval_start='2015-06-01', ignore_series=[], exclusions=[], events=[e])
+    G.label_rows(truth, ev, None)
+    on = lambda d: ev.loc[ev.date == pd.Timestamp(d)].iloc[0]  # noqa: E731
+    assert on('2016-03-01').label and on('2016-03-14').label and not on('2016-03-15').use
+    assert not on('2016-07-01').use and not on('2016-07-14').use            # the return: two weeks unscored
+    assert on('2016-07-15').use and not on('2016-07-15').label              # then the source must be trusted

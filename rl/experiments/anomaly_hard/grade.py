@@ -34,7 +34,7 @@ recurring_first). Timing, from what a point-in-time scorer could see (build.anno
   * one-day problems: every day untrustworthy
   * a ramp (a shift built up over ramp_days) counts for confidence from the day it is fully built, not before
   * level changes: the first CHANGE_DAYS from when visible untrustworthy, unscored up to SETTLE_DAYS while the code
-    decides, then the new level trusted; after a temporary change ends, SETTLE_DAYS unscored, then trusted
+    decides, then the new level trusted; after a temporary change ends, RETURN_DAYS (14) unscored, then trusted
   * thin beginning: before a source is established (its truth count's centred 28-day median has held thin_ct for
     THIN_ESTABLISHED days), rows with that median under THIN_LO x thin_ct must be dropped (the gate); rows between
     THIN_LO and THIN_HI x thin_ct and THIN_EDGE days either side of the stretch's edges are unscored. A source that
@@ -84,6 +84,7 @@ import writeup as writeup_grade  # the write-up rubric (writeup.py, judge.md)
 KEYS = ['date', 'ticker', 'source_id']
 OUT_COLS = ['confidence', 'clean_ct', 'clean_amt']
 CHANGE_DAYS, SETTLE_DAYS = 14, 45
+RETURN_DAYS = CHANGE_DAYS   # after a temporary change ends: unscored this long, then the source must be trusted
 W_CONF, W_CLEAN, W_STAB = 0.4, 0.4, 0.2   # headline reward weights (confidence, cleaned series, stability)
 ALERT_GAP = 2            # days of trust that still join two distrusted runs into one alert
 ALERT_DAYS = CHANGE_DAYS  # an alert longer than a change's onset window counts as several
@@ -287,8 +288,8 @@ def label_rows(truth: dict, ev: pd.DataFrame, clean_truth: pd.DataFrame | None =
         parts.append((dict(e, part='onset', end=str(on_end.date())), ser & ev.date.between(a, on_end)))
         if not e.get('permanent'):
             # back on its old level: the data is right again, so distrusting the return is neither required nor
-            # penalised for SETTLE_DAYS; after that the source must be trusted
-            quiet |= ser & (ev.date > b) & (ev.date <= b + D(SETTLE_DAYS))
+            # penalised for RETURN_DAYS (time to see the return, as for a change's onset); after that it must be trusted
+            quiet |= ser & (ev.date > b) & (ev.date <= b + D(RETURN_DAYS))
     ev['use'] &= ~quiet
     for tk, s, m in thin_parts:           # thin beginnings not excluded for another reason: must be dropped (a gate)
         m = m & ~excluded_thin(truth, ev, tk, s) & (ev.date >= pd.Timestamp(truth['eval_start']))

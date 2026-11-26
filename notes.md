@@ -198,9 +198,8 @@ The runs were airgapped and used the subscription. Total = data reward x (0.5 + 
 2. Slow shifts: 0.78 a panel after the placement fix (were 2); place them first if 2 a panel is wanted.
 3. Judge calibration: label the calibration page (https://claude.ai/artifact/4Wbhocf2wEDgdXvzSX6FRp, 6 reports x 12
    items + 4 planted errors, blind); then trim the report rubric (42 items) to what earns its place.
-4. Pull request mayankmahajan24/rl_finance#73: title and description predate most of this work; rewrite, or split.
-5. Register anomaly_hard as a family; pass threshold; data_audit CI pins; anomaly_hindsight (not updated for any
-   of E34-E41).
+4. Pull request mayankmahajan24/rl_finance#73: title and description rewritten 2026-11-26 (#98); consider splitting.
+5. Register anomaly_hard as a family; pass threshold; data_audit CI pins.
 
 ---
 

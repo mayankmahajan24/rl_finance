@@ -32,7 +32,9 @@ recurring_first). Timing, from what a point-in-time scorer could see (build.anno
     own noise); a level change that never does is `unscored`; one that takes over SETTLE_DAYS to show is `slow`
     (cleaned series only; for confidence unscored until settled, then trusted)
   * one-day problems: every day untrustworthy
-  * a ramp (a shift built up over ramp_days) counts for confidence from the day it is fully built, not before
+  * a ramp (a shift built up over ramp_days): untrustworthy from the day it is visible until it is fully built
+    (shift_start + ramp_days; at least CHANGE_DAYS if it shows only once built), then RAMP_GRACE days unscored, then
+    the new level is fine (flagging it is a false positive)
   * level changes: the first CHANGE_DAYS from when visible untrustworthy, unscored up to SETTLE_DAYS while the code
     decides, then the new level trusted; after a temporary change ends, RETURN_DAYS (14) unscored, then trusted
   * thin beginning: before a source is established (its truth count's centred 28-day median has held thin_ct for
@@ -84,6 +86,7 @@ import writeup as writeup_grade  # the write-up rubric (writeup.py, judge.md)
 KEYS = ['date', 'ticker', 'source_id']
 OUT_COLS = ['confidence', 'clean_ct', 'clean_amt']
 CHANGE_DAYS, SETTLE_DAYS = 14, 45
+RAMP_GRACE = CHANGE_DAYS    # after a ramp is fully built: unscored this long (time to see it stopped), then fine
 RETURN_DAYS = CHANGE_DAYS   # after a temporary change ends: unscored this long, then the source must be trusted
 W_CONF, W_CLEAN, W_STAB = 0.4, 0.4, 0.2   # headline reward weights (confidence, cleaned series, stability)
 ALERT_GAP = 2            # days of trust that still join two distrusted runs into one alert
@@ -277,11 +280,16 @@ def label_rows(truth: dict, ev: pd.DataFrame, clean_truth: pd.DataFrame | None =
         if not e['regime']:
             parts.append((e, ser & ev.date.between(a, b)))
             continue
-        if e.get('ramp_days'):             # a gradual shift: for confidence it counts once it has fully built up
-            built = pd.Timestamp(e.get('shift_start', e['start'])) + D(int(e['ramp_days']) - 1)
-            if built > a:
-                quiet |= ser & (ev.date >= a) & (ev.date < built)
-                a = built
+        if e.get('ramp_days'):
+            # a ramp: untrustworthy from the day it shows while it builds (flag it early, and keep flagging it while it
+            # moves); then RAMP_GRACE days unscored (time to see that it has stopped); then the new level is fine
+            built = pd.Timestamp(e.get('shift_start', e['start'])) + D(int(e['ramp_days']))
+            on_end = min(built if built > a else a + D(CHANGE_DAYS - 1), b)
+            parts.append((dict(e, part='ramp', end=str(on_end.date())), ser & ev.date.between(a, on_end)))
+            quiet |= ser & (ev.date > on_end) & (ev.date <= min(on_end + D(RAMP_GRACE), b))
+            if not e.get('permanent'):
+                quiet |= ser & (ev.date > b) & (ev.date <= b + D(RETURN_DAYS))
+            continue
         settle = max(a + D(SETTLE_DAYS - 1), pd.Timestamp(e.get('settle', a)))
         on_end = min(a + D(CHANGE_DAYS - 1), b)
         quiet |= ser & (ev.date > on_end) & (ev.date <= min(settle, b))

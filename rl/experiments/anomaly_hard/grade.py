@@ -506,7 +506,7 @@ def consistency_score(sol, data, clean_truth, full, ev, stretches, c_, n_problem
         base = run(sol / 'score.py', clean_truth[data.columns], c_('truthrun'))
     except GateError as e:
         return 0.0, dict(error=str(e)[-500:])
-    k = ev[KEYS + ['date']].copy()
+    k = ev[KEYS].copy()
     k = k.merge(again[KEYS + ['confidence']].rename(columns={'confidence': 'confidence2'}), on=KEYS, how='left')
     k = k.merge(base[KEYS + ['confidence']].rename(columns={'confidence': 'confidence_t'}), on=KEYS, how='left')
     sc = stretches.to_numpy() & k.confidence2.notna().to_numpy()

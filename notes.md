@@ -27,7 +27,7 @@ panel code in `rl/families/_shared` and the source data, like every family).
 
 | | **anomaly_hard** | **anomaly_hindsight** |
 |---|---|---|
-| Status | **Active.** Graded; references and Opus results current | **Active, in progress** (H#9): rebuilt; 8 Opus runs and a fresh reference under way |
+| Status | **Active, redesigned 2026-11-26** (E36-E41): confidence scored against whether the cleaned value is right; source changes committed, **rebuild pending**; reference and Opus results to redo | **Active, in progress** (H#9): rebuilt; 8 Opus runs and a fresh reference under way |
 | Code | `rl/experiments/anomaly_hard/` | `rl/experiments/anomaly_hindsight/` (copied 2026-11-25) |
 | Built tasks | `rl/tasks/proto/anomaly_hard{,_train}/anomhard-*` | `rl/tasks/proto/anomaly_hindsight{,_train}/anomhind-*` |
 | Cleaned series | point in time, like confidence | built in hindsight from the whole panel; confidence stays point in time |
@@ -67,39 +67,40 @@ split's companies. It is graded on **three hidden panels** of the other half (sa
 disguise each), and the reward is their mean. Held-out seeds (`rl/splits/secrets`) and held-out companies (ALK, JBLU,
 KSS, JCP) are never used.
 
-### 1.2 Grader, anomaly_hard (`grade.py`, `writeup.py`, `judge.md`)
+### 1.2 Grader, anomaly_hard (`grade.py`, `writeup.py`, `judge.md`), as of 2026-11-26
 
-**Data reward per panel = 0.4 x confidence + 0.4 x cleaned series + 0.2 x stability**, then gated.
+**Data reward per panel = 0.45 x confidence + 0.45 x cleaned series + 0.1 x stability** (#93), then gated; the task's
+data reward is the mean over its three hidden panels.
 
-- **Confidence.** F1 of alert precision and problem recall.
-  - An alert is a run of distrusted rows on one source. Gaps of up to 2 days are joined; a run longer than 14 days
-    counts as one alert per 14 days.
-  - Each kind of problem weighs the same.
-  - A problem counts from the day it becomes visible: its 7-day median deviation reaches 3x the source's own noise.
-- **Cleaned series = gain x intact x kept.**
-  - gain: the share of each problem kind's error, beyond noise, that the repair removes (pooled per kind).
-  - intact: the share of good rows left within the source's own noise.
-  - kept: the share of rows that should be kept and were not left blank.
-  - Noise is `grade.own_noise`, measured on usable days only.
-- **Stability.** The scorer is re-run on its own cleaned series (rounded like raw data) and on the truth panel; extra
-  alarms cost in proportion to the size of the panel's problems.
-- **Gates (panel reward 0):**
-  - format;
-  - point in time (all three columns unchanged when the panel is truncated at hidden dates);
-  - no AI at run time;
-  - report exists;
-  - detection (confidence score at least 0.25);
-  - low signal dropped (at least 90% of a thin start's rows distrusted and blank).
-  - An integrity-gate failure on any panel zeroes the task.
-- **Not scored:**
-  - the first year;
-  - rows near 20 a day;
-  - 14 days either side of a thin stretch's edges;
-  - series with a median under 10 a day;
-  - windows around company-wide natural breaks;
-  - problems too small to see.
+- **Confidence** (#89, #90, #92): read as the probability that the row's cleaned value is right.
+  - Right: the cleaned value is within the source's own noise of the truth panel in count and in ticket size. Wrong:
+    beyond 2x that in either. In between: not scored.
+  - No timing windows: a step is wrong until corrected, a ramp while the correction lags, a return while the code
+    still rescales; a company's real growth is never wrong.
+  - Brier in strata fixed before the outcome (a proper score): each kind of planted problem (every scored row in
+    its spans, start to end plus 30 days, right or wrong) and the fine rows outside every span. Kinds averaged, then
+    half and half with the fine rows; skill against a constant 0.5, floored at 0.
+  - Times (0.5 + 0.5 x alert precision). An alert is a run of distrusted rows on one source (gaps up to 2 days
+    joined, split every 14 days); true only if it touches a wrong row inside a planted problem's span. No alerts
+    counts as full precision.
+- **Cleaned series = gain x intact x kept** (unchanged): gain per kind on problem rows, intact on untouched rows,
+  kept on rows to keep; blank counts as raw.
+- **Stability** (#87, #89): re-run on its own cleaned output (counts rounded, dollars to the cent, blanks dropped) and
+  on the truth panel; 1 - (extra alerts on its own output) / (the panel's planted problems that show), floored at 0.
+- **Gates:** the task scores 0 on malformed output, a point-in-time failure (all three columns), a model or network
+  client in the code (parsed imports and calls, #87), or no report. A panel scores 0 if low signal is not dropped
+  (90% of a thin start distrusted and blank) or confidence is not continuous (judged on the rows the code doubts,
+  under 0.99, once there are 50: at least 20 distinct values, none on more than half of those strictly between 0.01
+  and 0.99; deliberately not in the instruction). The detection gate (confidence at least 0.25) was removed.
+- **Not scored:** the first year; series too thin to grade; rows near 20 a day and 14 days either side of a thin
+  stretch's edges; windows around company-wide natural breaks; a planted problem's days before it shows (its
+  trailing 7-day median deviation reaches 3x the noise of a 7-day median of the source's relation to its sisters,
+  `build.annotate_events`, #87) and a problem that never does.
 - **Isolation.** Agent code runs as nobody, with no network, in its own mount namespace with empty shared writable
   folders; `tests/` is root-only.
+- **Checks:** the answer key scores 1.0 on every panel of train-001; constants score 0; 51 offline tests
+  (`rl/tests/test_anomaly_hard_writeup.py`) cover the target, strata, damage exploit, continuity, no-AI scan, the
+  report-zero-on-failure rule and the report code items.
 
 **Report score** (judged on the task's visible panel and the solution's own output on it):
 
@@ -127,7 +128,7 @@ KSS, JCP) are never used.
   | G1-G5 | chart: every series; own units; full history; original line unmodified; exactly two lines |
   | F1-F4 | nothing from outside; sections hold their content; units; readable sentences |
 - **writeup_score** = share of applicable items passed.
-  - It is 0 if V5 fails on all three votes.
+  - It is 0 if V5 fails on all three votes, and 0 if the code fails on the visible panel (#87; was: report skipped).
   - It is halved for each of: length outside 150-500 words, a missing section (K1), no chart (K8).
 
 **Total reward = data reward x (0.5 + 0.5 x writeup_score).** A report can halve the reward but never earn it alone.
@@ -190,17 +191,16 @@ The runs were airgapped and used the subscription. Total = data reward x (0.5 + 
   (confidence 0.33 to 0.72), not in cleaning (0.87 to 0.96). Smoothing the gates barely narrows it (experiment E22).
   The two best runs were the two longest.
 
-### 1.6 Open decisions (Mayank)
+### 1.6 Open decisions and next steps (Mayank)
 
-1. Per-series Data table in the report (a code check that every series has a row; the judge checks values against
-   facts). Proposed, not yet approved.
-2. Judge calibration: label the calibration page (https://claude.ai/artifact/4Wbhocf2wEDgdXvzSX6FRp, 14 reports).
-3. Register anomaly_hard as a family (recommended).
-4. data_audit CI pins failing on this branch: re-pin or revert.
-5. Pass threshold.
-6. anomaly_hindsight: when to run it; whether to adapt its references.
-7. Optional: re-judge the two earliest v8 reports and the references under the current rubric; compare the strong
-   and weak Opus runs' transcripts.
+1. **Rebuild** anomaly_hard (applies E37, E39-E41 to the built tasks); then a fresh reference against the new score
+   on the tuning panels; then Opus runs and grading.
+2. Slow shifts: 0.78 a panel after the placement fix (were 2); place them first if 2 a panel is wanted.
+3. Judge calibration: label the calibration page (https://claude.ai/artifact/4Wbhocf2wEDgdXvzSX6FRp, 6 reports x 12
+   items + 4 planted errors, blind); then trim the report rubric (42 items) to what earns its place.
+4. Pull request mayankmahajan24/rl_finance#73: title and description predate most of this work; rewrite, or split.
+5. Register anomaly_hard as a family; pass threshold; data_audit CI pins; anomaly_hindsight (not updated for any
+   of E34-E41).
 
 ---
 
@@ -245,6 +245,12 @@ active construction; "Retired" means it was later replaced (see section 3).
 | E33 | 11-25 | Count and spend charts (#74, H#12): every series needs a count panel and a spend panel; G1-G5 grade both; reference reports redrawn (two figures, plain axis numbers) | Re-judged the six calibration reports: references 1.0 and 0.976 (one F4 vote); the four Opus reports already charted both measures and pass G1-G5 (0.76-0.90). The same Opus report moved 0.881 to 0.762 between two judge runs on non-chart items (M2-M4, F2, F4): judge run-to-run variance worth measuring. Calibration page refreshed with the new verdicts and charts | Active |
 | E34 | 11-25 | Confidence as a probability (#76, #77): balanced row Brier skill; continuity gate; practitioner made probabilistic (p0-p6) | Practitioner p3 0.811 tuning, 0.890 held-out (old discrete one: 0, fails the gate). 8 Opus runs (v9) on the rebuilt tasks; grading paused at t001-t004 (#80) | Superseded by E35 |
 | E35 | 11-26 | Fresh reference (#78-#82). Ramps scored for confidence only once fully built (#78); fresh probabilistic reference f1-f12 (one-off and shift posteriors, distrust until a new level settles, minimum shift 2.5 sigma, moves away from the original basis): best f11 0.888 with ramps (old reference under the same grader 0.769). Ramps dropped from the build (#80, #81): f11 0.922 tuning, 0.918 held-out; 4 Opus runs on ramp-free tasks 0.86-0.94 (too easy: false alerts nearly free). Confidence x (0.5 + 0.5 x alert precision) (#82): f11 0.807, Opus 0.45-0.81. Precision work g1-g3, h1-h3: shorter distrust window, yearly patterns, second pass for confidence, same-day culprit rule: false alerts 50 to 11 a panel, but Brier skill falls as precision rises (g3 0.86 x 0.26 precision; h3 0.76 x 0.48); best h2 0.836 tuning | Reference h2 kept in solutions/fresh (not yet the active reference); awaiting a decision on the target |
+| E36 | 11-26 | Grader timing rules, one at a time (#83-#88): return after a temporary change 14 days unscored (was 45); ramps scored from visible until fully built, then a 7-day grace (was: only the 14 days after built); ramps planted again with the rule in the instruction (#85); one rule for every level change (until the new level has held two weeks, a week unscored, then fine); instruction framing: every source tracks the same fundamental momentum of the business (no method named) | Each rule needed its own window and wording; the windows read as rules to learn | Superseded by E39 (windows removed) |
+| E37 | 11-26 | First independent review (skills checklist): 14 findings | Applied (#87): report scored 0 when the code fails on the visible panel (was a free pass); continuity values strictly between 0.01 and 0.99; stability scaled to untrustworthy rows; parsed no-AI scan; shift visibility against a 7-day median's noise (train: scored steps and ramps 54 to 70 of 72); volume shifts get the size floor; instruction: kinds of problems and of normal behaviour, gates zero a panel, stability input as it is, temporary and lasting changes alike, report asks (count and spend figures, a not-to-do, point-in-time and self-run checks, a source with no sister); K5 and K7 narrowed; README rewritten; detection gate removed | Active |
+| E38 | 11-26 | Simplification pass (#87): keep every check that guards a real property, drop what is redundant | Detection gate and dead code removed; report rubric size left alone until the calibration labels exist | Active |
+| E39 | 11-26 | Confidence = the probability that the cleaned value is right (#89): all timing windows removed; instruction states intent, not formulas (2,300 to about 1,900 words) | Oracle 1.0 on train-001 (after E41); h2 0.354 then 0.526: TUL had two planted slow shifts (half the company drifting), h2 rescaled the two good sources for years at 99.5% confidence | Active |
+| E40 | 11-26 | Second independent review (#90): confidence was improper (strata by outcome paid for distrusting correct repairs); damaging good rows and flagging them paid (+0.12 a panel); slow shifts counted but the text said otherwise; continuity let 0.005/0.995 through | Strata fixed before the outcome; damage outside planted spans counts with fine rows and alerts are true only inside spans; instruction: a far drift is a problem until brought back; continuity fixed; regression tests | Active |
+| E41 | 11-26 | Oracle check and placement (#91-#94): no alerts = full precision; continuity judged on doubted rows; a level change checks its company is free over its whole span (two slow shifts on one company could land before); weights 45/45/10; Not scored lists thin series and a problem's days before it shows | Oracle 1.0, 1.0, 1.0; scratch build: no overlapping changes, steps and ramps 2 a panel, slow shifts 0.78 a panel (were 2) | Active; rebuild pending |
 | E25 | 11-25 | anomaly_hindsight copy with hindsight cleaning rules (#60, #61, H#1-H#4) | Built; every task has a thin start, 7 of 13 a company-wide break | Active, on hold |
 
 ---
@@ -253,6 +259,11 @@ active construction; "Retired" means it was later replaced (see section 3).
 
 | What | Retired | Why | Replaced by |
 |---|---|---|---|
+| Confidence as F1 of alert precision and recall; balanced Brier against fixed untrustworthy windows | 11-25 / 11-26 | F1 ignored how low perturbed days scored; windows (14 days, 45, 7, ramp and return rules) read as rules to learn | Brier against whether the cleaned value is right (E39) |
+| Detection gate (confidence at least 0.25) | 11-26 | Redundant (no detection scores 0) and zeroed good panels | Removed (E38) |
+| Stability over all problem rows | 11-26 | Near-free (every solution 0.95-1.0) | Alerts per planted problem, 10% weight (E39, #93) |
+| Ramp-free task (scratch build) and reference h3 on it | 11-26 | Reference reached 0.92 but Opus 0.86-0.94: too easy | Ramps planted again with the E39 scoring |
+| Reference candidates p0-p6, f1-f12, g1-g3, h1-h3 | 11-26 | Built for earlier confidence targets | A fresh reference against the E39 score (pending); h2 kept in solutions/fresh |
 | Library-based references (ruptures, Rbeast, MSTL, statsforecast, Prophet) | 11-25 | Below the practitioner on the tuning panels (0.54-0.76 against 0.871), E30 | Practitioner (CUSUM) kept |
 | Real-data background, reviewed real problems, quirk events, hindsight reference, review/triage tools | 11-23 / 11-24 | Debatable labels; no exact truth | Semi-real background with planted problems (E5) |
 | Per-alert precision weighting, event F1, the "fixed" metric, row-level F1 | 11-23 | Restated other parts or rewarded spraying flags | Alert F1 with the 14-day split |

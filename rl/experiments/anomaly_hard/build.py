@@ -32,6 +32,21 @@ RL = HERE.parents[1]
 sys.path[:0] = [str(RL), str(HERE)]
 from families._shared import build_panel  # noqa: E402
 from families._shared.panel_perturb import Frame, _fmt  # noqa: E402
+
+
+class UnscaledFrame(Frame):
+    """The shared disguise (codes, shuffled sources, dates shifted by whole years) without the per-series rescale of
+    counts and dollars: the twenty-a-day low-signal bar and a series' counting noise refer to its real transactions
+    (feedback #95). The rescale's random draws are still made, so everything else matches the shared Frame."""
+
+    def __init__(self, raw, rng, tickers=None, artifacts=((), ())):
+        super().__init__(raw, rng, tickers=tickers, artifacts=artifacts)
+        orig = raw if tickers is None else raw[raw.ticker.isin(tickers)]
+        df = orig.copy()
+        df['ticker'] = df.ticker.map(self.tmap)
+        df['source_id'] = df.source_id.map(self.smap)
+        df['date'] = df.date + self.shift
+        self.df = df[df.ct > 0].sort_values(['ticker', 'source_id', 'date']).reset_index(drop=True)
 import background  # noqa: E402
 import grade  # noqa: E402
 import perturb as P  # noqa: E402
@@ -48,7 +63,7 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
     raw = ctx.raw
     pool = sorted(sensors) if sensors else sorted(raw.ticker.unique())
     tks = list(rng.choice(pool, min(n_tickers, len(pool)), replace=False))
-    F = Frame(raw, rng, tickers=tks, artifacts=ctx.artifacts)
+    F = UnscaledFrame(raw, rng, tickers=tks, artifacts=ctx.artifacts)
     F.df = background.semi_real(F.df)        # every source rebuilt on its company's real moves
     d0, d1 = F.df.date.min(), F.df.date.max()
     span = (d1 - d0).days
@@ -205,9 +220,7 @@ day-to-day moves, with its own level, weekday pattern and day-to-day noise. It i
 for a company named in the table below. The panel your
 code is graded on covers other companies, with their own codes and source ids, so the code must not depend on them. Source ids
 are shuffled. Dates are shifted by a whole multiple of 364 days, so weekdays line up but holidays can sit a few days
-off their usual dates. Each ticker-source series has its `ct` and `amt` multiplied by its own hidden factor between
-0.3 and 3, so levels are not comparable across series. Growth within a series and average ticket size (`amt` / `ct`)
-are real."""
+off their usual dates. Counts, dollars, growth and average ticket size (`amt` / `ct`) are real."""
 BRANDS = {'M_M': "Macy's stores", 'M_BL': "Bloomingdale's", 'JWN_JWN': 'Nordstrom full-line stores',
           'JWN_RACK': 'Nordstrom Rack', 'ROST_ROST': 'Ross Dress for Less', 'ROST_DD': "dd's DISCOUNTS",
           'TJX_TJMAXX': 'T.J. Maxx and Marshalls'}

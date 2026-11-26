@@ -16,7 +16,7 @@ Gates (reward 0 if any fails):
   low_signal_dropped  at least LOW_SIGNAL_SHARE of the thin beginning's rows distrusted (confidence < 0.5) and blank
   continuous     confidence is a probability on a continuous scale, not a few levels (see continuous())
 
-Data reward = W_CONF x confidence + W_CLEAN x cleaned series + W_STAB x stability (0.4 / 0.4 / 0.2). Also reported:
+Data reward = W_CONF x confidence + W_CLEAN x cleaned series + W_STAB x stability (0.45 / 0.45 / 0.1). Also reported:
 the three components and the geometric mean sqrt(confidence x cleaned series x stability) (reward_geometric).
 
 Reward = data reward x (0.5 + 0.5 x writeup_score): the report graded on the task's visible panel and the solution's
@@ -83,7 +83,7 @@ OUT_COLS = ['confidence', 'clean_ct', 'clean_amt']
 SETTLE_DAYS = 45            # build: marks a change slower than this to show as `slow` (informational; scored like any)
 NOISE_WRONG = 2.0           # a cleaned value this many times the source's own noise off the truth is wrong (1x: right)
 AFTER_DAYS = 30             # a wrong row within this many days after a problem ends is still that problem's
-W_CONF, W_CLEAN, W_STAB = 0.4, 0.4, 0.2   # headline reward weights (confidence, cleaned series, stability)
+W_CONF, W_CLEAN, W_STAB = 0.45, 0.45, 0.1   # headline reward weights (confidence, cleaned series, stability)
 ALERT_GAP = 2            # days of trust that still join two distrusted runs into one alert
 ALERT_DAYS = 14           # an alert longer than two weeks counts as several
 ONE_DAY = {'volume_spike', 'dropout', 'count_flood', 'dollar_spike'}   # planted one-day problems: one kind

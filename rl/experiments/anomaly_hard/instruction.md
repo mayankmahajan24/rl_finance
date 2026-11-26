@@ -116,7 +116,7 @@ python /app/solution/score.py --input IN.csv --output OUT.csv
 The grader knows which rows of the hidden panel misreport and what each source would have reported had it been
 working normally.
 
-Your score is a weighted average of three parts: 40% confidence, 40% cleaned series, 20% stability.
+Your score is a weighted average of three parts: 45% confidence, 45% cleaned series, 10% stability.
 
 * **Confidence.** Scored row by row against whether your cleaned value turned out right (within the source's own
   day-to-day noise of what it should have reported): high confidence where it is right, low where it is not, as a

@@ -48,7 +48,7 @@ prose that names one does not count), or the write-up is missing. A panel's rewa
 the instruction, #76/#77). The earlier detection gate (confidence at least 0.25) was removed: detecting nothing now
 scores 0 on confidence by itself.
 
-**Reward** (per panel) = 0.4 x confidence + 0.4 x cleaned series + 0.2 x stability; the task's data reward is the mean
+**Reward** (per panel) = 0.45 x confidence + 0.45 x cleaned series + 0.1 x stability; the task's data reward is the mean
 over its three hidden panels (each with its own planted problems and disguise, so tuning to one does not pay).
 
 | Part | How |

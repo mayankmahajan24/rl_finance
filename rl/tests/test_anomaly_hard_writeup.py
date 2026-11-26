@@ -181,7 +181,7 @@ def test_a_temporary_change_return_is_unscored_for_two_weeks_then_trusted():
     assert on('2016-07-15').use and not on('2016-07-15').label              # then the source must be trusted
 
 
-def test_a_ramp_is_untrustworthy_while_it_builds_then_fine_after_two_weeks():
+def test_a_ramp_is_untrustworthy_while_it_builds_then_fine_after_a_week():
     import grade as G
     days = pd.date_range('2015-01-01', '2017-12-31')
     ev = pd.DataFrame(dict(date=days, ticker='TAG', source_id=1))
@@ -192,5 +192,5 @@ def test_a_ramp_is_untrustworthy_while_it_builds_then_fine_after_two_weeks():
     on = lambda d: ev.loc[ev.date == pd.Timestamp(d)].iloc[0]  # noqa: E731
     assert not on('2016-03-09').use                                         # before it shows: not scored
     assert on('2016-03-10').label and on('2016-03-31').label                # from visible until fully built (03-31)
-    assert not on('2016-04-01').use and not on('2016-04-14').use            # two weeks to see that it stopped
-    assert on('2016-04-15').use and not on('2016-04-15').label              # then flagging it is a false positive
+    assert not on('2016-04-01').use and not on('2016-04-07').use            # a week to see that it stopped
+    assert on('2016-04-08').use and not on('2016-04-08').label              # then flagging it is a false positive

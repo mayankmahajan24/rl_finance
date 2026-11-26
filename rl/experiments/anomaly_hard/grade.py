@@ -33,7 +33,7 @@ recurring_first). Timing, from what a point-in-time scorer could see (build.anno
     (cleaned series only; for confidence unscored until settled, then trusted)
   * one-day problems: every day untrustworthy
   * a ramp (a shift built up over ramp_days): untrustworthy from the day it is visible until it is fully built
-    (shift_start + ramp_days; at least CHANGE_DAYS if it shows only once built), then RAMP_GRACE days unscored, then
+    (shift_start + ramp_days; at least CHANGE_DAYS if it shows only once built), then RAMP_GRACE (7) days unscored, then
     the new level is fine (flagging it is a false positive)
   * level changes: the first CHANGE_DAYS from when visible untrustworthy, unscored up to SETTLE_DAYS while the code
     decides, then the new level trusted; after a temporary change ends, RETURN_DAYS (14) unscored, then trusted
@@ -86,7 +86,7 @@ import writeup as writeup_grade  # the write-up rubric (writeup.py, judge.md)
 KEYS = ['date', 'ticker', 'source_id']
 OUT_COLS = ['confidence', 'clean_ct', 'clean_amt']
 CHANGE_DAYS, SETTLE_DAYS = 14, 45
-RAMP_GRACE = CHANGE_DAYS    # after a ramp is fully built: unscored this long (time to see it stopped), then fine
+RAMP_GRACE = 7              # after a ramp is fully built: unscored this long (time to see it stopped), then fine
 RETURN_DAYS = CHANGE_DAYS   # after a temporary change ends: unscored this long, then the source must be trusted
 W_CONF, W_CLEAN, W_STAB = 0.4, 0.4, 0.2   # headline reward weights (confidence, cleaned series, stability)
 ALERT_GAP = 2            # days of trust that still join two distrusted runs into one alert

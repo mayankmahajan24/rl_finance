@@ -10,8 +10,12 @@ company and each of two measures (log count, log ticket = log dollars per transa
          cleaned values.
   level  the source's standing gap: the median gap of the last 28 days if that agrees with the last 14 and 7, else of
          the last 14 or 7; zero unless it is clear of the noise of such a median.
+         A level is dropped on the second day running that the source is back towards its usual relation.
   day    a day whose gap is far from the level is imputed from the sisters; a day that did the same on the same
-         date a year ago is kept as reported. A third identical report in a row (count and dollars) is imputed, and each one after it.
+         date a year ago is kept as reported. A third identical report in a row (count and dollars) is imputed, and
+         each one after it. A count and a ticket off in opposite ways, far enough jointly, are read as a wrong count.
+  pair   with only two usable sources neither can say which of them moved: the day's move of the gap is shared
+         between them by how far each moved against its own last weeks.
 
 cleaned = reported - level (or the sisters' value on an imputed day). Everything for day t uses days <= t only.
 """
@@ -32,10 +36,15 @@ K_LO, K_HI = 2.5, 6.0   # a 7- or 14-day median gap this many of its own sds fro
 K_LONG = 3.5         # a 28-day median gap beyond this many of its own sds is a level, in full (see standing level below)
 AGREE = 1.5          # the 28-day median is used while within this many 7-day sds of the 7-day median
 SHORT, MID, LONG = 7, 14, 28  # windows of the level medians (days)
+OWN_WEEKS = 4        # weeks of a source's own same-weekday values that say what it should read today
+OWN_SURE = 0.9       # share of a two-source move that makes the source the one that moved
+MIN_WEEK = 4         # days a 7-day median needs: a majority of the week
 MIN_SD = 0.02        # floor on a source's noise sd (log units)
 DEFAULT_SD = 0.15    # noise sd before there is history to measure it
 MIN_HIST = 30        # observations needed to measure a noise sd
 STUCK_DAYS = 3       # identical reports in a row before a feed counts as stuck
+K_BOTH = 4.4         # count and ticket off in opposite ways, this many sds jointly: as rare by chance as K_DAY on one (chi-square, 2 df)
+BOTH_CONF = 0.82     # confidence of a row imputed on that joint evidence: that of a row imputed just over the bar
 MIRROR = 2.0         # spreads the other measure must stand out, the opposite way, to be read as the mirror of a wrong count
 K_RUN = 3.0          # two days running beyond this many spreads, same side: the second is imputed (a step's day two)
 STUCK_ONE_DAYS = 4   # identical reports in a row of one measure alone (count or dollars) before it counts as stuck
@@ -74,10 +83,12 @@ def robust_sd(hist, default):
 
 def gaps(x, adj, base, bad):
     """Gap of each source to its sisters today: median over sisters j of x[s] - adj[j] - base[s, j].
-    Sisters must report today, be established and not be marked bad; if none qualifies, any established sister."""
+    Sisters must report today, be established and not be marked bad; if none qualifies, any established sister.
+    Also returns the number of sisters used and, where it is one, which."""
     S = len(x)
     g = np.full(S, np.nan)
     n = np.zeros(S, int)
+    only = np.full(S, -1)
     for s in range(S):
         if np.isnan(x[s]):
             continue
@@ -90,7 +101,9 @@ def gaps(x, adj, base, bad):
         if pick.any():
             g[s] = np.median(d[pick])
             n[s] = pick.sum()
-    return g, n
+            if n[s] == 1:
+                only[s] = int(np.argmax(pick))
+    return g, n, only
 
 
 def standing_level(G, t, since, sd, sd7, sd14, sd28, prev, sh_prev):
@@ -99,12 +112,12 @@ def standing_level(G, t, since, sd, sd7, sd14, sd28, prev, sh_prev):
     # the standing level, from the gap's recent medians
     r0 = max(t - LONG + 1, 0)
     w28 = G[r0:t + 1]
-    if (since > r0).any():                 # after a release, days before it no longer count towards the level
+    if (since > r0).any():                 # after a release or a level's end, earlier days no longer count towards the level
         w28 = w28.copy()
         for s in np.flatnonzero(since > r0):
             w28[:since[s] - r0, s] = np.nan
     w7, w14 = w28[-SHORT:], w28[-MID:]
-    q7 = np.where((~np.isnan(w7)).sum(axis=0) >= 4, nanmed(w7, axis=0), np.nan)
+    q7 = np.where((~np.isnan(w7)).sum(axis=0) >= MIN_WEEK, nanmed(w7, axis=0), np.nan)
     q14 = np.where((~np.isnan(w14)).sum(axis=0) >= 8, nanmed(w14, axis=0), np.nan)
     q28 = np.where((~np.isnan(w28)).sum(axis=0) >= 14, nanmed(w28, axis=0), np.nan)
     # the longest window that still agrees with the last week gives the level; its own noise sets the bar
@@ -148,6 +161,7 @@ def one_measure(X, est, pred_ct=None, stuck=None, cnt=None, release=None):
     G = np.full((T, S), np.nan)                # gap to sisters, as the level windows see it
     GD = np.full((T, S), np.nan)               # gap to sisters as it stood on the day (G is re-based when the common level moves)
     E = np.full((T, S), np.nan)                # gap minus level
+    EN = np.full((T, S), np.nan)               # the same on the whole gap
     Q7 = np.full((T, S), np.nan)
     Q14 = np.full((T, S), np.nan)
     Q28 = np.full((T, S), np.nan)
@@ -159,6 +173,8 @@ def one_measure(X, est, pred_ct=None, stuck=None, cnt=None, release=None):
     SD = np.full((T, S), np.nan)
     SH = np.zeros((T, S))                      # share of the level taken
     since = np.zeros(S, int)                   # first day the level may be measured from
+    run = np.zeros(S, int)                     # days running far off the level, same side
+    side_prev = np.zeros(S)                    # which side yesterday was off, 0 if it was not
     sd_e = sd_7 = sd_14 = sd_28 = None
     for t in range(T):
         x = X[t]
@@ -178,7 +194,7 @@ def one_measure(X, est, pred_ct=None, stuck=None, cnt=None, release=None):
             base = np.where(few, recent, base)
         lo = max(t - YEAR, 0)
         if t % 7 == 0 or sd_e is None:         # noise sds, re-measured weekly on the trailing year
-            sd_e = robust_sd(E[lo:t], DEFAULT_SD)
+            sd_e = robust_sd(EN[lo:t], DEFAULT_SD)
             sd_7 = robust_sd(Q7[lo:t] - LV[lo:t], np.nan)
             sd_14 = robust_sd(Q14[lo:t] - LV[lo:t], np.nan)
             sd_28 = robust_sd(Q28[lo:t] - LV[lo:t], np.nan)
@@ -194,17 +210,45 @@ def one_measure(X, est, pred_ct=None, stuck=None, cnt=None, release=None):
             prev = np.where(release[t], 0.0, prev)
         adj = x - prev                         # sisters at their usual level, by yesterday's level
         bad = np.zeros(S, bool)
-        g, n = gaps(x, adj, base, bad)
+        g, n, only = gaps(x, adj, base, bad)
+        if cnt is not None:                    # a quiet day for the business: counting noise at the count the sisters imply
+            quiet = np.exp(np.where(np.isnan(g), x, x - g + prev))
+            sd = np.maximum(sd, 1.0 / np.sqrt(np.maximum(np.nan_to_num(quiet, nan=1.0), 1.0)))
         for _ in range(S - 1):                 # drop the worst sister and look again, until none stands out
             z0 = np.where(bad, 0, np.abs(np.nan_to_num(g - prev)) / sd)
             w = int(np.argmax(z0))
             if z0[w] <= K_DAY:
                 break
             bad[w] = True
-            g2, n2 = gaps(x, adj, base, bad)
+            g2, n2, only2 = gaps(x, adj, base, bad)
             g = np.where(bad, g, g2)
             n = np.where(bad, n, n2)
+            only = np.where(bad, only, only2)
+        # one sister only: the two cannot tell which of them moved, but each one's own recent weeks can. Today's
+        # move of the gap is given to each in proportion to its squared own move (against its cleaned values on
+        # the same weekday of the last OWN_WEEKS weeks), so the one that jumped takes it and the other is left alone
+        sure = np.zeros(S, bool)
+        whole = g.copy()                       # the gap before it is shared out: the noise is measured on this
+        pair = np.flatnonzero(only >= 0) if (~np.isnan(x)).sum() == 2 else []
+        if len(pair):
+            own = x - prev - nanmed(C[[t - 7 * k for k in range(1, OWN_WEEKS + 1) if t >= 7 * k]], axis=0)
+            for s in pair:
+                a, b = own[s] ** 2, own[only[s]] ** 2
+                if np.isfinite(a + b) and a + b > 0:
+                    g[s] = prev[s] + (whole[s] - prev[s]) * a / (a + b)
+                    sure[s] = a / (a + b) >= OWN_SURE
         G[t], NS[t], SD[t] = g, n, sd
+        if t:
+            # a level that has ended: the second day running more than K_RUN spreads off the level in force, on the
+            # same side and nearer the usual relation than the level. The level is measured afresh from the first
+            # of the two days, so it is dropped now instead of when the week's median turns
+            off = g - prev
+            with np.errstate(invalid='ignore'):
+                side = np.where(np.abs(off) > K_RUN * sd, np.sign(off), 0.0)
+            run = np.where((side != 0) & (side == side_prev), run + 1, (side != 0).astype(int))
+            side_prev = side
+            home = (run == 2) & (prev != 0) & (np.abs(g) < np.abs(off))
+            since = np.where(home, t - 1, since)
         sh_prev = SH[t - 1] if t else np.zeros(S)
         level = standing_level(G, t, since, sd, sd7, sd14, sd28, prev, sh_prev)
         # a level is the source against its sisters, so only a minority can have moved: when most of the company's
@@ -226,12 +270,14 @@ def one_measure(X, est, pred_ct=None, stuck=None, cnt=None, release=None):
         MV[t] = on & ~agree
         e = g - lv
         E[t] = e
+        EN[t] = whole - lv
         z = np.nan_to_num(e / sd)
         Z[t] = z
         for s in range(S):
             if np.isnan(x[s]) or np.isnan(g[s]):
                 continue
-            lone = n[s] < 2 or bad.sum() > 1    # one sister only, or several sources off at once: less sure whose fault
+            # one sister only (unless its own weeks say it was this one), or several sources off at once: less sure whose fault
+            lone = (n[s] < 2 and not sure[s]) or bad.sum() > 1
             faint = on[s] and cnt is not None and 1.0 / np.sqrt(max(cnt[t, s], 1.0)) > FAINT * sd[s]
             if (stuck is not None and stuck[t, s]) or faint:
                 ST[t, s] = 1                    # a repeated report, or too few transactions left to rescale: impute
@@ -269,12 +315,12 @@ def confidence(z, st, mv, n):
     """Probability that the cleaned value is right, from how the row was treated and how far it stood out."""
     a = np.abs(z)
     asis = 0.995 - 0.005 * np.minimum(a, 2) / 2 - 0.04 * np.clip(a - 2, 0, 1) - 0.45 * np.clip(a - 3, 0, 1)        # 0.995 .. 0.50
-    imputed = 0.90 + 0.07 * np.clip((a - K_DAY) / K_DAY, 0, 1)                                 # 0.90 .. 0.97
+    imputed = 0.82 + 0.16 * np.clip((a - K_DAY) / K_DAY, 0, 1)                                 # 0.82 .. 0.98
     scaled = np.where(mv, 0.97, 0.99) - 0.005 * np.minimum(a, 2) / 2 - 0.12 * np.clip((a - 2) / (K_DAY - 2), 0, 1)
     yearly = 0.80 - 0.05 * np.clip(a / (4 * K_DAY), 0, 1)
     c = np.select([st == 1, st == 2, st == 3], [imputed, scaled, yearly], asis)
     c = np.where((n == 1) & (st == 1), c - 0.2, c)           # one sister: either of the two could be off
-    return np.where(n >= 1, c, 0.97)                         # no sister to compare with: kept as reported
+    return np.where(n >= 1, c, 0.99)                         # no sister to compare with: kept as reported
 
 
 def score_company(g, release=None):
@@ -333,6 +379,13 @@ def score_company(g, release=None):
         mirror &= ((Sc == 1) & np.isin(St, (0, 2)) & (np.abs(Et) > MIRROR * Dt[1])) | (
             (St == 1) & np.isin(Sc, (0, 2)) & (np.abs(Ec) > MIRROR * Dc[1])) | (
             (Sc == 1) & (St == 1) & (np.abs(Ec + Et) <= MIRROR * Dt[1]))
+        # neither measure over its own bar, but the two together are (a count off with good dollars moves both, in
+        # opposite ways): the same reading, from the joint evidence
+        both = (Ec * Et < 0) & (np.abs(Ec + Et) < np.minimum(np.abs(Ec), np.abs(Et))) & ~(stuck | stuck_c | stuck_a)
+        both &= np.isin(Sc, (0, 2)) & np.isin(St, (0, 2)) & (Nc >= 2) & (np.minimum(np.abs(Zc), np.abs(Zt)) > MIRROR)
+        both &= Zc ** 2 + Zt ** 2 > K_BOTH ** 2
+    mirror |= both
+    conf = np.where(both, BOTH_CONF, conf)
     clean_ct = np.where(mirror, np.exp(lc.to_numpy() - Dc[0]), clean_ct)
     clean_amt = np.where(mirror, amt.to_numpy() * np.exp(-Dc[2] - Dt[2]), clean_amt)
     one_c = stuck_c & (Sc == 1) & (St == 1)      # count stuck, dollars good: the count is dollars / usual ticket
@@ -345,6 +398,7 @@ def score_company(g, release=None):
     rank = np.array([0, 3, 2, 1])                                   # as reported < yearly < rescaled < imputed
     worst = np.where(rank[Sc] >= rank[St], Sc, St)
     treat = np.array(['as reported', 'imputed', 'rescaled', 'yearly pattern kept'], dtype=object)[worst]
+    treat = np.where(both, 'imputed', treat)
     treat = np.where(swapped.to_numpy() & (worst == 0), 'columns swapped back', treat)
     treat = np.where(thin, 'discarded', treat)
     out = []

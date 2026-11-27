@@ -28,13 +28,15 @@ K_FLAKY = 2.5        # the day bar once FLAKY_N days were imputed in the last FL
 FLAKY_N, FLAKY_DAYS = 3, 14
 NEAR, STEADY = 2.5, 0.7   # a level needs this share of the last week within NEAR spreads of it
 FAINT = 2.0          # under a level, a count whose counting noise exceeds this many spreads is imputed, not rescaled
-K_LEVEL = 4.0        # a 7- or 28-day median gap beyond this many of its own sds is a level change
+K_LO, K_HI = 2.5, 6.0   # a 7- or 14-day median gap this many of its own sds from zero starts to count as a level; in full from K_HI
+K_LONG = 3.5         # a 28-day median gap beyond this many of its own sds is a level, in full (see standing level below)
 AGREE = 1.5          # the 28-day median is used while within this many 7-day sds of the 7-day median
 SHORT, MID, LONG = 7, 14, 28  # windows of the level medians (days)
 MIN_SD = 0.02        # floor on a source's noise sd (log units)
 DEFAULT_SD = 0.15    # noise sd before there is history to measure it
 MIN_HIST = 30        # observations needed to measure a noise sd
 STUCK_DAYS = 3       # identical reports in a row before a feed counts as stuck
+MIRROR = 2.0         # spreads the other measure must stand out, the opposite way, to be read as the mirror of a wrong count
 K_RUN = 3.0          # two days running beyond this many spreads, same side: the second is imputed (a step's day two)
 STUCK_ONE_DAYS = 4   # identical reports in a row of one measure alone (count or dollars) before it counts as stuck
 STUCK_ONE_MIN = 30   # a count repeating on its own counts as stuck from this many transactions (chance repeats below)
@@ -48,6 +50,7 @@ THIN_CT = 20         # transactions a day below which a new source carries no si
 THIN_EDGE = 0.8      # 7- and 28-day medians both at this share of THIN_CT already count as growing out of thin
 THIN_DAYS = 90       # days at or above THIN_CT (28-day median) before a source counts as established
 RECUR_SHARE = 0.5    # a gap at least this share of today's, same sign, a year ago: a yearly pattern, kept
+MAJORITY_OF = 4      # sources needed to tell 'most moved together' from 'one moved': with three, two sisters cannot outvote
 MAD = 1.4826         # median absolute deviation -> standard deviation, for normal noise
 
 
@@ -90,6 +93,49 @@ def gaps(x, adj, base, bad):
     return g, n
 
 
+def standing_level(G, t, since, sd, sd7, sd14, sd28, prev, sh_prev):
+    """The level each source stands at on day t, from the medians of its gap over the last SHORT, MID and LONG days.
+    Returns the three medians, the level, the share of it taken, whether it is on, and whether four weeks agree."""
+    # the standing level, from the gap's recent medians
+    r0 = max(t - LONG + 1, 0)
+    w28 = G[r0:t + 1]
+    if (since > r0).any():                 # after a release, days before it no longer count towards the level
+        w28 = w28.copy()
+        for s in np.flatnonzero(since > r0):
+            w28[:since[s] - r0, s] = np.nan
+    w7, w14 = w28[-SHORT:], w28[-MID:]
+    q7 = np.where((~np.isnan(w7)).sum(axis=0) >= 4, nanmed(w7, axis=0), np.nan)
+    q14 = np.where((~np.isnan(w14)).sum(axis=0) >= 8, nanmed(w14, axis=0), np.nan)
+    q28 = np.where((~np.isnan(w28)).sum(axis=0) >= 14, nanmed(w28, axis=0), np.nan)
+    # the longest window that still agrees with the last week gives the level; its own noise sets the bar
+    ok14 = ~np.isnan(q14) & (np.abs(q14 - q7) <= AGREE * sd7)
+    agree = ok14 & ~np.isnan(q28) & (np.abs(q28 - q7) <= AGREE * sd7) & (np.abs(q28 - q14) <= AGREE * sd14)
+    lvl = np.where(agree, q28, np.where(ok14, q14, q7))
+    # a fresh level (short windows) between K_LO and K_HI is partial evidence, and so is the correction: a share
+    # of the level, rising to all. A level four weeks agree on is taken in full from K_LONG: what is left
+    # uncorrected for long is learnt as the usual relation, so a lasting level must not be corrected in part
+    far = np.abs(lvl) / np.where(agree, sd28, np.where(ok14, sd14, sd7))
+    share = np.where(agree, far > K_LONG, np.clip((far - K_LO) / (K_HI - K_LO), 0, 1))
+    # a level that stands keeps the share it has reached
+    share = np.where((share > 0) & (prev * lvl > 0), np.maximum(share, sh_prev), share)
+    on = ~np.isnan(lvl) & (share > 0)
+    # a level is a state the source sits in: most of the last week must be near it (a fault that comes and goes
+    # leaves the week split between two values, and is treated day by day instead)
+    near = (np.abs(w7 - lvl) <= NEAR * sd).sum(axis=0) / np.maximum((~np.isnan(w7)).sum(axis=0), 1)
+    on &= near >= STEADY
+    return q7, q14, q28, lvl, share, on, agree
+
+
+def common_level(q7, lv):
+    """The part of the levels shared by most of a company's sources: with MAJORITY_OF sources or more that have a
+    week of gaps, the middle level (of the two middle ones, the one nearer zero) if both are on the same side."""
+    v = np.sort(lv[~np.isnan(q7)])
+    if len(v) < MAJORITY_OF:
+        return 0.0
+    lo, hi = v[(len(v) - 1) // 2], v[len(v) // 2]
+    return 0.0 if lo * hi <= 0 else (lo if abs(lo) < abs(hi) else hi)
+
+
 def one_measure(X, est, pred_ct=None, stuck=None, cnt=None, release=None):
     """X: days x sources, log values (blank where no row). Returns the cleaned log values, z (gap from level in
     noise sds), state (0 as reported, 1 imputed day, 2 rescaled level, 3 yearly pattern kept), moving (level taken
@@ -99,7 +145,8 @@ def one_measure(X, est, pred_ct=None, stuck=None, cnt=None, release=None):
     T, S = X.shape
     X = np.where(est, X, np.nan)               # a source has a usual level only once it is established
     C = X.copy()                               # cleaned history, feeds the usual relation
-    G = np.full((T, S), np.nan)                # gap to sisters
+    G = np.full((T, S), np.nan)                # gap to sisters, as the level windows see it
+    GD = np.full((T, S), np.nan)               # gap to sisters as it stood on the day (G is re-based when the common level moves)
     E = np.full((T, S), np.nan)                # gap minus level
     Q7 = np.full((T, S), np.nan)
     Q14 = np.full((T, S), np.nan)
@@ -110,6 +157,7 @@ def one_measure(X, est, pred_ct=None, stuck=None, cnt=None, release=None):
     MV = np.zeros((T, S), bool)
     NS = np.zeros((T, S), int)
     SD = np.full((T, S), np.nan)
+    SH = np.zeros((T, S))                      # share of the level taken
     since = np.zeros(S, int)                   # first day the level may be measured from
     sd_e = sd_7 = sd_14 = sd_28 = None
     for t in range(T):
@@ -157,33 +205,24 @@ def one_measure(X, est, pred_ct=None, stuck=None, cnt=None, release=None):
             g = np.where(bad, g, g2)
             n = np.where(bad, n, n2)
         G[t], NS[t], SD[t] = g, n, sd
-        # the standing level, from the gap's recent medians
-        r0 = max(t - LONG + 1, 0)
-        w28 = G[r0:t + 1]
-        if (since > r0).any():                 # after a release, days before it no longer count towards the level
-            w28 = w28.copy()
-            for s in np.flatnonzero(since > r0):
-                w28[:since[s] - r0, s] = np.nan
-        w7, w14 = w28[-SHORT:], w28[-MID:]
-        q7 = np.where((~np.isnan(w7)).sum(axis=0) >= 4, nanmed(w7, axis=0), np.nan)
-        q14 = np.where((~np.isnan(w14)).sum(axis=0) >= 8, nanmed(w14, axis=0), np.nan)
-        q28 = np.where((~np.isnan(w28)).sum(axis=0) >= 14, nanmed(w28, axis=0), np.nan)
-        Q7[t], Q14[t], Q28[t] = q7, q14, q28
-        # the longest window that still agrees with the last week gives the level; its own noise sets the bar
-        ok14 = ~np.isnan(q14) & (np.abs(q14 - q7) <= AGREE * sd7)
-        agree = ok14 & ~np.isnan(q28) & (np.abs(q28 - q7) <= AGREE * sd7) & (np.abs(q28 - q14) <= AGREE * sd14)
-        lvl = np.where(agree, q28, np.where(ok14, q14, q7))
-        thr = K_LEVEL * np.where(agree, sd28, np.where(ok14, sd14, sd7))
-        on = ~np.isnan(lvl) & (np.abs(lvl) > thr)
-        # a level is a state the source sits in: most of the last week must be near it (a fault that comes and goes
-        # leaves the week split between two values, and is treated day by day instead)
-        near = (np.abs(w7 - lvl) <= NEAR * sd).sum(axis=0) / np.maximum((~np.isnan(w7)).sum(axis=0), 1)
-        on &= near >= STEADY
+        sh_prev = SH[t - 1] if t else np.zeros(S)
+        level = standing_level(G, t, since, sd, sd7, sd14, sd28, prev, sh_prev)
+        # a level is the source against its sisters, so only a minority can have moved: when most of the company's
+        # sources stand at a level on the same side, that common part is taken off all of them
+        shared = common_level(level[0], np.where(level[5], level[3] * level[4], 0.0))
+        if shared:
+            G[max(t - LONG + 1, 0):t + 1] -= shared
+            g = g - shared
+            prev = prev - shared
+            level = standing_level(G, t, since, sd, sd7, sd14, sd28, prev, sh_prev)
+        Q7[t], Q14[t], Q28[t], lvl, share, on, agree = level
+        GD[t] = g
         # after several repaired days in two weeks, a further fault is likelier: a lower bar for the day
         flaky = (ST[max(t - FLAKY_DAYS, 0):t] == 1).sum(axis=0) >= FLAKY_N
         kday = np.where(flaky, K_FLAKY, K_DAY)
-        lv = np.where(on, lvl, 0.0)
+        lv = np.where(on, lvl * share, 0.0)
         LV[t] = lv
+        SH[t] = np.where(on, share, 0.0)
         MV[t] = on & ~agree
         e = g - lv
         E[t] = e
@@ -198,6 +237,8 @@ def one_measure(X, est, pred_ct=None, stuck=None, cnt=None, release=None):
                 ST[t, s] = 1                    # a repeated report, or too few transactions left to rescale: impute
                 C[t, s] = x[s] - g[s]
                 Z[t, s] = np.sign(z[s] or 1.0) * max(abs(z[s]), 1.5 * K_DAY)
+                if not faint:
+                    G[t, s] = GD[t, s] = np.nan  # a repeated report says nothing of where the source stands: not for the level
             elif abs(z[s]) > kday[s] * (LONE if lone else 1):
                 if recurs(E, t, s, e[s], sd[s]):
                     ST[t, s] = 3
@@ -211,7 +252,7 @@ def one_measure(X, est, pred_ct=None, stuck=None, cnt=None, release=None):
             else:
                 ST[t, s] = 2 if on[s] else 0
                 C[t, s] = x[s] - lv[s]
-    return C, Z, ST, MV, NS, (G, SD, LV)
+    return C, Z, ST, MV, NS, (GD, SD, LV)
 
 
 def recurs(E, t, s, e, sd):
@@ -227,12 +268,12 @@ def recurs(E, t, s, e, sd):
 def confidence(z, st, mv, n):
     """Probability that the cleaned value is right, from how the row was treated and how far it stood out."""
     a = np.abs(z)
-    asis = 0.995 - 0.005 * np.minimum(a, 2) / 2 - 0.22 * np.clip((a - 2) / (K_DAY - 2), 0, 1)   # 0.995 .. 0.77
-    imputed = 0.52 + 0.40 * np.clip((a - K_DAY) / K_DAY, 0, 1)                                 # 0.52 .. 0.92
-    scaled = np.where(mv, 0.90, 0.97) - 0.15 * np.clip(a / K_DAY, 0, 1)
+    asis = 0.995 - 0.005 * np.minimum(a, 2) / 2 - 0.04 * np.clip(a - 2, 0, 1) - 0.45 * np.clip(a - 3, 0, 1)        # 0.995 .. 0.50
+    imputed = 0.90 + 0.07 * np.clip((a - K_DAY) / K_DAY, 0, 1)                                 # 0.90 .. 0.97
+    scaled = np.where(mv, 0.97, 0.99) - 0.005 * np.minimum(a, 2) / 2 - 0.12 * np.clip((a - 2) / (K_DAY - 2), 0, 1)
     yearly = 0.80 - 0.05 * np.clip(a / (4 * K_DAY), 0, 1)
     c = np.select([st == 1, st == 2, st == 3], [imputed, scaled, yearly], asis)
-    c = np.where((n == 1) & (st == 1), 0.51 + 0.1 * (c - 0.52), c)   # one sister: either of the two could be off
+    c = np.where((n == 1) & (st == 1), c - 0.2, c)           # one sister: either of the two could be off
     return np.where(n >= 1, c, 0.97)                         # no sister to compare with: kept as reported
 
 
@@ -278,10 +319,22 @@ def score_company(g, release=None):
     Cc, Zc, Sc, Mc, Nc, Dc = one_measure(lc.to_numpy(), est, pred, stuck | stuck_c, ct.to_numpy(), rel_c)
     Ct, Zt, St, Mt, Nt, Dt = one_measure(lt.to_numpy(), est, None, stuck | stuck_c | stuck_a, None, rel_t)
     conf = np.minimum(confidence(Zc, Sc, Mc, Nc), confidence(Zt, St, Mt, Nt))
-    same_c = np.isin(Sc, (0, 3))
-    same_t = np.isin(St, (0, 3))
+    same_c = (Sc == 0) | ((Sc == 3) & (Dc[2] == 0))     # as reported, unless a level in force has to come off
+    same_t = (St == 0) | ((St == 3) & (Dt[2] == 0))
     clean_ct = np.where(same_c, ct.to_numpy(), np.exp(Cc))
     clean_amt = np.where(same_c & same_t, amt.to_numpy(), clean_ct * np.exp(Ct))
+    # a wrong count with good dollars shows as a ticket off by as much the other way. When one measure is imputed and
+    # the other, left alone, stands out the opposite way and is nearer that mirror image than its usual place, or
+    # both are imputed and the ticket is within noise of the mirror image, the count is the one at fault: it is
+    # imputed and the dollars are kept as reported (at the levels in force)
+    Ec, Et = Dc[0] - Dc[2], Dt[0] - Dt[2]
+    with np.errstate(invalid='ignore'):
+        mirror = (Ec * Et < 0) & (np.abs(Ec + Et) < np.minimum(np.abs(Ec), np.abs(Et))) & ~(stuck | stuck_c | stuck_a)
+        mirror &= ((Sc == 1) & np.isin(St, (0, 2)) & (np.abs(Et) > MIRROR * Dt[1])) | (
+            (St == 1) & np.isin(Sc, (0, 2)) & (np.abs(Ec) > MIRROR * Dc[1])) | (
+            (Sc == 1) & (St == 1) & (np.abs(Ec + Et) <= MIRROR * Dt[1]))
+    clean_ct = np.where(mirror, np.exp(lc.to_numpy() - Dc[0]), clean_ct)
+    clean_amt = np.where(mirror, amt.to_numpy() * np.exp(-Dc[2] - Dt[2]), clean_amt)
     one_c = stuck_c & (Sc == 1) & (St == 1)      # count stuck, dollars good: the count is dollars / usual ticket
     clean_ct = np.where(one_c, amt.to_numpy() / np.exp(Ct), clean_ct)
     clean_amt = np.where(one_c, amt.to_numpy(), clean_amt)

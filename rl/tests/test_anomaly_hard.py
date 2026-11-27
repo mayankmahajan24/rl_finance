@@ -284,10 +284,25 @@ def _late(tmp_path, name, n, conf=""):
     return variant(tmp_path, name, LATE.replace("{n}", str(n)).replace("{conf}", conf))
 
 
-def test_answer_key_has_an_early_days_kind(task, monkeypatch):
+def _early(d):
+    return d["confidence"]["brier_early"]
+
+
+def test_answer_key_has_early_rows_in_its_lasting_kinds(task, monkeypatch):
     reward, d = grade_sol(task, SOL / "oracle", monkeypatch, trusted=True, tmp=task)
-    k = _kind(d, "confidence", "early_days")
-    assert reward == pytest.approx(1.0, abs=1e-3) and k["rows"] > 20 and k["wrong_rows"] == 0 and k["brier"] < 0.001
+    with_early = [r for r in d["confidence"]["by_kind"] if "early_brier" in r]
+    assert reward == pytest.approx(1.0, abs=1e-3) and _early(d) < 0.001
+    assert {"level_shift_step", "multi_day", "stuck"} <= {r["kind"] for r in with_early}
+    assert all(r["early_wrong_rows"] == 0 for r in with_early) and sum(r["early_rows"] for r in with_early) > 20
+
+
+def test_a_kind_is_a_quarter_its_early_rows(task, monkeypatch, tmp_path):
+    import grade
+    d = grade_sol(task, _late(tmp_path, "late3", 3), monkeypatch, trusted=True)[1]
+    r = _kind(d, "confidence", "level_shift_step")
+    assert grade.EARLY_SHARE == 0.25
+    assert r["scored_brier"] == pytest.approx(0.75 * r["brier"] + 0.25 * r["early_brier"], abs=2e-4)
+    assert r["early_brier"] > 3 * r["brier"]                  # the miss sits in the early rows
 
 
 def test_catching_a_problem_late_costs_most_on_day_one(task, monkeypatch, tmp_path):
@@ -295,10 +310,11 @@ def test_catching_a_problem_late_costs_most_on_day_one(task, monkeypatch, tmp_pa
     key = grade_sol(task, SOL / "oracle", monkeypatch, trusted=True, tmp=task)[1]["confidence_score"]
     d1 = grade_sol(task, _late(tmp_path, "late1", 1), monkeypatch, trusted=True)[1]
     d3 = grade_sol(task, _late(tmp_path, "late3", 3), monkeypatch, trusted=True)[1]
-    b1, b3 = _kind(d1, "confidence", "early_days")["brier"], _kind(d3, "confidence", "early_days")["brier"]
     assert key > d1["confidence_score"] > d3["confidence_score"]
-    assert b3 > b1 > 0.2                       # the kind's own error: most of it is already lost on day one
-    assert b1 > 0.5 * b3                       # 16 of the 31 parts of weight sit on day one, 28 on days one to three
+    assert _early(d3) > _early(d1) > 0.2       # the early rows' error: most of it is already lost on day one
+    assert _early(d1) > 0.5 * _early(d3)       # 16 of the 31 parts of weight sit on day one, 28 on days one to three
+    assert key - d1["confidence_score"] > 0.1                       # a day late is felt ...
+    assert d3["confidence_score"] > 0.3                             # ... and three days late is not a zero
 
 
 def test_doubting_the_unrepaired_early_days_beats_trusting_them(task, monkeypatch, tmp_path):
@@ -306,8 +322,8 @@ def test_doubting_the_unrepaired_early_days_beats_trusting_them(task, monkeypatc
     trusted = grade_sol(task, _late(tmp_path, "late3", 3), monkeypatch, trusted=True)[1]
     doubted = grade_sol(task, _late(tmp_path, "late3d", 3, ROW_U + "o.loc[m, 'confidence'] = 0.05 + 0.04 * u[m]"),
                         monkeypatch, trusted=True)[1]
-    assert _kind(doubted, "confidence", "early_days")["brier"] < 0.5 * _kind(trusted, "confidence", "early_days")["brier"]
-    assert doubted["confidence_score"] > trusted["confidence_score"]
+    assert _early(doubted) < 0.5 * _early(trusted)
+    assert doubted["confidence_score"] > trusted["confidence_score"] and doubted["confidence_score"] > 0.9
 
 
 def test_doubting_everything_early_is_not_free(task, monkeypatch, tmp_path):
@@ -315,5 +331,39 @@ def test_doubting_everything_early_is_not_free(task, monkeypatch, tmp_path):
     sol = variant(tmp_path, "jumpy", LATE.replace("{n}", "5").replace("\nas_reported(m)\n", "\n").replace(
         "{conf}", ROW_U + "o.loc[m, 'confidence'] = 0.05 + 0.04 * u[m]"))
     d = grade_sol(task, sol, monkeypatch, trusted=True)[1]
-    assert _kind(d, "confidence", "early_days")["brier"] > 0.7
-    assert d["confidence_score"] < 0.9
+    assert _early(d) > 0.7
+    assert d["confidence_score"] < 0.8
+
+
+def test_a_step_shows_only_once_the_days_so_far_clear_the_bar(task):
+    # a level change is scored from the first day the median of its error over the days so far (up to 7) reaches
+    # SHIFT_K x 1.2533 / sqrt(days) times the source's daily noise: about 3.8 on day one, 1.4 after a week
+    import grade
+    import numpy as np
+    build, P = _experiment_module("build"), _experiment_module("perturb")
+    gold = json.loads((task / "tests" / "gold.json").read_text())
+    data = pd.read_csv(task / "tests" / "eval_panel.csv.gz", parse_dates=["date"])
+    clean = pd.read_csv(task / "tests" / "truth_panel.csv.gz", parse_dates=["date"])
+    sig = grade.own_noise(clean).set_index(["ticker", "source_id"])
+    j = data.merge(clean, on=["date", "ticker", "source_id"], suffixes=("", "_x"))
+    lg = lambda x: np.log(np.maximum(x.astype(float), 0.01))  # noqa: E731
+    j["zc"] = lg(j.ct) - lg(j.ct_x)
+    j["zt"] = (lg(j.amt) - lg(j.ct)) - (lg(j.amt_x) - lg(j.ct_x))
+    seen = 0
+    for e in gold["events"]:
+        swapped = any(s["type"] == "column_swap" and (s["ticker"], s["source_id"]) == (e["ticker"], e["source_id"])
+                      for s in gold["events"])
+        if not e.get("regime") or e.get("unscored") or e["type"] == "level_shift_slow" or swapped:
+            continue
+        x = j[(j.ticker == e["ticker"]) & (j.source_id == e["source_id"])
+              & (j.date >= e["shift_start"]) & (j.date <= e["end"])].sort_values("date")
+        s = sig.loc[(e["ticker"], e["source_id"])]
+        n = np.minimum(np.arange(len(x)) + 1, 7)
+        z = np.maximum(x.zc.rolling(7, min_periods=1).median().abs() / s.sig_c,
+                       x.zt.rolling(7, min_periods=1).median().abs() / s.sig_t).to_numpy()
+        clear = z >= P.SHIFT_K * build.MEDIAN_SD / np.sqrt(n)
+        assert str(x.date.iloc[int(np.argmax(clear))])[:10] == e["visible"], e
+        if e["type"] == "level_shift_step" and e["visible"] == e["shift_start"]:
+            assert z[0] >= P.SHIFT_K * build.MEDIAN_SD                 # day one only for a step that large
+        seen += 1
+    assert seen >= 4

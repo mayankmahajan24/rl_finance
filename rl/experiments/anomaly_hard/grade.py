@@ -86,7 +86,8 @@ AFTER_DAYS = 30             # a wrong row within this many days after a problem 
 W_CONF, W_CLEAN, W_STAB = 0.45, 0.45, 0.1   # headline reward weights (confidence, cleaned series, stability)
 ALERT_GAP = 2            # days of trust that still join two distrusted runs into one alert
 ALERT_DAYS = 14           # an alert longer than two weeks counts as several
-EARLY_DAYS = 5           # the first days of a lasting problem, from the day it shows, are also a kind of their own
+EARLY_DAYS = 5           # the first days of a lasting problem, from the day it shows, count extra within its kind
+EARLY_SHARE = 0.25       # ... a kind's Brier is this share its early rows, the rest every row in its spans
 EARLY_HALF = 2.0         # ... each day weighing this many times the next (16, 8, 4, 2, 1): day one counts most
 ONE_DAY = {'volume_spike', 'dropout', 'count_flood', 'dollar_spike', 'rollup'}   # planted one-day problems: one kind
 MULTI_DAY = {'volume_block', 'outage'}   # a week or weeks too high or too low, then straight back: one kind
@@ -334,7 +335,7 @@ def cleaned_right(truth, ev, scored_rows) -> tuple[pd.Series, pd.Series, pd.Seri
 
 
 def early_weights(truth, ev) -> pd.Series:
-    """Each row's weight in the `early_days` kind (0 outside it): the first EARLY_DAYS days of every lasting problem
+    """Each row's weight among its kind's early rows (0 if not early): the first EARLY_DAYS days of every lasting problem
     (anything but a one-day problem), counted from the day it shows (`visible`, else its start), each day weighing
     EARLY_HALF times the next. A row early in two problems takes the larger weight."""
     w = pd.Series(0.0, index=ev.index)
@@ -356,10 +357,11 @@ def confidence_score(ev, target, kinds, scored, early=None):
     1 - (mean over kinds of their Brier + Brier on fine rows) / 2 / 0.25, floored at 0 (a constant 0.5 scores 0),
     times (0.5 + 0.5 x alert precision): an alert is a run of distrusted scored days on a source (gaps up to ALERT_GAP
     days joined, split every ALERT_DAYS days), true if it touches a wrong row inside a problem's span. A panel without
-    planted problems is scored on its fine rows alone. `early` (early_weights): the first days of the lasting
-    problems are one more kind, `early_days`, its Brier weighted towards day one; those rows stay in their own kind
-    too. So doubting a problem on its first day is worth far more than on its third, and since the score is a
-    probability score, doubting a row that turns out right costs as much as trusting one that turns out wrong."""
+    planted problems is scored on its fine rows alone. `early` (early_weights): within each kind that has early rows
+    (the first days of its lasting problems), the kind's Brier is EARLY_SHARE the Brier of those rows, weighted
+    towards day one, and the rest the Brier of every row in its spans. So being right about a problem on its first
+    day is worth far more than on its third, and since the score is a probability score, doubting a row that turns
+    out right costs as much as trusting one that turns out wrong."""
     c = ev.confidence.astype(float).clip(0, 1)
     b = (c - target) ** 2
     fine_rows = scored & (kinds == 'fine')
@@ -369,25 +371,31 @@ def confidence_score(ev, target, kinds, scored, early=None):
         return max(0.0, 1 - fine / 0.25), dict(no_problem_rows=True, brier_fine=round(fine, 4),
                                                distrusted_share=round(float(ev.flag[scored].mean()), 4) if scored.any() else 0.0)
     per_kind = b[prob_rows].groupby(kinds[prob_rows]).mean()
-    early_rows = scored & (early > 0) if early is not None else pd.Series(False, index=ev.index)
-    if early_rows.any():
-        per_kind['early_days'] = float(np.average(b[early_rows], weights=early[early_rows]))
+    early_rows = prob_rows & (early > 0) if early is not None else pd.Series(False, index=ev.index)
+    early_kind = {k: float(np.average(b[m], weights=early[m])) for k in per_kind.index
+                  if (m := early_rows & (kinds == k)).any()}
+    plain = per_kind.copy()
+    for k, v in early_kind.items():
+        per_kind[k] = (1 - EARLY_SHARE) * plain[k] + EARLY_SHARE * v
     problems = float(per_kind.mean())
     skill = max(0.0, 1 - (0.5 * problems + 0.5 * fine) / 0.25)
     e_ = ev[scored].assign(hit=(prob_rows & (target == 0))[scored])
     n_alerts, true_alerts = alerts(e_)
     prec = true_alerts / n_alerts if n_alerts else 1.0       # no alerts: no false alarms
     wrong = scored & (target == 0)
-    by_kind = pd.DataFrame(dict(rows=prob_rows.groupby(kinds).sum(), wrong_rows=wrong.groupby(kinds).sum(), brier=per_kind,
+    by_kind = pd.DataFrame(dict(rows=prob_rows.groupby(kinds).sum(), wrong_rows=wrong.groupby(kinds).sum(), brier=plain,
                                 mean_confidence=c[prob_rows].groupby(kinds[prob_rows]).mean())).dropna().round(4)
-    if early_rows.any():
-        by_kind.loc['early_days'] = [int(early_rows.sum()), int((early_rows & (target == 0)).sum()),
-                                     round(float(per_kind['early_days']), 4),
-                                     round(float(np.average(c[early_rows], weights=early[early_rows])), 4)]
+    by_kind = by_kind.reset_index(names='kind').to_dict('records')
+    for r in by_kind:                                  # the early rows of the kind, and the Brier the kind is scored on
+        if r['kind'] in early_kind:
+            m = early_rows & (kinds == r['kind'])
+            r.update(early_rows=int(m.sum()), early_wrong_rows=int((m & (target == 0)).sum()),
+                     early_brier=round(early_kind[r['kind']], 4), scored_brier=round(float(per_kind[r['kind']]), 4))
+    early_all = round(float(np.average(b[early_rows], weights=early[early_rows])), 4) if early_rows.any() else None
     return skill * (0.5 + 0.5 * prec), dict(brier_skill=round(skill, 4), brier_problems=round(problems, 4),
                                              brier_fine=round(fine, 4), damaged_fine_rows=int((fine_rows & (target == 0)).sum()),
                                              alert_precision=round(prec, 3), alerts=n_alerts, true_alerts=true_alerts,
-                                             by_kind=by_kind.reset_index(names='kind').to_dict('records'))
+                                             brier_early=early_all, by_kind=by_kind)
 
 
 def continuous(ev) -> tuple[bool, dict]:

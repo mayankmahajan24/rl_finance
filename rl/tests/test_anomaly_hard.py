@@ -260,3 +260,60 @@ def test_counts_are_written_whole_beside_a_swapped_series(task):
     assert (pd.to_numeric(back.ct) == data.ct).all()
     whole = pd.DataFrame(dict(date=pd.to_datetime(["2020-01-01"]), ct=[36], amt=[1.5]))
     assert grade.panel_csv(whole).splitlines()[1] == "2020-01-01,36,1.5"
+
+
+# ---------------------------------------------------------------- early days (feedback #105): confidence only
+# The first five days of every lasting problem are one more kind in the confidence part, day one weighing most.
+# `late(n)`: the answer key, but for the first n days of each lasting problem the row is left as reported.
+LASTING = "lambda e: e['type'] not in ('volume_spike', 'dropout', 'count_flood', 'dollar_spike', 'rollup') and not e.get('unscored')"
+LATE = ON_EVENTS + """def first_days(n):
+    m = np.zeros(len(o), bool)
+    for e in ev:
+        if ({lasting})(e):
+            first = e.get('visible') or e.get('shift_start', e['start'])
+            last = min(str(pd.Timestamp(first) + pd.Timedelta(days=n - 1))[:10], e['end'])
+            m |= ((o.ticker == e['ticker']) & (o.source_id == e['source_id']) & (o.date >= first) & (o.date <= last)).to_numpy()
+    return m
+m = first_days({n})
+as_reported(m)
+{conf}
+""".replace("{lasting}", LASTING)
+
+
+def _late(tmp_path, name, n, conf=""):
+    return variant(tmp_path, name, LATE.replace("{n}", str(n)).replace("{conf}", conf))
+
+
+def test_answer_key_has_an_early_days_kind(task, monkeypatch):
+    reward, d = grade_sol(task, SOL / "oracle", monkeypatch, trusted=True, tmp=task)
+    k = _kind(d, "confidence", "early_days")
+    assert reward == pytest.approx(1.0, abs=1e-3) and k["rows"] > 20 and k["wrong_rows"] == 0 and k["brier"] < 0.001
+
+
+def test_catching_a_problem_late_costs_most_on_day_one(task, monkeypatch, tmp_path):
+    # still trusted while unrepaired: one day late, then three days late
+    key = grade_sol(task, SOL / "oracle", monkeypatch, trusted=True, tmp=task)[1]["confidence_score"]
+    d1 = grade_sol(task, _late(tmp_path, "late1", 1), monkeypatch, trusted=True)[1]
+    d3 = grade_sol(task, _late(tmp_path, "late3", 3), monkeypatch, trusted=True)[1]
+    b1, b3 = _kind(d1, "confidence", "early_days")["brier"], _kind(d3, "confidence", "early_days")["brier"]
+    assert key > d1["confidence_score"] > d3["confidence_score"]
+    assert b3 > b1 > 0.2                       # the kind's own error: most of it is already lost on day one
+    assert b1 > 0.5 * b3                       # 16 of the 31 parts of weight sit on day one, 28 on days one to three
+
+
+def test_doubting_the_unrepaired_early_days_beats_trusting_them(task, monkeypatch, tmp_path):
+    # three days late either way; the second answer says so (confidence 0.05-0.09 on those rows)
+    trusted = grade_sol(task, _late(tmp_path, "late3", 3), monkeypatch, trusted=True)[1]
+    doubted = grade_sol(task, _late(tmp_path, "late3d", 3, ROW_U + "o.loc[m, 'confidence'] = 0.05 + 0.04 * u[m]"),
+                        monkeypatch, trusted=True)[1]
+    assert _kind(doubted, "confidence", "early_days")["brier"] < 0.5 * _kind(trusted, "confidence", "early_days")["brier"]
+    assert doubted["confidence_score"] > trusted["confidence_score"]
+
+
+def test_doubting_everything_early_is_not_free(task, monkeypatch, tmp_path):
+    # trigger-happy: the answer key's repairs, but every early row distrusted although its cleaned value is right
+    sol = variant(tmp_path, "jumpy", LATE.replace("{n}", "5").replace("\nas_reported(m)\n", "\n").replace(
+        "{conf}", ROW_U + "o.loc[m, 'confidence'] = 0.05 + 0.04 * u[m]"))
+    d = grade_sol(task, sol, monkeypatch, trusted=True)[1]
+    assert _kind(d, "confidence", "early_days")["brier"] > 0.7
+    assert d["confidence_score"] < 0.9

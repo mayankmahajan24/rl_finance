@@ -86,6 +86,8 @@ AFTER_DAYS = 30             # a wrong row within this many days after a problem 
 W_CONF, W_CLEAN, W_STAB = 0.45, 0.45, 0.1   # headline reward weights (confidence, cleaned series, stability)
 ALERT_GAP = 2            # days of trust that still join two distrusted runs into one alert
 ALERT_DAYS = 14           # an alert longer than two weeks counts as several
+EARLY_DAYS = 5           # the first days of a lasting problem, from the day it shows, are also a kind of their own
+EARLY_HALF = 2.0         # ... each day weighing this many times the next (16, 8, 4, 2, 1): day one counts most
 ONE_DAY = {'volume_spike', 'dropout', 'count_flood', 'dollar_spike', 'rollup'}   # planted one-day problems: one kind
 MULTI_DAY = {'volume_block', 'outage'}   # a week or weeks too high or too low, then straight back: one kind
 THIN_ESTABLISHED = 90    # a source is established once its median has held at thin_ct or more this many days running
@@ -331,14 +333,33 @@ def cleaned_right(truth, ev, scored_rows) -> tuple[pd.Series, pd.Series, pd.Seri
     return target, k, scored
 
 
-def confidence_score(ev, target, kinds, scored):
+def early_weights(truth, ev) -> pd.Series:
+    """Each row's weight in the `early_days` kind (0 outside it): the first EARLY_DAYS days of every lasting problem
+    (anything but a one-day problem), counted from the day it shows (`visible`, else its start), each day weighing
+    EARLY_HALF times the next. A row early in two problems takes the larger weight."""
+    w = pd.Series(0.0, index=ev.index)
+    for e in truth['events']:
+        if e.get('unscored') or e['type'] in ONE_DAY:
+            continue
+        first = pd.Timestamp(e.get('visible') or e.get('shift_start', e['start']))
+        d = (ev.date - first).dt.days
+        m = (ev.ticker == e['ticker']) & (ev.source_id == e['source_id']) & (d >= 0) & (d < EARLY_DAYS) \
+            & (ev.date <= pd.Timestamp(e['end']))
+        w[m] = np.maximum(w[m], EARLY_HALF ** (EARLY_DAYS - 1 - d[m]))
+    return w
+
+
+def confidence_score(ev, target, kinds, scored, early=None):
     """Confidence read as the probability that the row's cleaned value is right. Brier against right (1) or wrong (0)
     in strata fixed before the outcome is known, so a calibrated probability scores best: each kind of planted problem
     (every scored row in its spans, right or wrong) and the fine rows outside every span. Balanced Brier skill:
     1 - (mean over kinds of their Brier + Brier on fine rows) / 2 / 0.25, floored at 0 (a constant 0.5 scores 0),
     times (0.5 + 0.5 x alert precision): an alert is a run of distrusted scored days on a source (gaps up to ALERT_GAP
     days joined, split every ALERT_DAYS days), true if it touches a wrong row inside a problem's span. A panel without
-    planted problems is scored on its fine rows alone."""
+    planted problems is scored on its fine rows alone. `early` (early_weights): the first days of the lasting
+    problems are one more kind, `early_days`, its Brier weighted towards day one; those rows stay in their own kind
+    too. So doubting a problem on its first day is worth far more than on its third, and since the score is a
+    probability score, doubting a row that turns out right costs as much as trusting one that turns out wrong."""
     c = ev.confidence.astype(float).clip(0, 1)
     b = (c - target) ** 2
     fine_rows = scored & (kinds == 'fine')
@@ -348,6 +369,9 @@ def confidence_score(ev, target, kinds, scored):
         return max(0.0, 1 - fine / 0.25), dict(no_problem_rows=True, brier_fine=round(fine, 4),
                                                distrusted_share=round(float(ev.flag[scored].mean()), 4) if scored.any() else 0.0)
     per_kind = b[prob_rows].groupby(kinds[prob_rows]).mean()
+    early_rows = scored & (early > 0) if early is not None else pd.Series(False, index=ev.index)
+    if early_rows.any():
+        per_kind['early_days'] = float(np.average(b[early_rows], weights=early[early_rows]))
     problems = float(per_kind.mean())
     skill = max(0.0, 1 - (0.5 * problems + 0.5 * fine) / 0.25)
     e_ = ev[scored].assign(hit=(prob_rows & (target == 0))[scored])
@@ -356,6 +380,10 @@ def confidence_score(ev, target, kinds, scored):
     wrong = scored & (target == 0)
     by_kind = pd.DataFrame(dict(rows=prob_rows.groupby(kinds).sum(), wrong_rows=wrong.groupby(kinds).sum(), brier=per_kind,
                                 mean_confidence=c[prob_rows].groupby(kinds[prob_rows]).mean())).dropna().round(4)
+    if early_rows.any():
+        by_kind.loc['early_days'] = [int(early_rows.sum()), int((early_rows & (target == 0)).sum()),
+                                     round(float(per_kind['early_days']), 4),
+                                     round(float(np.average(c[early_rows], weights=early[early_rows])), 4)]
     return skill * (0.5 + 0.5 * prec), dict(brier_skill=round(skill, 4), brier_problems=round(problems, 4),
                                              brier_fine=round(fine, 4), damaged_fine_rows=int((fine_rows & (target == 0)).sum()),
                                              alert_precision=round(prec, 3), alerts=n_alerts, true_alerts=true_alerts,
@@ -493,7 +521,7 @@ def score(truth: dict, data: pd.DataFrame, clean_truth: pd.DataFrame, sol: pathl
     label_rows(truth, ev, clean_truth)
     stretches = ev.use | ev.midthin                    # an established source's thin stretches count for the cleaned series
     target, kinds, scored = cleaned_right(truth, ev, stretches)
-    conf, conf_d = confidence_score(ev, target, kinds, scored)
+    conf, conf_d = confidence_score(ev, target, kinds, scored, early_weights(truth, ev))
     cln, cln_d = clean_score(truth, ev, stretches)
     n_problems = sum(not e.get('unscored') for e in truth['events'])
     cons, cons_d = consistency_score(sol, data, clean_truth, full, ev, stretches, c_, n_problems)

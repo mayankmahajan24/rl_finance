@@ -122,7 +122,9 @@ Your score is a weighted average of three parts: 45% confidence, 45% cleaned ser
 
 * **Confidence.** Scored row by row against whether your cleaned value turned out right (within the source's own
   day-to-day noise of what it should have reported): high confidence where it is right, low where it is not, as a
-  probability; each kind of problem weighs the same, and false alarms cost extra. So a problem your code has not yet
+  probability; each kind of problem weighs the same, and false alarms cost extra. The first five days of a lasting
+  problem, counted from the day it stands out, are also scored as a kind of their own, each day weighing twice the
+  next: doubting a problem on its first day is worth far more than on its third. So a problem your code has not yet
   caught or corrected should carry low confidence; once your cleaned value is back on track, confidence should be
   high again, and a company's real moves, which your cleaned series keeps, should never be distrusted.
 * **Cleaned series.** How much of each problem your cleaned values repair (in count and in dollars, beyond the

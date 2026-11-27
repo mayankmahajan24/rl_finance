@@ -2,6 +2,7 @@
 # One Opus task run that can see nothing but its own run folder and the instruction. Usage: run_blind.sh RUN [PROMPT]
 #   RUN     folder name under $R (default /home/user/anomaly_hard_runs) holding app/data, app/solution, app/output
 #   PROMPT  text to send instead of $R/prompt-RUN.txt (used by the self-check, which asks the agent what it can see)
+#   MODEL   (environment) the model to run; default claude-opus-5-5
 #
 # On top of run.sh (subscription login, no web tools, every shell command in its own empty network namespace):
 #   * the whole agent process, not only its shell, runs in a private mount namespace in which these are empty:
@@ -19,7 +20,7 @@ REPO=${REPO:-/home/user/rl_finance}
 prompt=${2:-$(cat "$R/prompt-$t.txt")}
 out=${OUT:-$R/stream-$t.jsonl}
 err=${ERR:-$R/stderr-$t.txt}
-export BLIND_RUN="$R/$t" BLIND_R="$R" BLIND_REPO="$REPO" BLIND_PROMPT="$prompt" BLIND_VENV="${VENV:-/home/user/venvpin}"
+export BLIND_MODEL="${MODEL:-claude-opus-5-5}" BLIND_RUN="$R/$t" BLIND_R="$R" BLIND_REPO="$REPO" BLIND_PROMPT="$prompt" BLIND_VENV="${VENV:-/home/user/venvpin}"
 # the transcript and error log are opened here, outside the namespace, so they land in the real folder
 exec unshare -m -p -f --mount-proc -- /bin/bash -c '
   set -euo pipefail
@@ -38,9 +39,9 @@ exec unshare -m -p -f --mount-proc -- /bin/bash -c '
   [ "$(ls "$BLIND_R")" = "$(printf "offline.sh\n%s" "$(basename "$BLIND_RUN")")" ] || { echo "not blind: other runs in view" >&2; exit 97; }
   cd "$BLIND_RUN"
   env -u ANTHROPIC_API_KEY -u CLAUDE_ADDITIONAL_DIRECTORIES -u CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD \
-    -u BLIND_PROMPT -u BLIND_REPO -u BLIND_R -u BLIND_RUN -u BLIND_VENV \
+    -u BLIND_MODEL -u BLIND_PROMPT -u BLIND_REPO -u BLIND_R -u BLIND_RUN -u BLIND_VENV \
     PATH="$BLIND_VENV/bin:$PATH" CLAUDE_CODE_SHELL_PREFIX="$BLIND_R/offline.sh" \
-    timeout 4h claude -p --model claude-opus-5-5 --tools "Bash,Read,Write,Edit,Glob,Grep" \
+    timeout 4h claude -p --model "$BLIND_MODEL" --tools "Bash,Read,Write,Edit,Glob,Grep" \
     --allowedTools "Bash Read Write Edit Glob Grep" --disallowedTools "WebFetch,WebSearch" \
     --output-format stream-json --verbose -- "$BLIND_PROMPT" < /dev/null
   echo "exit $?" >&2

@@ -52,19 +52,20 @@ problems (closures, thin start and real events only). 13 tasks: 5 bench (001-004
 **Gates.** The task's reward is 0 if the output is malformed, the point-in-time check fails (outputs on truncated
 panels must match the full run, all three columns), the code imports or calls a model or network client (parsed, so
 prose that names one does not count), or the write-up is missing. A panel's reward is 0 if low signal is not dropped
-(at least 90% of the thin start's rows distrusted and blank) or confidence is not a probability on a continuous scale
-(rows scored strictly between 0.01 and 0.99 need at least 20 distinct values, none on more than half; stated in the
-instruction since #96). The earlier detection gate (confidence at least 0.25) was removed: detecting nothing now
+(at least 90% of the thin start's rows distrusted and blank). The continuity gate (#96) was removed in #111: it zeroed
+a calibrated two-level answer and was passed by adding jitter. If the report's judge is asked for and cannot run, the
+task is not graded and earns nothing. The point-in-time check truncates at three hidden dates drawn per panel, one in
+its last month. The earlier detection gate (confidence at least 0.25) was removed: detecting nothing now
 scores 0 on confidence by itself.
 
-**Reward** (per panel) = 0.45 x confidence + 0.45 x cleaned series + 0.1 x stability; the task's data reward is the mean
+**Reward** (per panel) = 0.5 x confidence + 0.5 x cleaned series (#111; stability is reported, not scored); the task's data reward is the mean
 over its three hidden panels (each with its own planted problems and disguise, so tuning to one does not pay).
 
 | Part | How |
 |---|---|
-| Confidence | read as the probability that the row's cleaned value is right: within the source's own noise of the truth panel in count and ticket (right), beyond 2x in either (wrong), in between not scored. Brier in strata fixed before the outcome (each kind of planted problem: every row in its spans, right or wrong; and the fine rows outside every span), so a calibrated probability scores best; balanced skill (kinds averaged, then half and half with fine rows), floored at 0, times (0.5 + 0.5 x alert precision), an alert being true only if it touches a wrong row inside a problem's span. Early days (#105, #108): within each lasting kind, a quarter of the kind's Brier comes from the first five days of each of its problems from the day it shows, each day weighing twice the next (16, 8, 4, 2, 1); the other three quarters are all the kind's rows. A level change shows on the first day the running median of its error (up to 7 days) clears 3 x 1.2533 / sqrt(days seen) x the source's noise, so a small step is not scored before the days so far could show it. |
-| Cleaned series | gain x intact x kept. Gain: per kind, the share of the raw log error (count and ticket, beyond the source's own noise) on problem rows that the cleaned series removes, mean over kinds. Intact: share of untouched rows left within the source's noise. Kept: share of rows to keep not left blank (blank counts as raw). |
-| Stability | the code re-run on its own cleaned series (counts rounded, dollars to the cent, blanks dropped) and on the truth panel: 1 - (extra alerts on its own output) / (the panel's planted problems), floored at 0. |
+| Confidence | read as the probability that the row's cleaned value is right: within the source's own noise of the truth panel in count and ticket (right), beyond 2x in either (wrong), in between not scored. Brier in strata fixed before the outcome (each kind of planted problem: every row in its spans, right or wrong; and the fine rows outside every span), so a calibrated probability scores best; balanced skill (kinds averaged, then half and half with fine rows), floored at 0. No other factor (#111: the alert-precision factor was avoided by never scoring a kept row under 0.5): a false alarm costs what the Brier charges for doubting a right row. Early days (#105, #108): within each lasting kind, a quarter of the kind's Brier comes from the first five days of each of its problems from the day it shows, each day weighing twice the next (16, 8, 4, 2, 1); the other three quarters are all the kind's rows. A level change shows on the first day the running median of its error (up to 7 days) clears 3 x 1.2533 / sqrt(days seen) x the source's noise, so a small step is not scored before the days so far could show it. |
+| Cleaned series | gain x undamaged (#111). Gain: per kind, the share of the raw log error (count and ticket, beyond the source's own noise) on problem rows that the cleaned series removes, mean over kinds. Undamaged: 1 - (healthy scored rows the cleaned series gets wrong, by the confidence part's test, or leaves blank) / (problem rows scored), floored at 0: each broken healthy row cancels one problem row. |
+| Stability (reported only) | the code re-run on its own cleaned series (counts rounded, dollars to the cent, blanks dropped) and on the truth panel: 1 - (extra alerts on its own output) / (the panel's planted problems), floored at 0. |
 
 **What is not scored** (no point-in-time code could know, or too ambiguous to grade): the one-year warm-up; series too
 low-volume to grade; short windows around company-wide natural breaks in the underlying data; a source's thin

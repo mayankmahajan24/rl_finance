@@ -67,6 +67,17 @@ N_SOURCE_WIDE = 1      # per panel: a temporary step on one source across its co
 SWAP_MIN_CT = 1.5 * THIN_CT   # a swapped series is never near the low-signal line (its count column is unreadable)
 
 
+def _cutoffs(d0, d1, df):
+    """Three hidden dates the panel is truncated at for the point-in-time check: one in the middle, one in the last
+    third and one in the last month, so no stretch of the panel is safe for look-ahead. Drawn from the panel's own
+    content (not the planting stream), so adding them changed no panel."""
+    r = np.random.default_rng(int(pd.util.hash_pandas_object(df[['ct']], index=False).sum() % (2 ** 32)))
+    span = (d1 - d0).days
+    days = [r.integers(int(span * 0.35), int(span * 0.65)), r.integers(int(span * 0.67), span - 40),
+            r.integers(span - 30, span - 2)]
+    return [_fmt(d0 + pd.Timedelta(days=int(x))) for x in days]
+
+
 def plant(rng, control, ctx, n_tickers=8, sensors=None):
     raw = ctx.raw
     pool = sorted(sensors) if sensors else sorted(raw.ticker.unique())
@@ -308,7 +319,7 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
     truth = dict(family='anomaly_hard', control=control, events=events, decoys=decoys, exclusions=excl,
                  closures=closures, thin_start=thin_planted, ignore_series=F.low_volume_series(),
                  eval_start=_fmt(d0 + pd.Timedelta(days=EVAL_START_DAYS)), threshold=0.5, thin_ct=THIN_CT,
-                 truncation_cutoffs=[_fmt(d0 + (d1 - d0) * f) for f in (0.45, 0.7)])
+                 truncation_cutoffs=_cutoffs(d0, d1, F.df))
     df = F.df.sort_values(['date', 'ticker', 'source_id']).reset_index(drop=True)
     truth_df = truth_df.sort_values(['date', 'ticker', 'source_id']).reset_index(drop=True)
     assert len(truth_df) == len(df) and (truth_df[['date', 'ticker', 'source_id']] == df[['date', 'ticker', 'source_id']]).all().all()

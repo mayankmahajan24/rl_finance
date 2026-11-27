@@ -14,14 +14,14 @@ Gates (reward 0 if any fails):
   no_ai          no model or network client imported or shelled out to
   writeup        SOLUTION_DIR/../output/writeup.md (or --writeup) exists and is not empty
   low_signal_dropped  at least LOW_SIGNAL_SHARE of the thin beginning's rows distrusted (confidence < 0.5) and blank
-  continuous     confidence is a probability on a continuous scale, not a few levels (see continuous())
 
-Data reward = W_CONF x confidence + W_CLEAN x cleaned series + W_STAB x stability (0.45 / 0.45 / 0.1). Also reported:
-the three components and the geometric mean sqrt(confidence x cleaned series x stability) (reward_geometric).
+Data reward = W_CONF x confidence + W_CLEAN x cleaned series (0.5 / 0.5). Also reported, not in the reward: stability,
+and alerts and their precision.
 
 Reward = data reward x (0.5 + 0.5 x writeup_score): the report graded on the task's visible panel and the solution's
 own output on it (writeup.py, judge.md: code items and a model judge), so the report can halve the reward but never
-earn it alone. The data reward alone when no judge can run (details.writeup says why) or with WRITEUP_JUDGE=skip.
+earn it alone. With WRITEUP_JUDGE=skip the data reward alone; if the judge was asked for and could not run, the task is
+not graded and the reward is 0 (details.writeup says why).
 --home TASK grades the report against the task it was written for, when the solution is graded on another task.
 
 Scored rows (label_rows): from eval_start (one year in), not on low-volume series (ignore_series), not near
@@ -39,23 +39,21 @@ Confidence: read as the probability that the row's cleaned value is right (clean
   rows in between are too close to call and not scored. There are no timing windows: a shift is wrong until the code
   has corrected it, a ramp while the correction lags, a return while the code still rescales, a one-day problem
   where the imputed value is still off; a company's real growth is never wrong (cleaned = raw = truth). Balanced
-  Brier skill: 1 - (Brier on wrong rows, the mean within each kind of problem then over kinds; a wrong row with no
-  planted problem near it is the code's own damage, kind 'other' + Brier on right rows) / 2 / 0.25, floored at 0
-  (a constant 0.5 scores 0), times (0.5 + 0.5 x alert precision): an alert is a run of distrusted scored days on a
-  source (gaps up to ALERT_GAP days joined, split every ALERT_DAYS days), precision the share that touch a wrong row.
-  A panel with no wrong rows is scored on its right rows alone.
+  Brier skill in strata fixed before the outcome: 1 - (mean over the kinds of planted problem of the Brier on every
+  scored row in the kind's spans + Brier on the fine rows outside every span) / 2 / 0.25, floored at 0 (a constant
+  0.5 scores 0). Within a lasting kind, EARLY_SHARE of its Brier is its problems' first EARLY_DAYS days. No other
+  factor: a false alarm costs what the Brier charges for doubting a right row.
 
-Cleaned series = gain x intact x kept, against the truth panel; a blank cleaned value counts as the raw value.
-  gain    per kind, 1 - (cleaned error / raw error) pooled over the kind's problems' scored rows, each error = mean over
-          count and dollars of |log value - log truth| beyond the source's own noise (own_noise; dollars: count and
-          ticket noise combined), floored at 0; mean over kinds
-  intact  share of scored rows no problem changed whose cleaned value is within the source's own noise of the truth,
-          in count and in ticket
-  kept    share of scored rows that should be kept (all but the thin beginning) not left blank
+Cleaned series = gain x undamaged, against the truth panel; a blank cleaned value counts as the raw value for gain.
+  gain       per kind, 1 - (cleaned error / raw error) pooled over the kind's problems' scored rows, each error = mean
+             over count and dollars of |log value - log truth| beyond the source's own noise (own_noise; dollars: count
+             and ticket noise combined), floored at 0; mean over kinds
+  undamaged  1 - (healthy scored rows broken) / (problem rows scored), floored at 0: a healthy row is broken if its
+             cleaned value is wrong (the confidence part's test) or blank, and each one cancels one problem row
 
-Stability: score.py run again on its own cleaned series (counts rounded, dollars to the cent, blank rows dropped) and
-on the truth panel: 1 - (alerts on its cleaned series beyond the alerts on the truth panel) / (the panel's planted
-problems that show), floored at 0. If a run fails, 0.
+Stability (reported only): score.py run again on its own cleaned series (counts rounded, dollars to the cent, blank
+rows dropped) and on the truth panel: 1 - (alerts on its cleaned series beyond the alerts on the truth panel) / (the
+panel's planted problems that show), floored at 0. If a run fails, 0.
 
 The write-up must exist (a gate); it is scored by writeup.py (see Reward above).
 """
@@ -83,7 +81,8 @@ OUT_COLS = ['confidence', 'clean_ct', 'clean_amt']
 SETTLE_DAYS = 45            # build: marks a change slower than this to show as `slow` (informational; scored like any)
 NOISE_WRONG = 2.0           # a cleaned value this many times the source's own noise off the truth is wrong (1x: right)
 AFTER_DAYS = 30             # a wrong row within this many days after a problem ends is still that problem's
-W_CONF, W_CLEAN, W_STAB = 0.45, 0.45, 0.1   # headline reward weights (confidence, cleaned series, stability)
+W_CONF, W_CLEAN = 0.5, 0.5   # headline reward weights (confidence, cleaned series); stability is reported only
+DAMAGE_FLOOR = 100           # a panel with fewer problem rows than this charges broken healthy rows against this many
 ALERT_GAP = 2            # days of trust that still join two distrusted runs into one alert
 ALERT_DAYS = 14           # an alert longer than two weeks counts as several
 EARLY_DAYS = 5           # the first days of a lasting problem, from the day it shows, count extra within its kind
@@ -96,9 +95,6 @@ THIN_LO, THIN_HI, THIN_EDGE = 0.8, 1.25, 14   # thin: truth count's 28-day media
 # dropped (distrusted, left blank); between THIN_LO and THIN_HI x thin_ct, and the first THIN_EDGE days of a thin
 # stretch and the THIN_EDGE days after it, are not scored (the code cannot tell yet, point in time)
 LOW_SIGNAL_SHARE = 0.9   # gate: share of a task's thin-beginning rows that must be distrusted and left blank
-CONT_LO, CONT_HI = 0.01, 0.99   # gate continuous: rows scored strictly between these are checked (saturated ends left out)
-CONT_DISTINCT, CONT_TOP = 20, 0.5   # at least this many distinct values over all scored rows; between the ends, no
-CONT_MIN_BETWEEN = 50               # value on more than this share (tested once this many rows fall between them)
 # imports or shell calls that reach a model or the network
 NO_AI = re.compile(r'\b(anthropic|openai|google\.generativeai|google\.genai|mistralai|cohere|ollama|litellm|langchain|'
                    r'transformers|requests|httpx|aiohttp|urllib\.request|urllib3|http\.client|socket|websocket|'
@@ -171,9 +167,14 @@ def run(script: pathlib.Path, panel: pd.DataFrame, cache: pathlib.Path | None = 
                     cmd[1] = str(work / 'solution' / script.name)
                 subprocess.run(['chmod', '-R', 'a+rX', str(pathlib.Path(cmd[1]).parent)], check=True)
             cmd = _sandboxed(cmd, work)
-        r = subprocess.run(cmd, cwd=work, capture_output=True, text=True, timeout=1200, env=env)
+        try:
+            r = subprocess.run(cmd, cwd=work, capture_output=True, text=True, timeout=1200, env=env)
+        except subprocess.TimeoutExpired:
+            raise GateError('score.py did not finish within 20 minutes') from None
         if r.returncode:
             raise GateError(f'score.py failed: {r.stderr[-1500:]}')
+        if not (work / 'out.csv').exists():
+            raise GateError('score.py wrote no output file')
         s = pd.read_csv(work / 'out.csv', parse_dates=['date'])
     finally:
         shutil.rmtree(work, ignore_errors=True)
@@ -354,14 +355,12 @@ def confidence_score(ev, target, kinds, scored, early=None):
     """Confidence read as the probability that the row's cleaned value is right. Brier against right (1) or wrong (0)
     in strata fixed before the outcome is known, so a calibrated probability scores best: each kind of planted problem
     (every scored row in its spans, right or wrong) and the fine rows outside every span. Balanced Brier skill:
-    1 - (mean over kinds of their Brier + Brier on fine rows) / 2 / 0.25, floored at 0 (a constant 0.5 scores 0),
-    times (0.5 + 0.5 x alert precision): an alert is a run of distrusted scored days on a source (gaps up to ALERT_GAP
-    days joined, split every ALERT_DAYS days), true if it touches a wrong row inside a problem's span. A panel without
-    planted problems is scored on its fine rows alone. `early` (early_weights): within each kind that has early rows
-    (the first days of its lasting problems), the kind's Brier is EARLY_SHARE the Brier of those rows, weighted
-    towards day one, and the rest the Brier of every row in its spans. So being right about a problem on its first
-    day is worth far more than on its third, and since the score is a probability score, doubting a row that turns
-    out right costs as much as trusting one that turns out wrong."""
+    1 - (mean over kinds of their Brier + Brier on fine rows) / 2 / 0.25, floored at 0 (a constant 0.5 scores 0).
+    Nothing else: a false alarm costs what the Brier charges for doubting a row that is right (half the score is the
+    fine rows), and alerts and their precision are reported only. A panel without planted problems is scored on its
+    fine rows alone. `early` (early_weights): within each kind that has early rows (the first days of its lasting
+    problems), the kind's Brier is EARLY_SHARE the Brier of those rows, weighted towards day one, and the rest the
+    Brier of every row in its spans."""
     c = ev.confidence.astype(float).clip(0, 1)
     b = (c - target) ** 2
     fine_rows = scored & (kinds == 'fine')
@@ -381,7 +380,7 @@ def confidence_score(ev, target, kinds, scored, early=None):
     skill = max(0.0, 1 - (0.5 * problems + 0.5 * fine) / 0.25)
     e_ = ev[scored].assign(hit=(prob_rows & (target == 0))[scored])
     n_alerts, true_alerts = alerts(e_)
-    prec = true_alerts / n_alerts if n_alerts else 1.0       # no alerts: no false alarms
+    prec = true_alerts / n_alerts if n_alerts else None      # reported only: the score is the Brier skill alone
     wrong = scored & (target == 0)
     by_kind = pd.DataFrame(dict(rows=prob_rows.groupby(kinds).sum(), wrong_rows=wrong.groupby(kinds).sum(), brier=plain,
                                 mean_confidence=c[prob_rows].groupby(kinds[prob_rows]).mean())).dropna().round(4)
@@ -392,26 +391,10 @@ def confidence_score(ev, target, kinds, scored, early=None):
             r.update(early_rows=int(m.sum()), early_wrong_rows=int((m & (target == 0)).sum()),
                      early_brier=round(early_kind[r['kind']], 4), scored_brier=round(float(per_kind[r['kind']]), 4))
     early_all = round(float(np.average(b[early_rows], weights=early[early_rows])), 4) if early_rows.any() else None
-    return skill * (0.5 + 0.5 * prec), dict(brier_skill=round(skill, 4), brier_problems=round(problems, 4),
+    return skill, dict(brier_skill=round(skill, 4), brier_problems=round(problems, 4),
                                              brier_fine=round(fine, 4), damaged_fine_rows=int((fine_rows & (target == 0)).sum()),
-                                             alert_precision=round(prec, 3), alerts=n_alerts, true_alerts=true_alerts,
+                                             alert_precision=None if prec is None else round(prec, 3), alerts=n_alerts, true_alerts=true_alerts,
                                              brier_early=early_all, by_kind=by_kind)
-
-
-def continuous(ev) -> tuple[bool, dict]:
-    """Confidence is a probability on a continuous scale, not a few levels. Judged on the rows the code doubts
-    (confidence under CONT_HI, thin beginning left out), once there are CONT_MIN_BETWEEN of them: at least CONT_DISTINCT
-    distinct values (3 decimals), and, once CONT_MIN_BETWEEN fall strictly between CONT_LO and CONT_HI, no single
-    value on more than CONT_TOP of those. A code confident almost everywhere passes."""
-    allv = ev[ev.use & ~ev.thin].confidence.round(3)
-    doubt = allv[allv < CONT_HI]                     # the rows the code doubts: where a few fixed levels would show
-    if len(doubt) < CONT_MIN_BETWEEN:                # confident almost everywhere: nothing to judge
-        return True, dict(rows_doubted=len(doubt))
-    u = doubt[doubt > CONT_LO]
-    distinct = int(doubt.nunique())
-    top = float(u.value_counts(normalize=True).iloc[0]) if len(u) >= CONT_MIN_BETWEEN else 0.0
-    return distinct >= CONT_DISTINCT and top <= CONT_TOP, dict(rows_doubted=len(doubt), rows_between=len(u),
-                                                                distinct=distinct, top_share=round(top, 3))
 
 
 def own_noise(truth_panel: pd.DataFrame, thin_ct: float = 20) -> pd.DataFrame:
@@ -472,16 +455,18 @@ def clean_score(truth, ev, scored_rows):
         gains.append(dict(type=e['type'], kind=kind(e['type']), ticker=e['ticker'], source_id=e['source_id'],
                           start=e['start'], rows=int(m.sum()), raw_total=float(er[m].sum()), clean_total=float(ec[m].sum()),
                           raw_error=round(float(er[m].mean()), 3), clean_error=round(float(ec[m].mean()), 3), gain=round(g, 3)))
-    # rows no problem touched should be left as they are: intact = within the source's own noise of the truth
+    # rows no problem touched should be left as they are. A healthy row is broken if its cleaned value is wrong
+    # (NOISE_WRONG times the source's own noise off the truth, in count or in ticket: the confidence part's test) or
+    # blank; each broken row cancels the credit for one problem row
     ok = scored_rows & ~changed & ~unscored & ~ev.thin
     dc, dt = (lg(cc) - lg(ev.tct)).abs(), ((lg(ca) - lg(cc)) - (lg(ev.tamt) - lg(ev.tct))).abs()
+    blank_rows = ev.clean_ct.isna() | ev.clean_amt.isna()
+    moved = ok & ((dc >= NOISE_WRONG * ev.sig_c) | (dt >= NOISE_WRONG * ev.sig_t))
+    broken = int((moved | (ok & blank_rows)).sum())
     intact_rows = (dc <= ev.sig_c) & (dt <= ev.sig_t)
-    intact = float(intact_rows[ok].mean()) if ok.any() else 1.0
-    keep = scored_rows & ~ev.thin
-    blank = int((keep & (ev.clean_ct.isna() | ev.clean_amt.isna())).sum())
-    kept = 1 - blank / int(keep.sum()) if keep.any() else 1.0
     if gains:
         g = pd.DataFrame(gains)
+        problem_rows = int(g.rows.sum())
         # per kind, the share of its error (beyond noise) repaired, pooled over its problems (a problem that barely
         # moved the series weighs little); then the mean over kinds
         tot = g.groupby('kind')[['raw_total', 'clean_total']].sum()
@@ -493,11 +478,15 @@ def clean_score(truth, ev, scored_rows):
         by_kind['gain'] = (1 - tot.clean_total / tot.raw_total).clip(lower=0)
         by_kind = by_kind.round(3).reset_index().to_dict('records')
     else:
-        gain, by_kind = 1.0, []
-    return gain * intact * kept, dict(gain=round(gain, 3), intact=round(intact, 4), kept=round(kept, 4),
-                                      damaged_rows=int((ok & ~intact_rows).sum()), blank_rows=blank,
-                                      mean_damage=round(float(err_cln[ok].mean()) if ok.any() else 0.0, 4),
-                                      by_kind=by_kind, events=gains)
+        gain, by_kind, problem_rows = 1.0, [], 0
+    undamaged = max(0.0, 1 - broken / max(problem_rows, DAMAGE_FLOOR))
+    return gain * undamaged, dict(gain=round(gain, 3), undamaged=round(undamaged, 4), broken_rows=broken,
+                                  problem_rows=problem_rows, moved_rows=int(moved.sum()),
+                                  blank_rows=int((ok & blank_rows).sum()),
+                                  intact=round(float(intact_rows[ok].mean()) if ok.any() else 1.0, 4),
+                                  damaged_rows=int((ok & ~intact_rows).sum()),
+                                  mean_damage=round(float(err_cln[ok].mean()) if ok.any() else 0.0, 4),
+                                  by_kind=by_kind, events=gains)
 
 
 def score(truth: dict, data: pd.DataFrame, clean_truth: pd.DataFrame, sol: pathlib.Path,
@@ -538,13 +527,10 @@ def score(truth: dict, data: pd.DataFrame, clean_truth: pd.DataFrame, sol: pathl
     dropped = (th & ev.flag & ev.clean_ct.isna() & ev.clean_amt.isna())
     low_share = float(dropped.sum() / th.sum()) if th.any() else 1.0
     gates['low_signal_dropped'] = low_share >= LOW_SIGNAL_SHARE
-    gates['continuous'], cont_d = continuous(ev)
     ok = all(gates.values())
-    reward = (W_CONF * conf + W_CLEAN * cln + W_STAB * cons) * ok           # headline: a weighted average
-    geo = float(np.sqrt(max(conf, 0.0) * max(cln * cons, 0.0))) * ok      # reported: the geometric mean
+    reward = (W_CONF * conf + W_CLEAN * cln) * ok           # headline: the two parts averaged; stability is reported only
     return reward, dict(gates=gates, ai_hits=hits, changed_on_truncation=leaks, rows_scored=int(ev.use.sum()),
-                        reward_geometric=round(geo, 3),
-                        low_signal=dict(rows=int(th.sum()), dropped_share=round(low_share, 3)), continuity=cont_d,
+                        low_signal=dict(rows=int(th.sum()), dropped_share=round(low_share, 3)),
                         confidence_score=round(conf, 3),
                         clean_score=round(cln, 3), stability=round(cons, 3), confidence=conf_d, clean=cln_d,
                         consistency=cons_d)
@@ -615,7 +601,7 @@ def grade_task(task: pathlib.Path, sol: pathlib.Path, writeup: pathlib.Path, cac
             os.environ.pop('ORACLE_TESTS', None)
         first = first or d
         rows.append(dict(panel=k, reward=round(reward, 3), gates=d['gates'], **{x: d.get(x) for x in (
-            'confidence_score', 'clean_score', 'stability', 'reward_geometric')}))
+            'confidence_score', 'clean_score', 'stability')}))
         if not all(d['gates'].get(g, True) for g in INTEGRITY):
             break                                         # an integrity failure ends grading
     ok = all(all(r['gates'].get(g, True) for g in INTEGRITY) for r in rows)
@@ -629,13 +615,13 @@ def grade_task(task: pathlib.Path, sol: pathlib.Path, writeup: pathlib.Path, cac
             w = writeup_grade.grade(h, sol, writeup, run, (cache.parent / f'writeup-{h.name}') if cache else None)
         except GateError as e:                 # the code failed on the visible panel: no report can be checked
             w = dict(writeup_score=0.0, judge=f'score.py failed on the visible panel: {str(e)[-300:]}')
-        except RuntimeError as e:              # the judge itself could not run: the data reward stands alone
-            w = dict(writeup_score=None, judge=f'not graded: {str(e)[-300:]}')
+        except RuntimeError as e:              # the judge could not run: not graded, and no reward (a report that
+            w = dict(writeup_score=None, not_graded=True, judge=f'not graded: {str(e)[-300:]}')   # breaks the judge must not pay)
     ws = (w or {}).get('writeup_score')
-    reward = data_reward * (0.5 + 0.5 * ws) if ws is not None else data_reward
+    reward = 0.0 if (w or {}).get('not_graded') else data_reward * (0.5 + 0.5 * ws) if ws is not None else data_reward
     return reward, dict(first, gates=gates, data_reward=round(data_reward, 3), writeup=w,
                         confidence_score=mean('confidence_score'), clean_score=mean('clean_score'),
-                        stability=mean('stability'), reward_geometric=mean('reward_geometric'), panels=rows)
+                        stability=mean('stability'), panels=rows)
 
 
 def main():

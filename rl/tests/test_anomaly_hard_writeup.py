@@ -185,15 +185,6 @@ def _conf_panel(values):
     return pd.DataFrame(dict(confidence=values, use=True, thin=False), index=range(n))
 
 
-def test_continuity_passes_a_sharp_probability_and_fails_a_few_levels():
-    import grade as G
-    rng = np.random.default_rng(0)
-    sharp = np.r_[np.zeros(500), rng.uniform(0.02, 0.98, 60), np.full(5000, 0.999)]   # mostly saturated, graded between
-    assert G.continuous(_conf_panel(sharp))[0]
-    levels = np.r_[np.full(300, 0.05), np.full(200, 0.3), np.full(5000, 1.0)]
-    assert not G.continuous(_conf_panel(levels))[0]
-
-
 def test_code_that_fails_on_the_visible_panel_gets_a_zero_report(monkeypatch):
     import grade as G
     task = HERE.parents[1] / 'tasks' / 'proto' / 'anomaly_hard_train' / 'anomhard-train-001'
@@ -201,7 +192,7 @@ def test_code_that_fails_on_the_visible_panel_gets_a_zero_report(monkeypatch):
         pytest.skip('tasks not built')
     ok = dict(format=True, point_in_time=True, no_ai=True, writeup=True)
     monkeypatch.setattr(G, 'score', lambda *a, **k: (0.8, dict(gates=dict(ok), confidence_score=.5, clean_score=.5,
-                                                                stability=.5, reward_geometric=.5)))
+                                                                stability=.5)))
 
     def fails(*a, **k):
         raise G.GateError('score.py failed: exit 1')
@@ -270,25 +261,74 @@ def test_calibrated_confidence_on_repairs_beats_distrusting_them():
     assert G.confidence_score(cal, target, kinds, scored)[0] > G.confidence_score(zero, target, kinds, scored)[0]
 
 
-def test_damaging_good_rows_and_flagging_them_does_not_pay():
+def test_a_wrong_row_held_just_over_half_is_not_free():
+    # no alert-precision factor to dodge (#111): a wrong row at 0.55 costs what the Brier charges, more than at 0.05
+    import grade as G
+    ev, truth = _target_panel()
+    target, kinds, scored = G.cleaned_right(truth, ev, pd.Series(True, index=ev.index))
+    honest = ev.assign(confidence=np.where(target == 0, 0.05, 0.99)); honest['flag'] = honest.confidence < 0.5
+    dodge = ev.assign(confidence=np.where(target == 0, 0.55, 0.99)); dodge['flag'] = dodge.confidence < 0.5
+    h, d = (G.confidence_score(x, target, kinds, scored)[0] for x in (honest, dodge))
+    assert h > d + 0.02
+
+
+def test_a_few_false_alarms_cost_what_the_brier_charges_and_no_more():
     import grade as G
     ev, target, kinds, scored = _strata_panel()
-    honest = ev.assign(confidence=np.where(target == 0, 0.002, 0.99)); honest['flag'] = honest.confidence < 0.5
-    ev2, target2, kinds2, scored2 = _strata_panel(damage=40)   # the same rule, plus 40 good rows damaged and flagged
-    gamed = ev2.assign(confidence=np.where(target2 == 0, 0.002, 0.99)); gamed['flag'] = gamed.confidence < 0.5
-    assert G.confidence_score(gamed, target2, kinds2, scored2)[0] < G.confidence_score(honest, target, kinds, scored)[0]
+    honest = ev.assign(confidence=np.where(target == 0, 0.05, 0.99)); honest['flag'] = honest.confidence < 0.5
+    alarms = honest.copy(); alarms.loc[alarms.index[:3], 'confidence'] = 0.3; alarms['flag'] = alarms.confidence < 0.5
+    h, a = (G.confidence_score(x, target, kinds, scored)[0] for x in (honest, alarms))
+    assert a < h and h - a < 0.01
 
 
-def test_two_level_confidence_fails_continuity():
+def test_breaking_healthy_rows_cancels_problem_rows_one_for_one():
+    # the cleaned part: a healthy row made wrong, or left blank, cancels the credit for one problem row (#111)
     import grade as G
-    two = np.r_[np.full(300, 0.005), np.full(5000, 0.995)]
-    assert not G.continuous(_conf_panel(two))[0]
+    ev, truth = _target_panel()
+    ev['clean_ct'] = ev.tct; ev['clean_amt'] = ev.tamt             # every problem row repaired
+    rows = pd.Series(ev.date >= pd.Timestamp(truth['eval_start']), index=ev.index)
+    full, d = G.clean_score(truth, ev, rows)
+    assert full == 1.0 and d['broken_rows'] == 0
+    n = d['problem_rows'] // 4
+    healthy = ev.index[(ev.date >= pd.Timestamp('2015-07-01')) & (ev.date < pd.Timestamp('2016-02-01'))][:n]
+    moved = ev.copy(); moved.loc[healthy, ['clean_ct', 'clean_amt']] *= 1.5
+    blank = ev.copy(); blank.loc[healthy, ['clean_ct', 'clean_amt']] = np.nan
+    for bad in (moved, blank):
+        got, d2 = G.clean_score(truth, bad, rows)
+        assert d2['broken_rows'] == n and abs(got - (1 - n / max(d['problem_rows'], G.DAMAGE_FLOOR))) < 1e-9
+    nudged = ev.copy(); nudged.loc[healthy, ['clean_ct', 'clean_amt']] *= 1.05   # within the source's noise: not broken
+    assert G.clean_score(truth, nudged, rows)[0] == 1.0
 
 
-def test_confident_everywhere_passes_continuity_and_no_alerts_is_full_precision():
+def test_a_judge_that_cannot_run_earns_no_reward(monkeypatch):
     import grade as G
-    sure = np.r_[np.full(3000, 0.995), np.full(3000, 1.0)]
-    assert G.continuous(_conf_panel(sure))[0]
+    task = HERE.parents[1] / 'tasks' / 'proto' / 'anomaly_hard_train' / 'anomhard-train-001'
+    if not task.exists():
+        pytest.skip('tasks not built')
+    ok = dict(format=True, point_in_time=True, no_ai=True, writeup=True)
+    monkeypatch.setattr(G, 'score', lambda *a, **k: (0.8, dict(gates=dict(ok), confidence_score=.5, clean_score=.5,
+                                                                stability=.5)))
+
+    def breaks(*a, **k):
+        raise RuntimeError('judge failed')
+    monkeypatch.setattr(G.writeup_grade, 'grade', breaks)
+    monkeypatch.delenv('WRITEUP_JUDGE', raising=False)
+    reward, d = G.grade_task(task, task, task / 'instruction.md')
+    assert reward == 0.0 and d['writeup']['not_graded']
+    monkeypatch.setenv('WRITEUP_JUDGE', 'skip')                    # asked not to judge: the data reward alone
+    assert abs(G.grade_task(task, task, task / 'instruction.md')[0] - 0.8) < 1e-9
+
+
+def test_a_broken_png_is_not_a_chart(tmp_path):
+    import writeup as W
+    (tmp_path / 'figures').mkdir()
+    (tmp_path / 'figures' / 'bad.png').write_bytes(W.PNG + b'not an image')
+    report = tmp_path / 'writeup.md'; report.write_text('![x](figures/bad.png)')
+    assert W.figures(report.read_text(), report) == []
+
+
+def test_confident_everywhere_and_right_scores_in_full():
+    import grade as G
     ev, target, kinds, scored = _strata_panel()
     target[:] = 1.0                                               # every cleaned value right
     ev = ev.assign(confidence=0.995, flag=False)

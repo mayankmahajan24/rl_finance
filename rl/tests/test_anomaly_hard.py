@@ -104,11 +104,12 @@ def test_paraphrased_answer_key_passes(task, monkeypatch, tmp_path):
     assert reward > 0.97, (d["gates"], d["confidence_score"], d["clean_score"], d["stability"])
 
 
-def test_answer_key_on_a_few_fixed_levels_fails_continuity(task, monkeypatch, tmp_path):
-    # right verdicts, but confidence on two fixed levels (0.3 / 0.9): not a probability on a continuous scale
-    sol = variant(tmp_path, "levels", "o['confidence'] = np.where(o.confidence < 0.5, 0.3, 0.9)")
+def test_answer_key_on_two_fixed_levels_is_not_zeroed(task, monkeypatch, tmp_path):
+    # right verdicts on two fixed levels (0.03 / 0.97): the probability score pays for being right, not for variety
+    # (the continuity gate that zeroed this was removed, #111)
+    sol = variant(tmp_path, "levels", "o['confidence'] = np.where(o.confidence < 0.5, 0.03, 0.97)")
     reward, d = grade_sol(task, sol, monkeypatch, trusted=True)
-    assert reward == 0.0 and d["gates"]["continuous"] is False
+    assert reward > 0.9 and "continuous" not in d["gates"]
 
 
 def test_negated_answer_key_fails(task, monkeypatch, tmp_path):
@@ -122,19 +123,27 @@ def test_do_nothing_fails(task, monkeypatch, tmp_path):
     assert reward == 0.0
 
 
-def test_distrust_everything_with_perfect_cleaning_fails(task, monkeypatch, tmp_path):
-    # the answer key's cleaned series with every row at confidence 0: one fixed level, zeroed by the continuity gate
+def test_distrust_everything_with_perfect_cleaning_earns_the_cleaning_half_only(task, monkeypatch, tmp_path):
+    # the answer key's cleaned series with every row at confidence 0: nothing for confidence, and no free part
     reward, d = grade_sol(task, SOL / "distrust_all", monkeypatch, tmp=tmp_path)
-    assert reward == 0.0 and d["gates"]["continuous"] is False
+    assert d["confidence_score"] == 0.0 and reward <= 0.5 + 1e-9
 
 
 def test_distrust_everything_earns_no_confidence_credit(task, monkeypatch, tmp_path):
-    # the same, with confidence varying row by row under 0.5 so it passes the continuity gate: the confidence part
-    # scores nothing, and the total is at most the cleaned series' and stability's share (55%)
+    # the same, with confidence varying row by row under 0.5
     sol = variant(tmp_path, "distrust", ROW_U + "o['confidence'] = 0.02 + 0.4 * u")
     reward, d = grade_sol(task, sol, monkeypatch, trusted=True)
-    assert d["gates"]["continuous"] is True and d["confidence_score"] == 0.0, d["gates"]
-    assert reward <= 0.55 + 1e-9
+    assert d["confidence_score"] == 0.0 and reward <= 0.5 + 1e-9
+
+
+def test_point_in_time_cutoffs_reach_the_last_month(task):
+    # three hidden dates, one in the panel's last 30 days, and not the same dates on every panel (#111)
+    gold = json.loads((task / "tests" / "gold.json").read_text())
+    end = pd.read_csv(task / "tests" / "eval_panel.csv.gz", usecols=["date"], parse_dates=["date"]).date.max()
+    cuts = sorted(pd.Timestamp(c) for c in gold["truncation_cutoffs"])
+    assert len(cuts) == 3 and 2 <= (end - cuts[-1]).days <= 30
+    other = json.loads((task / "tests" / "panel-2" / "gold.json").read_text())
+    assert other["truncation_cutoffs"] != gold["truncation_cutoffs"]
 
 
 def test_missing_writeup_scores_zero(task, monkeypatch):

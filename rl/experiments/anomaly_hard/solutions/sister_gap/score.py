@@ -35,6 +35,7 @@ MIN_SD = 0.02        # floor on a source's noise sd (log units)
 DEFAULT_SD = 0.15    # noise sd before there is history to measure it
 MIN_HIST = 30        # observations needed to measure a noise sd
 STUCK_DAYS = 3       # identical reports in a row before a feed counts as stuck
+K_RUN = 3.0          # two days running beyond this many spreads, same side: the second is imputed (a step's day two)
 STUCK_ONE_DAYS = 4   # identical reports in a row of one measure alone (count or dollars) before it counts as stuck
 STUCK_ONE_MIN = 30   # a count repeating on its own counts as stuck from this many transactions (chance repeats below)
 SWAP_TICKET = 1.0    # dollars per transaction under this: the two columns may be swapped
@@ -204,6 +205,9 @@ def one_measure(X, est, pred_ct=None, stuck=None, cnt=None, release=None):
                 else:
                     ST[t, s] = 1
                     C[t, s] = x[s] - g[s]
+            elif t and not on[s] and not lone and abs(z[s]) > K_RUN and abs(Z[t - 1, s]) > K_RUN and z[s] * Z[t - 1, s] > 0:
+                ST[t, s] = 1                    # the second day running on the same side: no longer one noisy day
+                C[t, s] = x[s] - g[s]
             else:
                 ST[t, s] = 2 if on[s] else 0
                 C[t, s] = x[s] - lv[s]

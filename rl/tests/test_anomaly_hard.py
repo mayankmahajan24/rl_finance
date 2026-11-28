@@ -104,11 +104,12 @@ def test_paraphrased_answer_key_passes(task, monkeypatch, tmp_path):
     assert reward > 0.97, (d["gates"], d["confidence_score"], d["clean_score"], d["stability"])
 
 
-def test_answer_key_on_a_few_fixed_levels_fails_continuity(task, monkeypatch, tmp_path):
-    # right verdicts, but confidence on two fixed levels (0.3 / 0.9): not a probability on a continuous scale
-    sol = variant(tmp_path, "levels", "o['confidence'] = np.where(o.confidence < 0.5, 0.3, 0.9)")
+def test_answer_key_on_two_fixed_levels_is_not_zeroed(task, monkeypatch, tmp_path):
+    # right verdicts on two fixed levels (0.03 / 0.97): the probability score pays for being right, not for variety
+    # (the continuity gate that zeroed this was removed, #111)
+    sol = variant(tmp_path, "levels", "o['confidence'] = np.where(o.confidence < 0.5, 0.03, 0.97)")
     reward, d = grade_sol(task, sol, monkeypatch, trusted=True)
-    assert reward == 0.0 and d["gates"]["continuous"] is False
+    assert reward > 0.9 and "continuous" not in d["gates"]
 
 
 def test_negated_answer_key_fails(task, monkeypatch, tmp_path):
@@ -122,19 +123,27 @@ def test_do_nothing_fails(task, monkeypatch, tmp_path):
     assert reward == 0.0
 
 
-def test_distrust_everything_with_perfect_cleaning_fails(task, monkeypatch, tmp_path):
-    # the answer key's cleaned series with every row at confidence 0: one fixed level, zeroed by the continuity gate
+def test_distrust_everything_with_perfect_cleaning_earns_the_cleaning_half_only(task, monkeypatch, tmp_path):
+    # the answer key's cleaned series with every row at confidence 0: nothing for confidence, and no free part
     reward, d = grade_sol(task, SOL / "distrust_all", monkeypatch, tmp=tmp_path)
-    assert reward == 0.0 and d["gates"]["continuous"] is False
+    assert d["confidence_score"] == 0.0 and reward <= 0.5 + 1e-9
 
 
 def test_distrust_everything_earns_no_confidence_credit(task, monkeypatch, tmp_path):
-    # the same, with confidence varying row by row under 0.5 so it passes the continuity gate: the confidence part
-    # scores nothing, and the total is at most the cleaned series' and stability's share (55%)
+    # the same, with confidence varying row by row under 0.5
     sol = variant(tmp_path, "distrust", ROW_U + "o['confidence'] = 0.02 + 0.4 * u")
     reward, d = grade_sol(task, sol, monkeypatch, trusted=True)
-    assert d["gates"]["continuous"] is True and d["confidence_score"] == 0.0, d["gates"]
-    assert reward <= 0.55 + 1e-9
+    assert d["confidence_score"] == 0.0 and reward <= 0.5 + 1e-9
+
+
+def test_point_in_time_cutoffs_reach_the_last_month(task):
+    # three hidden dates, one in the panel's last 30 days, and not the same dates on every panel (#111)
+    gold = json.loads((task / "tests" / "gold.json").read_text())
+    end = pd.read_csv(task / "tests" / "eval_panel.csv.gz", usecols=["date"], parse_dates=["date"]).date.max()
+    cuts = sorted(pd.Timestamp(c) for c in gold["truncation_cutoffs"])
+    assert len(cuts) == 3 and 2 <= (end - cuts[-1]).days <= 30
+    other = json.loads((task / "tests" / "panel-2" / "gold.json").read_text())
+    assert other["truncation_cutoffs"] != gold["truncation_cutoffs"]
 
 
 def test_missing_writeup_scores_zero(task, monkeypatch):
@@ -155,3 +164,215 @@ def test_agent_code_cannot_read_the_answer_key(task, monkeypatch, tmp_path):
         pytest.skip("the grader isolates agent code only as root with namespaces (the Harbor verifier does it there)")
     reward, _ = grade_sol(task, SOL / "exploit_gold_read", monkeypatch, tmp=tmp_path)
     assert reward == 0.0
+
+
+# ---------------------------------------------------------------- the problems added by feedback #103
+# column swaps, one measure stuck, and a step on one source across its companies. Each test edits the answer key on
+# the rows of one of them. `i` is the input the script was given (row for row with its output `o`), `ev` the events.
+ON_EVENTS = """import json, os
+i = pd.read_csv(a[a.index('--input') + 1])
+ev = json.loads((pathlib.Path(os.environ['ORACLE_TASK']) / 'tests' / 'gold.json').read_text())['events']
+def rows(pick):
+    m = np.zeros(len(o), bool)
+    for e in ev:
+        if pick(e):
+            m |= ((o.ticker == e['ticker']) & (o.source_id == e['source_id'])
+                  & (o.date >= e.get('shift_start', e['start'])) & (o.date <= e['end'])).to_numpy()
+    return m
+def as_reported(m):
+    o.loc[m, 'clean_ct'] = i.ct.to_numpy()[m]
+    o.loc[m, 'clean_amt'] = i.amt.to_numpy()[m]
+"""
+SWAP = "lambda e: e['type'] == 'column_swap'"
+STUCK_ONE = "lambda e: e['type'] == 'stuck' and e.get('measure') in ('count', 'dollars')"
+SOURCE_WIDE = "lambda e: bool(e.get('source_wide'))"
+
+
+def _events(task, pick):
+    return [e for e in json.loads((task / "tests" / "gold.json").read_text())["events"] if pick(e)]
+
+
+def _gains(d, events):
+    """The cleaned-series gain the grader gave each of `events` (those it scored)."""
+    key = {(e["type"], e["ticker"], e["source_id"], e["start"]) for e in events}
+    return [g["gain"] for g in d["clean"]["events"] if (g["type"], g["ticker"], g["source_id"], g["start"]) in key]
+
+
+def _kind(d, part, kind):
+    return next(r for r in d[part]["by_kind"] if r["kind"] == kind)
+
+
+def test_new_problems_are_planted(task):
+    swaps = _events(task, eval(SWAP))
+    assert sorted(e["whole"] for e in swaps) == [False, True]
+    assert len({e["ticker"] for e in swaps}) == 2                      # on two different companies
+    assert sorted(e["measure"] for e in _events(task, eval(STUCK_ONE))) == ["count", "dollars"]
+    wide = _events(task, eval(SOURCE_WIDE))
+    assert len(wide) >= 2 and len({e["ticker"] for e in wide}) == len(wide)
+    assert len({(e["source_id"], e["start"], e["end"], e["ct_mult"]) for e in wide}) == 1   # one source, same days
+
+
+def test_answer_key_is_scored_on_the_new_problems(task, monkeypatch):
+    _, d = grade_sol(task, SOL / "oracle", monkeypatch, trusted=True, tmp=task)
+    for pick in (SWAP, STUCK_ONE, SOURCE_WIDE):
+        g = _gains(d, _events(task, eval(pick)))
+        assert g and all(x == pytest.approx(1.0, abs=1e-3) for x in g), (pick, g)
+    assert _kind(d, "clean", "column_swap")["events"] == 2
+
+
+def test_swapped_columns_left_as_reported_fail(task, monkeypatch, tmp_path):
+    # the answer key everywhere else, the swapped series as reported and still trusted
+    sol = variant(tmp_path, "swap_raw", ON_EVENTS + f"as_reported(rows({SWAP}))")
+    reward, d = grade_sol(task, sol, monkeypatch, trusted=True)
+    assert _kind(d, "clean", "column_swap")["gain"] == 0.0
+    c = _kind(d, "confidence", "column_swap")
+    assert c["wrong_rows"] == c["rows"] and c["brier"] > 0.9          # every row wrong, and trusted
+    assert reward < 0.85, (d["confidence_score"], d["clean_score"])
+
+
+def test_swap_with_only_the_count_put_right_fails(task, monkeypatch, tmp_path):
+    # a near miss: the true count, but the dollar column still carrying the count
+    sol = variant(tmp_path, "swap_half", ON_EVENTS + f"m = rows({SWAP})\no.loc[m, 'clean_amt'] = i.amt.to_numpy()[m]")
+    _, d = grade_sol(task, sol, monkeypatch, trusted=True)
+    assert _kind(d, "clean", "column_swap")["gain"] < 0.6
+    c = _kind(d, "confidence", "column_swap")
+    assert c["wrong_rows"] == c["rows"]                               # the ticket is still wrong on every row
+
+
+def test_one_measure_stuck_left_as_reported_fails(task, monkeypatch, tmp_path):
+    sol = variant(tmp_path, "stuck_raw", ON_EVENTS + f"as_reported(rows({STUCK_ONE}))")
+    _, d = grade_sol(task, sol, monkeypatch, trusted=True)
+    g = _gains(d, _events(task, eval(STUCK_ONE)))
+    assert g and all(x == 0.0 for x in g), g
+    assert _kind(d, "clean", "stuck")["gain"] < 1.0
+
+
+def test_source_wide_step_left_as_reported_fails(task, monkeypatch, tmp_path):
+    sol = variant(tmp_path, "wide_raw", ON_EVENTS + f"as_reported(rows({SOURCE_WIDE}))")
+    _, d = grade_sol(task, sol, monkeypatch, trusted=True)
+    wide = _events(task, eval(SOURCE_WIDE))
+    g = _gains(d, wide)
+    assert len(g) == len(wide) and all(x == 0.0 for x in g), g
+
+
+def test_counts_are_written_whole_beside_a_swapped_series(task):
+    import grade
+    data = pd.read_csv(task / "tests" / "eval_panel.csv.gz", parse_dates=["date"])
+    assert data.ct.dtype.kind == "f"                                   # the swapped rows carry dollars and cents
+    text = grade.panel_csv(data)
+    back = pd.read_csv(pd.io.common.StringIO(text), dtype=str)
+    swapped = pd.Series(False, index=data.index)
+    for e in _events(task, eval(SWAP)):
+        swapped |= (data.ticker == e["ticker"]) & (data.source_id == e["source_id"]) & (data.date >= e["start"])
+    assert not back.ct[~swapped.to_numpy()].str.contains(r"\.", regex=True).any()   # 36, not 36.0
+    assert back.ct[swapped.to_numpy()].str.contains(r"\.", regex=True).mean() > 0.9
+    assert (pd.to_numeric(back.ct) == data.ct).all()
+    whole = pd.DataFrame(dict(date=pd.to_datetime(["2020-01-01"]), ct=[36], amt=[1.5]))
+    assert grade.panel_csv(whole).splitlines()[1] == "2020-01-01,36,1.5"
+
+
+# ---------------------------------------------------------------- early days (feedback #105): confidence only
+# The first five days of every lasting problem are one more kind in the confidence part, day one weighing most.
+# `late(n)`: the answer key, but for the first n days of each lasting problem the row is left as reported.
+LASTING = "lambda e: e['type'] not in ('volume_spike', 'dropout', 'count_flood', 'dollar_spike', 'rollup') and not e.get('unscored')"
+LATE = ON_EVENTS + """def first_days(n):
+    m = np.zeros(len(o), bool)
+    for e in ev:
+        if ({lasting})(e):
+            first = e.get('visible') or e.get('shift_start', e['start'])
+            last = min(str(pd.Timestamp(first) + pd.Timedelta(days=n - 1))[:10], e['end'])
+            m |= ((o.ticker == e['ticker']) & (o.source_id == e['source_id']) & (o.date >= first) & (o.date <= last)).to_numpy()
+    return m
+m = first_days({n})
+as_reported(m)
+{conf}
+""".replace("{lasting}", LASTING)
+
+
+def _late(tmp_path, name, n, conf=""):
+    return variant(tmp_path, name, LATE.replace("{n}", str(n)).replace("{conf}", conf))
+
+
+def _early(d):
+    return d["confidence"]["brier_early"]
+
+
+def test_answer_key_has_early_rows_in_its_lasting_kinds(task, monkeypatch):
+    reward, d = grade_sol(task, SOL / "oracle", monkeypatch, trusted=True, tmp=task)
+    with_early = [r for r in d["confidence"]["by_kind"] if "early_brier" in r]
+    assert reward == pytest.approx(1.0, abs=1e-3) and _early(d) < 0.001
+    assert {"level_shift_step", "multi_day", "stuck"} <= {r["kind"] for r in with_early}
+    assert all(r["early_wrong_rows"] == 0 for r in with_early) and sum(r["early_rows"] for r in with_early) > 20
+
+
+def test_a_kind_is_a_quarter_its_early_rows(task, monkeypatch, tmp_path):
+    import grade
+    d = grade_sol(task, _late(tmp_path, "late3", 3), monkeypatch, trusted=True)[1]
+    r = _kind(d, "confidence", "level_shift_step")
+    assert grade.EARLY_SHARE == 0.25
+    assert r["scored_brier"] == pytest.approx(0.75 * r["brier"] + 0.25 * r["early_brier"], abs=2e-4)
+    assert r["early_brier"] > 3 * r["brier"]                  # the miss sits in the early rows
+
+
+def test_catching_a_problem_late_costs_most_on_day_one(task, monkeypatch, tmp_path):
+    # still trusted while unrepaired: one day late, then three days late
+    key = grade_sol(task, SOL / "oracle", monkeypatch, trusted=True, tmp=task)[1]["confidence_score"]
+    d1 = grade_sol(task, _late(tmp_path, "late1", 1), monkeypatch, trusted=True)[1]
+    d3 = grade_sol(task, _late(tmp_path, "late3", 3), monkeypatch, trusted=True)[1]
+    assert key > d1["confidence_score"] > d3["confidence_score"]
+    assert _early(d3) > _early(d1) > 0.2       # the early rows' error: most of it is already lost on day one
+    assert _early(d1) > 0.5 * _early(d3)       # 16 of the 31 parts of weight sit on day one, 28 on days one to three
+    assert key - d1["confidence_score"] > 0.1                       # a day late is felt ...
+    assert d3["confidence_score"] > 0.3                             # ... and three days late is not a zero
+
+
+def test_doubting_the_unrepaired_early_days_beats_trusting_them(task, monkeypatch, tmp_path):
+    # three days late either way; the second answer says so (confidence 0.05-0.09 on those rows)
+    trusted = grade_sol(task, _late(tmp_path, "late3", 3), monkeypatch, trusted=True)[1]
+    doubted = grade_sol(task, _late(tmp_path, "late3d", 3, ROW_U + "o.loc[m, 'confidence'] = 0.05 + 0.04 * u[m]"),
+                        monkeypatch, trusted=True)[1]
+    assert _early(doubted) < 0.5 * _early(trusted)
+    assert doubted["confidence_score"] > trusted["confidence_score"] and doubted["confidence_score"] > 0.9
+
+
+def test_doubting_everything_early_is_not_free(task, monkeypatch, tmp_path):
+    # trigger-happy: the answer key's repairs, but every early row distrusted although its cleaned value is right
+    sol = variant(tmp_path, "jumpy", LATE.replace("{n}", "5").replace("\nas_reported(m)\n", "\n").replace(
+        "{conf}", ROW_U + "o.loc[m, 'confidence'] = 0.05 + 0.04 * u[m]"))
+    d = grade_sol(task, sol, monkeypatch, trusted=True)[1]
+    assert _early(d) > 0.7
+    assert d["confidence_score"] < 0.8
+
+
+def test_a_step_shows_only_once_the_days_so_far_clear_the_bar(task):
+    # a level change is scored from the first day the median of its error over the days so far (up to 7) reaches
+    # SHIFT_K x 1.2533 / sqrt(days) times the source's daily noise: about 3.8 on day one, 1.4 after a week
+    import grade
+    import numpy as np
+    build, P = _experiment_module("build"), _experiment_module("perturb")
+    gold = json.loads((task / "tests" / "gold.json").read_text())
+    data = pd.read_csv(task / "tests" / "eval_panel.csv.gz", parse_dates=["date"])
+    clean = pd.read_csv(task / "tests" / "truth_panel.csv.gz", parse_dates=["date"])
+    sig = grade.own_noise(clean).set_index(["ticker", "source_id"])
+    j = data.merge(clean, on=["date", "ticker", "source_id"], suffixes=("", "_x"))
+    lg = lambda x: np.log(np.maximum(x.astype(float), 0.01))  # noqa: E731
+    j["zc"] = lg(j.ct) - lg(j.ct_x)
+    j["zt"] = (lg(j.amt) - lg(j.ct)) - (lg(j.amt_x) - lg(j.ct_x))
+    seen = 0
+    for e in gold["events"]:
+        swapped = any(s["type"] == "column_swap" and (s["ticker"], s["source_id"]) == (e["ticker"], e["source_id"])
+                      for s in gold["events"])
+        if not e.get("regime") or e.get("unscored") or e["type"] == "level_shift_slow" or swapped:
+            continue
+        x = j[(j.ticker == e["ticker"]) & (j.source_id == e["source_id"])
+              & (j.date >= e["shift_start"]) & (j.date <= e["end"])].sort_values("date")
+        s = sig.loc[(e["ticker"], e["source_id"])]
+        n = np.minimum(np.arange(len(x)) + 1, 7)
+        z = np.maximum(x.zc.rolling(7, min_periods=1).median().abs() / s.sig_c,
+                       x.zt.rolling(7, min_periods=1).median().abs() / s.sig_t).to_numpy()
+        clear = z >= P.SHIFT_K * build.MEDIAN_SD / np.sqrt(n)
+        assert str(x.date.iloc[int(np.argmax(clear))])[:10] == e["visible"], e
+        if e["type"] == "level_shift_step" and e["visible"] == e["shift_start"]:
+            assert z[0] >= P.SHIFT_K * build.MEDIAN_SD                 # day one only for a step that large
+        seen += 1
+    assert seen >= 4

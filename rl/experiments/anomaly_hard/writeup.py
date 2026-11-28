@@ -90,12 +90,29 @@ def _norm(h: str) -> str:
     return re.sub(r'^\d+[.)]?\s*', '', h).strip().lower()
 
 
+MAX_PNG_BYTES = 8_000_000
+
+
+def _png_ok(f: pathlib.Path) -> bool:
+    """A PNG the judge can be sent: the right header, not oversized, and it decodes (a broken image must not be able
+    to make the judge fail)."""
+    if f.stat().st_size > MAX_PNG_BYTES or f.read_bytes()[:8] != PNG:
+        return False
+    try:
+        from PIL import Image
+        with Image.open(f) as im:
+            im.verify()
+        return True
+    except Exception:
+        return False
+
+
 def figures(text: str, report_path: pathlib.Path) -> list[pathlib.Path]:
     """The charts the report shows that exist as valid PNGs beside it (output/figures/), the first MAX_FIGURES."""
     out = []
     for rel in FIGURE.findall(text):
         f = report_path.parent / rel
-        if f.is_file() and f.read_bytes()[:8] == PNG and f not in out:
+        if f.is_file() and f not in out and _png_ok(f):
             out.append(f)
     return out[:MAX_FIGURES]
 
@@ -358,7 +375,10 @@ def _ask_cli(system: str, user: str, vote: int, cache: pathlib.Path | None, figs
            '--input-format', 'stream-json', '--output-format', 'stream-json', '--verbose']
     r = None
     for attempt in range(3):
-        r = subprocess.run(cmd, input=msg, capture_output=True, text=True, timeout=900, env=env, cwd='/')
+        try:
+            r = subprocess.run(cmd, input=msg, capture_output=True, text=True, timeout=900, env=env, cwd='/')
+        except subprocess.TimeoutExpired:
+            continue
         for ln in r.stdout.splitlines()[::-1]:
             try:
                 d = json.loads(ln)

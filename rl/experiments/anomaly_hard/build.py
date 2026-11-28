@@ -58,6 +58,24 @@ N_POINTS, SHIFTS = 2, [('step', 2), ('ramp', 2)]   # per panel: 2 of each point 
 N_PANELS = 3           # hidden panels a task is graded on (the reward is their mean): fresh draws of problems
 N_INSIDE, N_STACKED = 2, 1   # per panel: one-offs placed inside a level change, and a step stacked on one
 N_RECURRING, N_SLOW = 2, 2   # per panel: planted yearly closures (normal) and slow panel ramps (problems)
+N_MULTI = 1            # per panel: one of each several-day problem (perturb.MULTI)
+N_PHANTOM, N_SMALL, N_CHAIN = 1, 1, 1   # per panel: a phantom-count stretch, a small step on a clean source, and a
+#                                         one-off planted a week or two before a level change on the same source
+N_STUCK_ONE = 1        # per panel: one count-only and one dollars-only stuck stretch (perturb.stuck_one)
+N_SWAP = 2             # per panel: a source with count and dollars swapped, one for its whole history, one from a date on
+N_SOURCE_WIDE = 1      # per panel: a temporary step on one source across its companies at once (perturb.source_step)
+SWAP_MIN_CT = 1.5 * THIN_CT   # a swapped series is never near the low-signal line (its count column is unreadable)
+
+
+def _cutoffs(d0, d1, df):
+    """Three hidden dates the panel is truncated at for the point-in-time check: one in the middle, one in the last
+    third and one in the last month, so no stretch of the panel is safe for look-ahead. Drawn from the panel's own
+    content (not the planting stream), so adding them changed no panel."""
+    r = np.random.default_rng(int(pd.util.hash_pandas_object(df[['ct']], index=False).sum() % (2 ** 32)))
+    span = (d1 - d0).days
+    days = [r.integers(int(span * 0.35), int(span * 0.65)), r.integers(int(span * 0.67), span - 40),
+            r.integers(span - 30, span - 2)]
+    return [_fmt(d0 + pd.Timedelta(days=int(x))) for x in days]
 
 
 def plant(rng, control, ctx, n_tickers=8, sensors=None):
@@ -109,6 +127,35 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
     truth_df = F.df.copy()
     if not control:
         cands = F.candidates(exclude_series=art_series)
+        # the series whose count and dollars are swapped for its whole history is set aside now (nothing else is
+        # planted on it) and swapped last; it is never near the low-signal line, whose rule reads the count
+        med28 = truth_df.sort_values('date').groupby(['ticker', 'source_id']).ct.apply(
+            lambda x: x.rolling(28, min_periods=1).median().min())
+        whole_swap = None
+        if N_SWAP:
+            for _ in range(500):
+                t, s = cands[int(rng.integers(len(cands)))]
+                if med28.get((t, s), 0) >= SWAP_MIN_CT and free((t, s), d0, d1) and free(('pt', t, s), d0, d1):
+                    whole_swap = (t, s)
+                    busy += [((t, s), d0, d1), (('pt', t, s), d0, d1)]
+                    break
+        # one source, every company at once: a temporary step that starts and ends on the same days everywhere.
+        # Placed first, while each company still has a free stretch; each company's series is one level-shift event
+        for _ in range(N_SOURCE_WIDE):
+            for _ in range(500):
+                s = int(rng.choice(sorted({s_ for _, s_ in cands})))
+                lo, length = day(0.32, 0.8), int(rng.integers(30, 91))
+                hi = lo + pd.Timedelta(days=length + 45)
+                mult = float(rng.choice([rng.uniform(0.55, 0.75), rng.uniform(1.4, 1.8)]))
+                have = [t for t, s_ in cands if s_ == s]
+                ok = [t for t in have if free((t, s), lo, hi) and free(('pt', t, s), lo, hi) and free(t, lo, hi)
+                      and free(('chg', t), lo, hi) and abs(np.log(mult)) >= P.SHIFT_K * P.own_noise(F, t, s)['ct']]
+                if len(ok) < max(2, min(3, len(have))):
+                    continue
+                events += P.source_step(F, s, ok, lo, length, mult)
+                for t in ok:
+                    busy += [((t, s), lo, hi), (('chg', t), lo, hi)]
+                break
         jobs = [(f, None) for f in P.POINTS for _ in range(N_POINTS)] + [(mode, None) for mode, n in SHIFTS
                                                                         for _ in range(n)]
         jobs += [('slow', None) for _ in range(N_SLOW)]
@@ -147,6 +194,73 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
                         # a lasting change holds the company to the end; a temporary one until it is over
                         busy.append((('chg', t), lo, d1 if length is None else lo + pd.Timedelta(days=length + 45)))
                     break
+        # several-day problems that are not a steady level (feedback #102): on a source with no level change, thin
+        # start or closure in their span, away from company events, one at a time per company
+        for f, longest in [x for x in P.MULTI for _ in range(N_MULTI)]:
+            for _ in range(500):
+                t, s = cands[int(rng.integers(len(cands)))]
+                lo = day(0.32, 0.93)
+                hi = lo + pd.Timedelta(days=longest)
+                if hi > d1 or not (free((t, s), lo, hi) and free(('pt', t, s), lo, hi) and free(t, lo, hi)
+                                   and free(('multi', t), lo, hi)):
+                    continue
+                ev = f(F, t, s, lo)
+                if ev:
+                    events += ev
+                    busy += [(k_, lo, hi) for k_ in ((t, s), ('pt', t, s), ('multi', t))]
+                    break
+        # one measure stuck while the other keeps moving: once on the count, once on the dollars
+        for col in ['ct', 'amt'] * N_STUCK_ONE:
+            for _ in range(500):
+                t, s = cands[int(rng.integers(len(cands)))]
+                lo = day(0.32, 0.93)
+                hi = lo + pd.Timedelta(days=8)
+                if hi > d1 or not (free((t, s), lo, hi) and free(('pt', t, s), lo, hi) and free(t, lo, hi)
+                                   and free(('multi', t), lo, hi)):
+                    continue
+                ev = P.stuck_one(F, t, s, lo, col)
+                if ev:
+                    events += ev
+                    busy += [(k_, lo, hi) for k_ in ((t, s), ('pt', t, s), ('multi', t))]
+                    break
+        # level changes of two more shapes: a fixed number of phantom transactions a day, and a step sized against
+        # the source's noise to its sisters, on one of the panel's cleaner sources
+        sig = grade.own_noise(truth_df).set_index(['ticker', 'source_id'])
+        clean_half = [c for c in cands if c in sig.index and sig.loc[c, 'sig_c'] <= sig.reindex(cands).sig_c.median()]
+        for what in ['phantom'] * N_PHANTOM + ['small'] * N_SMALL:
+            for _ in range(500):
+                pool_ = clean_half if what == 'small' and clean_half else cands
+                t, s = pool_[int(rng.integers(len(pool_)))]
+                lo = day(0.3, 0.7)
+                length = int(rng.integers(30, 121)) if what == 'phantom' else int(rng.integers(90, 241))
+                hi = lo + pd.Timedelta(days=length + 45)
+                if not (free((t, s), lo, hi) and free(('pt', t, s), lo, hi) and free(t, lo, lo + pd.Timedelta(days=3))
+                        and free(('chg', t), lo, hi)):
+                    continue
+                ev = P.phantom(F, t, s, lo, length) if what == 'phantom' else P.level_shift(
+                    F, t, s, lo, 'step', length, d1, small=dict(ct=float(sig.loc[(t, s), 'sig_c']),
+                                                                tkt=float(sig.loc[(t, s), 'sig_t'])))
+                if ev:
+                    events += ev
+                    busy += [((t, s), lo, hi), (('chg', t), lo, hi)]
+                    break
+        # problems in quick succession: a one-off 5-14 days before a level change on the same source
+        firsts = [e for e in events if e.get('regime') and not e.get('small') and e.get('measure') != 'phantom']
+        for _ in range(N_CHAIN):
+            for _ in range(200):
+                if not firsts:
+                    break
+                e = firsts[int(rng.integers(len(firsts)))]
+                t, s = e['ticker'], e['source_id']
+                lo = pd.Timestamp(e.get('shift_start', e['start'])) - pd.Timedelta(days=int(rng.integers(5, 15)))
+                if lo < d0 + pd.Timedelta(days=EVAL_START_DAYS) or not free(('pt', t, s), lo, lo + pd.Timedelta(days=3)) \
+                        or not free(t, lo, lo + pd.Timedelta(days=3)) or not free((t, s), lo, lo, pad=0):
+                    continue
+                ev = P.POINTS[int(rng.integers(len(P.POINTS)))](F, t, s, lo)
+                if ev:
+                    events += [dict(x, before_change=True) for x in ev]
+                    busy.append((('pt', t, s), lo, lo + pd.Timedelta(days=3)))
+                    break
         # overlapping problems in one source (feedback #97): one-offs inside a level change, and a step on top of an
         # earlier level change, each in the same source while its sisters stay clean
         levels = [e for e in events if e.get('regime') or e['type'] == 'level_shift_slow']
@@ -178,6 +292,21 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
                     if ev:
                         events += ev
                         break
+    if not control:
+        # count and dollars swapped in one source, last of all: the series set aside above for its whole history,
+        # and one more, on another company, from a date on (nothing else planted on it from 45 days before)
+        if whole_swap:
+            events += P.column_swap(F, *whole_swap, d0)
+        for _ in range(500 if N_SWAP > 1 else 0):
+            t, s = cands[int(rng.integers(len(cands)))]
+            lo = day(0.35, 0.85)
+            if (whole_swap and t == whole_swap[0]) or med28.get((t, s), 0) < SWAP_MIN_CT or any(
+                    b[0] in ((t, s), ('pt', t, s)) and b[2] >= lo - pd.Timedelta(days=45) for b in busy):
+                continue
+            ev = P.column_swap(F, t, s, lo)
+            if ev:
+                events += ev
+                break
     # company-wide natural breaks (every source at once: nothing to recover them from) are not scored
     excl = [dict(ticker=i['ticker'], source_id=i['source_id'], lo=i['start'],
                  hi=i['end'] or F.d(ctx.panel_end)) for i in req]
@@ -190,7 +319,7 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
     truth = dict(family='anomaly_hard', control=control, events=events, decoys=decoys, exclusions=excl,
                  closures=closures, thin_start=thin_planted, ignore_series=F.low_volume_series(),
                  eval_start=_fmt(d0 + pd.Timedelta(days=EVAL_START_DAYS)), threshold=0.5, thin_ct=THIN_CT,
-                 truncation_cutoffs=[_fmt(d0 + (d1 - d0) * f) for f in (0.45, 0.7)])
+                 truncation_cutoffs=_cutoffs(d0, d1, F.df))
     df = F.df.sort_values(['date', 'ticker', 'source_id']).reset_index(drop=True)
     truth_df = truth_df.sort_values(['date', 'ticker', 'source_id']).reset_index(drop=True)
     assert len(truth_df) == len(df) and (truth_df[['date', 'ticker', 'source_id']] == df[['date', 'ticker', 'source_id']]).all().all()
@@ -200,13 +329,13 @@ def plant(rng, control, ctx, n_tickers=8, sensors=None):
     return df, truth, mapping, truth_df
 
 
-MEDIAN7_SD = 1.2533 / np.sqrt(7)   # a 7-day median's noise, as a share of one day's (normal noise)
+MEDIAN_SD = 1.2533                 # an n-day median's noise is this / sqrt(n) of one day's (normal noise)
 
 
 def annotate_events(truth, df, truth_df):
     """What a point-in-time scorer could see, written into each level change: it becomes `visible` on the first day its
-    deviation (raw against the truth panel, trailing 7-day median) reaches P.SHIFT_K times the noise of a 7-day median
-    of the source's relation to its sisters (MEDIAN7_SD of its daily noise), in count or ticket; its onset is scored from then (earlier days unscored). A change that never gets there is
+    deviation (raw against the truth panel, median of the days so far, up to 7) reaches P.SHIFT_K times the noise of a
+    median of that many days of the source's relation to its sisters (MEDIAN_SD / sqrt(days) of its daily noise), in count or ticket; its onset is scored from then (earlier days unscored). A change that never gets there is
     `unscored`. A planted slow ramp, or a change that took longer than grade.SETTLE_DAYS to become visible, is `slow`:
     scored on the cleaned series only. The noise is the grader's (grade.own_noise), so what is scored is what the
     grader can tell apart from the source's normal variation against its sister sources."""
@@ -234,7 +363,9 @@ def annotate_events(truth, df, truth_df):
         dc = lg(j.ct) - lg(j.ct_x)
         dt = (lg(j.amt) - lg(j.ct)) - (lg(j.amt_x) - lg(j.ct_x))
         z = np.maximum(dc.rolling(7, min_periods=1).median().abs() / sc, dt.rolling(7, min_periods=1).median().abs() / st)
-        seen = z[z >= P.SHIFT_K * MEDIAN7_SD]              # against the noise of a 7-day median, not of one day
+        # against the noise of a median of the days seen so far (up to 7), so the same strength of evidence is asked
+        # on day one as after a week: about 3.8 times the daily noise on day one, 2.7 on day two, 1.4 from day seven
+        seen = z[z >= P.SHIFT_K * MEDIAN_SD / np.sqrt(dc.rolling(7, min_periods=1).count())]
         if seen.empty:
             e['unscored'] = True
         else:
@@ -302,9 +433,9 @@ def build_task(ctx, d: pathlib.Path, seed: int, control: bool) -> dict:
     for f in ('Dockerfile', 'requirements.lock'):     # the pinned task image (environment/ in this folder)
         shutil.copy(HERE / 'environment' / f, d / 'environment' / f)
     (d / 'tests').mkdir()
-    shown.to_csv(d / 'environment' / 'data' / 'transactions.csv', index=False, date_format='%Y-%m-%d')
+    (d / 'environment' / 'data' / 'transactions.csv').write_text(grade.panel_csv(shown))
     (d / 'tests' / 'eval_panel.csv.gz').write_bytes(gzip.compress(
-        hidden.to_csv(index=False, date_format='%Y-%m-%d').encode(), mtime=0))
+        grade.panel_csv(hidden).encode(), mtime=0))
     (d / 'tests' / 'truth_panel.csv.gz').write_bytes(gzip.compress(
         clean.to_csv(index=False, date_format='%Y-%m-%d').encode(), mtime=0))
     (d / 'tests' / 'gold.json').write_text(json.dumps(dict(truth, seed=seed), indent=1))
@@ -312,7 +443,7 @@ def build_task(ctx, d: pathlib.Path, seed: int, control: bool) -> dict:
         h, t, _, c = plant(np.random.default_rng([seed, k]), control, ctx, sensors=hid)
         pk = d / 'tests' / f'panel-{k}'
         pk.mkdir()
-        pk.joinpath('eval_panel.csv.gz').write_bytes(gzip.compress(h.to_csv(index=False, date_format='%Y-%m-%d').encode(), mtime=0))
+        pk.joinpath('eval_panel.csv.gz').write_bytes(gzip.compress(grade.panel_csv(h).encode(), mtime=0))
         pk.joinpath('truth_panel.csv.gz').write_bytes(gzip.compress(c.to_csv(index=False, date_format='%Y-%m-%d').encode(), mtime=0))
         pk.joinpath('gold.json').write_text(json.dumps(dict(t, seed=seed, panel=k), indent=1))
     (d / 'tests').chmod(0o700)          # grader-only: the scorer runs as nobody and cannot read it
